@@ -163,6 +163,21 @@
     @keyframes qIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
     #quoteModal.is-open .q-item { animation: qIn .55s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(140ms + var(--i, 0) * 60ms); }
     #quoteModal .q-glow { position: absolute; width: 260px; height: 260px; border-radius: 9999px; filter: blur(80px); pointer-events: none; }
+    /* Compact layout so the quote modal fits the screen without scrolling */
+    #quoteModal .q-panel { overflow: hidden; padding: 1.5rem 1.75rem; }
+    #quoteModal .q-panel h2 { font-size: clamp(1.4rem, 3.2vh, 1.9rem); line-height: 1.15; margin-top: .5rem; }
+    #quoteModal .q-sub { margin-top: .5rem; }
+    #quoteForm { margin-top: 1.1rem; }
+    #quoteForm > * + * { margin-top: .85rem; }
+    #quoteForm .grid { gap: .85rem; }
+    #quoteModal input, #quoteModal select, #quoteModal textarea { padding-top: .65rem; padding-bottom: .65rem; margin-top: .35rem; }
+    #quoteModal textarea { min-height: 0; }
+    #quoteModal #quoteSubmit { padding-top: .85rem; padding-bottom: .85rem; }
+    #quoteModal .q-hint { margin-top: .3rem; }
+    @media (max-height: 760px) { #quoteModal .q-hint { display: none; } #quoteModal .q-panel { padding: 1.25rem 1.5rem; } }
+    @media (max-height: 680px) { #quoteModal .q-sub { display: none; } #quoteForm { margin-top: .85rem; } #quoteForm > * + * { margin-top: .65rem; } }
+    /* Only on very short screens (e.g. phone in landscape) allow scrolling as a last resort */
+    @media (max-height: 520px) { #quoteModal .q-panel { overflow-y: auto; } }
     #quoteModal .q-view { transition: opacity .35s ease, transform .45s cubic-bezier(.2,.7,.2,1); }
     #quoteModal .q-view.is-hidden { opacity: 0; transform: translateY(14px); pointer-events: none; position: absolute; inset: 0; visibility: hidden; transition: opacity .35s ease, transform .45s cubic-bezier(.2,.7,.2,1), visibility 0s linear .35s; }
     #quoteSuccess .check-circle { stroke-dasharray: 160; stroke-dashoffset: 160; }
@@ -1052,11 +1067,11 @@
                                     class="bg-panel">Custom
                                     System</option><option
                                     class="bg-panel">Something else</option>
-                            </select>
-                        </label>
+                            </select></label>
+                            </div>
                         <label class="block"><span
                                 class="text-sm text-slate-300">Project
-                                details</span><textarea required rows="4"
+                                details</span><textarea required rows="3"
                                 placeholder="Tell us about your idea..."
                                 class="mt-2 w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3.5 placeholder-slate-500 focus:outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-500/20 transition resize-none"></textarea></label>
                         <button id="submitBtn" type="submit"
@@ -1123,7 +1138,7 @@
             aria-hidden="true">
             <div class="q-backdrop absolute inset-0" data-close-quote></div>
             <div
-                class="q-panel relative w-full max-w-xl max-h-[92vh] overflow-y-auto rounded-3xl p-7 sm:p-10">
+                class="q-panel relative w-full max-w-xl max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-3xl p-7 sm:p-10">
                 <div class="q-glow -top-20 -right-16 bg-brand-500/30"></div>
                 <div class="q-glow -bottom-24 -left-16 bg-aqua/20"></div>
 
@@ -1146,7 +1161,7 @@
                             style="--i:1">Tell us about your <span
                                 class="gradient-text">project</span></h2>
                         <p
-                            class="q-item mt-3 text-slate-400 text-sm sm:text-base"
+                            class="q-item q-sub mt-3 text-slate-400 text-sm sm:text-base"
                             style="--i:2">Share a few details and we'll reply
                             within 24 hours with next steps and a free
                             estimate.</p>
@@ -1161,34 +1176,61 @@
                                         class="mt-2 w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3.5 placeholder-slate-500 focus:outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-500/20 transition" /></label>
                                 <label class="block"><span
                                         class="text-sm text-slate-300">Email</span><input
-                                        required type="email" name="email"
+                                        required type="email" name="email" autocomplete="email" inputmode="email" maxlength="254"
+                                        pattern="[A-Za-z0-9._%+\-]+@[A-Za-z0-9\-]+(\.[A-Za-z0-9\-]+)*\.[A-Za-z]{2,}"
+                                        title="Enter a valid email address, e.g. you@email.com"
                                         placeholder="you@email.com"
                                         class="mt-2 w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3.5 placeholder-slate-500 focus:outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-500/20 transition" /></label>
                             </div>
-                            <label class="q-item block" style="--i:4"><span
+                            <div class="q-item" style="--i:4">
+                                <span class="text-sm text-slate-300">Mobile number</span>
+                                <div class="mt-2 flex gap-3">
+                                    <select id="quoteCountry" name="countryCode" required aria-label="Country code"
+                                        class="w-[8.5rem] shrink-0 rounded-xl bg-white/5 border border-white/10 px-4 py-3.5 placeholder-slate-500 focus:outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-500/20 transition">
+                                        <option class="bg-panel" value="+63" data-min="10" data-max="10">PH (+63)</option>
+                                        <option class="bg-panel" value="+1" data-min="10" data-max="10">US/CA (+1)</option>
+                                        <option class="bg-panel" value="+44" data-min="10" data-max="10">UK (+44)</option>
+                                        <option class="bg-panel" value="+61" data-min="9" data-max="9">AU (+61)</option>
+                                        <option class="bg-panel" value="+65" data-min="8" data-max="8">SG (+65)</option>
+                                        <option class="bg-panel" value="+60" data-min="9" data-max="10">MY (+60)</option>
+                                        <option class="bg-panel" value="+81" data-min="9" data-max="10">JP (+81)</option>
+                                        <option class="bg-panel" value="+82" data-min="9" data-max="10">KR (+82)</option>
+                                        <option class="bg-panel" value="+91" data-min="10" data-max="10">IN (+91)</option>
+                                        <option class="bg-panel" value="+86" data-min="11" data-max="11">CN (+86)</option>
+                                        <option class="bg-panel" value="+852" data-min="8" data-max="8">HK (+852)</option>
+                                        <option class="bg-panel" value="+971" data-min="9" data-max="9">AE (+971)</option>
+                                        <option class="bg-panel" value="+966" data-min="9" data-max="9">SA (+966)</option>
+                                        <option class="bg-panel" value="+49" data-min="10" data-max="11">DE (+49)</option>
+                                        <option class="bg-panel" value="+33" data-min="9" data-max="9">FR (+33)</option>
+                                        <option class="bg-panel" value="+64" data-min="8" data-max="10">NZ (+64)</option>
+                                    </select>
+                                    <input id="quoteMobile" required type="tel" name="mobile" inputmode="numeric"
+                                        autocomplete="tel-national" maxlength="15" pattern="[0-9 \-]{6,15}"
+                                        title="Digits only, without the country code" placeholder="917 123 4567"
+                                        aria-label="Mobile number" class="w-full min-w-0 rounded-xl bg-white/5 border border-white/10 px-4 py-3.5 placeholder-slate-500 focus:outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-500/20 transition" />
+                                </div>
+                                <p class="q-hint mt-1.5 text-xs text-slate-500">Pick your country code, then enter your mobile number without the leading 0.</p>
+                            </div>
+                            <label class="q-item block" style="--i:5"><span
                                     class="text-sm text-slate-300">I'm
                                     interested in</span>
                                 <select name="service"
                                     class="mt-2 w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3.5 focus:outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-500/20 transition">
-                                    <option class="bg-panel">Website
-                                        Development</option>
-                                    <option class="bg-panel">Mobile App
-                                        Development</option>
-                                    <option class="bg-panel">UI/UX
-                                        Design</option>
-                                    <option class="bg-panel">Custom
-                                        System</option>
-                                    <option class="bg-panel">Something
-                                        else</option>
+                                    <option class="bg-panel">Website Development</option>
+                                    <option class="bg-panel">Mobile App Development</option>
+                                    <option class="bg-panel">UI/UX Design</option>
+                                    <option class="bg-panel">Custom System</option>
+                                    <option class="bg-panel">Something else</option>
                                 </select>
                             </label>
-                            <label class="q-item block" style="--i:5"><span
+                            <label class="q-item block" style="--i:6"><span
                                     class="text-sm text-slate-300">Project
                                     details</span><textarea required rows="4"
                                     name="details"
                                     placeholder="Tell us about your idea..."
                                     class="mt-2 w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3.5 placeholder-slate-500 focus:outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-500/20 transition resize-none"></textarea></label>
-                            <button id="quoteSubmit" type="submit" style="--i:6"
+                            <p id="quoteError" class="hidden text-sm text-red-400" role="alert"></p>
+                            <button id="quoteSubmit" type="submit" style="--i:7"
                                 class="q-item btn-shine w-full py-4 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white shadow-lg shadow-brand-500/30 hover:shadow-brand-500/60 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 flex items-center justify-center gap-3">
                                 <span id="quoteSubmitLabel">Request My Free
                                     Quote</span>
@@ -1227,6 +1269,33 @@
                     d="M12 19V5M5 12l7-7 7 7" /></svg>
         </button>
 
+        <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js";
+    import { getDatabase, ref, push, set, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAoyAOyfJsqlK_Pe6pmfA5cTexx0IOcH9g",
+      authDomain: "moren-325fd.firebaseapp.com",
+      databaseURL: "https://moren-325fd-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "moren-325fd",
+      storageBucket: "moren-325fd.firebasestorage.app",
+      messagingSenderId: "1015241645428",
+      appId: "1:1015241645428:web:2d6366a8bdc38a5fb72021",
+      measurementId: "G-1HDSV3V8P1"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    try { getAnalytics(app); } catch (err) { console.warn('Analytics unavailable:', err); }
+    const db = getDatabase(app);
+
+    // Saves one quote request under /quotes/<auto-id>
+    window.saveQuote = async (data) => {
+      const newRef = push(ref(db, 'quotes'));
+      await set(newRef, { ...data, status: 'new', createdAt: serverTimestamp() });
+      return newRef.key;
+    };
+  </script>
         <script>
     // Preloader
     const loadbar = document.getElementById('loadbar');
@@ -1400,19 +1469,60 @@
         else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
       }
     });
-    qForm.addEventListener('submit', e => {
+    qForm.addEventListener('submit', async e => {
       e.preventDefault();
+      const qErr = document.getElementById('quoteError');
+      qErr.classList.add('hidden');
       qSubmit.disabled = true; qSubmit.classList.add('opacity-80');
       qLabel.textContent = 'Sending...';
       qSubmit.insertAdjacentHTML('afterbegin', '<span class="q-spinner" id="qSpin"></span>');
-      setTimeout(() => {
-        const sp = document.getElementById('qSpin'); if (sp) sp.remove();
+
+      const fd = new FormData(qForm);
+      const email = (fd.get('email') || '').trim().toLowerCase();
+      const countryCode = fd.get('countryCode') || '';
+      const mobile = String(fd.get('mobile') || '').replace(/[\s\-]/g, '').replace(/^0+/, '');
+      const opt = document.getElementById('quoteCountry').selectedOptions[0];
+      const min = +opt.dataset.min, max = +opt.dataset.max;
+      const fail = msg => {
+        const sp0 = document.getElementById('qSpin'); if (sp0) sp0.remove();
         qSubmit.disabled = false; qSubmit.classList.remove('opacity-80');
         qLabel.textContent = 'Request My Free Quote';
+        qErr.textContent = msg; qErr.classList.remove('hidden');
+      };
+      if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/.test(email)) return fail('Please enter a valid email address.');
+      if (!/^[0-9]+$/.test(mobile)) return fail('Mobile number must contain digits only.');
+      if (mobile.length < min || mobile.length > max) return fail('Please enter a valid mobile number for ' + countryCode + ' (' + (min === max ? min : min + '-' + max) + ' digits, no leading 0).');
+      const payload = {
+        name: (fd.get('name') || '').trim(),
+        email,
+        countryCode,
+        mobile,
+        phone: countryCode + mobile,
+        service: fd.get('service') || '',
+        details: (fd.get('details') || '').trim()
+      };
+
+      let ok = false;
+      try {
+        if (!window.saveQuote) throw new Error('Firebase not loaded');
+        await window.saveQuote(payload);
+        ok = true;
+      } catch (err) {
+        console.error('Quote submit failed:', err);
+      }
+
+      const sp = document.getElementById('qSpin'); if (sp) sp.remove();
+      qSubmit.disabled = false; qSubmit.classList.remove('opacity-80');
+      qLabel.textContent = 'Request My Free Quote';
+
+      if (ok) {
         qFormView.classList.add('is-hidden');
         qSuccess.classList.remove('is-hidden');
         requestAnimationFrame(() => qSuccess.classList.add('play'));
-      }, 1300);
+      } else {
+        qErr.textContent = 'Sorry, something went wrong sending your request. Please try again.';
+        qErr.classList.remove('hidden');
+      }
     });
 
     // Login: 3s loading animation, then fade out and navigate
