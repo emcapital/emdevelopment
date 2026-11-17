@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>StockShelf – Inventory Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap"
+      rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <style>
+    :root {
+      box-sizing: border-box;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      --panel: #1f2933;
+      --amber: #f2b01e;
+      --surface: #f4f6f8;
+      --card: #ffffff;
+      --text: #1b2430;
+      --muted: #5b6776;
+      --line: #d5dbe2;
+      --field: #ffffff;
+      --danger: #b42318;
+      color-scheme: light;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --surface: #141a21;
+        --card: #1c242d;
+        --text: #e8edf2;
+        --muted: #98a4b3;
+        --line: #2f3a46;
+        --field: #121820;
+        --danger: #ff8a80;
+        color-scheme: dark;
+      }
+    }
+
+    :root[data-theme="dark"] {
+      --surface: #141a21;
+      --card: #1c242d;
+      --text: #e8edf2;
+      --muted: #98a4b3;
+      --line: #2f3a46;
+      --field: #121820;
+      --danger: #ff8a80;
+      color-scheme: dark;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      background: var(--surface);
+      color: var(--text);
+      font-family: 'Barlow', system-ui, sans-serif;
+    }
+
+    .display {
+      font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+      letter-spacing: .01em;
+    }
+
+    .hazard {
+      background: repeating-linear-gradient(-45deg, var(--amber) 0 12px, #1f2933 12px 24px);
+    }
+
+    .barcode {
+      background: repeating-linear-gradient(90deg, #1b2430 0 2px, transparent 2px 4px, #1b2430 4px 5px, transparent 5px 9px, #1b2430 9px 12px, transparent 12px 14px);
+    }
+
+    .field {
+      background: var(--field);
+      border: 1px solid var(--line);
+      color: var(--text);
+    }
+
+    .field:focus {
+      outline: 2px solid var(--amber);
+      outline-offset: 1px;
+      border-color: transparent;
+    }
+
+    .btn:focus-visible,
+    .link:focus-visible {
+      outline: 2px solid var(--amber);
+      outline-offset: 2px;
+    }
+
+    .back-btn {
+      border: 1px solid rgba(255, 255, 255, .35);
+      background: rgba(255, 255, 255, .06);
+      transition: background .2s, border-color .2s;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, .16);
+      border-color: var(--amber);
+    }
+
+    .back-btn:focus-visible {
+      outline: 2px solid var(--amber);
+      outline-offset: 2px;
+    }
+
+    .hidden-view {
+      display: none;
+    }
+
+    body {
+      --ease: cubic-bezier(.2, .7, .2, 1);
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(18px)
+      }
+    }
+
+    @keyframes pop {
+      from {
+        opacity: 0;
+        transform: translateY(24px) scale(.9)
+      }
+    }
+
+    @keyframes grow {
+      from {
+        transform: scaleX(0)
+      }
+    }
+
+    @keyframes wipe {
+      from {
+        clip-path: inset(0 100% 0 0)
+      }
+    }
+
+    @keyframes spinIn {
+      from {
+        opacity: 0;
+        transform: rotate(-120deg) scale(.4)
+      }
+    }
+
+    @keyframes slideBg {
+      to {
+        background-position: 33.941px 0
+      }
+    }
+
+    @keyframes glow {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 2px #f2b01e, 0 0 0 0 rgba(242, 176, 30, .6)
+      }
+
+      50% {
+        box-shadow: 0 0 0 2px #f2b01e, 0 0 0 12px rgba(242, 176, 30, 0)
+      }
+    }
+
+    @keyframes glowSm {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(242, 176, 30, .7)
+      }
+
+      50% {
+        box-shadow: 0 0 0 7px rgba(242, 176, 30, 0)
+      }
+    }
+
+    @keyframes shake {
+      20% {
+        transform: translateX(-8px)
+      }
+
+      40% {
+        transform: translateX(7px)
+      }
+
+      60% {
+        transform: translateX(-5px)
+      }
+
+      80% {
+        transform: translateX(3px)
+      }
+    }
+
+    @keyframes drop {
+      from {
+        opacity: 0;
+        transform: translateY(-8px)
+      }
+    }
+
+    @keyframes leave {
+      to {
+        opacity: 0;
+        transform: translateY(-14px) scale(.985);
+        filter: blur(4px)
+      }
+    }
+
+    @keyframes enter {
+      from {
+        opacity: 0;
+        transform: translateY(18px) scale(.99)
+      }
+    }
+
+    @keyframes draw {
+      to {
+        stroke-dashoffset: 0
+      }
+    }
+
+    @keyframes flash {
+      from {
+        background-color: rgba(242, 176, 30, .35)
+      }
+    }
+
+    @keyframes dashIn {
+      from {
+        opacity: 0;
+        transform: translateY(-100%)
+      }
+    }
+
+    .hazard {
+      background-size: 33.941px 33.941px;
+      animation: slideBg 1.4s linear infinite
+    }
+
+    @keyframes pageOut {
+      to {
+        opacity: 0
+      }
+    }
+
+    @keyframes pageIn {
+      from {
+        opacity: 0
+      }
+    }
+
+    body {
+      animation: pageIn .5s ease-out
+    }
+
+    body.page-out {
+      animation: pageOut .45s ease-in forwards;
+      pointer-events: none
+    }
+
+    .leaving {
+      animation: leave .38s ease-in forwards
+    }
+
+    .entering {
+      animation: enter .5s var(--ease) backwards
+    }
+
+    /* login: left panel */
+    aside>.flex {
+      animation: rise .7s var(--ease) .1s backwards
+    }
+
+    aside svg {
+      animation: spinIn .9s var(--ease) .2s backwards
+    }
+
+    .w {
+      display: inline-block;
+      animation: rise .7s var(--ease) backwards;
+      animation-delay: calc(.25s + var(--i, 0)*60ms)
+    }
+
+    aside .max-w-xl>p {
+      animation: rise .7s var(--ease) .7s backwards
+    }
+
+    aside>p {
+      animation: rise .7s var(--ease) 1.6s backwards
+    }
+
+    aside .grid>div {
+      animation: pop .7s var(--ease) backwards;
+      animation-delay: calc(.85s + var(--n, 0)*110ms);
+      transition: transform .3s var(--ease)
+    }
+
+    aside .grid>div:nth-child(1) {
+      --n: 0
+    }
+
+    aside .grid>div:nth-child(2) {
+      --n: 1
+    }
+
+    aside .grid>div:nth-child(3) {
+      --n: 2
+    }
+
+    aside .grid>div:nth-child(4) {
+      --n: 3
+    }
+
+    aside .grid>div:hover {
+      transform: translateY(-5px) rotate(-.6deg)
+    }
+
+    aside .grid>.ring-2 {
+      animation: pop .7s var(--ease) .95s backwards, glow 2.2s ease-in-out 1.8s infinite
+    }
+
+    aside .bg-white .h-full {
+      transform-origin: left;
+      animation: grow 1.1s var(--ease) 1.2s backwards
+    }
+
+    .barcode {
+      animation: wipe 1.1s var(--ease) 1.5s backwards
+    }
+
+    /* login: form */
+    section>div>* {
+      animation: rise .7s var(--ease) backwards;
+      animation-delay: calc(.2s + var(--n, 0)*90ms)
+    }
+
+    section>div> :nth-child(1) {
+      --n: 0
+    }
+
+    section>div> :nth-child(2) {
+      --n: 1
+    }
+
+    section>div> :nth-child(3) {
+      --n: 2
+    }
+
+    section>div> :nth-child(4) {
+      --n: 3
+    }
+
+    #loginForm>* {
+      animation: rise .6s var(--ease) backwards;
+      animation-delay: calc(.75s + var(--n, 0)*80ms)
+    }
+
+    #loginForm> :nth-child(1) {
+      --n: 0
+    }
+
+    #loginForm> :nth-child(2) {
+      --n: 1
+    }
+
+    #loginForm> :nth-child(3) {
+      --n: 2
+    }
+
+    #loginForm> :nth-child(4) {
+      --n: 3
+    }
+
+    #loginForm> :nth-child(5) {
+      --n: 4
+    }
+
+    #error {
+      animation: drop .35s var(--ease) backwards
+    }
+
+    .field {
+      transition: border-color .25s, box-shadow .25s, background-color .25s
+    }
+
+    .field:focus {
+      outline: none;
+      border-color: var(--amber);
+      box-shadow: 0 0 0 4px rgba(242, 176, 30, .3)
+    }
+
+    .field[aria-invalid="true"] {
+      border-color: var(--danger)
+    }
+
+    .shake {
+      animation: shake .45s
+    }
+
+    .flash {
+      animation: flash .9s ease-out
+    }
+
+    .link {
+      transition: opacity .2s, background-color .2s
+    }
+
+    .link:hover {
+      opacity: .65
+    }
+
+    .cta {
+      position: relative;
+      overflow: hidden;
+      transition: transform .2s, box-shadow .25s
+    }
+
+    .cta::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, .55) 50%, transparent 70%);
+      transform: translateX(-120%);
+      transition: transform .7s var(--ease)
+    }
+
+    .cta:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 22px -8px rgba(242, 176, 30, .7)
+    }
+
+    .cta:hover:not(:disabled)::after {
+      transform: translateX(120%)
+    }
+
+    .cta:active:not(:disabled) {
+      transform: translateY(0) scale(.985)
+    }
+
+    .cta:disabled {
+      cursor: wait
+    }
+
+    #check path {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation: draw .45s ease-out .05s forwards
+    }
+
+    /* dashboard */
+    #dashView header {
+      animation: dashIn .6s var(--ease) backwards
+    }
+
+    #dashView main>h1 {
+      animation: rise .6s var(--ease) .25s backwards
+    }
+
+    #dashView main>p {
+      animation: rise .6s var(--ease) .35s backwards
+    }
+
+    #dashView .grid>div {
+      animation: pop .65s var(--ease) backwards;
+      animation-delay: calc(.45s + var(--n, 0)*100ms);
+      transition: transform .25s var(--ease), box-shadow .25s
+    }
+
+    #dashView .grid>div:nth-child(1) {
+      --n: 0
+    }
+
+    #dashView .grid>div:nth-child(2) {
+      --n: 1
+    }
+
+    #dashView .grid>div:nth-child(3) {
+      --n: 2
+    }
+
+    #dashView .grid>div:nth-child(4) {
+      --n: 3
+    }
+
+    #dashView .grid>div:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 24px -14px rgba(0, 0, 0, .4)
+    }
+
+    #dashView .overflow-x-auto {
+      animation: rise .7s var(--ease) .9s backwards
+    }
+
+    #rows tr {
+      animation: rise .5s var(--ease) backwards;
+      animation-delay: calc(1.1s + var(--i, 0)*90ms);
+      transition: background-color .2s
+    }
+
+    #rows tr:hover {
+      background: rgba(242, 176, 30, .14)
+    }
+
+    .pill-low {
+      animation: glowSm 1.8s ease-in-out infinite
+    }
+
+    #logout {
+      transition: transform .2s, filter .2s
+    }
+
+    #logout:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.08)
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: .01ms !important;
+        animation-delay: 0ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important
+      }
+    }
+  </style>
+  </head>
+
+  <body>
+
+    <!-- LOGIN VIEW -->
+    <main id="loginView" class="min-h-screen grid lg:grid-cols-[1.05fr_1fr]">
+
+      <aside
+        class="relative text-white px-6 py-8 sm:px-10 lg:px-14 lg:py-12 flex flex-col justify-between gap-10"
+        style="background:var(--panel)">
+        <div class="absolute inset-x-0 top-0 h-2 hazard"></div>
+        <div class="flex items-center justify-between gap-3 pt-2">
+          <div class="flex items-center gap-3">
+            <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
+              <rect x="2" y="2" width="30" height="30" rx="3" fill="#f2b01e" />
+              <path d="M8 12h18M8 17h18M8 22h18M13 8v18M21 8v18"
+                stroke="#1f2933" stroke-width="2.4" />
+            </svg>
+            <span class="display text-2xl font-bold">StockShelf</span>
+          </div>
+          <a href="../../index.html"
+            class="btn back-btn inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-semibold text-white whitespace-nowrap"
+            aria-label="Back to EM Development website"><svg width="16"
+              height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+              aria-hidden="true"><path
+                d="M19 12H5M11 6l-6 6 6 6" /></svg><span><span
+                class="hidden sm:inline">Back to </span>EM
+              Development</span></a>
+        </div>
+
+        <div class="max-w-xl">
+          <h1
+            class="display text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.02]">Know
+            what’s on every shelf before the truck arrives.</h1>
+          <p class="mt-4 text-slate-300 max-w-md">Track stock levels, bin
+            locations and reorder points for your warehouse in one place.</p>
+
+          <div class="mt-8 grid grid-cols-2 sm:grid-cols-3 gap-3"
+            aria-label="Sample stock tags">
+            <div class="rounded-md bg-white text-slate-900 p-3">
+              <div class="text-xs text-slate-500">BX-2041 · Aisle A</div>
+              <div class="font-semibold leading-tight mt-0.5">Corrugated box
+                12×12</div>
+              <div class="display text-2xl font-bold mt-1">1,240</div>
+              <div class="h-1.5 rounded bg-slate-200 mt-1">
+                <div class="h-full rounded bg-slate-700"
+                  style="width:82%"></div>
+              </div>
+            </div>
+            <div
+              class="rounded-md bg-white text-slate-900 p-3 ring-2 ring-[#f2b01e]">
+              <div class="text-xs text-slate-500">PL-0310 · Aisle C</div>
+              <div class="font-semibold leading-tight mt-0.5">Pallet wrap 500
+                mm</div>
+              <div class="display text-2xl font-bold mt-1">86 <span
+                  class="text-sm font-semibold text-amber-700">Low</span></div>
+              <div class="h-1.5 rounded bg-slate-200 mt-1">
+                <div class="h-full rounded bg-[#f2b01e]"
+                  style="width:14%"></div>
+              </div>
+            </div>
+            <div
+              class="rounded-md bg-white text-slate-900 p-3 col-span-2 sm:col-span-1">
+              <div class="text-xs text-slate-500">LB-7712 · Aisle B</div>
+              <div class="font-semibold leading-tight mt-0.5">Thermal labels
+                4×6</div>
+              <div class="display text-2xl font-bold mt-1">3,400</div>
+              <div class="h-1.5 rounded bg-slate-200 mt-1">
+                <div class="h-full rounded bg-slate-700"
+                  style="width:94%"></div>
+              </div>
+            </div>
+            <div
+              class="rounded-md bg-white text-slate-900 p-3 col-span-2 sm:col-span-3">
+              <div class="flex items-center justify-between gap-4">
+                <div>
+                  <div class="text-xs text-slate-500">Inbound · Dock 2</div>
+                  <div class="font-semibold">Pallet 0042 · 48 cartons</div>
+                </div>
+                <div class="barcode h-10 w-32 sm:w-44 rounded-sm" role="img"
+                  aria-label="Sample barcode"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-sm text-slate-400">Sample site · all data shown is dummy
+          data.</p>
+      </aside>
+
+      <section class="flex items-center justify-center px-6 py-10 sm:px-10">
+        <div class="w-full max-w-sm">
+          <h2 class="display text-4xl font-bold">Sign in</h2>
+          <p class="mt-1" style="color:var(--muted)">Access your warehouse
+            dashboard.</p>
+
+          <div class="mt-6 rounded-md p-4"
+            style="background:var(--card);border:1px dashed var(--amber)">
+            <p class="font-semibold">Try the demo</p>
+            <p class="text-sm mt-1" style="color:var(--muted)">Email: <span
+                class="font-semibold"
+                style="color:var(--text)">email@email.com</span><br>Password:
+              <span class="font-semibold" style="color:var(--text)">123</span>
+            </p>
+            <button type="button" id="fillDemo"
+              class="btn link mt-3 text-sm font-semibold underline underline-offset-2">Fill
+              in demo login</button>
+          </div>
+
+          <form id="loginForm" class="mt-6 space-y-4" novalidate>
+            <div>
+              <label for="email"
+                class="block text-sm font-medium mb-1">Email</label>
+              <input id="email" type="email" autocomplete="username"
+                placeholder="you@company.com"
+                class="field w-full rounded-md px-3 py-2.5">
+            </div>
+            <div>
+              <label for="password"
+                class="block text-sm font-medium mb-1">Password</label>
+              <div class="relative">
+                <input id="password" type="password"
+                  autocomplete="current-password"
+                  placeholder="Enter your password"
+                  class="field w-full rounded-md px-3 py-2.5 pr-16">
+                <button type="button" id="togglePw"
+                  class="btn link absolute right-2 top-1/2 -translate-y-1/2 text-sm font-medium px-2 py-1 rounded"
+                  aria-pressed="false">Show</button>
+              </div>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+              <label class="flex items-center gap-2"><input type="checkbox"
+                  class="accent-[#f2b01e] w-4 h-4"> Keep me signed in</label>
+              <a href="#" class="link underline underline-offset-2"
+                onclick="return false">Forgot password?</a>
+            </div>
+            <p id="error" role="alert" class="hidden-view text-sm font-medium"
+              style="color:var(--danger)"></p>
+            <button id="submitBtn" type="submit"
+              class="btn cta w-full rounded-md py-3 font-semibold flex items-center justify-center gap-2"
+              style="background:var(--amber);color:#1b2430">
+              <svg id="spinner" class="hidden-view animate-spin" width="18"
+                height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" stroke="#1b2430"
+                  stroke-opacity=".3" stroke-width="3" />
+                <path d="M21 12a9 9 0 0 0-9-9" stroke="#1b2430" stroke-width="3"
+                  stroke-linecap="round" />
+              </svg>
+              <svg id="check" class="hidden-view" width="18" height="18"
+                viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M5 12l5 5L19 7" stroke="#1b2430" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round"
+                  pathLength="1" />
+              </svg>
+              <span id="btnLabel">Sign in</span>
+            </button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <!-- DASHBOARD VIEW (dummy) -->
+    <div id="dashView" class="hidden-view min-h-screen">
+      <header class="text-white" style="background:var(--panel)">
+        <div class="h-2 hazard"></div>
+        <div
+          class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
+          <span class="display text-2xl font-bold">StockShelf</span>
+          <div class="flex items-center gap-4 text-sm">
+            <a href="../../index.html"
+              class="btn back-btn inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-semibold text-white whitespace-nowrap"
+              aria-label="Back to EM Development website"><svg width="16"
+                height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                stroke-linejoin="round" aria-hidden="true"><path
+                  d="M19 12H5M11 6l-6 6 6 6" /></svg><span><span
+                  class="hidden sm:inline">Back to </span>EM
+                Development</span></a>
+            <span class="hidden sm:inline text-slate-300">email@email.com</span>
+            <button id="logout" type="button"
+              class="btn rounded-md px-3 py-1.5 font-semibold"
+              style="background:var(--amber);color:#1b2430">Sign out</button>
+          </div>
+        </div>
+      </header>
+
+      <main class="max-w-5xl mx-auto px-6 py-8">
+        <h1 class="display text-4xl font-bold">Stock overview</h1>
+        <p style="color:var(--muted)">Welcome back. This is sample data for the
+          demo.</p>
+
+        <div class="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="rounded-md p-4"
+            style="background:var(--card);border:1px solid var(--line)">
+            <div class="text-sm" style="color:var(--muted)">Products
+              tracked</div>
+            <div class="display text-3xl font-bold" data-count="248">248</div>
+          </div>
+          <div class="rounded-md p-4"
+            style="background:var(--card);border:1px solid var(--line)">
+            <div class="text-sm" style="color:var(--muted)">Units in
+              stock</div>
+            <div class="display text-3xl font-bold"
+              data-count="18420">18,420</div>
+          </div>
+          <div class="rounded-md p-4"
+            style="background:var(--card);border:2px solid var(--amber)">
+            <div class="text-sm" style="color:var(--muted)">Low stock</div>
+            <div class="display text-3xl font-bold" data-count="7">7</div>
+          </div>
+          <div class="rounded-md p-4"
+            style="background:var(--card);border:1px solid var(--line)">
+            <div class="text-sm" style="color:var(--muted)">Orders today</div>
+            <div class="display text-3xl font-bold" data-count="36">36</div>
+          </div>
+        </div>
+
+        <div class="mt-6 rounded-md overflow-x-auto"
+          style="background:var(--card);border:1px solid var(--line)">
+          <table class="w-full text-left text-sm min-w-[520px]">
+            <thead
+              style="border-bottom:1px solid var(--line);color:var(--muted)">
+              <tr>
+                <th class="p-3 font-medium">SKU</th>
+                <th class="p-3 font-medium">Item</th>
+                <th class="p-3 font-medium">Location</th>
+                <th class="p-3 font-medium text-right">In stock</th>
+                <th class="p-3 font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+
+    <script>
+    const DEMO = {
+      email: 'email@email.com',
+      password: '123'
+    };
+    const items = [
+      ['BX-2041', 'Corrugated box 12×12', 'Aisle A · Bin 3', 1240, 'In stock'],
+      ['PL-0310', 'Pallet wrap 500 mm', 'Aisle C · Bin 1', 86, 'Low'],
+      ['LB-7712', 'Thermal labels 4×6', 'Aisle B · Bin 7', 3400, 'In stock'],
+      ['TP-0098', 'Packing tape, clear', 'Aisle A · Bin 9', 412, 'In stock'],
+      ['GL-5520', 'Work gloves, size L', 'Aisle D · Bin 2', 58, 'Low'],
+      ['ST-1180', 'Shelf bin, small', 'Aisle E · Bin 4', 920, 'In stock']
+    ];
+
+    const $ = id => document.getElementById(id);
+    const form = $('loginForm'),
+      email = $('email'),
+      pw = $('password'),
+      err = $('error');
+
+    $('rows').innerHTML = items.map(([sku, name, loc, qty, status], i) => {
+      const low = status === 'Low';
+      const pill = low ?
+        'background:#f2b01e;color:#1b2430' :
+        'background:transparent;color:var(--text);border:1px solid var(--line)';
+      return `<tr style="--i:${i};border-top:1px solid var(--line)">
+      <td class="p-3 font-semibold">${sku}</td><td class="p-3">${name}</td>
+      <td class="p-3" style="color:var(--muted)">${loc}</td>
+      <td class="p-3 text-right">${qty.toLocaleString('en-US')}</td>
+      <td class="p-3"><span class="rounded px-2 py-0.5 text-xs font-semibold ${low ? 'pill-low' : ''}" style="${pill}">${status}</span></td></tr>`;
+    }).join('');
+
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // headline: reveal word by word
+    const h = document.querySelector('aside h1');
+    h.innerHTML = h.textContent.split(' ').map((w, i) => `<span class="w" style="--i:${i}">${w}</span>`).join(' ');
+
+    function clearError() {
+      err.classList.add('hidden-view');
+      [email, pw].forEach(f => f.removeAttribute('aria-invalid'));
+    }
+
+    function showError(msg) {
+      err.textContent = msg;
+      err.classList.add('hidden-view');
+      void err.offsetWidth;
+      err.classList.remove('hidden-view');
+      [email, pw].forEach(f => {
+        f.setAttribute('aria-invalid', 'true');
+        f.classList.remove('shake');
+        void f.offsetWidth;
+        f.classList.add('shake');
+      });
+    }
+    [email, pw].forEach(f => f.addEventListener('input', clearError));
+
+    // smooth switch between the login and dashboard views
+    function swap(from, to, cb) {
+      from.classList.add('leaving');
+      setTimeout(() => {
+        from.classList.remove('leaving');
+        from.classList.add('hidden-view');
+        to.classList.remove('hidden-view');
+        to.classList.add('entering');
+        setTimeout(() => to.classList.remove('entering'), 600);
+        window.scrollTo(0, 0);
+        if (cb) cb();
+      }, reduce ? 0 : 380);
+    }
+
+    function countUp() {
+      document.querySelectorAll('[data-count]').forEach((el, i) => {
+        const end = +el.dataset.count;
+        if (reduce) {
+          el.textContent = end.toLocaleString('en-US');
+          return;
+        }
+        const start = performance.now() + 450 + i * 100,
+          dur = 1200;
+        const tick = t => {
+          const p = Math.min(Math.max((t - start) / dur, 0), 1);
+          el.textContent = Math.round(end * (1 - Math.pow(1 - p, 3))).toLocaleString('en-US');
+          if (p < 1) requestAnimationFrame(tick);
+        };
+        el.textContent = '0';
+        requestAnimationFrame(tick);
+      });
+    }
+
+    const typeInto = (el, text) => new Promise(res => {
+      el.value = '';
+      if (reduce) {
+        el.value = text;
+        return res();
+      }
+      let i = 0;
+      (function k() {
+        el.value = text.slice(0, ++i);
+        i < text.length ? setTimeout(k, 40) : res();
+      })();
+    });
+
+    $('fillDemo').addEventListener('click', async e => {
+      const b = e.currentTarget;
+      b.disabled = true;
+      clearError();
+      await typeInto(email, DEMO.email);
+      await typeInto(pw, DEMO.password);
+      [email, pw].forEach(f => {
+        f.classList.remove('flash');
+        void f.offsetWidth;
+        f.classList.add('flash');
+      });
+      b.disabled = false;
+      $('submitBtn').focus();
+    });
+
+    $('togglePw').addEventListener('click', e => {
+      const show = pw.type === 'password';
+      pw.type = show ? 'text' : 'password';
+      e.target.textContent = show ? 'Hide' : 'Show';
+      e.target.setAttribute('aria-pressed', String(show));
+    });
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      err.classList.add('hidden-view');
+      const em = email.value.trim(),
+        pass = pw.value;
+      if (!em || !pass) return showError('Enter your email and password to continue.');
+      if (em.toLowerCase() !== DEMO.email || pass !== DEMO.password)
+        return showError('Email or password doesn’t match. Use the demo login shown above.');
+
+      $('spinner').classList.remove('hidden-view');
+      $('btnLabel').textContent = 'Signing in';
+      $('submitBtn').disabled = true;
+      setTimeout(() => {
+        $('spinner').classList.add('hidden-view');
+        $('check').classList.remove('hidden-view');
+        $('btnLabel').textContent = 'Welcome back';
+        try {
+          sessionStorage.setItem('stockshelf_auth', '1');
+        } catch (_) {}
+        setTimeout(() => {
+          // fade the login page out, then go to dashboard.html
+          document.body.classList.add('page-out');
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, reduce ? 0 : 450);
+        }, reduce ? 0 : 650);
+      }, reduce ? 0 : 900);
+    });
+
+    $('logout').addEventListener('click', () => {
+      swap($('dashView'), $('loginView'));
+      form.reset();
+      clearError();
+      $('spinner').classList.add('hidden-view');
+      $('check').classList.add('hidden-view');
+      $('btnLabel').textContent = 'Sign in';
+      $('submitBtn').disabled = false;
+      pw.type = 'password';
+      $('togglePw').textContent = 'Show';
+    });
+  </script>
+  </body>
+
+</html>
