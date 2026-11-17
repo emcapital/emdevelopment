@@ -6,30 +6,390 @@
             content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
         <meta name="theme-color" content="#070a16" />
         <title>Offline | EM Development</title>
+        <script>
+    // Match the theme saved by the main site (no flash)
+    try { if (localStorage.getItem('theme') === 'light') document.documentElement.classList.add('light'); } catch (e) {}
+  </script>
         <style>
-    :root { color-scheme: dark; }
+    /* Everything is inline on purpose: this page must work with no network. */
+    :root {
+      --bg: #070a16; --text: #e8ebff; --muted: #a9b2e6; --faint: #7480b8;
+      --card: rgba(255,255,255,.045); --line: rgba(255,255,255,.1);
+      --brand: #5b6cff; --brand-2: #4351e8; --aqua: #22d3ee; --pink: #f472b6; --ok: #34d399;
+      --grid: rgba(124,140,255,.08); --stage: #0c1230;
+      --space-y: clamp(28px, 7vh, 88px);   /* top + bottom page margin */
+      color-scheme: dark;
+    }
+    html.light {
+      --bg: #f4f5ff; --text: #0f1535; --muted: #55608a; --faint: #7a84aa;
+      --card: rgba(255,255,255,.85); --line: rgba(15,21,53,.1);
+      --grid: rgba(67,81,232,.08); --stage: #eceeff; --ok: #059669; --pink: #db2777;
+      color-scheme: light;
+    }
     * { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; }
-    body { display: flex; align-items: center; justify-content: center; padding: 24px; background: #070a16; color: #e5e9ff; font-family: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif; }
-    .card { max-width: 380px; width: 100%; text-align: center; padding: 36px 28px; border-radius: 28px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.09); }
-    .logo { width: 56px; height: 56px; margin: 0 auto 18px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 26px; color: #fff; background: linear-gradient(135deg, #5b6cff, #22d3ee); }
-    h1 { margin: 0 0 8px; font-size: 24px; letter-spacing: -.01em; }
-    p { margin: 0 0 24px; color: #a9b2e6; line-height: 1.55; font-size: 15px; }
-    button { width: 100%; padding: 14px; border: 0; border-radius: 12px; cursor: pointer; color: #fff; font: 700 15px/1 inherit; background: linear-gradient(90deg, #5b6cff, #4351e8); }
-    button:focus-visible { outline: 3px solid rgba(124,140,255,.5); outline-offset: 2px; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0; min-height: 100vh; min-height: 100dvh;
+      display: flex; flex-direction: column;
+      padding: calc(var(--space-y) + env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) calc(var(--space-y) + env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+      background: var(--bg); color: var(--text);
+      font-family: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased; overflow-x: hidden; position: relative;
+    }
+
+    /* ---------- Page fade in / out ---------- */
+    body { animation: pageIn .8s ease backwards; transition: opacity .5s ease; }
+    html.leaving body { opacity: 0; }
+    @keyframes pageIn { from { opacity: 0; } to { opacity: 1; } }
+    .lead { transition: opacity .3s ease; }
+    .lead.fade { opacity: 0; }
+
+    /* ---------- Background ---------- */
+    .bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+    .bg::before {
+      content: ""; position: absolute; inset: 0;
+      background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 48px 48px;
+      -webkit-mask-image: radial-gradient(ellipse at 50% 30%, #000 10%, transparent 70%);
+      mask-image: radial-gradient(ellipse at 50% 30%, #000 10%, transparent 70%);
+    }
+    .glow { position: absolute; border-radius: 50%; filter: blur(100px); opacity: .4; animation: drift 18s ease-in-out infinite; }
+    .g1 { width: min(480px, 90vw); aspect-ratio: 1; background: var(--brand); top: -18%; right: -12%; }
+    .g2 { width: min(380px, 80vw); aspect-ratio: 1; background: var(--aqua); bottom: -16%; left: -10%; opacity: .22; animation-delay: -8s; }
+    html.light .glow { opacity: .2; } html.light .g2 { opacity: .14; }
+    @keyframes drift { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-36px, 30px); } }
+
+    /* ---------- Layout ---------- */
+    .wrap { width: 100%; max-width: 1080px; margin: auto; display: flex; flex-direction: column; gap: clamp(28px, 5vw, 56px); }
+
+    .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; animation: up .7s both; }
+    .brand { display: flex; align-items: center; gap: 11px; font-weight: 800; font-size: 16px; letter-spacing: -.01em; }
+    .brand svg { width: 38px; height: 38px; flex: none; }
+    .brand span b { color: #7c8cff; font-weight: 800; }
+    html.light .brand span b { color: var(--brand-2); }
+
+    .status {
+      display: inline-flex; align-items: center; gap: 8px; padding: 7px 13px; border-radius: 999px; white-space: nowrap;
+      font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+      color: var(--pink); background: color-mix(in srgb, var(--pink) 12%, transparent); border: 1px solid color-mix(in srgb, var(--pink) 32%, transparent);
+      transition: color .4s, background .4s, border-color .4s;
+    }
+    .status i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: blink 1.6s ease-in-out infinite; }
+    .status.ok { color: var(--ok); }
+    @keyframes blink { 50% { opacity: .25; } }
+
+    .hero { display: grid; gap: clamp(28px, 5vw, 56px); align-items: center; }
+    @media (min-width: 900px) { .hero { grid-template-columns: 1.05fr 1fr; } }
+
+    .copy { animation: up .8s .1s both; }
+    .eyebrow { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .24em; text-transform: uppercase; color: var(--aqua); }
+    html.light .eyebrow { color: #0891b2; }
+    h1 { margin: 14px 0 0; font-size: clamp(34px, 8.2vw, 62px); line-height: 1.04; letter-spacing: -.03em; font-weight: 800; }
+    h1 span { background: linear-gradient(90deg, #7c8cff, #22d3ee, #f472b6, #7c8cff); background-size: 300% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: flow 6s ease infinite; }
+    html.light h1 span { background-image: linear-gradient(90deg, #4351e8, #0891b2, #db2777, #4351e8); }
+    @keyframes flow { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+    .lead { margin: 18px 0 0; max-width: 46ch; color: var(--muted); font-size: clamp(15px, 2.2vw, 17px); line-height: 1.65; }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+    .btn, .ghost {
+      min-height: 50px; padding: 0 24px; border-radius: 14px; cursor: pointer; font: 700 15px/1 inherit; font-family: inherit;
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px; transition: transform .2s, box-shadow .2s, background .2s, border-color .2s, color .2s;
+    }
+    .btn { position: relative; overflow: hidden; border: 0; color: #fff; background: linear-gradient(90deg, var(--brand), var(--brand-2) 55%, #2aa5d6); box-shadow: 0 12px 30px -10px rgba(91,108,255,.7); }
+    .btn:hover { transform: translateY(-2px); }
+    .btn:active { transform: scale(.98); }
+    .btn::after { content: ""; position: absolute; top: 0; left: 0; width: 40%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.4), transparent); animation: shine 3.6s ease-in-out infinite; }
+    @keyframes shine { from { transform: translateX(-120%) skewX(-20deg); } to { transform: translateX(320%) skewX(-20deg); } }
+    .btn[disabled] { cursor: progress; opacity: .9; }
+    .btn svg { width: 18px; height: 18px; }
+    .btn.busy svg { animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .btn.shake { animation: shake .45s; }
+    @keyframes shake { 20%,60% { transform: translateX(-6px); } 40%,80% { transform: translateX(6px); } }
+    .ghost { color: var(--muted); background: transparent; border: 1px solid var(--line); }
+    .ghost:hover { color: var(--text); border-color: rgba(124,140,255,.55); background: rgba(124,140,255,.08); }
+    .btn:focus-visible, .ghost:focus-visible { outline: 3px solid rgba(124,140,255,.55); outline-offset: 3px; }
+    .hidden { display: none; }
+    @media (max-width: 479px) { .actions > * { flex: 1 1 100%; } }
+
+    .auto { margin-top: 26px; max-width: 360px; }
+    .auto p { margin: 0 0 9px; font-size: 13px; color: var(--faint); display: flex; justify-content: space-between; gap: 10px; }
+    .auto p b { color: var(--muted); font-weight: 700; font-variant-numeric: tabular-nums; }
+    .bar { height: 5px; border-radius: 99px; background: var(--line); overflow: hidden; }
+    .bar i { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--brand), var(--aqua)); }
+
+    /* ---------- Illustration ---------- */
+    .stage {
+      position: relative; border-radius: clamp(22px, 4vw, 32px); padding: clamp(14px, 3vw, 26px);
+      background: linear-gradient(160deg, var(--card), transparent), var(--stage);
+      border: 1px solid var(--line); box-shadow: 0 40px 90px -40px rgba(67,81,232,.55);
+      animation: up .9s .2s both;
+    }
+    .stage::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
+      background: linear-gradient(140deg, rgba(124,140,255,.7), transparent 35%, transparent 65%, rgba(34,211,238,.55));
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+    .stage svg { display: block; width: 100%; height: auto; overflow: visible; }
+    .link-dim { stroke: var(--line); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 2 9; }
+    .link-live { stroke: url(#lg); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 7 9; animation: dash 1.2s linear infinite; }
+    @keyframes dash { to { stroke-dashoffset: -32; } }
+    .packet { fill: var(--aqua); opacity: 0; animation: send 2.6s ease-in infinite; }
+    .p2 { animation-delay: .87s; } .p3 { animation-delay: 1.74s; }
+    @keyframes send { 0% { transform: translateX(0); opacity: 0; } 12% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateX(110px); opacity: 0; } }
+    .x-badge { transform-box: fill-box; transform-origin: center; animation: pop 2.6s ease-in-out infinite; }
+    @keyframes pop { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+    .sig { animation: sig 2.4s ease-in-out infinite; } .s2 { animation-delay: .3s; } .s3 { animation-delay: .6s; }
+    @keyframes sig { 0%,100% { opacity: .2; } 45% { opacity: 1; } }
+    .cap { margin: 14px 4px 0; display: flex; justify-content: space-between; gap: 10px; font-size: 12px; color: var(--faint); font-weight: 600; }
+    .cap span:last-child { color: var(--pink); }
+
+    /* ---------- Tips ---------- */
+    .tips { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; animation: up .9s .3s both; }
+    @media (min-width: 640px) { .tips { grid-template-columns: repeat(3, 1fr); } }
+    .tips li { display: flex; gap: 14px; align-items: flex-start; padding: 18px; border-radius: 20px; background: var(--card); border: 1px solid var(--line); transition: transform .3s, border-color .3s; }
+    .tips li:hover { transform: translateY(-3px); border-color: rgba(124,140,255,.45); }
+    .tips .ic { flex: none; width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center; color: var(--aqua); background: rgba(34,211,238,.1); border: 1px solid rgba(34,211,238,.22); }
+    html.light .tips .ic { color: #0891b2; }
+    .tips .ic svg { width: 20px; height: 20px; }
+    .tips h2 { margin: 1px 0 4px; font-size: 14.5px; font-weight: 700; }
+    .tips p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
+
+    .foot { text-align: center; font-size: 12.5px; color: var(--faint); animation: up .9s .4s both; }
+    .foot strong { color: var(--muted); }
+
+    @keyframes up { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+
+    /* ---------- Small / short screens ---------- */
+    @media (max-width: 380px) { .brand span { font-size: 14px; } .status { padding: 6px 10px; font-size: 10.5px; } }
+    @media (max-height: 520px) and (orientation: landscape) { :root { --space-y: 20px; } }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; animation-delay: 0s !important; }
+      .packet { opacity: 0; }
+    }
   </style>
     </head>
     <body>
-        <main class="card">
-            <div class="logo">E</div>
-            <h1>You're offline</h1>
-            <p>We can't reach the server right now. Check your connection and
-                try again. Pages you've already opened may still be
-                available.</p>
-            <button type="button" onclick="location.reload()">Try again</button>
-        </main>
+        <div class="bg" aria-hidden="true"><div class="glow g1"></div><div
+                class="glow g2"></div></div>
+
+        <div class="wrap">
+            <header class="top">
+                <div class="brand">
+                    <svg viewBox="0 0 40 40" aria-hidden="true">
+                        <defs><lineargradient id="lb" x1="0" y1="0" x2="40"
+                                y2="40" gradientUnits="userSpaceOnUse"><stop
+                                    stop-color="#5b6cff" /><stop offset="1"
+                                    stop-color="#22d3ee" /></lineargradient></defs>
+                        <rect width="40" height="40" rx="11" fill="url(#lb)" />
+                        <text x="20" y="26" text-anchor="middle"
+                            font-family="system-ui, sans-serif" font-size="16"
+                            font-weight="800" fill="#fff"
+                            font-style="italic">EM</text>
+                    </svg>
+                    <span>EM <b>Development</b></span>
+                </div>
+                <div class="status" id="status" role="status"
+                    aria-live="polite"><i></i><span id="statusText">No
+                        connection</span></div>
+            </header>
+
+            <main class="hero">
+                <section class="copy">
+                    <span class="eyebrow">Connection lost</span>
+                    <h1>You’re <span>offline</span></h1>
+                    <p class="lead" id="lead">We can’t reach the server right
+                        now. Check your connection and try again. Pages you’ve
+                        already opened may still be available.</p>
+
+                    <div class="actions">
+                        <button type="button" class="btn" id="retry">
+                            <svg viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2.4"
+                                stroke-linecap="round" stroke-linejoin="round"
+                                aria-hidden="true"><path
+                                    d="M21 12a9 9 0 1 1-3-6.7" /><path
+                                    d="M21 4v5h-5" /></svg>
+                            <span id="retryLabel">Try again</span>
+                        </button>
+                        <button type="button" class="ghost hidden" id="back">←
+                            Go back</button>
+                    </div>
+
+                    <div class="auto">
+                        <p><span>Checking again automatically</span><b
+                                id="count">15s</b></p>
+                        <div class="bar"><i id="barFill"></i></div>
+                    </div>
+                </section>
+
+                <aside class="stage" aria-hidden="true">
+                    <svg viewBox="0 0 440 250">
+                        <defs>
+                            <lineargradient id="lg" x1="96" y1="0" x2="204"
+                                y2="0" gradientUnits="userSpaceOnUse"><stop
+                                    stop-color="#5b6cff" /><stop offset="1"
+                                    stop-color="#22d3ee" /></lineargradient>
+                            <lineargradient id="dv" x1="0" y1="0" x2="1"
+                                y2="1"><stop stop-color="#5b6cff" /><stop
+                                    offset="1"
+                                    stop-color="#22d3ee" /></lineargradient>
+                        </defs>
+                        <!-- link -->
+                        <line class="link-dim" x1="232" y1="125" x2="336"
+                            y2="125" />
+                        <line class="link-live" x1="108" y1="125" x2="194"
+                            y2="125" />
+                        <circle class="packet" cx="100" cy="125" r="5" />
+                        <circle class="packet p2" cx="100" cy="125" r="5" />
+                        <circle class="packet p3" cx="100" cy="125" r="5" />
+                        <!-- device -->
+                        <g>
+                            <rect x="26" y="62" width="76" height="126" rx="16"
+                                fill="none" stroke="url(#dv)"
+                                stroke-width="3" />
+                            <rect x="40" y="80" width="48" height="8" rx="4"
+                                fill="url(#dv)" opacity=".85" />
+                            <rect x="40" y="98" width="48" height="30" rx="8"
+                                fill="url(#dv)" opacity=".25" />
+                            <rect x="40" y="136" width="32" height="6" rx="3"
+                                fill="url(#dv)" opacity=".4" />
+                            <rect x="40" y="148" width="40" height="6" rx="3"
+                                fill="url(#dv)" opacity=".25" />
+                            <circle cx="64" cy="174" r="4" fill="url(#dv)" />
+                        </g>
+                        <!-- broken link badge -->
+                        <g class="x-badge">
+                            <circle cx="213" cy="125" r="17" fill="var(--stage)"
+                                stroke="#f472b6" stroke-width="3" />
+                            <path d="M206 118l14 14M220 118l-14 14"
+                                stroke="#f472b6" stroke-width="3.4"
+                                stroke-linecap="round" />
+                        </g>
+                        <!-- server -->
+                        <g>
+                            <rect x="340" y="70" width="84" height="110" rx="16"
+                                fill="none" stroke="var(--line)"
+                                stroke-width="3" />
+                            <rect x="354" y="86" width="56" height="20" rx="7"
+                                fill="none" stroke="var(--line)"
+                                stroke-width="2.5" />
+                            <rect x="354" y="114" width="56" height="20" rx="7"
+                                fill="none" stroke="var(--line)"
+                                stroke-width="2.5" />
+                            <rect x="354" y="142" width="56" height="20" rx="7"
+                                fill="none" stroke="var(--line)"
+                                stroke-width="2.5" />
+                            <circle cx="365" cy="96" r="3"
+                                fill="#f472b6" /><circle cx="365" cy="124" r="3"
+                                fill="#f472b6" /><circle cx="365" cy="152" r="3"
+                                fill="#f472b6" />
+                        </g>
+                        <!-- signal -->
+                        <g fill="none" stroke="url(#dv)" stroke-width="4"
+                            stroke-linecap="round">
+                            <path class="sig"
+                                d="M52 38a22 22 0 0 1 24 0" /><path
+                                class="sig s2"
+                                d="M44 28a34 34 0 0 1 40 0" /><path
+                                class="sig s3" d="M36 18a46 46 0 0 1 56 0" />
+                        </g>
+                    </svg>
+                    <div class="cap"><span>Your device</span><span>Server
+                            unreachable</span></div>
+                </aside>
+            </main>
+
+            <ul class="tips">
+                <li><span class="ic"><svg viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round"><path
+                                d="M5 12.5a10 10 0 0 1 14 0" /><path
+                                d="M8.5 16a5 5 0 0 1 7 0" /><circle cx="12"
+                                cy="19.5" r="1"
+                                fill="currentColor" /></svg></span><div><h2>Check
+                            Wi-Fi or data</h2><p>Make sure Wi-Fi or mobile data
+                            is switched on.</p></div></li>
+                <li><span class="ic"><svg viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round"><path
+                                d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21.5 2.5 20 2.5 18 3 16.5 4.5L13 8 4.8 6.2l-1.3 1.3L9 11l-3 3-3-.5L2 14.8l3 1.7 1.7 3 1.3-1-.5-3 3-3 3.5 5.5z" /></svg></span><div><h2>Turn
+                            off Airplane mode</h2><p>It blocks every connection
+                            on your device.</p></div></li>
+                <li><span class="ic"><svg viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round"><path
+                                d="M4 20v-3M10 20V12M16 20V8M22 20V4" /></svg></span><div><h2>Find
+                            a better signal</h2><p>Move closer to your router or
+                            to an open area.</p></div></li>
+            </ul>
+
+            <footer class="foot"><strong>EM Development</strong> · We’ll
+                reconnect automatically when you’re back online.</footer>
+        </div>
+
         <script>
-    addEventListener('online', function () { location.reload(); });
+    (function () {
+      var $ = function (id) { return document.getElementById(id); };
+      var retry = $('retry'), label = $('retryLabel'), status = $('status'), statusText = $('statusText'),
+          lead = $('lead'), back = $('back'), count = $('count'), fill = $('barFill');
+      var INTERVAL = 15, left = INTERVAL, online = false;
+
+      if (history.length > 1) back.classList.remove('hidden');
+      // Fade the whole page out, then run the action
+      function leave(fn) {
+        document.documentElement.classList.add('leaving');
+        setTimeout(fn, 520);
+      }
+      // Cross-fade the message when its text changes
+      function setLead(text) {
+        lead.classList.add('fade');
+        setTimeout(function () { lead.textContent = text; lead.classList.remove('fade'); }, 300);
+      }
+      back.addEventListener('click', function () { leave(function () { history.back(); }); });
+      // If the browser restores this page from its back/forward cache, fade it back in
+      addEventListener('pageshow', function (e) {
+        if (e.persisted) document.documentElement.classList.remove('leaving');
+      });
+
+      function goOnline() {
+        if (online) return; online = true;
+        status.classList.add('ok'); statusText.textContent = 'Back online';
+        setLead('Connection restored. Taking you back…');
+        label.textContent = 'Reloading…'; retry.disabled = true; retry.classList.add('busy');
+        count.textContent = 'Now'; fill.style.width = '100%';
+        setTimeout(function () { leave(function () { location.reload(); }); }, 900);
+      }
+      function check() {
+        if (navigator.onLine) { goOnline(); return true; }
+        return false;
+      }
+
+      retry.addEventListener('click', function () {
+        if (retry.disabled) return;
+        retry.disabled = true; retry.classList.add('busy'); label.textContent = 'Checking…';
+        setTimeout(function () {
+          if (check()) return;
+          retry.disabled = false; retry.classList.remove('busy');
+          label.textContent = 'Still offline, try again';
+          retry.classList.remove('shake'); void retry.offsetWidth; retry.classList.add('shake');
+          setTimeout(function () { if (!online) label.textContent = 'Try again'; }, 2200);
+          left = INTERVAL;
+        }, 900);
+      });
+
+      // Auto re-check every 15 seconds, with a progress bar
+      setInterval(function () {
+        if (online) return;
+        left -= 1;
+        if (left <= 0) { left = INTERVAL; check(); }
+        count.textContent = left + 's';
+        fill.style.width = ((INTERVAL - left) / INTERVAL * 100) + '%';
+      }, 1000);
+
+      addEventListener('online', goOnline);
+      addEventListener('offline', function () {
+        online = false; status.classList.remove('ok'); statusText.textContent = 'No connection';
+      });
+    })();
   </script>
     </body>
 </html>
