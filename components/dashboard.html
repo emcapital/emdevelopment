@@ -662,7 +662,7 @@
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut, updateProfile, sendPasswordResetEmail, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-    import { getDatabase, ref, push, set, update, remove, onValue, get, serverTimestamp, increment, query, limitToLast } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+    import { getDatabase, ref, push, set, update, remove, onValue, get, serverTimestamp, increment, query, limitToLast, orderByChild } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
     const FB = {
       apiKey: "AIzaSyAoyAOyfJsqlK_Pe6pmfA5cTexx0IOcH9g", authDomain: "moren-325fd.firebaseapp.com",
@@ -675,6 +675,34 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
     const LOGIN_URL = '../auth/login.html'; // path to login.html, relative to this file
+    // the "account created" message sent to a new customer (no password reset link: it states the login and the default password)
+    const acctSite = () => new URL(LOGIN_URL, location.href).href;
+    // Automatic email via EmailJS (https://www.emailjs.com). Fill these three in; while any is empty, the "Send account email" button is used instead.
+    const EMAILJS = { serviceId: 'service_6obqxmm', templateId: 'template_9isvbcv', replyTemplateId: 'template_rzlhxdf', publicKey: 'L6uRXN8WLyoKf2KwQ' };   // templateId = new customer account email, replyTemplateId = emails you send from Quotations
+    const replyReady = () => !!(EMAILJS.serviceId && EMAILJS.replyTemplateId && EMAILJS.publicKey);
+    async function emailjsSend(templateId, params) {
+      const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 15000);
+      try {
+        const r = await fetch('https://api.emailjs.com/api/v1.0/email/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: ctl.signal,
+          body: JSON.stringify({ service_id: EMAILJS.serviceId, template_id: templateId, user_id: EMAILJS.publicKey, template_params: params }) });
+        if (r.ok) return { ok: true };
+        const txt = (await r.text().catch(() => '')).trim().slice(0, 140);
+        return { ok: false, err: txt || 'EmailJS error ' + r.status };
+      } catch (e) { return { ok: false, err: e && e.name === 'AbortError' ? 'This is taking too long. Check your connection and try again.' : 'Could not reach EmailJS. Check your connection and try again.' }; }
+      finally { clearTimeout(t); }
+    }
+    const emailReady = () => !!(EMAILJS.serviceId && EMAILJS.templateId && EMAILJS.publicKey);
+    async function sendAcctEmail(c) {
+      const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 15000);
+      try {
+        const r = await fetch('https://api.emailjs.com/api/v1.0/email/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: ctl.signal,
+          body: JSON.stringify({ service_id: EMAILJS.serviceId, template_id: EMAILJS.templateId, user_id: EMAILJS.publicKey,
+            template_params: { to_email: c.email, to_name: c.name, password: c.pw, site_url: acctSite(), subject: acctSubject, message: acctBody(c) } }) });
+        return r.ok;
+      } catch (e) { return false; } finally { clearTimeout(t); }
+    }
+    const acctSubject = 'Your EM Development account has been created';
+    const acctBody = c => 'Hi ' + c.name + ',\n\nAn account has been created for you at EM Development so you can track the progress of your website development.\n\nEmail: ' + c.email + '\nPassword: ' + c.pw + ' (default)\n\nYou can change your password after you sign in, in the website: ' + acctSite() + '\n\nThank you,\nEM Development';
 
     // ---------- helpers ----------
     const $ = s => document.querySelector(s);
@@ -699,9 +727,10 @@
       settings: 'M20 21a8 8 0 0 0-16 0M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',
       chat: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z',
       backup: 'M12 3v12M7 10l5 5 5-5M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2',
+      tracker: 'M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',
       trash: 'M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M10 11v6M14 11v6'
     };
-    const TITLES = { overview: 'Overview', projects: 'Projects', invoices: 'Invoices', subscriptions: 'Subscriptions', accounting: 'Accounting', customers: 'Customers', portal: 'My Website', messages: 'Quotations', chat: 'Chat', backup: 'Backup', settings: 'Account' };
+    const TITLES = { overview: 'Overview', projects: 'Projects', invoices: 'Invoices', subscriptions: 'Subscriptions', accounting: 'Accounting', customers: 'Customers', portal: 'My Website', messages: 'Quotations', chat: 'Chat', tracker: 'Tracker', backup: 'Backup', settings: 'Account' };
     const svg = (d, c = 'w-5 h-5') => `<svg class="${c}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="${d}"/></svg>`;
     let toastT;
     function toast(t) { const el = $('#toast'); el.textContent = t; el.className = 'fixed left-1/2 z-50 glass rounded-2xl px-5 py-2.5 text-sm font-medium text-center max-w-[calc(100vw-2rem)]'; el.style.bottom = 'calc(1.5rem + env(safe-area-inset-bottom, 0px))'; el.style.animation = 'toastIn .4s ease both'; clearTimeout(toastT); toastT = setTimeout(() => { el.style.animation = 'toastOut .35s ease forwards'; toastT = setTimeout(() => el.classList.add('hidden'), 350); }, 2600); }
@@ -823,6 +852,7 @@
         <div class="mt-3 inline-flex self-start px-3 py-1 rounded-full text-xs font-semibold bg-brand-500/20 text-brand-400">${esc(q.service || 'General inquiry')}</div>
         <p class="mt-3 text-sm text-slate-300 whitespace-pre-wrap break-words">${esc(q.details || '')}</p>
         <div class="mt-4 space-y-1 text-sm"><div class="truncate"><span class="text-slate-400">Email:</span> <a class="text-brand-400 hover:text-white font-medium" href="mailto:${esc(q.email)}?subject=${subj}&body=${body}">${esc(q.email)}</a></div>${q.phone ? `<div class="truncate"><span class="text-slate-400">Phone:</span> <a class="text-brand-400 hover:text-white font-medium" href="tel:${esc(q.phone)}">${esc(q.phone)}</a></div>` : ''}</div>
+        <div class="mt-4"><button type="button" data-act="qreply" data-q="${esc(q.id)}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 transition">${svg(ICON.messages, 'w-4 h-4')}Reply by email</button></div>
         <label class="mt-auto pt-4 border-t border-white/10 flex items-center gap-3 text-sm font-semibold cursor-pointer select-none"><input type="checkbox" class="chk" data-act="qmail" data-q="${esc(q.id)}" ${q.emailSent ? 'checked' : ''}/><span data-qtxt data-h="${esc(qSentHtml(q))}">${qSentHtml(q)}</span></label></div>`;
     };
     const qGridHtml = () => qList().map(qCard).join('') || `<p class="text-slate-400">${qError ? '' : Q.length ? 'Nothing in this list.' : 'No quotations yet.'}</p>`;
@@ -1259,7 +1289,7 @@
         if (st === 'paid') { doc.setDrawColor(5, 150, 105); doc.setLineWidth(.8); doc.roundedRect(18, yEnd + 5, 34, 12, 2, 2, 'S'); doc.setTextColor(5, 150, 105); doc.setFontSize(13); doc.text('PAID', 35, yEnd + 13.2, { align: 'center' }); }
         doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(120, 128, 160);
         doc.text('Thank you for your business.', 105, 266, { align: 'center' });
-        doc.text('inquire@emdevelopment.com  |  (+63) 920 501 8789  |  Cebu City, Cebu, Philippines', 105, 272, { align: 'center' });
+        doc.text('emdevelopmentph@gmail.com  |  (+63) 920 501 8789  |  Cebu City, Cebu, Philippines', 105, 272, { align: 'center' });
         doc.save(i.num + '.pdf');
       } catch (err) { console.error('pdf', err); toast('Could not create the PDF. Check your connection and try again.'); }
       btn.disabled = false; btn.classList.remove('opacity-50');
@@ -1349,7 +1379,7 @@
         const links = K.reduce((n, c) => n + lk(c).length, 0), avg = K.length ? Math.round(K.reduce((n, c) => n + prog(lk(c)), 0) / K.length) : 0;
         const stat = (l, v, g) => `<div data-f class="${card} !p-4 sm:!p-5"><div class="text-xs text-slate-400">${l}</div><div class="stat-v mt-1 text-lg min-[420px]:text-xl sm:text-2xl font-extrabold ${g ? 'gradient-text' : ''}">${v}</div></div>`;
         const lbl = 'block text-sm font-medium text-slate-300';
-        const creds = kCreds ? `<div data-f class="${card} mb-4 !border-emerald-400/30"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="font-bold">Account created for ${esc(kCreds.name)}</div><p class="mt-1 text-sm text-slate-400">${kCreds.mailed ? 'An email was sent to ' + esc(kCreds.email) + ' with a link to sign in and set their own password.' : 'The email could not be sent automatically. Use Copy login details below, or Send password reset in Manage.'}</p></div><button data-act="kdismiss" aria-label="Dismiss" class="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition">${svg('M6 6l12 12M18 6L6 18', 'w-4 h-4')}</button></div><div class="mt-3 grid sm:grid-cols-2 gap-3 text-sm"><div class="min-w-0"><span class="text-slate-400">Email</span><div class="font-semibold break-all">${esc(kCreds.email)}</div></div><div class="min-w-0"><span class="text-slate-400">Temporary password</span><div class="font-mono font-semibold break-all">${esc(kCreds.pw)}</div></div></div><button data-act="kcopy" class="mt-4 px-5 py-2.5 rounded-xl glass text-sm font-semibold text-brand-400 hover:text-white transition">Copy login details</button></div>` : '';
+        const creds = kCreds ? `<div data-f class="${card} mb-4 !border-emerald-400/30"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="font-bold">Account created for ${esc(kCreds.name)}</div><p class="mt-1 text-sm text-slate-400">${kCreds.mailed ? 'An email was sent to ' + esc(kCreds.email) + ' with their login, the default password and the website link.' : (emailReady() ? 'The email could not be sent automatically. ' : '') + 'Use Send account email to email ' + esc(kCreds.email) + ' their login and default password.'}</p></div><button data-act="kdismiss" aria-label="Dismiss" class="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition">${svg('M6 6l12 12M18 6L6 18', 'w-4 h-4')}</button></div><div class="mt-3 grid sm:grid-cols-2 gap-3 text-sm"><div class="min-w-0"><span class="text-slate-400">Email</span><div class="font-semibold break-all">${esc(kCreds.email)}</div></div><div class="min-w-0"><span class="text-slate-400">Default password</span><div class="font-mono font-semibold break-all">${esc(kCreds.pw)}</div></div></div><div class="mt-4 flex flex-wrap gap-3"><button data-act="kmail" class="btn-shine px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white text-sm shadow-lg shadow-brand-500/30">${kCreds.mailed ? 'Send again' : 'Send account email'}</button><button data-act="kcopy" class="px-5 py-2.5 rounded-xl glass text-sm font-semibold text-brand-400 hover:text-white transition">Copy message</button></div></div>` : '';
         const kCard = c => {
           const ps = lk(c), v = prog(ps);
           return `<div data-f data-kid="${esc(c.id)}" class="${card} flex flex-col${c.disabled ? ' !border-red-400/40' : ''}">
@@ -1375,7 +1405,7 @@
             <label class="${lbl}">Company or website<input name="company" maxlength="80" autocomplete="off" class="field mt-1.5" placeholder="e.g. Cebu Bakery"/></label>
             <label class="${lbl}">Email (their login)<input name="email" type="email" required maxlength="120" autocomplete="off" class="field mt-1.5" placeholder="name@company.com"/></label>
             <label class="${lbl}">Phone (optional)<input name="phone" maxlength="30" autocomplete="off" class="field mt-1.5" placeholder="+63 900 000 0000"/></label>
-            <div class="sm:col-span-2 rounded-xl bg-white/10 p-3 text-sm text-slate-300">Their temporary password will be <span class="font-mono font-bold">123456</span>. We email them straight away with a link to sign in and set their own password.</div>
+            <div class="sm:col-span-2 rounded-xl bg-white/10 p-3 text-sm text-slate-300">Their default password will be <span class="font-mono font-bold">123456</span>. They get an email with their login, this default password and the website link, where they can change it.</div>
           </div>
           <div><div class="${lbl}">Projects to share</div><div class="mt-2 grid sm:grid-cols-2 gap-2">${C.map(p => `<label class="flex items-center gap-3 text-sm text-slate-300 cursor-pointer select-none"><input type="checkbox" class="chk" name="proj" value="${esc(p.id)}"/><span class="min-w-0 break-words">${esc(p.name)}</span></label>`).join('') || '<p class="text-sm text-slate-400">No projects yet. You can share one later.</p>'}</div></div>
           <p id="kErrMsg" class="text-sm text-red-400 min-h-[1.25rem]" role="alert"></p>
@@ -1459,9 +1489,17 @@
       messages() {
         const todo = Q.filter(q => !q.emailSent).length;
         const pill = (f, l) => `<button data-qpill="${f}" data-act="qflt" data-v="${f}" class="${pillCls(qflt === f)}">${l}</button>`;
-        return `<div data-f class="flex flex-wrap items-center justify-between gap-3 mb-5"><div class="flex flex-wrap gap-2">${pill('all', 'All (' + Q.length + ')')}${pill('todo', 'To email (' + todo + ')')}${pill('sent', 'Emailed (' + (Q.length - todo) + ')')}</div></div>
+        return `<div data-f class="flex flex-wrap items-center justify-between gap-3 mb-5"><div class="flex flex-wrap gap-2">${pill('all', 'All (' + Q.length + ')')}${pill('todo', 'To email (' + todo + ')')}${pill('sent', 'Emailed (' + (Q.length - todo) + ')')}</div><button type="button" data-act="qnew" class="btn-shine w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white text-sm shadow-lg shadow-brand-500/30">+ New email</button></div>
           ${qError ? `<p class="mb-4 text-sm text-red-400" role="alert">${esc(qError)}</p>` : ''}
           <div id="qgrid" data-ids="${Q.map(q => q.id).join(',')}" class="grid md:grid-cols-2 gap-4">${qGridHtml()}</div>`;
+      },
+      tracker() {
+        return `${trError ? `<p class="mb-4 text-sm text-red-400" role="alert">${esc(trError)}</p>` : ''}
+        <div id="trstats" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">${trStats()}</div>
+        <div data-f class="flex flex-wrap items-center justify-between gap-3 mb-4"><div class="flex flex-wrap gap-2">${['all', 'login', 'logout', 'email', 'failed'].map(k => `<button data-trpill="${k}" data-act="trflt" data-v="${k}" class="${pillCls(trflt === k)}">${trCounts()[k]}</button>`).join('')}</div>
+          <button data-act="trcsv" class="w-full sm:w-auto px-5 py-2.5 rounded-xl glass text-sm font-semibold text-brand-400 hover:text-white transition">Export CSV</button></div>
+        <input id="trq" type="search" autocomplete="off" aria-label="Search the tracker" value="${esc(trq)}" placeholder="Search by name, email or recipient..." class="field mb-5"/>
+        <div id="trlist" class="space-y-2.5">${trListHtml()}</div>`;
       },
       chat() { return '<div id="chatHost"></div>'; },
       backup() {
@@ -1750,7 +1788,7 @@
       let uids = K.map(c => c.uid).filter(Boolean);
       try { const sn = await withTimeout(get(ref(db, `users/${U.uid}/customers`)), 30000); sn.forEach(ch => { const u = (ch.val() || {}).uid; if (u) uids.push(u); }); } catch (e) {}
       uids = [...new Set(uids)];
-      await Promise.all([take(`users/${U.uid}`), take('quotes'), ...uids.flatMap(u => [take(`portal/${u}`), take(`chats/${u}`), take(`maintenance/${u}`)])]);
+      await Promise.all([take(`users/${U.uid}`), take(`activity/${U.uid}`), take('quotes'), ...uids.flatMap(u => [take(`portal/${u}`), take(`chats/${u}`), take(`maintenance/${u}`)])]);
       return { data, failed };
     }
     async function bkDownload() {
@@ -1770,7 +1808,7 @@
       } catch (err) { console.error(err); bkFail('dl', 'Could not create the backup. Please try again.'); }
     }
     // only these paths may be restored, and users/<uid> must be this account's own
-    const bkAllowed = path => path === `users/${U.uid}` || path === 'quotes' || /^(portal|chats|maintenance)\/[A-Za-z0-9_-]+$/.test(path);
+    const bkAllowed = path => path === `users/${U.uid}` || path === `activity/${U.uid}` || path === 'quotes' || /^(portal|chats|maintenance)\/[A-Za-z0-9_-]+$/.test(path);
     function bkParse(text) {
       let f; try { f = JSON.parse(text); } catch (e) { throw new Error('That file is not a valid backup (it could not be read).'); }
       if (!f || f.format !== BK_FORMAT || !f.data || typeof f.data !== 'object') throw new Error('That file is not a backup made by this dashboard.');
@@ -1818,7 +1856,7 @@
     }
 
     // ---------- events ----------
-    const navKeys = () => PORTAL ? ['portal', 'settings'] : ['overview', 'projects', 'invoices', 'subscriptions', 'accounting', 'customers', 'chat', 'messages', 'backup', 'settings'];
+    const navKeys = () => PORTAL ? ['portal', 'settings'] : ['overview', 'projects', 'invoices', 'subscriptions', 'accounting', 'customers', 'chat', 'messages', 'tracker', 'backup', 'settings'];
     const buildNav = () => { $('#nav').innerHTML = navKeys().map(k => `<button data-v="${k}" class="nav-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold text-slate-300 hover:text-white">${svg(ICON[k])}${TITLES[k]}${k === 'chat' ? '<span id="chatBadge" class="hidden ml-auto min-w-[1.25rem] h-5 px-1.5 rounded-full bg-pink text-white text-[11px] font-bold items-center justify-center" aria-label="Unread chat messages"></span>' : ''}</button>`).join(''); chBadge(); };
     buildNav();
     $('#nav').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (b) go(b.dataset.v); });
@@ -1852,6 +1890,16 @@
         q.emailSent = val; q.emailAt = val ? Date.now() : 0; repaintQ();   // show it right away; the database write follows
         try { await update(ref(db, `quotes/${q.id}`), { emailSent: val, emailSentAt: val ? serverTimestamp() : null }); toast(val ? 'Marked as emailed' : 'Marked as not emailed'); }
         catch (err) { const r = Q.find(x => x.id === b.dataset.q); if (r) { r.emailSent = prev.s; r.emailAt = prev.t; } toast(quoteErr(err, 'update the quotation')); repaintQ(); }
+      }
+      else if (a === 'qreply') { const q = Q.find(x => x.id === b.dataset.q); if (q) openQMail(q, b); }
+      else if (a === 'qnew') openQMail(null, b);
+      else if (a === 'trflt') { trflt = b.dataset.v; document.querySelectorAll('[data-trpill]').forEach(x => x.className = pillCls(x.dataset.v === trflt)); drawT(); }
+      else if (a === 'trcsv') {
+        const q = v => { v = String(v); if (/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; };
+        const rows = [['Date', 'Time', 'Event', 'Who', 'Account email', 'Role', 'Email type', 'Sent to', 'Status', 'Details']].concat(trFiltered().map(e => [e.at ? dstr(new Date(e.at)) : '', e.at ? trTime(e.at) : '', TRT[trKind(e)].l, e.name, e.email, e.actor, e.kind, e.to, e.type === 'email' ? e.status : '', e.detail || e.preview]));
+        const url = URL.createObjectURL(new Blob(['\ufeff' + rows.map(r => r.map(q).join(',')).join('\r\n')], { type: 'text/csv' }));
+        const dl = document.createElement('a'); dl.href = url; dl.download = 'tracker-' + dstr(new Date()) + '.csv'; document.body.appendChild(dl); dl.click(); dl.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000); toast('Tracker exported');
       }
       else if (a === 'newp') openModal();
       else if (a === 'del') openDel(b.dataset.p, b);
@@ -1919,8 +1967,12 @@
       else if (a === 'kdismiss') { kCreds = null; paint(false); }
       else if (a === 'kcopy') {
         if (!kCreds) return;
-        const t = 'Hi ' + kCreds.name + ',\n\nEM Development has created an account for you so you can track the progress of your website development.\n\nLogin: ' + new URL(LOGIN_URL, location.href).href + '\nEmail: ' + kCreds.email + '\nTemporary password: ' + kCreds.pw + '\n\nPlease sign in and change your password right away.';
+        const t = acctBody(kCreds);
         try { await navigator.clipboard.writeText(t); toast('Login details copied'); } catch (e2) { toast('Could not copy. Select the text and copy it manually.'); }
+      }
+      else if (a === 'kmail') {
+        if (!kCreds) return;
+        location.href = 'mailto:' + encodeURIComponent(kCreds.email).replace(/%40/g, '@') + '?subject=' + encodeURIComponent(acctSubject) + '&body=' + encodeURIComponent(acctBody(kCreds));
       }
       else if (a === 'klink') {
         const c = K.find(x => x.id === b.dataset.k); if (!c || !c.uid) return;
@@ -2569,11 +2621,90 @@
       }
     });
 
+    // ---------- send an email from the Quotations page ----------
+    // Sent through EmailJS (template EMAILJS.replyTemplateId). The template receives: to_email, to_name, message, from_name. The subject line is set in the EmailJS template.
+    // Replying to a quotation also marks it as emailed.
+    let qmEl = null, qmOpen = false, qmBusy = false, qmQ = null, qmFocus = null;
+    function qmUI() {
+      if (qmEl) return qmEl;
+      const lbl = 'block text-sm font-medium text-slate-300';
+      qmEl = document.createElement('div'); qmEl.id = 'qmModal'; qmEl.className = 'fixed inset-0 z-[60] items-center justify-center p-4';
+      qmEl.style.cssText = 'display:none;padding:max(1rem,env(safe-area-inset-top,0px)) max(1rem,env(safe-area-inset-right,0px)) max(1rem,env(safe-area-inset-bottom,0px)) max(1rem,env(safe-area-inset-left,0px))';
+      qmEl.setAttribute('role', 'dialog'); qmEl.setAttribute('aria-modal', 'true'); qmEl.setAttribute('aria-labelledby', 'qmTitle');
+      qmEl.innerHTML = `<div data-qmback class="absolute inset-0 bg-black/60 backdrop-blur-sm" style="opacity:0;transition:opacity .3s ease"></div>
+        <form data-qmform novalidate class="modal-card relative w-full max-w-2xl overflow-y-auto rounded-3xl p-6 sm:p-8" style="max-height:calc(100dvh - 2rem);opacity:0;transform:translateY(18px) scale(.97);transition:opacity .3s ease,transform .35s cubic-bezier(.2,.7,.2,1)">
+          <div class="flex items-start justify-between gap-4 mb-5"><div class="min-w-0"><h2 id="qmTitle" class="text-xl font-extrabold tracking-tight">Send <span class="gradient-text">email</span></h2><p data-qmhint class="mt-1 text-sm text-slate-400"></p></div>
+            <button type="button" data-qmclose aria-label="Close" class="shrink-0 w-10 h-10 rounded-xl glass flex items-center justify-center text-slate-300 hover:text-white transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <label class="${lbl}">To (email)<input name="to" type="email" required maxlength="120" autocomplete="off" class="field mt-1.5" placeholder="name@company.com"/></label>
+            <label class="${lbl}">Recipient name<input name="name" maxlength="60" autocomplete="off" class="field mt-1.5" placeholder="Customer name"/></label>
+
+            <label class="${lbl} sm:col-span-2">Message<textarea name="message" required rows="9" maxlength="5000" class="field mt-1.5" style="resize:vertical;min-height:11rem" placeholder="Write your message..."></textarea></label>
+          </div>
+          <p data-qmerr class="mt-3 text-sm text-red-400 min-h-[1.25rem]" role="alert"></p>
+          <div class="mt-2 flex flex-wrap justify-end gap-3"><button type="button" data-qmcancel class="px-6 py-3 rounded-xl glass font-semibold text-slate-300 hover:text-white transition">Cancel</button><button type="submit" data-qmsend class="btn-shine px-6 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white">Send email</button></div></form>`;
+      document.body.appendChild(qmEl);
+      const f = qmEl.querySelector('form'), close = () => { if (!qmBusy) closeQMail(); };
+      qmEl.querySelector('[data-qmback]').addEventListener('click', close);
+      qmEl.querySelector('[data-qmclose]').addEventListener('click', close);
+      qmEl.querySelector('[data-qmcancel]').addEventListener('click', close);
+      f.addEventListener('submit', e => { e.preventDefault(); sendQMail(f); });
+      f.addEventListener('keydown', e => {   // keep Tab inside the modal
+        if (e.key !== 'Tab') return;
+        const els = [...f.querySelectorAll('input, textarea, button')].filter(x => !x.disabled && x.offsetParent !== null);
+        if (!els.length) return;
+        const first = els[0], last = els[els.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape' && qmOpen && !qmBusy) closeQMail(); });
+      return qmEl;
+    }
+    function openQMail(q, trigger) {
+      const el = qmUI(), f = el.querySelector('form'); qmQ = q ? q.id : null; qmFocus = trigger || document.activeElement; qmOpen = true;
+      f.reset();
+      f.elements.to.value = q ? q.email : ''; f.elements.name.value = q ? q.name : '';
+      f.elements.message.value = q ? 'Hi ' + q.name + ',\n\nThank you for reaching out to EM Development about ' + (q.service || 'your project') + '.\n\n\n\nBest regards,\nEM Development' : '';
+      el.querySelector('[data-qmhint]').textContent = q ? 'Replying to ' + q.name + '. This quotation is marked as emailed once the email is sent.' : 'Write a new email to anyone. It is sent from your EM Development email address.';
+      el.querySelector('[data-qmerr]').textContent = '';
+      el.style.display = 'flex';
+      requestAnimationFrame(() => requestAnimationFrame(() => { el.querySelector('[data-qmback]').style.opacity = '1'; const fm = el.querySelector('[data-qmform]'); fm.style.opacity = '1'; fm.style.transform = 'none'; }));
+      setTimeout(() => { if (qmOpen) { const m = f.elements.message; if (q) { m.focus({ preventScroll: true }); const pos = m.value.indexOf('\n\n\n\n') + 2; m.setSelectionRange(pos, pos); } else f.elements.to.focus({ preventScroll: true }); } }, 120);
+    }
+    function closeQMail() {
+      qmOpen = false; if (!qmEl) return;
+      qmEl.querySelector('[data-qmback]').style.opacity = '0';
+      const fm = qmEl.querySelector('[data-qmform]'); fm.style.opacity = '0'; fm.style.transform = 'translateY(18px) scale(.97)';
+      setTimeout(() => { if (!qmOpen) qmEl.style.display = 'none'; }, 320);
+      if (qmFocus && qmFocus.isConnected && qmFocus.focus) qmFocus.focus({ preventScroll: true });
+    }
+    async function sendQMail(f) {
+      if (qmBusy) return;
+      const err = qmEl.querySelector('[data-qmerr]'), btn = qmEl.querySelector('[data-qmsend]'), bad = m => { err.textContent = m; };
+      const to = String(f.elements.to.value || '').trim(), name = String(f.elements.name.value || '').trim().replace(/\s+/g, ' ').slice(0, 60);
+      const message = String(f.elements.message.value || '').trim().slice(0, 5000);
+      if (!/^\S+@\S+\.\S+$/.test(to)) return bad('Enter a valid email address to send to.');
+      if (!message) return bad('Write a message.');
+      if (!replyReady()) return bad('Email sending is not set up. Check the EMAILJS settings at the top of the script.');
+      err.textContent = ''; qmBusy = true; btn.disabled = true; btn.textContent = 'Sending...';
+      const qid = qmQ, r = await emailjsSend(EMAILJS.replyTemplateId, { to_email: to, email: to, to, recipient: to, user_email: to, reply_to: 'emdevelopmentph@gmail.com', to_name: name || to, name: name || to, message, from_name: 'EM Development' });
+      qmBusy = false; btn.disabled = false; btn.textContent = 'Send email';
+      trkLog({ type: 'email', kind: qid ? 'Quotation reply' : 'New email', to, toName: name, status: r.ok ? 'sent' : 'failed', detail: r.ok ? '' : String(r.err || '').slice(0, 140), preview: message.slice(0, 140), ref: qid || '' });
+      if (!r.ok) return bad('The email could not be sent. ' + r.err);
+      closeQMail();
+      const q = qid ? Q.find(x => x.id === qid) : null;
+      if (q && !q.emailSent) {   // a reply marks the quotation as emailed
+        q.emailSent = true; q.emailAt = Date.now(); repaintQ();
+        try { await update(ref(db, `quotes/${q.id}`), { emailSent: true, emailSentAt: serverTimestamp() }); toast('Email sent to ' + to); }
+        catch (e2) { q.emailSent = false; q.emailAt = 0; repaintQ(); toast('Email sent to ' + to + ', but it could not be marked as emailed.'); }
+      } else toast('Email sent to ' + to);
+    }
+
     // ---------- customers (admin side) ----------
     // Saved at users/<adminUid>/customers/<id>. Each customer also gets portal/<customerUid>, which tells their login whose projects to show.
     const TEMP_PW = '123456';   // every new customer starts with this; the email tells them to change it
     const kErr = (err, what) => { console.error(what, err); return /PERMISSION_DENIED/i.test(String((err && (err.code || err.message)) || '')) ? 'Blocked by the database rules. Add the "portal" and "customers" rules in Firebase.' : 'Could not ' + what + '. Please try again.'; };
-    const repaintK = () => { chSync(); if (document.body.classList.contains('ready')) { if (view === 'customers') paint(false); else if (view === 'subscriptions') updateSView(); } };
+    const repaintK = () => { chSync(); trkSync(); if (document.body.classList.contains('ready')) { if (view === 'customers') paint(false); else if (view === 'subscriptions') updateSView(); } };
     let offK = () => {}, kSig = '';
     function watchCustomers() {
       offK(); K = []; kSig = ''; kError = '';
@@ -2604,8 +2735,9 @@
           [`users/${U.uid}/customers/${cid}`]: { name, email, company, phone, uid: cuid, projects, createdAt: serverTimestamp() },
           [`portal/${cuid}`]: { admin: U.uid, cid, name, email, company, projects, update: '', updatedAt: 0 }
         }), 12000);
-        let mailed = true; try { await sendPasswordResetEmail(auth, email); } catch (e) { mailed = false; }   // Firebase emails them a link to set their own password
-        kCreds = { name, email, pw, mailed }; kOpen = false; kBusy = false; toast(mailed ? 'Account created and email sent' : 'Account created, but the email could not be sent'); paint(false);
+        let mailed = false;
+        if (emailReady()) { mailed = await sendAcctEmail({ name, email, pw }); trkLog({ type: 'email', kind: 'Account created', to: email, toName: name, status: mailed ? 'sent' : 'failed', detail: mailed ? '' : 'The account email could not be sent.' }); }
+        kCreds = { name, email, pw, mailed }; kOpen = false; kBusy = false; toast(mailed ? 'Account created and email sent' : 'Account created. Send them the account email below.'); paint(false);
       } catch (e) {
         kBusy = false; btn.disabled = false; btn.textContent = 'Create account';
         const c = String((e && (e.code || e.message)) || '');
@@ -2671,22 +2803,101 @@
         repaintP();
       }, () => { PORTAL = { revoked: true }; repaintP(); });
     }
-    const stopAll = () => { chStop(); offProjects(); offMR(); offQuotes(); offInv(); offEx(); offSub(); offK(); offPortalNode(); Object.values(PW).forEach(f => f()); PW = {}; };
+    const stopAll = () => { chStop(); trkStop(); offProjects(); offMR(); offQuotes(); offInv(); offEx(); offSub(); offK(); offPortalNode(); Object.values(PW).forEach(f => f()); PW = {}; };
+
+    // ---------- tracker: logins, logouts and emails sent ----------
+    // Every person writes their own entries at activity/<uid>/<pushId>; the admin reads their own and every customer's.
+    // { type: login | logout | email, actor, name, email, at, kind, to, toName, status, detail, preview, ref }
+    let TR = {}, trOff = {}, trError = '', trflt = 'all', trq = '';
+    const TRT = {
+      login: { l: 'Signed in', c: 'text-aqua bg-aqua/15', ic: 'M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3' },
+      logout: { l: 'Signed out', c: 'text-slate-300 bg-white/10', ic: 'M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9' },
+      email: { l: 'Email sent', c: 'text-emerald-300 bg-emerald-400/15', ic: ICON.messages },
+      failed: { l: 'Email failed', c: 'text-red-300 bg-red-500/15', ic: 'M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01' }
+    };
+    const trKind = e => e.type === 'email' ? (e.status === 'failed' ? 'failed' : 'email') : e.type;
+    const trTime = t => new Date(t).toLocaleTimeString('en', { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+    const trErr = err => /PERMISSION_DENIED/i.test(String((err && (err.code || err.message)) || '')) ? 'Blocked by the database rules. Add the "activity" rules in Firebase so the tracker can save and read entries.' : 'Could not load the tracker. Please try again.';
+    // save one entry for the signed-in person; returns true when it was saved
+    async function trkLog(rec, key, at, ms) {
+      if (!U) return false;
+      try {
+        const base = `activity/${U.uid}`, k = key || push(ref(db, base)).key, out = { actor: PORTAL ? 'customer' : 'admin', name: String(U.displayName || (U.email || '').split('@')[0] || 'User').slice(0, 60), email: String(U.email || '').slice(0, 120), at: at || serverTimestamp() };
+        Object.keys(rec).forEach(x => { if (rec[x] !== undefined && rec[x] !== null) out[x] = typeof rec[x] === 'string' ? rec[x].slice(0, 200) : rec[x]; });
+        await withTimeout(set(ref(db, `${base}/${k}`), out), ms || 8000);
+        return true;
+      } catch (e) { console.error('tracker', e); return false; }
+    }
+    // a new sign-in is spotted by Firebase's own last sign-in time, so reloading the page never counts as a login
+    async function trkLogin(user) {
+      const ms = Date.parse(user.metadata && user.metadata.lastSignInTime); if (!ms) return;
+      const lk = 'trk:li:' + user.uid; let last = ''; try { last = localStorage.getItem(lk) || ''; } catch (e) {}
+      if (last === String(ms)) return;
+      if (await trkLog({ type: 'login', detail: 'Signed in' }, 'in' + ms, ms)) { try { localStorage.setItem(lk, String(ms)); } catch (e) {} }
+    }
+    const trAll = () => Object.values(TR).flat().sort((a, b) => b.at - a.at);
+    function trkSync() {
+      if (!U || PORTAL) return;
+      const uids = [U.uid, ...K.map(c => c.uid).filter(Boolean)];
+      Object.keys(trOff).forEach(u => { if (!uids.includes(u)) { trOff[u](); delete trOff[u]; delete TR[u]; } });
+      uids.forEach(u => {
+        if (trOff[u]) return;
+        trOff[u] = onValue(query(ref(db, `activity/${u}`), orderByChild('at'), limitToLast(200)), snap => {
+          const l = []; snap.forEach(ch => {
+            const v = ch.val() || {}; if (!['login', 'logout', 'email'].includes(v.type)) return;
+            l.push({ id: ch.key, uid: u, type: v.type, actor: v.actor === 'customer' ? 'customer' : 'admin', name: String(v.name || ''), email: String(v.email || ''), at: +v.at || 0, kind: String(v.kind || ''), to: String(v.to || ''), toName: String(v.toName || ''), status: v.status === 'failed' ? 'failed' : 'sent', detail: String(v.detail || ''), preview: String(v.preview || '') });
+          });
+          TR[u] = l; trError = ''; if (document.body.classList.contains('ready') && view === 'tracker') drawT();
+        }, err => { if (u === U.uid || !trError) trError = trErr(err); if (document.body.classList.contains('ready') && view === 'tracker') paint(false); });
+      });
+    }
+    function trkStop() { Object.values(trOff).forEach(f => f()); trOff = {}; TR = {}; }
+    function trFiltered() {
+      const q = trq.trim().toLowerCase();
+      return trAll().filter(e => (trflt === 'all' || trKind(e) === trflt) && (!q || (e.name + ' ' + e.email + ' ' + e.to + ' ' + e.toName + ' ' + e.kind).toLowerCase().includes(q)));
+    }
+    function trCounts() {
+      const a = trAll(), n = k => a.filter(e => trKind(e) === k).length;
+      return { all: 'All (' + a.length + ')', login: 'Logins (' + n('login') + ')', logout: 'Logouts (' + n('logout') + ')', email: 'Emails sent (' + n('email') + ')', failed: 'Failed (' + n('failed') + ')' };
+    }
+    function trStats() {
+      const a = trAll(), day = new Date().toDateString(), today = k => a.filter(e => trKind(e) === k && e.at && new Date(e.at).toDateString() === day).length;
+      const st = (l, v, g, sub) => `<div class="${card} !p-4 sm:!p-5"><div class="text-xs text-slate-400">${l}</div><div class="stat-v mt-1 text-lg min-[420px]:text-xl sm:text-2xl font-extrabold ${g ? 'gradient-text' : ''}">${v}</div><div class="mt-1 text-xs text-slate-500">${sub}</div></div>`;
+      return st('Logins today', today('login'), 1, a.filter(e => e.type === 'login').length + ' in total') + st('Logouts today', today('logout'), 0, a.filter(e => e.type === 'logout').length + ' in total') + st('Emails sent', a.filter(e => trKind(e) === 'email').length, 0, today('email') + ' today') + st('Emails failed', a.filter(e => trKind(e) === 'failed').length, 0, today('failed') + ' today');
+    }
+    function trRow(e) {
+      const k = trKind(e), T = TRT[k], who = e.name || e.email || 'User';
+      const line = e.type === 'email'
+        ? `${esc(e.kind || 'Email')} to <span class="font-semibold text-slate-200 break-all">${esc(e.toName && e.toName !== e.to ? e.toName + ' (' + e.to + ')' : e.to)}</span> &middot; by ${esc(who)}`
+        : `<span class="font-semibold text-slate-200">${esc(who)}</span>${e.email ? ' <span class="break-all">(' + esc(e.email) + ')</span>' : ''}`;
+      const extra = e.type === 'email' ? (k === 'failed' && e.detail ? `<div class="mt-1 text-xs text-red-300 break-words">${esc(e.detail)}</div>` : '') + (e.preview ? `<div class="mt-1 text-xs text-slate-500 break-words">&ldquo;${esc(e.preview)}${e.preview.length >= 140 ? '...' : ''}&rdquo;</div>` : '') : '';
+      return `<div class="glass rounded-2xl p-4 flex items-start gap-3"><span class="w-10 h-10 shrink-0 rounded-xl flex items-center justify-center ${T.c}">${svg(T.ic, 'w-5 h-5')}</span>
+        <div class="min-w-0 flex-1"><div class="flex flex-wrap items-center gap-2"><span class="font-bold text-sm">${T.l}</span><span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${e.actor === 'customer' ? 'text-pink bg-pink/15' : 'text-brand-400 bg-brand-500/20'}">${e.actor === 'customer' ? 'Customer' : 'Admin'}</span></div>
+          <div class="mt-0.5 text-sm text-slate-400 break-words">${line}</div>${extra}</div>
+        <div class="shrink-0 text-right"><div class="text-sm font-semibold">${e.at ? esc(fmtD(e.at)) : '-'}</div><div class="text-xs text-slate-400">${e.at ? esc(trTime(e.at)) : ''}</div></div></div>`;
+    }
+    const trListHtml = () => trFiltered().map(trRow).join('') || `<p class="text-slate-400">${trError ? '' : trAll().length ? 'Nothing matches your search or filter.' : 'No activity yet. Sign-ins, sign-outs and emails sent from here will be listed with their date and time.'}</p>`;
+    function drawT() {
+      const l = $('#trlist'), st = $('#trstats'); if (!l) return;
+      st.innerHTML = trStats(); l.innerHTML = trListHtml();
+      const c = trCounts(); document.querySelectorAll('[data-trpill]').forEach(b => { const t = c[b.dataset.trpill]; if (b.textContent !== t) b.textContent = t; });
+    }
+    $('#view').addEventListener('input', e => { if (e.target && e.target.id === 'trq') { trq = e.target.value; drawT(); } });
 
     // ---------- auth ----------
     function fillUser() { const n = U.displayName || U.email.split('@')[0]; $('#who').textContent = n; $('#avatar').textContent = n[0].toUpperCase(); }
     $('#logoutBtn').addEventListener('click', async () => {
       const b = $('#logoutBtn'), l = $('#logoutLabel'); b.disabled = true; l.textContent = 'Logging out...';
-      try { await signOut(auth); leave(LOGIN_URL); } catch (err) { b.disabled = false; l.textContent = 'Log out'; toast('Could not log out. Please try again.'); }
+      try { await trkLog({ type: 'logout', detail: 'Signed out' }, null, 0, 3000); await signOut(auth); leave(LOGIN_URL); } catch (err) { b.disabled = false; l.textContent = 'Log out'; toast('Could not log out. Please try again.'); }
     });
     onAuthStateChanged(auth, async user => {
       if (!user) { stopAll(); if (!leave.on) { document.body.classList.add('ready'); leave(LOGIN_URL); } return; }
       U = user; load(); fillUser();
       try { const sn = await get(ref(db, `portal/${user.uid}`)); PORTAL = sn.exists() ? (sn.val() || { revoked: true }) : null; } catch (e) { PORTAL = null; }
       if (portalBlocked(PORTAL)) { denyPortal(); return; }
-      buildNav(); drawNotif();
+      buildNav(); drawNotif(); trkLogin(user);
       if (PORTAL) { view = 'portal'; watchPortal(); }
-      else { view = 'overview'; watchProjects(); watchMaint(); watchQuotes(); watchInvoices(); watchExpenses(); watchSubs(); watchCustomers(); setTimeout(() => loadPdf().catch(() => {}), 2500); }
+      else { view = 'overview'; watchProjects(); watchMaint(); watchQuotes(); watchInvoices(); watchExpenses(); watchSubs(); watchCustomers(); trkSync(); setTimeout(() => loadPdf().catch(() => {}), 2500); }
       if (!document.body.classList.contains('ready')) { paint(true); document.body.classList.add('ready'); }
     });
   </script>
