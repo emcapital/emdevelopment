@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport"
+            content="width=device-width, initial-scale=1, viewport-fit=cover">
+        <title>Services | Oriel Architects</title>
+        <script>
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem('oriel-theme') } catch (e) {}
+      if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', t);
+      try {
+        if (sessionStorage.getItem('oriel-nav')) {
+          sessionStorage.removeItem('oriel-nav');
+          document.documentElement.classList.add('soft')
+        }
+      } catch (e) {}
+    })();
+  </script>
+        <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,500;12..96,700&family=Newsreader:ital,wght@0,300;0,400;1,300&display=swap"
+            rel="stylesheet">
+        <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            d: ['"Bricolage Grotesque"', 'system-ui', 'sans-serif'],
+            s: ['Newsreader', 'Georgia', 'serif']
+          },
+          colors: {
+            bp: 'rgb(var(--bp) / <alpha-value>)',
+            page: 'rgb(var(--page) / <alpha-value>)',
+            fg: 'rgb(var(--fg) / <alpha-value>)',
+            paper: '#EEF0EC',
+            ink: '#14213D',
+            chalk: '#EAF0FF',
+            sun: '#F2D95C'
+          }
+        }
+      }
+    }
+  </script>
+        <style>
+    :root {
+      --e: cubic-bezier(.77, 0, .18, 1);
+      /* light theme (rgb channels so Tailwind opacity modifiers work) */
+      --bp: 27 47 107;
+      --page: 238 240 236;
+      --fg: 20 33 61;
+      --sv: 20 33 61;
+      --accent: #1B2F6B;
+      --nav: rgba(20, 33, 61, .92);
+      --scrim: rgba(238, 240, 236, .93);
+      --scrim-fg: #14213D;
+      --art-filter: none;
+      color-scheme: light
+    }
+
+    :root[data-theme="dark"] {
+      --bp: 14 25 58;
+      --page: 9 14 26;
+      --fg: 234 240 255;
+      --sv: 27 47 107;
+      --accent: #F2D95C;
+      --nav: rgba(9, 14, 26, .92);
+      --scrim: rgba(9, 14, 26, .9);
+      --scrim-fg: #EAF0FF;
+      --art-filter: brightness(.82) saturate(.95);
+      color-scheme: dark
+    }
+
+    /* theme switch: new theme spreads out as a circle from the toggle */
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+      animation: none;
+      mix-blend-mode: normal
+    }
+
+    ::view-transition-old(root) {
+      z-index: 1
+    }
+
+    ::view-transition-new(root) {
+      z-index: 2
+    }
+
+    /* page transition veil: fades out when leaving, fades in when arriving */
+    #veil {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      background: rgb(var(--page));
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .45s ease
+    }
+
+    #veil.leaving {
+      opacity: 1;
+      pointer-events: all
+    }
+
+    .soft #veil {
+      animation: veilout .8s ease both
+    }
+
+    @keyframes veilout {
+      from {
+        opacity: 1
+      }
+
+      to {
+        opacity: 0
+      }
+    }
+
+    /* arriving from another page: skip the preloader and start the intro sooner */
+    .soft #pre {
+      display: none
+    }
+
+    .soft .ln,
+    .soft .fillin {
+      animation-delay: calc(var(--d, 0)*1s + .35s)
+    }
+
+    .soft .m>span {
+      animation-delay: calc(var(--d, 0)*.12s + .4s)
+    }
+
+    .soft #top [data-r] {
+      transition-delay: .9s !important
+    }
+
+    /* active page */
+    .ul[aria-current="page"] {
+      color: #F2D95C
+    }
+
+    .ul[aria-current="page"]:after {
+      transform: scaleX(1);
+      height: 2px;
+      bottom: -5px;
+      background: #F2D95C
+    }
+
+    /* mobile menu */
+    #burger svg path {
+      transform-box: fill-box;
+      transform-origin: center;
+      transition: transform .5s var(--e)
+    }
+
+    #burger[aria-expanded="true"] .b1 {
+      transform: translateY(4px) rotate(45deg)
+    }
+
+    #burger[aria-expanded="true"] .b2 {
+      transform: translateY(-4px) rotate(-45deg)
+    }
+
+    #mnav {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      padding: .5rem 1.5rem 1.25rem;
+      background: var(--nav);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      clip-path: inset(0 0 100% 0);
+      visibility: hidden;
+      transition: clip-path .6s var(--e), visibility 0s .6s
+    }
+
+    #mnav.open {
+      clip-path: inset(0);
+      visibility: visible;
+      transition: clip-path .6s var(--e)
+    }
+
+    #mnav a {
+      padding: .9rem 0;
+      font-size: 1.25rem;
+      border-bottom: 1px solid rgba(234, 240, 255, .15)
+    }
+
+    #mnav a[aria-current="page"] {
+      color: #F2D95C
+    }
+
+    #theme {
+      width: 2.5rem;
+      height: 2.5rem;
+      display: grid;
+      place-items: center;
+      border-radius: 9999px;
+      border: 1px solid rgba(234, 240, 255, .45);
+      transition: background .3s, transform .5s var(--e)
+    }
+
+    #theme:hover {
+      background: rgba(234, 240, 255, .14);
+      transform: rotate(25deg)
+    }
+
+    #theme svg {
+      width: 1.2rem;
+      height: 1.2rem
+    }
+
+    #theme .moon {
+      display: none
+    }
+
+    :root[data-theme="dark"] #theme .sun {
+      display: none
+    }
+
+    :root[data-theme="dark"] #theme .moon {
+      display: block
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      background: rgb(var(--page));
+      color: rgb(var(--fg));
+      font-family: Newsreader, Georgia, serif;
+      overflow-x: hidden
+    }
+
+    .grid-bg {
+      background-image: linear-gradient(rgba(234, 240, 255, .08) 1px, transparent 1px), linear-gradient(90deg, rgba(234, 240, 255, .08) 1px, transparent 1px);
+      background-size: 48px 48px;
+      animation: pan 30s linear infinite
+    }
+
+    @keyframes pan {
+      to {
+        background-position: 48px 48px
+      }
+    }
+
+    /* preloader */
+    #pre {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: #14213D;
+      display: grid;
+      place-items: center;
+      transition: transform 1s var(--e)
+    }
+
+    #pre.go {
+      transform: translateY(-100%)
+    }
+
+    #pre i {
+      display: block;
+      height: 2px;
+      width: 0;
+      background: #F2D95C;
+      animation: bar 1.2s var(--e) forwards
+    }
+
+    @keyframes bar {
+      to {
+        width: 160px
+      }
+    }
+
+    /* line drawing */
+    .ln {
+      fill: none;
+      stroke: #EAF0FF;
+      stroke-width: 1.5;
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation: draw 1.8s var(--e) forwards;
+      animation-delay: calc(var(--d, 0)*1s + 1.2s)
+    }
+
+    .ln.y {
+      stroke: #F2D95C
+    }
+
+    @keyframes draw {
+      to {
+        stroke-dashoffset: 0
+      }
+    }
+
+    .fillin {
+      opacity: 0;
+      animation: fi 1.2s ease forwards;
+      animation-delay: calc(var(--d, 0)*1s + 1.2s)
+    }
+
+    @keyframes fi {
+      to {
+        opacity: 1
+      }
+    }
+
+    /* headline mask reveal */
+    .m {
+      display: block;
+      overflow: hidden;
+      padding-bottom: .08em
+    }
+
+    .m>span {
+      display: block;
+      transform: translateY(110%);
+      animation: up 1.2s var(--e) forwards;
+      animation-delay: calc(var(--d, 0)*.12s + 1.5s)
+    }
+
+    @keyframes up {
+      to {
+        transform: none
+      }
+    }
+
+    .rv .m>span {
+      animation: none;
+      transition: transform 1.1s var(--e) calc(var(--d, 0)*.1s)
+    }
+
+    .rv.in .m>span {
+      transform: none
+    }
+
+    [data-r] {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 1s ease, transform 1s var(--e)
+    }
+
+    [data-r].in {
+      opacity: 1;
+      transform: none
+    }
+
+    /* nav */
+    .ul {
+      position: relative
+    }
+
+    .ul:after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -3px;
+      height: 1px;
+      width: 100%;
+      background: currentColor;
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform .5s var(--e)
+    }
+
+    .ul:hover:after {
+      transform: scaleX(1);
+      transform-origin: left
+    }
+
+    #prog {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      width: 100%;
+      background: #F2D95C;
+      transform: scaleX(0);
+      transform-origin: left;
+      z-index: 60
+    }
+
+    /* marquee */
+    .mq {
+      display: flex;
+      width: max-content;
+      animation: mq 28s linear infinite
+    }
+
+    .mq:hover {
+      animation-play-state: paused
+    }
+
+    @keyframes mq {
+      to {
+        transform: translateX(-50%)
+      }
+    }
+
+    /* project panels */
+    .pan {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: flex .9s var(--e);
+      min-height: 64px
+    }
+
+    .pan.on {
+      flex: 5
+    }
+
+    .pan svg.art {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      transition: transform 1.4s var(--e)
+    }
+
+    .pan:not(.on) svg.art {
+      transform: scale(1.15)
+    }
+
+    .pan svg.art {
+      filter: var(--art-filter)
+    }
+
+    .pan .tt {
+      position: absolute;
+      left: 1rem;
+      top: 1rem;
+      padding: .35rem .75rem;
+      border-radius: 2px;
+      background: var(--scrim);
+      color: var(--scrim-fg);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      transition: opacity .4s
+    }
+
+    .pan.on .tt {
+      opacity: 0
+    }
+
+    .pan .det {
+      position: absolute;
+      left: 1.5rem;
+      bottom: 1.5rem;
+      width: min(30rem, calc(100% - 3rem));
+      padding: 1.1rem 1.35rem 1.25rem;
+      border-radius: 2px;
+      background: var(--scrim);
+      color: var(--scrim-fg);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-left: 3px solid #F2D95C;
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .6s ease, transform .8s var(--e)
+    }
+
+    .pan.on .det {
+      opacity: 1;
+      transform: none;
+      transition-delay: .35s
+    }
+
+    @media(min-width:768px) {
+      .pan .tt {
+        writing-mode: vertical-rl;
+        padding: .75rem .35rem
+      }
+    }
+
+    /* services accordion */
+    .acc {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows .7s var(--e)
+    }
+
+    .acc>div {
+      overflow: hidden
+    }
+
+    .sv.on .acc {
+      grid-template-rows: 1fr
+    }
+
+    .sv .pl {
+      transition: transform .6s var(--e)
+    }
+
+    .sv.on .pl {
+      transform: rotate(135deg)
+    }
+
+    .sv:before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgb(var(--sv));
+      transform: scaleY(0);
+      transform-origin: bottom;
+      transition: transform .6s var(--e);
+      z-index: -1
+    }
+
+    .sv:hover:before,
+    .sv.on:before {
+      transform: scaleY(1)
+    }
+
+    .sv {
+      position: relative;
+      isolation: isolate;
+      transition: color .5s, padding .6s var(--e)
+    }
+
+    .sv:hover,
+    .sv.on {
+      color: #EAF0FF;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem
+    }
+
+    /* form */
+    .fld {
+      position: relative
+    }
+
+    .fld:after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      height: 2px;
+      width: 100%;
+      background: var(--accent);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .6s var(--e)
+    }
+
+    .fld:focus-within:after {
+      transform: scaleX(1)
+    }
+
+    .fld input,
+    .fld textarea {
+      background: transparent;
+      color: inherit;
+      width: 100%;
+      outline: none;
+      padding: 1.4rem 0 .5rem;
+      border-bottom: 1px solid rgb(var(--fg) / .3)
+    }
+
+    .fld label {
+      position: absolute;
+      left: 0;
+      top: 1.3rem;
+      transition: all .4s var(--e);
+      pointer-events: none;
+      opacity: .6
+    }
+
+    .fld input:focus+label,
+    .fld input:not(:placeholder-shown)+label,
+    .fld textarea:focus+label,
+    .fld textarea:not(:placeholder-shown)+label {
+      top: 0;
+      font-size: .8rem;
+      opacity: 1;
+      color: var(--accent)
+    }
+
+    .btn {
+      position: relative;
+      overflow: hidden;
+      transition: transform .3s ease
+    }
+
+    .btn:before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: #F2D95C;
+      transform: translateY(101%);
+      transition: transform .5s var(--e)
+    }
+
+    .btn:hover:before {
+      transform: none
+    }
+
+    .btn span {
+      position: relative;
+      transition: color .4s
+    }
+
+    .btn:hover span {
+      color: #14213D
+    }
+
+    a:focus-visible,
+    button:focus-visible,
+    .pan:focus-visible,
+    input:focus-visible {
+      outline: 2px solid #F2D95C;
+      outline-offset: 3px
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+
+      *,
+      *:before,
+      *:after {
+        animation-duration: .01ms !important;
+        animation-delay: 0s !important;
+        transition-duration: .01ms !important;
+        transition-delay: 0s !important
+      }
+
+      .ln {
+        stroke-dashoffset: 0
+      }
+
+      .m>span {
+        transform: none
+      }
+
+      [data-r] {
+        opacity: 1;
+        transform: none
+      }
+    }
+  
+    /* about page */
+    .pr {
+      position: relative
+    }
+
+    .pr:before {
+      content: "";
+      position: absolute;
+      top: -1px;
+      left: 0;
+      height: 3px;
+      width: 100%;
+      background: #F2D95C;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .7s var(--e)
+    }
+
+    .pr:hover:before {
+      transform: scaleX(1)
+    }
+
+    .tl {
+      transition: padding .6s var(--e)
+    }
+
+    .tl:hover {
+      padding-left: 1rem
+    }
+
+    .tm svg {
+      transition: transform 1.2s var(--e)
+    }
+
+    .tm:hover svg {
+      transform: scale(1.08)
+    }
+
+    .tm .fr {
+      overflow: hidden;
+      border-radius: 2px;
+      filter: var(--art-filter)
+    }
+  </style>
+    </head>
+    <body>
+        <div id="pre">
+            <div
+                class="text-chalk font-d text-2xl mb-4 text-center">Oriel</div><i></i>
+        </div>
+        <div id="prog"></div>
+        <div id="veil" aria-hidden="true"></div>
+
+        <header id="nav"
+            class="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-6 md:px-12 py-5 text-chalk transition-all duration-500"
+            style="padding-top:max(1.25rem,env(safe-area-inset-top))">
+            <div class="flex items-center gap-4 md:gap-6 min-w-0">
+                <a href="../../index.html" id="back"
+                    class="font-d text-sm inline-flex items-center gap-2 border border-chalk/45 rounded-full px-3.5 py-2 whitespace-nowrap hover:bg-chalk/15 transition-colors"
+                    aria-label="Back to EM Development">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                        stroke="currentColor" stroke-width="1.8"
+                        stroke-linecap="round" stroke-linejoin="round"
+                        aria-hidden="true"><path
+                            d="M19 12H5M11 6l-6 6 6 6" /></svg>
+                    <span><span class="hidden sm:inline">Back to </span>EM
+                        Development</span>
+                </a>
+                <a href="#top"
+                    class="hidden lg:block font-d font-bold text-xl tracking-tight">Oriel
+                    Architects</a>
+            </div>
+            <div class="flex items-center gap-6 md:gap-9">
+                <nav class="hidden md:flex gap-9 font-d text-sm"
+                    aria-label="Main">
+                    <a class="ul" href="home.html">Home</a><a class="ul"
+                        href="about.html">About</a><a class="ul"
+                        href="services.html" aria-current="page">Services</a><a
+                        class="ul" href="contact.html">Contact</a>
+                </nav>
+                <button id="theme" type="button"
+                    aria-label="Switch to dark mode"
+                    title="Toggle light / dark">
+                    <svg class="sun" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.8"
+                        stroke-linecap="round" aria-hidden="true"><circle
+                            cx="12" cy="12" r="4.2" /><path
+                            d="M12 2.5v2.3M12 19.2v2.3M2.5 12h2.3M19.2 12h2.3M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6" /></svg>
+                    <svg class="moon" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.8"
+                        stroke-linejoin="round" aria-hidden="true"><path
+                            d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" /></svg>
+                </button>
+                <button id="burger" type="button" class="md:hidden"
+                    aria-label="Open menu" aria-expanded="false"
+                    aria-controls="mnav">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none"
+                        stroke="currentColor" stroke-width="1.8"
+                        stroke-linecap="round" aria-hidden="true"><path
+                            class="b1" d="M4 8h16" /><path class="b2"
+                            d="M4 16h16" /></svg>
+                </button>
+            </div>
+            <nav id="mnav" class="md:hidden font-d" aria-label="Mobile">
+                <a href="home.html">Home</a><a href="about.html">About</a><a
+                    href="services.html" aria-current="page">Services</a><a
+                    href="contact.html">Contact</a>
+            </nav>
+        </header>
+        <!-- HERO -->
+        <section id="top"
+            class="relative bg-bp text-chalk min-h-[78vh] overflow-hidden flex flex-col justify-end">
+            <div class="grid-bg absolute inset-0"></div>
+            <svg id="plan"
+                class="absolute right-0 bottom-0 w-full md:w-[62%] h-[55%] md:h-[88%]"
+                viewBox="0 0 800 600" preserveAspectRatio="xMaxYMax meet"
+                aria-hidden="true">
+                <g>
+                    <path class="ln" pathLength="1" style="--d:0"
+                        d="M20 540H780" />
+                    <path class="ln" pathLength="1" style="--d:.2"
+                        d="M60 540V360H200V540" />
+                    <path class="ln y" pathLength="1" style="--d:.4"
+                        d="M60 360L130 300L200 360" />
+                    <path class="ln" pathLength="1" style="--d:.6"
+                        d="M240 540V220Q400 110 560 220V540" />
+                    <path class="ln y" pathLength="1" style="--d:.8"
+                        d="M300 540V260Q400 200 500 260V540M400 210V540" />
+                    <path class="ln" pathLength="1" style="--d:1"
+                        d="M600 540V300L690 230L780 300V540" />
+                    <path class="ln" pathLength="1" style="--d:1.1"
+                        d="M600 300H780M650 540V420H730V540" />
+                    <path class="ln y" pathLength="1" style="--d:1.4"
+                        d="M60 585H780M60 575V595M780 575V595" />
+                </g>
+                <g class="fillin" style="--d:2" fill="#EAF0FF"
+                    font-family="Bricolage Grotesque" font-size="13"
+                    opacity=".8"><text x="100" y="580">Houses</text><text
+                        x="375" y="580">Civic</text><text x="660"
+                        y="580">Restoration</text></g>
+            </svg>
+            <div class="relative px-6 md:px-12 pb-14 md:pb-20 pt-40">
+                <p
+                    class="font-d text-sm tracking-widest uppercase text-sun mb-5"
+                    data-r>Services</p>
+                <h1
+                    class="font-d font-bold tracking-tight leading-[.95] text-[clamp(2.8rem,9vw,8rem)]">
+                    <span class="m"><span style="--d:0">One
+                            studio,</span></span>
+                    <span class="m"><span style="--d:1">from site to
+                            handover.</span></span>
+                </h1>
+                <p data-r
+                    class="mt-8 max-w-xl text-xl md:text-2xl font-light italic"
+                    style="transition-delay:2s">Four services, delivered by the
+                    same small team, so the idea you approve is the building you
+                    get.</p>
+            </div>
+        </section>
+
+        <!-- SERVICES -->
+        <section id="services"
+            class="px-6 md:px-12 pt-24 md:pt-36 pb-12 md:pb-20">
+            <div class="rv mb-12 md:mb-16" data-obs>
+                <h2
+                    class="font-d font-bold tracking-tight text-5xl md:text-7xl leading-none"><span
+                        class="m"><span>What we</span></span><span
+                        class="m"><span style="--d:1">design</span></span></h2>
+            </div>
+            <article
+                class="pr border-t border-fg/25 py-12 md:py-16 grid md:grid-cols-[1fr_1.6fr] gap-8 md:gap-12"
+                data-r>
+                <div class="md:sticky md:top-28 self-start">
+                    <div class="font-d text-sm"
+                        style="color:var(--accent)">01</div>
+                    <h3
+                        class="font-d font-bold tracking-tight text-4xl md:text-6xl leading-none mt-3">Architecture</h3>
+                    <svg viewBox="0 0 120 80" class="w-28 mt-6" fill="none"
+                        stroke="var(--accent)" stroke-width="1.6"
+                        stroke-linejoin="round" aria-hidden="true"><path
+                            d="M10 70H110M25 70V35H70V70M70 70V18H100V70M35 45h14v14H35z" /></svg>
+                </div>
+                <div>
+                    <p class="text-xl md:text-2xl max-w-2xl">New buildings from
+                        first sketch to handover, with full design and site
+                        supervision. We start on site, study the light through a
+                        full day, then draw the building around it.</p>
+                    <div
+                        class="mt-8 grid sm:grid-cols-[1.3fr_1fr] gap-8 text-lg">
+                        <div><div
+                                class="font-d text-sm uppercase tracking-widest opacity-70 mb-3">What's
+                                included</div><ul class="space-y-2"><li
+                                    class="flex items-start gap-3"><i
+                                        class="w-2 h-2 mt-2.5 shrink-0 rotate-45"
+                                        style="background:#F2D95C"></i><span>Site
+                                        and daylight study</span></li><li
+                                    class="flex items-start gap-3"><i
+                                        class="w-2 h-2 mt-2.5 shrink-0 rotate-45"
+                                        style="background:#F2D95C"></i><span>Concept
+                                        design and planning
+                                        applications</span></li><li
+                                    class="flex items-start gap-3"><i
+                                        class="w-2 h-2 mt-2.5 shrink-0 rotate-45"
+                                        style="background:#F2D95C"></i><span>Detailed
+                                        design and specification</span></li><li
+                                    class="flex items-start gap-3"><i
+                                        class="w-2 h-2 mt-2.5 shrink-0 rotate-45"
+                                        style="background:#F2D95C"></i><span>Tender
+                                        support and site
+                                        supervision</span></li></ul></div>
+                        <div><div
+                                class="font-d text-sm uppercase tracking-widest opacity-70 mb-3">Seen
+                                in</div><p>Tidewater House and Vault
+                                Gallery.</p></div>
+                    </div>
+                </div>
+            </article> <article
+                class="pr border-t border-fg/25 py-12 md:py-16 grid md:grid-cols-[1fr_1.6fr] gap-8 md:gap-12"
+                data-r>
+                <div class="md:sticky md:top-28 self-start">
+                    <div class="font-d text-sm"
+                        style="color:var(--accent)">02</div>
+                    <h3
+                        class="font-d font-bold tracking-tight text-4xl md:text-6xl leading-none mt-3">Interiors</h3>
+                    <svg viewBox="0 0 120 80" class="w-28 mt-6" fill="none"
+                        stroke="var(--accent)" stroke-width="1.6"
+                        stroke-linejoin="round" aria-hidden="true"><path
+                            d="M15 70H105M25 70V30Q25 15 45 15H75Q95 15 95 30V70M60 15V70M25 45H95" /></svg>
+                </div>
+                <div>
+                    <p class="text-xl md:text-2xl max-w-2xl">Joinery, lighting
+                        and finishes designed together with the building so
+                        rooms feel complete from the day you move in.</p>
+                    <div
+                        class="mt-8 grid sm:grid-cols-[1.3fr_1fr] gap-8 text-lg">
+                        <div><div
+                                class="font-d text-sm uppercase tracking-widest opacity-70 mb-3">What's
+                                included</div><ul class="space-y-2"><li
+                                    class="flex items-start gap-3"><i
+                                        class="w-2 h-2 mt-2.5 shrink-0 rotate-45"
+                                        style="background:#F2D95C"></i><span>Space
+                                        planning and room layouts</span></li><li
+                                    class="flex items-start gap-3"><i
+                                        class="w-2 h-2 mt-2.5 shrink-0 rotate-45"
+                                        style="background:#F2D95C"></i><span>Bespoke
+                                        joinery and fittings</span></li><li
+                                    class="flex items-start gap-3"><i
+                                        class="w-2 h-2 mt-2.5 shrink-0 rotate-45"
+                                        style="background:#F2D95C"></i><span>Lighting
+                                        design</span></li><li
+                                    class="flex items-start gap-3"><i
+                                        class="w-2 h-2 mt-2.5 shrink-0 rotate-45"
+                                        style="background:#F2D95C"></i><span>Material,
+                                        colour and furniture
+                                        schedules</span></li></ul></div>
+                        <div><div
+                                class="font-d text-sm uppercase tracking-widest opacity-70 mb-3">Seen
+                                in</div><p>Reading Rooms, where each tower is
+                                fitted out as its own quiet room.</p></div>
+                    </div>
+                </div>
+            </article> <article
+                class="pr border-t border-fg/25 py-12 md:py-16 grid md:grid-cols-[1fr_1.6fr] gap-8 md:gap-12"
+                data-r>
+                <div class="md:sticky md:top-28 self-start">
+                    <div class="font-d text-sm"
+                        style="color:var(--accent)">03</div>
+                    <h3
+                        class="font-d font-bold tracking-tight text-4xl md:text-6xl leading-none mt-3">Restoration</h3>
+                    <svg viewBox="0 0 120 80" class="w-28 mt-6" fill="none"
+                        stroke="var(--accent)" stroke-width="1.6"
+                        stroke-linejoin="round" aria-hidden="true"><path
+                            d="M15 70H105M25 70V38L60 12L95 38V70M25 38H95M45 70V50H75V70M60 12V38" /></svg>
+                </div>
+                <div>
+                    <p class="text-xl md:text-2xl max-w-2xl">Careful repair and
+                        reuse of older buildings, with new work that is clearly
+                        of its time and easy to tell apart from the
+                        original.</p>
+                    <div
+                        class="mt-8 grid sm:grid-cols-[1.3fr_1fr] gap-8 text-lg">
+                        <div><div
+                                class="font-d text-sm uppercase tracking-widest opacity-70 mb-3">What's
+                                included</div><ul class="space-y-2"><li
+                                    class="flex items-start gap-3"><i
+                                        class="w-2 h-2 mt-2.5 shrink-0 rotate-45"
+                                        style="background:#F2D95C"></i><span>Building
+                                        survey and condition
+                                        report</span></li><li
+                                    class="flex items-start gap-3"><i
+                                        class="w-2 h-2 mt-2.5 shrink-0 rotate-45"
+                                        style="background:#F2D95C"></i><span>Heritage
+                                        and materials appraisal</span></li><li
+                                    class="flex items-start gap-3"><i
+                                        class="w-2 h-2 mt-2.5 shrink-0 rotate-45"
+                                        style="background:#F2D95C"></i><span>Structural
+                                        repair and conservation</span></li><li
+                                    class="flex items-start gap-3"><i
+                                        class="w-2 h-2 mt-2.5 shrink-0 rotate-45"
+                                        style="background:#F2D95C"></i><span>Adaptive
+                                        reuse and new
+                                        additions</span></li></ul></div>
+                        <div><div
+                                class="font-d text-sm uppercase tracking-widest opacity-70 mb-3">Seen
+                                in</div><p>Granary Studios, a 1920s grain store
+                                turned into artist workspaces.</p></div>
+                    </div>
+                </div>
+            </article> <article
+                class="pr border-t border-fg/25 py-12 md:py-16 grid md:grid-cols-[1fr_1.6fr] gap-8 md:gap-12"
+                data-r>
+                <div class="md:sticky md:top-28 self-start">
+                    <div class="font-d text-sm"
+                        style="color:var(--accent)">04</div>
+                    <h3
+                        class="font-d font-bold tracking-tight text-4xl md:text-6xl leading-none mt-3">Masterplanning</h3>
+                    <svg viewBox="0 0 120 80" class="w-28 mt-6" fill="none"
+                        stroke="var(--accent)" stroke-width="1.6"
+                        stroke-linejoin="round" aria-hidden="true"><path
+                            d="M10 20H50V45H10zM60 20H110V35H60zM60 45H110V70H60zM10 55H50V70H10z" /></svg>
+                </div>
+                <div>
+                    <p class="text-xl md:text-2xl max-w-2xl">Neighbourhood and
+                        campus plans that connect streets, open space and
+                        buildings, and can be built in sensible stages.</p>
+                    <div
+                        class="mt-8 grid sm:grid-cols-[1.3fr_1fr] gap-8 text-lg">
+                        <div><div
+                                class="font-d text-sm uppercase tracking-widest opacity-70 mb-3">What's
+                                included</div><ul class="space-y-2"><li
+                                    class="flex items-start gap-3"><i
+                                        class="w-2 h-2 mt-2.5 shrink-0 rotate-45"
+                                        style="background:#F2D95C"></i><span>Site
+                                        and context analysis</span></li><li
+                                    class="flex items-start gap-3"><i
+                                        class="w-2 h-2 mt-2.5 shrink-0 rotate-45"
+                                        style="background:#F2D95C"></i><span>Street,
+                                        block and open space
+                                        layout</span></li><li
+                                    class="flex items-start gap-3"><i
+                                        class="w-2 h-2 mt-2.5 shrink-0 rotate-45"
+                                        style="background:#F2D95C"></i><span>Phasing
+                                        and delivery strategy</span></li><li
+                                    class="flex items-start gap-3"><i
+                                        class="w-2 h-2 mt-2.5 shrink-0 rotate-45"
+                                        style="background:#F2D95C"></i><span>Community
+                                        consultation and design
+                                        codes</span></li></ul></div>
+                        <div><div
+                                class="font-d text-sm uppercase tracking-widest opacity-70 mb-3">Seen
+                                in</div><p>Campus and neighbourhood plans for
+                                schools, councils and developers.</p></div>
+                    </div>
+                </div>
+            </article>
+            <div class="border-t border-fg/25"></div>
+        </section>
+
+        <!-- PROCESS -->
+        <section
+            class="relative bg-bp text-chalk px-6 md:px-12 py-24 md:py-36 overflow-hidden">
+            <div class="grid-bg absolute inset-0"></div>
+            <div class="relative">
+                <div class="rv mb-12 md:mb-16" data-obs>
+                    <h2
+                        class="font-d font-bold tracking-tight text-5xl md:text-7xl leading-none"><span
+                            class="m"><span>How a project</span></span><span
+                            class="m"><span
+                                style="--d:1">unfolds</span></span></h2>
+                </div>
+                <div class="relative grid md:grid-cols-5 gap-10 md:gap-8">
+                    <div
+                        class="hidden md:block absolute top-[5px] left-0 right-0 h-px bg-chalk/30"></div>
+                    <div data-r style="transition-delay:0.0s"
+                        class="relative pt-8">
+                        <i
+                            class="absolute top-0 left-0 w-3 h-3 rotate-45 bg-sun"></i>
+                        <div class="font-d text-sm text-sun">01</div>
+                        <h3
+                            class="font-d text-2xl md:text-3xl font-medium mt-2">Site
+                            study</h3>
+                        <p class="mt-3 text-lg opacity-85">We spend a day on
+                            site, tracking sun, wind, views and access.</p>
+                    </div>
+                    <div data-r style="transition-delay:0.12s"
+                        class="relative pt-8">
+                        <i
+                            class="absolute top-0 left-0 w-3 h-3 rotate-45 bg-sun"></i>
+                        <div class="font-d text-sm text-sun">02</div>
+                        <h3
+                            class="font-d text-2xl md:text-3xl font-medium mt-2">Concept</h3>
+                        <p class="mt-3 text-lg opacity-85">Sketches and models
+                            test a few clear ideas against your brief.</p>
+                    </div>
+                    <div data-r style="transition-delay:0.24s"
+                        class="relative pt-8">
+                        <i
+                            class="absolute top-0 left-0 w-3 h-3 rotate-45 bg-sun"></i>
+                        <div class="font-d text-sm text-sun">03</div>
+                        <h3
+                            class="font-d text-2xl md:text-3xl font-medium mt-2">Design</h3>
+                        <p class="mt-3 text-lg opacity-85">We settle the plan,
+                            structure and materials, and agree costs.</p>
+                    </div>
+                    <div data-r style="transition-delay:0.36s"
+                        class="relative pt-8">
+                        <i
+                            class="absolute top-0 left-0 w-3 h-3 rotate-45 bg-sun"></i>
+                        <div class="font-d text-sm text-sun">04</div>
+                        <h3
+                            class="font-d text-2xl md:text-3xl font-medium mt-2">Documents</h3>
+                        <p class="mt-3 text-lg opacity-85">Drawings and
+                            specifications that builders can price and build
+                            from.</p>
+                    </div>
+                    <div data-r style="transition-delay:0.48s"
+                        class="relative pt-8">
+                        <i
+                            class="absolute top-0 left-0 w-3 h-3 rotate-45 bg-sun"></i>
+                        <div class="font-d text-sm text-sun">05</div>
+                        <h3
+                            class="font-d text-2xl md:text-3xl font-medium mt-2">On
+                            site</h3>
+                        <p class="mt-3 text-lg opacity-85">We visit through
+                            construction and stay until handover.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section
+            class="px-6 md:px-12 py-24 md:py-36 grid md:grid-cols-[1fr_1.6fr] gap-12">
+            <div class="rv" data-obs>
+                <h2
+                    class="font-d font-bold tracking-tight text-5xl md:text-7xl leading-none"><span
+                        class="m"><span>Good to</span></span><span
+                        class="m"><span style="--d:1">know</span></span></h2>
+            </div>
+            <div id="svs" data-r>
+                <button
+                    class="sv on w-full text-left border-t border-fg/25 py-7"
+                    aria-expanded="true">
+                    <div
+                        class="flex justify-between items-center font-d text-2xl md:text-3xl font-medium">How
+                        long does a house take?<span
+                            class="pl text-4xl">+</span></div>
+                    <div class="acc"><div><p class="pt-4 max-w-lg text-lg">Most
+                                houses take around two years from first meeting
+                                to handover: about six months of design, six of
+                                permissions and pricing, and a year on
+                                site.</p></div></div>
+                </button>
+                <button class="sv w-full text-left border-t border-fg/25 py-7"
+                    aria-expanded="false">
+                    <div
+                        class="flex justify-between items-center font-d text-2xl md:text-3xl font-medium">How
+                        do you set your fees?<span
+                            class="pl text-4xl">+</span></div>
+                    <div class="acc"><div><p class="pt-4 max-w-lg text-lg">We
+                                agree a fixed fee for the early stages, then a
+                                fee for each later stage once the scope is
+                                clear, so you always know what the next step
+                                costs.</p></div></div>
+                </button>
+                <button class="sv w-full text-left border-t border-fg/25 py-7"
+                    aria-expanded="false">
+                    <div
+                        class="flex justify-between items-center font-d text-2xl md:text-3xl font-medium">Do
+                        you take small projects?<span
+                            class="pl text-4xl">+</span></div>
+                    <div class="acc"><div><p class="pt-4 max-w-lg text-lg">Yes.
+                                Extensions, interiors and restoration jobs are a
+                                regular part of our work, and they often lead to
+                                larger commissions.</p></div></div>
+                </button>
+                <button
+                    class="sv w-full text-left border-t border-b border-fg/25 py-7"
+                    aria-expanded="false">
+                    <div
+                        class="flex justify-between items-center font-d text-2xl md:text-3xl font-medium">Can
+                        you work with our builder?<span
+                            class="pl text-4xl">+</span></div>
+                    <div class="acc"><div><p class="pt-4 max-w-lg text-lg">Yes.
+                                We can work with your chosen contractor, or help
+                                you run a tender and compare the
+                                prices.</p></div></div>
+                </button>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section
+            class="bg-sun text-ink px-6 md:px-12 py-20 md:py-28 flex flex-col md:flex-row md:items-end md:justify-between gap-10">
+            <h2
+                class="rv font-d font-bold tracking-tight text-4xl md:text-7xl leading-[1.02]"
+                data-obs><span class="m"><span>Tell us about</span></span><span
+                    class="m"><span style="--d:1">your site.</span></span></h2>
+            <a href="contact.html"
+                class="btn font-d bg-ink text-chalk border border-ink px-8 py-4 rounded-full self-start md:self-auto text-lg"><span>Start
+                    a project</span></a>
+        </section>
+
+        <footer
+            class="bg-ink text-chalk px-6 md:px-12 py-10 flex flex-col md:flex-row justify-between gap-3 font-d text-sm"
+            style="padding-bottom:max(2.5rem,env(safe-area-inset-bottom))">
+            <span>Oriel Architects</span><span class="opacity-70">&copy; 2026
+                Oriel Architects. All rights reserved.</span>
+        </footer>
+
+        <script>
+    const $ = (s, r = document) => [...r.querySelectorAll(s)];
+    // preloader
+    addEventListener('load', () => setTimeout(() => $('#pre')[0].classList.add('go'), 900));
+    // reveal on scroll
+    const io = new IntersectionObserver(es => es.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        io.unobserve(e.target)
+      }
+    }), {
+      threshold: .2
+    });
+    $('[data-r],[data-obs]').forEach(el => io.observe(el));
+    // counters
+    const co = new IntersectionObserver(es => es.forEach(e => {
+      if (!e.isIntersecting) return;
+      co.unobserve(e.target);
+      const t = +e.target.dataset.c,
+        s = performance.now();
+      const f = n => {
+        const p = Math.min((n - s) / 1800, 1);
+        e.target.textContent = Math.round(t * (1 - Math.pow(1 - p, 4)));
+        if (p < 1) requestAnimationFrame(f)
+      };
+      requestAnimationFrame(f)
+    }), {
+      threshold: .6
+    });
+    $('[data-c]').forEach(el => co.observe(el));
+    // scroll: progress bar, nav, parallax
+    const nav = $('#nav')[0],
+      pr = $('#prog')[0],
+      plan = $('#plan')[0];
+    let tk = false;
+
+    function onS() {
+      const y = scrollY,
+        h = document.documentElement.scrollHeight - innerHeight;
+      pr.style.transform = `scaleX(${y/h})`;
+      const solid = y > innerHeight * .85;
+      nav.style.background = solid ? 'var(--nav)' : 'transparent';
+      nav.style.backdropFilter = solid ? 'blur(8px)' : 'none';
+      nav.style.transform = (y > 400 && y > onS.l) ? 'translateY(-100%)' : 'none';
+      onS.l = y;
+      if (plan) plan.style.transform = `translateY(${y*.12}px)`;
+      tk = false
+    }
+    onS.l = 0;
+    addEventListener('scroll', () => {
+      if (!tk) {
+        tk = true;
+        requestAnimationFrame(onS)
+      }
+    }, {
+      passive: true
+    });
+    // accordion
+    $('.sv').forEach(b => b.addEventListener('click', () => {
+      const o = b.classList.contains('on');
+      $('.sv').forEach(x => {
+        x.classList.remove('on');
+        x.setAttribute('aria-expanded', 'false')
+      });
+      if (!o) {
+        b.classList.add('on');
+        b.setAttribute('aria-expanded', 'true')
+      }
+    }));
+    // magnetic buttons
+    $('.btn').forEach(b => {
+      b.addEventListener('mousemove', e => {
+        const r = b.getBoundingClientRect();
+        b.style.transform = `translate(${(e.clientX-r.left-r.width/2)*.18}px,${(e.clientY-r.top-r.height/2)*.3}px)`
+      });
+      b.addEventListener('mouseleave', () => b.style.transform = '')
+    });
+    // theme toggle: new theme spreads across the whole page from the button
+    const root = document.documentElement,
+      tbtn = $('#theme')[0];
+    const label = () => tbtn.setAttribute('aria-label', root.dataset.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    label();
+    tbtn.addEventListener('click', () => {
+      const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      const apply = () => {
+        root.dataset.theme = next;
+        try { localStorage.setItem('oriel-theme', next) } catch (e) {}
+        label()
+      };
+      if (!document.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) return apply();
+      const r = tbtn.getBoundingClientRect(),
+        x = r.left + r.width / 2,
+        y = r.top + r.height / 2,
+        rad = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+      document.startViewTransition(apply).ready.then(() => {
+        root.animate({
+          clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${rad}px at ${x}px ${y}px)`]
+        }, {
+          duration: 900,
+          easing: 'cubic-bezier(.77,0,.18,1)',
+          pseudoElement: '::view-transition-new(root)'
+        })
+      })
+    });
+    // mobile menu
+    const bg = $('#burger')[0],
+      mn = $('#mnav')[0];
+    const setMenu = o => {
+      mn.classList.toggle('open', o);
+      bg.setAttribute('aria-expanded', o);
+      bg.setAttribute('aria-label', o ? 'Close menu' : 'Open menu')
+    };
+    bg.addEventListener('click', () => setMenu(!mn.classList.contains('open')));
+    $('a', mn).forEach(a => a.addEventListener('click', () => setMenu(false)));
+    addEventListener('keydown', e => {
+      if (e.key === 'Escape') setMenu(false)
+    });
+    // page transitions: fade out, then navigate
+    const veil = $('#veil')[0],
+      still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.addEventListener('click', e => {
+      const a = e.target.closest('a[href]');
+      if (!a || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      if (a.target && a.target !== '_self' || a.hasAttribute('download')) return;
+      const u = new URL(a.href, location.href);
+      if (u.origin !== location.origin || !/^https?:$/.test(u.protocol)) return;
+      if (u.pathname === location.pathname && u.search === location.search) {
+        if (u.hash) return; // in-page anchor: smooth scroll handles it
+        e.preventDefault();
+        scrollTo({ top: 0, behavior: 'smooth' });
+        return
+      }
+      e.preventDefault();
+      try { sessionStorage.setItem('oriel-nav', '1') } catch (x) {}
+      veil.classList.add('leaving');
+      setTimeout(() => { location.href = a.href }, still ? 0 : 450)
+    });
+    // back/forward cache: make sure the page is visible again
+    addEventListener('pageshow', e => {
+      if (e.persisted) veil.classList.remove('leaving')
+    });
+    </script>
+    </body>
+
+</html>
