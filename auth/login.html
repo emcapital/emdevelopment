@@ -198,23 +198,6 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
     }
-  
-    /* ===== Biometric login ===== */
-    .bio-card { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); }
-    html.light .bio-card { background: rgba(15,21,53,.04); border-color: rgba(15,21,53,.1); }
-    .bio-ic { width: 72px; height: 72px; border-radius: 9999px; margin: 0 auto; display: flex; align-items: center; justify-content: center; color: #fff; background: linear-gradient(135deg, #5b6cff, #22d3ee); box-shadow: 0 10px 30px rgba(91,108,255,.45); position: relative; }
-    .bio-ic svg { width: 34px; height: 34px; }
-    .bio-ic::after { content: ""; position: absolute; inset: -8px; border-radius: inherit; border: 2px solid rgba(124,140,255,.5); animation: bioPulse 2.2s ease-out infinite; }
-    @keyframes bioPulse { from { transform: scale(.85); opacity: .9; } to { transform: scale(1.35); opacity: 0; } }
-    .bio-link { background: none; border: 0; cursor: pointer; font: inherit; }
-    .bio-ov { position: fixed; inset: 0; z-index: 10001; display: flex; align-items: center; justify-content: center; padding: 1rem; background: rgba(4,6,14,.72); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); opacity: 0; visibility: hidden; transition: opacity .3s ease, visibility 0s linear .3s; }
-    .bio-ov.show { opacity: 1; visibility: visible; transition: opacity .3s ease, visibility 0s; }
-    .bio-box { width: min(24rem, 100%); border-radius: 1.5rem; padding: 1.75rem 1.5rem 1.5rem; text-align: center; background: rgba(13,18,38,.97); border: 1px solid rgba(255,255,255,.12); color: #e5e9ff; box-shadow: 0 30px 80px rgba(0,0,0,.55); transform: translateY(18px) scale(.97); transition: transform .45s cubic-bezier(.2,.8,.2,1); }
-    .bio-ov.show .bio-box { transform: none; }
-    html.light .bio-box { background: #fff; color: #0f1535; border-color: rgba(15,21,53,.12); box-shadow: 0 30px 80px rgba(67,81,232,.25); }
-    .bio-ghost { width: 100%; padding: .8rem; border-radius: .75rem; font-weight: 600; font-size: .9rem; cursor: pointer; color: inherit; background: transparent; border: 1px solid rgba(255,255,255,.14); transition: background-color .2s, border-color .2s; }
-    .bio-ghost:hover { background: rgba(124,140,255,.12); border-color: rgba(124,140,255,.5); }
-    html.light .bio-ghost { border-color: rgba(15,21,53,.16); }
   </style>
   </head>
   <body class="font-sans antialiased">
@@ -381,8 +364,7 @@
                 class="fade-item mt-5 text-2xl sm:text-3xl font-extrabold tracking-tight"
                 style="--i:1">Welcome <span
                   class="gradient-text">back</span></h1>
-              <p id="loginSubtitle"
-                class="fade-item mt-2 text-slate-400 text-sm"
+              <p class="fade-item mt-2 text-slate-400 text-sm"
                 style="--i:2">Log in to continue to your dashboard.</p>
             </div>
 
@@ -397,7 +379,7 @@
                       y="5" width="18" height="14" rx="2" /><path
                       d="M3 7l9 6 9-6" /></svg>
                   <input id="email" class="field" required type="email"
-                    name="email" autocomplete="email"
+                    name="email" autocomplete="username"
                     placeholder="you@email.com" />
                 </div>
               </div>
@@ -453,78 +435,12 @@
               </button>
             </form>
 
-            <!-- Biometric unlock (shown when this device already has a saved session) -->
-            <div id="bioPanel" class="hidden mt-8 text-center">
-              <div class="bio-card rounded-2xl p-6">
-                <div class="bio-ic" aria-hidden="true"><svg fill="none"
-                    stroke="currentColor" stroke-width="1.8"
-                    stroke-linecap="round" stroke-linejoin="round"
-                    viewBox="0 0 24 24"><path
-                      d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4" /><path
-                      d="M14 13.12c0 2.38 0 6.38-1 8.88" /><path
-                      d="M17.29 21.02c.12-.6.43-2.3.5-3.02" /><path
-                      d="M2 12a10 10 0 0 1 18-6" /><path d="M2 16h.01" /><path
-                      d="M21.8 16c.2-2 .131-5.354 0-6" /><path
-                      d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2" /><path
-                      d="M8.65 22c.21-.66.45-1.32.57-2" /><path
-                      d="M9 6.8a6 6 0 0 1 9 5.2v2" /></svg></div>
-                <p
-                  class="mt-5 text-xs uppercase tracking-widest text-slate-400">Signed
-                  in as</p>
-                <p id="bioEmail" class="mt-1 font-semibold break-all"></p>
-                <button id="bioUnlock" type="button"
-                  class="btn-shine mt-6 w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white shadow-lg shadow-brand-500/30 hover:shadow-brand-500/60 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 flex items-center justify-center gap-3">
-                  <span id="bioUnlockLabel">Unlock with biometrics</span>
-                </button>
-              </div>
-              <div class="mt-5 flex flex-col items-center gap-2 text-sm">
-                <button id="bioOther" type="button"
-                  class="bio-link font-semibold text-brand-400 hover:text-white transition py-1">Use
-                  password / another account</button>
-                <button id="bioOff" type="button"
-                  class="bio-link text-xs text-slate-500 hover:text-white transition py-1">Turn
-                  off biometric login on this device</button>
-              </div>
-            </div>
-
-            <p id="newHereNote"
-              class="fade-item mt-6 text-center text-xs text-slate-500"
+            <p class="fade-item mt-6 text-center text-xs text-slate-500"
               style="--i:7">New here? Your account is set up by the EM
               Development team.</p>
           </div>
         </div>
       </main>
-    </div>
-
-    <!-- Offer to turn on biometric login -->
-    <div id="bioOffer" class="bio-ov" role="dialog" aria-modal="true"
-      aria-hidden="true" aria-labelledby="bioOfferTitle">
-      <div class="bio-box">
-        <div class="bio-ic" aria-hidden="true"><svg fill="none"
-            stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-            stroke-linejoin="round" viewBox="0 0 24 24"><path
-              d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4" /><path
-              d="M14 13.12c0 2.38 0 6.38-1 8.88" /><path
-              d="M17.29 21.02c.12-.6.43-2.3.5-3.02" /><path
-              d="M2 12a10 10 0 0 1 18-6" /><path d="M2 16h.01" /><path
-              d="M21.8 16c.2-2 .131-5.354 0-6" /><path
-              d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2" /><path
-              d="M8.65 22c.21-.66.45-1.32.57-2" /><path
-              d="M9 6.8a6 6 0 0 1 9 5.2v2" /></svg></div>
-        <h2 id="bioOfferTitle" class="mt-6 text-xl font-extrabold">Turn on
-          biometric login?</h2>
-        <p class="mt-2 text-sm text-slate-400 leading-relaxed">Next time, unlock
-          your dashboard on this device with your fingerprint, face or screen
-          lock instead of typing your password.</p>
-        <button id="bioOfferYes" type="button"
-          class="mt-6 w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white shadow-lg shadow-brand-500/30 hover:-translate-y-0.5 transition-all duration-300">Turn
-          on</button>
-        <button id="bioOfferNo" type="button" class="bio-ghost mt-3">Not
-          now</button>
-        <button id="bioOfferNever" type="button"
-          class="bio-link mt-3 text-xs text-slate-500 hover:text-white transition">Don’t
-          ask again on this device</button>
-      </div>
     </div>
 
     <!-- Message pop-up (bottom right) -->
@@ -669,7 +585,6 @@
       const dest = await destFor(auth.currentUser);
       if (dest.blocked) {
         try { await signOut(auth); } catch (e) {}
-        bioClear();
         redirecting = false; setLoading(false);
         showMsg('Your account has been disabled. Please contact EM Development.', false);
         return;
@@ -703,148 +618,38 @@
       }
     }
 
-
-    // ===== Biometric login (WebAuthn platform authenticator) =====
-    // Unlocks an existing, saved Firebase session on THIS device with fingerprint / Face ID / screen lock.
-    const BIO_KEY = 'em_bio', BIO_NEVER = 'em_bio_never';
-    let loggingIn = false;
-    const b64u = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    const unb64u = str => Uint8Array.from(atob(str.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
-    const bioGet = () => { try { return JSON.parse(localStorage.getItem(BIO_KEY)); } catch (e) { return null; } };
-    const bioClear = () => { try { localStorage.removeItem(BIO_KEY); } catch (e) {} };
-    async function bioSupported() {
-      try { return !!(window.isSecureContext && window.PublicKeyCredential && await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()); }
-      catch (e) { return false; }
-    }
-    async function bioRegister(user) {
-      const cred = await navigator.credentials.create({ publicKey: {
-        challenge: crypto.getRandomValues(new Uint8Array(32)),
-        rp: { name: 'EM Development' },
-        user: { id: new TextEncoder().encode(user.uid).slice(0, 64), name: user.email || user.uid, displayName: user.email || 'EM Development user' },
-        pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
-        authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'preferred' },
-        attestation: 'none', timeout: 60000
-      }});
-      localStorage.setItem(BIO_KEY, JSON.stringify({ uid: user.uid, email: user.email || '', id: b64u(cred.rawId) }));
-    }
-    async function bioVerify(rec) {
-      await navigator.credentials.get({ publicKey: {
-        challenge: crypto.getRandomValues(new Uint8Array(32)),
-        allowCredentials: [{ type: 'public-key', id: unb64u(rec.id), transports: ['internal'] }],
-        userVerification: 'required', timeout: 60000
-      }});
-    }
-    function bioError(err) {
-      switch (err && err.name) {
-        case 'NotAllowedError': return 'Biometric check was cancelled or timed out. Please try again.';
-        case 'SecurityError': return 'Biometric login needs a secure (https) connection.';
-        case 'InvalidStateError': return 'Biometric login is already set up on this device.';
-        case 'NotSupportedError': return 'This device does not support biometric login.';
-        default: return 'Biometric check failed. Please use your password.';
-      }
-    }
-
-    const bioPanel = document.getElementById('bioPanel'), bioOffer = document.getElementById('bioOffer');
-    function showBioPanel(user, rec) {
-      form.classList.add('hidden');
-      document.getElementById('newHereNote').classList.add('hidden');
-      document.getElementById('loginSubtitle').textContent = 'Verify it\u2019s you to open your dashboard.';
-      document.getElementById('bioEmail').textContent = rec.email || user.email || '';
-      bioPanel.classList.remove('hidden');
-    }
-    function hideBioPanel() {
-      bioPanel.classList.add('hidden');
-      form.classList.remove('hidden');
-      document.getElementById('newHereNote').classList.remove('hidden');
-      document.getElementById('loginSubtitle').textContent = 'Log in to continue to your dashboard.';
-    }
-    document.getElementById('bioUnlock').addEventListener('click', async () => {
-      const rec = bioGet(), btn = document.getElementById('bioUnlock'), lbl = document.getElementById('bioUnlockLabel');
-      if (!rec || !auth.currentUser) { hideBioPanel(); return; }
-      btn.disabled = true; btn.classList.add('opacity-80'); lbl.textContent = 'Waiting for biometrics...';
-      try { await bioVerify(rec); goToApp(); }
-      catch (err) { showMsg(bioError(err), false); }
-      finally { btn.disabled = false; btn.classList.remove('opacity-80'); lbl.textContent = 'Unlock with biometrics'; }
-    });
-    document.getElementById('bioOther').addEventListener('click', async () => {
-      try { await signOut(auth); } catch (e) {}
-      hideBioPanel();
-    });
-    document.getElementById('bioOff').addEventListener('click', () => {
-      bioClear();
-      showMsg('Biometric login turned off on this device.', true);
-      setTimeout(goToApp, 900);
-    });
-
-    // Ask once after a successful password login (needs a real tap, so it is a button)
-    function askBioOffer() {
-      return new Promise(resolve => {
-        const yes = document.getElementById('bioOfferYes'), no = document.getElementById('bioOfferNo'), never = document.getElementById('bioOfferNever');
-        const done = v => {
-          bioOffer.classList.remove('show'); bioOffer.setAttribute('aria-hidden', 'true');
-          yes.onclick = no.onclick = never.onclick = null; removeEventListener('keydown', esc);
-          resolve(v);
-        };
-        const esc = e => { if (e.key === 'Escape') done(false); };
-        yes.onclick = () => done(true);
-        no.onclick = () => done(false);
-        never.onclick = () => { try { localStorage.setItem(BIO_NEVER, '1'); } catch (e) {} done(false); };
-        addEventListener('keydown', esc);
-        bioOffer.classList.add('show'); bioOffer.setAttribute('aria-hidden', 'false');
-        yes.focus({ preventScroll: true });
-      });
-    }
-    async function offerBio(user, remembered) {
-      try {
-        if (localStorage.getItem(BIO_NEVER) === '1') return;
-        const cur = bioGet(); if (cur && cur.uid === user.uid) return;
-        if (!(await bioSupported())) {
-          // Say why, once per visit, instead of silently doing nothing
-          if (!sessionStorage.getItem('bioHint')) {
-            sessionStorage.setItem('bioHint', '1');
-            showMsg(window.isSecureContext
-              ? 'Biometric login isn\u2019t available on this device (it needs a fingerprint, Face ID or screen lock).'
-              : 'Biometric login needs a secure https:// address. It won\u2019t work from a file or plain http.', false);
-            await new Promise(r => setTimeout(r, 2600));
-          }
-          return;
-        }
-        if (!remembered) {                             // biometrics unlock a saved session, so "Remember me" must be on
-          if (!sessionStorage.getItem('bioHint2')) {
-            sessionStorage.setItem('bioHint2', '1');
-            showMsg('Tip: tick \u201cRemember me\u201d when logging in to turn on biometric login.', true);
-            await new Promise(r => setTimeout(r, 2600));
-          }
-          return;
-        }
-        if (!(await askBioOffer())) return;
-        try { await bioRegister(user); showMsg('✓ Biometric login is on for this device.', true); }
-        catch (err) { showMsg(bioError(err), false); }
-        await new Promise(r => setTimeout(r, 900));
-      } catch (e) {}
-    }
-
-    // ===== Remember me: keep the email filled in and the box ticked on this device =====
-    const REM_EMAIL = 'em_login_email', REM_ON = 'em_login_remember';
-    try {
-      if (localStorage.getItem(REM_ON) === '1') {
-        rememberEl.checked = true;
-        emailEl.value = localStorage.getItem(REM_EMAIL) || '';
-      }
-    } catch (e) {}
+    // ===== Remember me =====
+    // Email: remembered by this page. Password: handed to the browser's built-in password manager
+    // (encrypted by the browser / OS) instead of being stored in plain text on the page.
+    const REM_ON = 'em_login_remember', REM_EMAIL = 'em_login_email';
     function saveRemember(email, on) {
       try {
         if (on) { localStorage.setItem(REM_ON, '1'); localStorage.setItem(REM_EMAIL, email); }
         else { localStorage.removeItem(REM_ON); localStorage.removeItem(REM_EMAIL); }
       } catch (e) {}
     }
+    async function savePassword(email, pass, on) {
+      if (!window.PasswordCredential || !navigator.credentials) return;
+      try {
+        if (on) await navigator.credentials.store(new PasswordCredential({ id: email, password: pass, name: email }));
+        else await navigator.credentials.preventSilentAccess();
+      } catch (e) {}
+    }
+    (async function restoreRemember() {
+      try {
+        if (localStorage.getItem(REM_ON) !== '1') return;
+        rememberEl.checked = true;
+        emailEl.value = localStorage.getItem(REM_EMAIL) || '';
+        // Fill the saved password too (Chrome/Edge); other browsers fill it through autocomplete
+        if (window.PasswordCredential && navigator.credentials) {
+          const c = await navigator.credentials.get({ password: true, mediation: 'silent' });
+          if (c && c.password) { emailEl.value = c.id || emailEl.value; pw.value = c.password; }
+        }
+      } catch (e) {}
+    })();
 
-    // Already signed in? Ask for biometrics if enabled on this device, otherwise skip the form.
-    onAuthStateChanged(auth, user => {
-      if (!user || loggingIn) return;
-      const rec = bioGet();
-      if (rec && rec.uid === user.uid && window.PublicKeyCredential) showBioPanel(user, rec); else goToApp();
-    });
+    // Already signed in? Skip the form.
+    onAuthStateChanged(auth, user => { if (user) goToApp(); });
     try {
       if (sessionStorage.getItem('loginNotice') === 'disabled') {
         sessionStorage.removeItem('loginNotice');
@@ -860,18 +665,15 @@
       if (!pass) { showMsg('Please enter your password.', false); return; }
       hideMsg();
       setLoading(true);
-      loggingIn = true;
       try {
         try { await setPersistence(auth, rememberEl.checked ? browserLocalPersistence : browserSessionPersistence); }
         catch (pe) { console.warn('Could not set persistence (storage may be blocked):', pe); }
-        const cred = await signInWithEmailAndPassword(auth, email, pass);
+        await signInWithEmailAndPassword(auth, email, pass);
         saveRemember(email, rememberEl.checked);
+        savePassword(email, pass, rememberEl.checked);
         setLoading(false);
-        await offerBio(cred.user, rememberEl.checked);
-        loggingIn = false;
         goToApp();
       } catch (err) {
-        loggingIn = false;
         setLoading(false);
         showMsg(friendlyError(err), false);
       }
