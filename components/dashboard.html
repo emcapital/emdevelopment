@@ -142,6 +142,23 @@
     #xForm { max-height: calc(100dvh - 2rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); }
     @media (max-width: 419px) { #xCancel, #xBtn { flex: 1; justify-content: center; } }
 
+    /* ===== Invoice + maintenance fee modals ===== */
+    #iModal, #fModal { display: none; padding: max(1rem, env(safe-area-inset-top, 0px)) max(1rem, env(safe-area-inset-right, 0px)) max(1rem, env(safe-area-inset-bottom, 0px)) max(1rem, env(safe-area-inset-left, 0px)); }
+    #iModal.show, #fModal.show { display: flex; }
+    #iBack, #fBack { opacity: 0; transition: opacity .3s ease; }
+    #iForm, #fForm { opacity: 0; transform: translateY(18px) scale(.97); transition: opacity .3s ease, transform .35s cubic-bezier(.2,.7,.2,1); max-height: calc(100dvh - 2rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); }
+    #iModal.open #iBack, #fModal.open #fBack { opacity: 1; }
+    #iModal.open #iForm, #fModal.open #fForm { opacity: 1; transform: none; }
+    /* expense modal (Accounting) */
+    #eModal { display: none; padding: max(1rem, env(safe-area-inset-top, 0px)) max(1rem, env(safe-area-inset-right, 0px)) max(1rem, env(safe-area-inset-bottom, 0px)) max(1rem, env(safe-area-inset-left, 0px)); }
+    #eModal.show { display: flex; }
+    #eBack { opacity: 0; transition: opacity .3s ease; }
+    #eForm { opacity: 0; transform: translateY(18px) scale(.97); transition: opacity .3s ease, transform .35s cubic-bezier(.2,.7,.2,1); max-height: calc(100dvh - 2rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); }
+    #eModal.open #eBack { opacity: 1; }
+    #eModal.open #eForm { opacity: 1; transform: none; }
+    @media (max-width: 419px) { #eCancel, #exSave { flex: 1; justify-content: center; } }
+    @media (max-width: 419px) { #iCancel, #iSave, #fCancel, #fSave { flex: 1; justify-content: center; } }
+
     /* ===== Responsive v2 ===== */
     #view { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
     #view > :not(.max-w-xl) { max-width: 90rem; margin-left: auto; margin-right: auto; }   /* keep ultra-wide screens readable */
@@ -162,6 +179,67 @@
     #notifBadge { box-shadow: 0 0 0 2px #070a16; transition: box-shadow .5s ease; }
     html.light #notifBadge { box-shadow: 0 0 0 2px #f5f6ff; }
     html.light #notifMenu button:hover { background: rgba(15,21,53,.06); }
+
+    /* ===== Overview (redesign) ===== */
+    @keyframes ovSpin { to { transform: rotate(360deg); } }
+    @keyframes ovPulse { 0% { box-shadow: 0 0 0 0 rgba(34,211,238,.55); } 100% { box-shadow: 0 0 0 9px rgba(34,211,238,0); } }
+    .ov-hero { position: relative; overflow: hidden; border-radius: 28px; padding: 1.5rem; border: 1px solid rgba(255,255,255,.1);
+      background: radial-gradient(120% 140% at 0% 0%, rgba(91,108,255,.26), transparent 55%), radial-gradient(90% 120% at 100% 100%, rgba(34,211,238,.16), transparent 60%), rgba(255,255,255,.03); }
+    @media (min-width: 640px) { .ov-hero { padding: 2.25rem 2.5rem; } }
+    .ov-hero::before { content: ""; position: absolute; width: 460px; height: 460px; right: -140px; top: -210px; border-radius: 9999px; pointer-events: none;
+      background: conic-gradient(from 0deg, #5b6cff, #22d3ee, #f472b6, #5b6cff); filter: blur(90px); opacity: .3; animation: ovSpin 28s linear infinite; animation-delay: var(--ph, 0s); }
+    .ov-hero::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .55;
+      background-image: radial-gradient(rgba(255,255,255,.16) 1px, transparent 1.4px); background-size: 22px 22px;
+      -webkit-mask-image: linear-gradient(115deg, transparent 35%, #000 100%); mask-image: linear-gradient(115deg, transparent 35%, #000 100%); }
+    .ov-eyebrow { display: inline-flex; align-items: center; gap: .55rem; font-size: .72rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: #8e99c9; }
+    .ov-live { width: 8px; height: 8px; border-radius: 9999px; background: #22d3ee; animation: ovPulse 2s ease-out infinite; }
+    .ov-chip { display: inline-flex; align-items: center; gap: .5rem; padding: .38rem .8rem; border-radius: 9999px; font-size: .75rem; font-weight: 600; color: #cdd4f5;
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); }
+    .ov-chip i { width: 7px; height: 7px; border-radius: 9999px; box-shadow: 0 0 10px currentColor; }
+    .ov-orbit { position: relative; width: 9.5rem; height: 9.5rem; }
+    @media (min-width: 640px) { .ov-orbit { width: 11.5rem; height: 11.5rem; } }
+    .ov-orbit-svg { position: absolute; inset: 11%; width: 78%; height: 78%; transform: rotate(-90deg); filter: drop-shadow(0 0 10px rgba(91,108,255,.45)); }
+    .ov-orbit-ring { position: absolute; inset: 0; border-radius: 9999px; border: 1px dashed rgba(124,140,255,.45); animation: ovSpin 24s linear infinite; animation-delay: var(--ph, 0s); }
+    .ov-orbit-ring i { position: absolute; top: -4px; left: 50%; width: 8px; height: 8px; margin-left: -4px; border-radius: 9999px; background: #22d3ee; box-shadow: 0 0 14px 2px rgba(34,211,238,.8); }
+    .ov-tile { position: relative; overflow: hidden; border-radius: 20px; padding: 1.05rem 1.1rem; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.09); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); transition: transform .3s ease, border-color .3s ease; }
+    .ov-tile::before { content: ""; position: absolute; left: 1.1rem; right: 1.1rem; top: 0; height: 2px; border-radius: 0 0 4px 4px; background: linear-gradient(90deg, var(--ac), transparent); opacity: .9; }
+    .ov-tile::after { content: ""; position: absolute; width: 120px; height: 120px; right: -40px; top: -50px; border-radius: 9999px; background: var(--ac); filter: blur(46px); opacity: .16; pointer-events: none; }
+    .ov-tile:hover { transform: translateY(-2px); border-color: rgba(255,255,255,.18); }
+    .ov-ico { flex: none; width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; color: var(--ac); background: rgba(255,255,255,.06); background: color-mix(in srgb, var(--ac) 16%, transparent); }
+    .ov-rows > .ov-row { padding: .95rem 0; border-top: 1px solid rgba(255,255,255,.08); }
+    .ov-rows > .ov-row:first-child { border-top: 0; }
+    .ov-seg { display: flex; gap: 3px; margin-top: .7rem; }
+    .ov-seg i { flex: 1; height: 8px; border-radius: 3px; background: rgba(255,255,255,.1); transition: background .5s ease; }
+    .ov-seg i.on { background: linear-gradient(90deg, #5b6cff, #22d3ee); box-shadow: 0 0 10px rgba(34,211,238,.3); }
+    .ov-link { display: inline-flex; align-items: center; gap: .3rem; font-size: .75rem; font-weight: 700; color: #7c8cff; transition: color .2s ease, gap .2s ease; }
+    .ov-link:hover { color: #fff; gap: .5rem; }
+    .ov-tl { position: relative; padding-left: 1.5rem; }
+    .ov-tl::before { content: ""; position: absolute; left: 5px; top: 8px; bottom: 8px; width: 2px; border-radius: 2px; background: linear-gradient(#5b6cff, #22d3ee 60%, transparent); opacity: .6; }
+    .ov-tl li { position: relative; padding-bottom: 1.05rem; }
+    .ov-tl li:last-child { padding-bottom: 0; }
+    .ov-node { position: absolute; left: -1.5rem; top: .32rem; width: 12px; height: 12px; border-radius: 9999px; background: #0d1226; border: 2px solid #7c8cff; box-shadow: 0 0 0 4px rgba(124,140,255,.14); }
+    .ov-tl li:first-child .ov-node { background: linear-gradient(135deg, #5b6cff, #22d3ee); border-color: transparent; box-shadow: 0 0 16px rgba(34,211,238,.75); }
+    .ov-split { height: 10px; border-radius: 9999px; overflow: hidden; background: linear-gradient(90deg, rgba(244,114,182,.55), rgba(244,114,182,.3)); }
+    .ov-split i { display: block; height: 100%; border-radius: 9999px; background: linear-gradient(90deg, #34d399, #22d3ee); box-shadow: 0 0 14px rgba(52,211,153,.45); transition: width .8s cubic-bezier(.2,.7,.2,1); }
+    .ov-dot { flex: none; width: 8px; height: 8px; border-radius: 9999px; }
+    .ov-dot.ok { background: #34d399; box-shadow: 0 0 8px rgba(52,211,153,.7); }
+    .ov-dot.due { background: #f472b6; box-shadow: 0 0 8px rgba(244,114,182,.7); }
+    .ov-empty { display: flex; align-items: center; gap: .75rem; padding: 1rem .25rem; font-size: .875rem; color: #8e99c9; }
+    html.light .ov-hero { border-color: rgba(15,21,53,.1); background: radial-gradient(120% 140% at 0% 0%, rgba(91,108,255,.18), transparent 55%), radial-gradient(90% 120% at 100% 100%, rgba(34,211,238,.14), transparent 60%), rgba(255,255,255,.7); box-shadow: 0 6px 24px rgba(67,81,232,.07); }
+    html.light .ov-hero::before { opacity: .22; }
+    html.light .ov-hero::after { background-image: radial-gradient(rgba(67,81,232,.2) 1px, transparent 1.4px); }
+    html.light .ov-eyebrow, html.light .ov-empty { color: #55608a; }
+    html.light .ov-chip { color: #1f2650; background: rgba(15,21,53,.05); border-color: rgba(15,21,53,.1); }
+    html.light .ov-tile { background: rgba(255,255,255,.75); border-color: rgba(15,21,53,.1); box-shadow: 0 6px 24px rgba(67,81,232,.07); }
+    html.light .ov-tile:hover { border-color: rgba(15,21,53,.2); }
+    html.light .ov-ico { background: rgba(15,21,53,.05); background: color-mix(in srgb, var(--ac) 14%, transparent); }
+    html.light .ov-rows > .ov-row { border-color: rgba(15,21,53,.1); }
+    html.light .ov-seg i { background: rgba(15,21,53,.1); }
+    html.light .ov-link { color: #4351e8; }
+    html.light .ov-link:hover { color: #0f1535; }
+    html.light .ov-node { background: #fff; }
+    html.light .ov-orbit-ring { border-color: rgba(67,81,232,.4); }
+    html.light .text-pink { color: #db2777; }
 
     html.light body { background: #f5f6ff; color: #0f1535; }
     html.light .glass { background: rgba(255,255,255,.75); border-color: rgba(15,21,53,.1); box-shadow: 0 6px 24px rgba(67,81,232,.07); }
@@ -210,7 +288,7 @@
               class="text-brand-400">Development</span></span>
         </a>
         <nav id="nav" class="mt-6 space-y-1.5 flex-1"></nav>
-        <p class="px-2 text-xs text-slate-500">Client portal</p>
+        <p class="px-2 text-xs text-slate-500">Admin portal</p>
       </aside>
 
       <div class="flex-1 min-w-0 flex flex-col">
@@ -295,7 +373,7 @@
       <div id="mBack"
         class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
       <form id="mForm" novalidate
-        class="modal-card relative w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-3xl p-6 sm:p-7">
+        class="modal-card relative w-full max-w-2xl max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-3xl p-6 sm:p-9">
         <div class="flex items-start justify-between gap-4">
           <div>
             <h2 id="mTitle"
@@ -313,7 +391,7 @@
           </button>
         </div>
 
-        <div class="mt-5 space-y-4">
+        <div class="mt-6 flex flex-col gap-5">
           <label
             class="block text-sm font-medium text-slate-300">Project
             name
@@ -335,25 +413,18 @@
                 class="field mt-1.5" />
             </label>
           </div>
-          <div class="grid sm:grid-cols-2 gap-3">
+          <div class="flex flex-col gap-2.5">
             <label class="block min-w-0 text-sm font-medium text-slate-300">Free
               maintenance (weeks)
               <input id="mWeeks" type="number" inputmode="numeric" min="0"
                 max="260" step="1" required
                 class="field mt-1.5" placeholder="e.g. 12" />
             </label>
-            <label
-              class="block min-w-0 text-sm font-medium text-slate-300">Maintenance
-              fee after (PHP / month)
-              <input id="mFee" type="number" inputmode="numeric" min="0"
-                max="10000000" step="1" required
-                class="field mt-1.5" placeholder="e.g. 1500" />
-            </label>
+            <p class="text-xs text-slate-400">Free maintenance starts the
+              day you complete the project. When it ends, the customer is
+              notified. Set the monthly maintenance fee later in
+              Subscriptions. Use 0 for no free period.</p>
           </div>
-          <p class="-mt-1 text-xs text-slate-400">Free maintenance starts the
-            day you complete the project. When it ends, the customer is notified
-            and can subscribe at this fee. Use 0 for no free period or no paid
-            plan.</p>
           <div>
             <label for="incIn"
               class="block text-sm font-medium text-slate-300">Inclusions</label>
@@ -366,11 +437,11 @@
             <div id="sugg"
               class="mt-2 flex flex-wrap gap-1.5"></div>
           </div>
-          <p id="mErr" class="text-sm text-pink min-h-[1.25rem]"
+          <p id="mErr" class="text-sm text-pink empty:hidden"
             role="alert"></p>
         </div>
 
-        <div class="mt-2 flex items-center justify-end gap-3">
+        <div class="mt-6 flex items-center justify-end gap-3">
           <button type="button" id="mCancel"
             class="px-5 py-2.5 rounded-xl glass text-sm font-semibold text-slate-300 hover:text-white transition">Cancel</button>
           <button id="mSave" type="submit"
@@ -480,6 +551,110 @@
       </form>
     </div>
 
+    <!-- Invoice modal (new + edit) -->
+    <div id="iModal"
+      class="fixed inset-0 z-[60] items-center justify-center p-4"
+      role="dialog" aria-modal="true" aria-labelledby="iTitle">
+      <div id="iBack"
+        class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+      <form id="iForm" novalidate data-edit
+        class="modal-card relative w-full max-w-2xl max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-3xl p-6 sm:p-9">
+        <div class="flex items-start justify-between gap-4">
+          <div class="min-w-0">
+            <h2 id="iTitle"
+              class="text-xl font-extrabold tracking-tight">New invoice</h2>
+            <p id="iHint" class="mt-1 text-sm text-slate-400"></p>
+          </div>
+          <button type="button" id="iClose" aria-label="Close"
+            class="w-9 h-9 shrink-0 rounded-xl glass flex items-center justify-center text-slate-400 hover:text-white transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor"
+              stroke-width="2.2" stroke-linecap="round"
+              viewBox="0 0 24 24"><path
+                d="M6 6l12 12M18 6L6 18" /></svg>
+          </button>
+        </div>
+
+        <div class="mt-6 flex flex-col gap-5">
+          <label class="block text-sm font-medium text-slate-300">Billed to
+            (customer)
+            <select name="cust" required class="field mt-1.5"></select>
+          </label>
+          <div class="grid sm:grid-cols-2 gap-3">
+            <label
+              class="block min-w-0 text-sm font-medium text-slate-300">Website
+              type
+              <select name="webtype" required class="field mt-1.5"></select>
+            </label>
+            <label
+              class="block min-w-0 text-sm font-medium text-slate-300">Payment
+              type
+              <select name="paytype" required class="field mt-1.5"></select>
+            </label>
+          </div>
+          <label class="block text-sm font-medium text-slate-300">Amount (PHP)
+            <input name="amt" type="number" inputmode="decimal" min="1"
+              max="1000000000" step="0.01" required class="field mt-1.5"
+              placeholder="15000" />
+          </label>
+          <p id="iErr" class="text-sm text-red-400 empty:hidden"
+            role="alert"></p>
+        </div>
+
+        <div class="mt-6 flex items-center justify-end gap-3">
+          <button type="button" id="iCancel"
+            class="px-5 py-2.5 rounded-xl glass text-sm font-semibold text-slate-300 hover:text-white transition">Cancel</button>
+          <button id="iSave" type="submit"
+            class="btn-shine px-6 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white text-sm shadow-lg shadow-brand-500/30 flex items-center gap-2.5 disabled:opacity-70">Create
+            invoice</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Maintenance fee modal (set from Subscriptions) -->
+    <div id="fModal"
+      class="fixed inset-0 z-[60] items-center justify-center p-4"
+      role="dialog" aria-modal="true" aria-labelledby="fTitle">
+      <div id="fBack"
+        class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+      <form id="fForm" novalidate
+        class="modal-card relative w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-3xl p-6 sm:p-8">
+        <div class="flex items-start justify-between gap-4">
+          <div class="min-w-0">
+            <h2 id="fTitle"
+              class="text-xl font-extrabold tracking-tight">Maintenance
+              <span class="gradient-text">fee</span></h2>
+            <p id="fDesc" class="mt-1 text-sm text-slate-400 break-words"></p>
+          </div>
+          <button type="button" id="fClose" aria-label="Close"
+            class="w-9 h-9 shrink-0 rounded-xl glass flex items-center justify-center text-slate-400 hover:text-white transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor"
+              stroke-width="2.2" stroke-linecap="round"
+              viewBox="0 0 24 24"><path
+                d="M6 6l12 12M18 6L6 18" /></svg>
+          </button>
+        </div>
+        <div class="mt-6 flex flex-col gap-5">
+          <label for="fIn" class="block text-sm font-medium text-slate-300">Fee
+            after the free period (PHP / month)
+            <input id="fIn" type="number" inputmode="numeric" min="0"
+              max="10000000" step="1" required class="field mt-1.5"
+              placeholder="e.g. 1500" />
+          </label>
+          <p class="-mt-2 text-xs text-slate-400">Customers can subscribe
+            at this fee once the free period ends. Use 0 for no paid plan.</p>
+          <p id="fErr" class="text-sm text-red-400 empty:hidden"
+            role="alert"></p>
+        </div>
+        <div class="mt-6 flex items-center justify-end gap-3">
+          <button type="button" id="fCancel"
+            class="px-5 py-2.5 rounded-xl glass text-sm font-semibold text-slate-300 hover:text-white transition">Cancel</button>
+          <button id="fSave" type="submit"
+            class="btn-shine px-6 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white text-sm shadow-lg shadow-brand-500/30 flex items-center gap-2.5 disabled:opacity-70">Save
+            fee</button>
+        </div>
+      </form>
+    </div>
+
     <div id="toast"
       class="fixed left-1/2 bottom-6 z-50 glass rounded-full px-5 py-2.5 text-sm font-medium hidden"
       style="transform:translateX(-50%)" role="status"></div>
@@ -578,16 +753,16 @@
     const mtSig = p => [p.hasM, p.mw, p.mf, p.arAt, p.archived, JSON.stringify(mtReqs(p.id)), K.length].join('|');
     function mtHtml(p) {
       if (!p.cloud) return '';
-      const m = mtInfo(p), fee = p.mf > 0 ? money(p.mf) + ' per month after the free period' : 'No paid plan fee set';
+      const m = mtInfo(p);
       const line = m.k === 'none' ? 'Maintenance is not set for this project.'
         : m.k === 'pending' ? 'Free maintenance: ' + mtWeeks(p.mw) + ' (starts when the project is completed)'
         : m.k === 'ended' ? 'Free maintenance ended ' + fmtD(m.end)
         : 'Free maintenance until ' + fmtD(m.end) + ' (' + m.left + (m.left === 1 ? ' day' : ' days') + ' left)';
       const tone = m.k === 'ended' ? 'text-red-300' : m.k === 'soon' ? 'text-pink' : '';
       const reqs = mtReqs(p.id).map(r => `<div class="mt-2 flex flex-wrap items-center justify-between gap-2"><span class="min-w-0 break-words">${esc(mtWho(r.u))} &middot; <b>${esc(r.status === 'requested' ? 'requested a subscription' : r.status)}</b></span><span class="flex gap-1.5">${r.status === 'requested' ? `<button type="button" data-act="mtok" data-u="${esc(r.u)}" data-p="${esc(p.id)}" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-500 text-white hover:bg-brand-600 transition">Activate</button><button type="button" data-act="mtno" data-u="${esc(r.u)}" data-p="${esc(p.id)}" class="px-3 py-1.5 rounded-lg text-xs font-semibold glass text-slate-300 hover:text-white transition">Decline</button>` : `<button type="button" data-act="mtdel" data-u="${esc(r.u)}" data-p="${esc(p.id)}" class="px-3 py-1.5 rounded-lg text-xs font-semibold glass text-slate-300 hover:text-white transition">Remove</button>`}</span></div>`).join('');
-      return `<div class="font-semibold ${tone}">${esc(line)}</div><div class="text-xs text-slate-400 mt-0.5">${esc(fee)}</div>${reqs}
+      return `<div class="font-semibold ${tone}">${esc(line)}</div>${reqs}
         <details class="mt-2"><summary class="cursor-pointer text-xs font-semibold text-brand-400 hover:text-white">Edit maintenance</summary>
-          <form data-form="maint" data-p="${esc(p.id)}" class="mt-2 flex flex-wrap items-end gap-2"><label class="text-xs text-slate-400">Free weeks<input name="weeks" type="number" min="0" max="260" step="1" required value="${p.mw}" class="field !py-2 mt-1 w-28"/></label><label class="text-xs text-slate-400">Fee (PHP / month)<input name="fee" type="number" min="0" max="10000000" step="1" required value="${p.mf}" class="field !py-2 mt-1 w-36"/></label><button type="submit" class="px-4 py-2 rounded-xl glass text-sm font-semibold text-brand-400 hover:text-white transition">Save</button></form></details>`;
+          <form data-form="maint" data-p="${esc(p.id)}" class="mt-2 flex flex-wrap items-end gap-2"><label class="text-xs text-slate-400">Free weeks<input name="weeks" type="number" min="0" max="260" step="1" required value="${p.mw}" class="field !py-2 mt-1 w-28"/></label><button type="submit" class="px-4 py-2 rounded-xl glass text-sm font-semibold text-brand-400 hover:text-white transition">Save</button></form></details>`;
     }
     function projCard(p) {
       const s = status(p), v = pct(p);
@@ -683,13 +858,15 @@
     // ---------- invoices ----------
     const dstr = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     const sumAmt = arr => arr.reduce((a, i) => a + i.amt, 0);
+    const WTYPES = ['Landing page', 'Business website', 'E-commerce website', 'Portfolio website', 'Blog or news website', 'Booking or reservation system', 'Web application', 'Mobile application', 'Other'];
+    const PAYT = { down: 'Downpayment', half: 'Half payment', full: 'Full payment', p75: '75% payment' };
     const istat = i => i.paid ? 'paid' : (i.due && i.due < dstr(new Date()) ? 'overdue' : 'unpaid');
     const IBADGE = { paid: BADGE.completed, unpaid: BADGE.pending, overdue: 'text-red-300 bg-red-500/15' };
     const ILABEL = { paid: 'Paid', unpaid: 'Unpaid', overdue: 'Overdue' };
     const iBadge = i => 'shrink-0 px-3 py-1 rounded-full text-xs font-semibold transition-colors duration-500 ' + IBADGE[istat(i)];
     const iBtn = i => 'px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors duration-500 ' + (i.paid ? 'glass text-slate-300 hover:text-white' : 'bg-brand-500 text-white hover:bg-brand-600');
     const iPaidTxt = i => i.paid && i.paidAt ? ' · Paid ' + fmtD(i.paidAt) : '';
-    const iMeta = i => 'Billed to ' + i.to + ' · Due ' + fmtD(i.due) + (i.cuid ? '' : ' · Not linked to a customer');
+    const iMeta = i => 'Billed to ' + i.to + (PAYT[i.pt] ? ' · ' + PAYT[i.pt] : '') + (i.due ? ' · Due ' + fmtD(i.due) : '') + (i.cuid ? '' : ' · Not linked to a customer');
     // an invoice is mirrored to the customer's portal only while that customer still exists in the database
     const invMirror = i => !!(i.cid && i.cuid && K.some(c => c.id === i.cid && c.uid === i.cuid));
     const iIconBtn = 'w-9 h-9 rounded-lg flex items-center justify-center text-slate-400 transition';
@@ -743,53 +920,89 @@
         it = setTimeout(() => { if (view === 'invoices') drawI(false); }, gone.length ? 650 : 0);
       }
     }
-    // invoice panel (create + edit share one form that slides open and closed)
+    // invoice modal (create + edit share one form)
+    const iModal = $('#iModal'), iForm = $('#iForm');
+    let invFocus = null;
     function showInvPanel(inv) {
-      const panel = $('#iPanel'); if (!panel) return;
-      const f = panel.querySelector('form'), dd = new Date(); dd.setDate(dd.getDate() + 14);
-      invEdit = inv ? inv.id : null; invOpen = true;
+      const f = iForm;
+      invEdit = inv ? inv.id : null; invOpen = true; invFocus = document.activeElement;
       f.reset(); f.dataset.edit = inv ? inv.id : '';
       const sel = f.elements.cust, nm = c => c.name + (c.company ? ' \u00b7 ' + c.company : '') + (c.email ? ' (' + c.email + ')' : '');
       sel.innerHTML = '<option value="">' + (K.length ? 'Choose a customer...' : 'No customers yet') + '</option>' + K.map(c => `<option value="${esc(c.id)}"${c.disabled || !c.uid ? ' disabled' : ''}>${esc(nm(c))}${c.disabled ? ' (disabled)' : ''}</option>`).join('')
         + (inv && inv.cid && !K.some(c => c.id === inv.cid) ? `<option value="${esc(inv.cid)}">${esc(inv.to)} (removed)</option>` : '');
       const locked = !!(inv && inv.cid); sel.value = locked ? inv.cid : ''; sel.disabled = locked;
+      const old = inv && inv.desc && !WTYPES.includes(inv.desc) ? [inv.desc] : [];   // an older invoice keeps its own text as an option
+      f.elements.webtype.innerHTML = '<option value="">Choose a website type...</option>' + WTYPES.concat(old).map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('');
+      f.elements.paytype.innerHTML = '<option value="">Choose a payment type...</option>' + Object.keys(PAYT).map(k => `<option value="${k}">${esc(PAYT[k])}</option>`).join('');
       $('#iHint').textContent = locked ? 'This invoice belongs to ' + inv.to + ' and shows in their portal. The customer cannot be changed.'
         : inv ? 'This invoice is not linked to a customer yet. Choose one so it shows in their portal.'
         : K.length ? 'Only customers saved in your Customers list can be invoiced. The invoice also appears in their portal.'
         : 'Add a customer on the Customers page first. Invoices can only be created for customers in your database.';
-      if (inv) { f.elements.desc.value = inv.desc; f.elements.amt.value = inv.amt; f.elements.due.value = inv.due; } else f.elements.due.value = dstr(dd);
+      if (inv) { f.elements.webtype.value = inv.desc; f.elements.paytype.value = inv.pt || ''; f.elements.amt.value = inv.amt; }
       $('#iTitle').textContent = inv ? 'Edit ' + inv.num : 'New invoice';
       $('#iSave').textContent = inv ? 'Save changes' : 'Create invoice';
       $('#iErr').textContent = '';
       document.querySelectorAll('.i-editing').forEach(n => n.classList.remove('i-editing'));
       if (inv) { const n = document.querySelector('[data-iid="' + CSS.escape(inv.id) + '"]'); if (n) n.classList.add('i-editing'); }
-      panel.classList.add('open'); panel.removeAttribute('inert');
-      const nb = $('#newInvBtn'); if (nb) nb.textContent = 'Close';
-      $('#view').scrollTo({ top: 0, behavior: 'smooth' });
-      setTimeout(() => { if (invOpen) (locked ? f.elements.desc : f.elements.cust).focus({ preventScroll: true }); }, 380);
+      iModal.classList.add('show');
+      requestAnimationFrame(() => requestAnimationFrame(() => iModal.classList.add('open')));
+      setTimeout(() => { if (invOpen) (locked ? f.elements.webtype : f.elements.cust).focus({ preventScroll: true }); }, 60);
     }
     function hideInvPanel() {
-      const panel = $('#iPanel'); invOpen = false; invEdit = null;
+      invOpen = false; invEdit = null;
       document.querySelectorAll('.i-editing').forEach(n => n.classList.remove('i-editing'));
-      if (!panel) return;
-      if (panel.contains(document.activeElement)) document.activeElement.blur();
-      panel.classList.remove('open'); panel.setAttribute('inert', '');
-      const nb = $('#newInvBtn'); if (nb) nb.textContent = '+ New invoice';
+      iModal.classList.remove('open');
+      setTimeout(() => { if (!iModal.classList.contains('open')) iModal.classList.remove('show'); }, 320);
+      if (invFocus && invFocus.isConnected && invFocus.focus) invFocus.focus();
     }
+    const closeInv = () => { if (!creatingInv) hideInvPanel(); };   // closing by the person waits while a save is running
+    $('#iBack').addEventListener('click', closeInv);
+    $('#iClose').addEventListener('click', closeInv);
+    $('#iCancel').addEventListener('click', closeInv);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && iModal.classList.contains('open')) closeInv(); });
+    iForm.addEventListener('keydown', e => {   // keep Tab inside the modal
+      if (e.key !== 'Tab') return;
+      const f = [...iForm.querySelectorAll('input, select, button')].filter(x => !x.disabled && x.offsetParent !== null);
+      if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+    iForm.addEventListener('submit', e => { e.preventDefault(); saveInvoice(iForm); });
+
     // ---------- subscriptions (Domain, Hosting, Maintenance, Others) ----------
     // Saved at users/<uid>/subscriptions/<pushId>. Maintenance plans that customers requested and you activated also show here (read-only).
     const STYPE = {
-      domain: { l: 'Domain', cls: 'text-aqua bg-aqua/15', ph: 'e.g. example.com' },
-      hosting: { l: 'Hosting', cls: 'text-brand-400 bg-brand-500/20', ph: 'e.g. Business hosting plan' },
-      maintenance: { l: 'Maintenance', cls: 'text-emerald-300 bg-emerald-400/15', ph: 'e.g. Website maintenance' },
+      domain: { l: 'Domain', cls: 'text-aqua bg-aqua/15', ph: 'https://example.com' },
+      hosting: { l: 'Hosting', cls: 'text-brand-400 bg-brand-500/20', ph: 'https://example.com' },
+      maintenance: { l: 'Maintenance', cls: 'text-emerald-300 bg-emerald-400/15', ph: 'https://example.com' },
       other: { l: 'Others', cls: 'text-pink bg-pink/15', ph: 'e.g. SSL certificate or business email' }
     };
+    const LINKT = ['domain', 'hosting', 'maintenance'];   // these types are named by the customer's website link
+    function siteUrl(v) {   // returns a clean http(s) link, or '' when the text is not a website address
+      v = String(v || '').trim(); if (!v || /\s/.test(v)) return '';
+      if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(v)) v = 'https://' + v;
+      try {
+        const u = new URL(v);
+        if (!/^https?:$/.test(u.protocol) || u.username || u.password || !/^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9-]{2,}$/i.test(u.hostname)) return '';
+        return u.pathname === '/' && !u.search && !u.hash ? u.origin : u.href;
+      } catch (e) { return ''; }
+    }
+    function addCycle(cycle, from) {   // the date one billing cycle after today (or after `from`)
+      const dt = from ? new Date(from + 'T00:00:00') : new Date(), day = dt.getDate();
+      dt.setMonth(dt.getMonth() + SCYCLE[cycle].m); if (dt.getDate() !== day) dt.setDate(0);
+      return dstr(dt);
+    }
+    const sName = s => {
+      const u = !s.auto && LINKT.includes(s.type) ? siteUrl(s.name) : '';
+      return u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer" class="text-brand-400 hover:text-white hover:underline">${esc(u.replace(/^https?:\/\//, ''))}</a>` : esc(s.name);
+    };
     const SCYCLE = { monthly: { l: 'Monthly', m: 1, per: 'month' }, quarterly: { l: 'Every 3 months', m: 3, per: '3 months' }, yearly: { l: 'Yearly', m: 12, per: 'year' } };
-    const SLABEL = { active: 'Active', soon: 'Renews soon', overdue: 'Renewal due', paused: 'Paused', cancelled: 'Cancelled', requested: 'Awaiting approval', declined: 'Declined', free: 'Free period', freesoon: 'Free ends soon', freeended: 'Free period ended' };
-    const SBADGE = { active: BADGE.completed, soon: BADGE.pending, overdue: IBADGE.overdue, paused: 'text-slate-300 bg-white/10', cancelled: 'text-slate-400 bg-white/10', requested: BADGE.pending, declined: IBADGE.overdue, free: BADGE.active, freesoon: BADGE.pending, freeended: IBADGE.overdue };
+    const SLABEL = { active: 'Active', soon: 'Renews soon', overdue: 'Renewal due', paused: 'Paused', cancelled: 'Cancelled', requested: 'Awaiting approval', declined: 'Declined', free: 'Free period', nofree: 'No free period', freesoon: 'Free ends soon', freeended: 'Free period ended' };
+    const SBADGE = { active: BADGE.completed, soon: BADGE.pending, overdue: IBADGE.overdue, paused: 'text-slate-300 bg-white/10', cancelled: 'text-slate-400 bg-white/10', requested: BADGE.pending, declined: IBADGE.overdue, free: BADGE.active, nofree: 'text-slate-300 bg-white/10', freesoon: BADGE.pending, freeended: IBADGE.overdue };
     const sDays = s => s.next ? Math.round((new Date(s.next + 'T00:00:00') - new Date(dstr(new Date()) + 'T00:00:00')) / 864e5) : null;
     const sstat = s => {
-      if (s.auto === 'free') return s.k === 'soon' ? 'freesoon' : s.k === 'ended' ? 'freeended' : 'free';
+      if (s.auto === 'free') return s.mw === 0 ? 'nofree' : s.k === 'soon' ? 'freesoon' : s.k === 'ended' ? 'freeended' : 'free';
       if (['cancelled', 'paused', 'requested', 'declined'].includes(s.status)) return s.status;
       const d = sDays(s); return d === null ? 'active' : d < 0 ? 'overdue' : d <= 30 ? 'soon' : 'active';
     };
@@ -801,7 +1014,7 @@
         const reqs = mtReqs(p.id), own = K.find(x => (x.projects || []).map(String).includes(String(p.id))), who = own ? (own.company || own.name) : '';
         reqs.forEach(r => out.push({ id: 'mt-' + r.u + '-' + p.id, type: 'maintenance', name: p.name + ' maintenance', to: mtWho(r.u), cid: '', amt: +r.fee || p.mf || 0, cycle: 'monthly', next: '', status: r.status === 'active' ? 'active' : r.status === 'declined' ? 'declined' : 'requested', notes: '', at: +r.requestedAt || 0, auto: 'req', u: r.u, pid: p.id }));
         const m = mtInfo(p);
-        if (p.mw > 0 && m.k !== 'none' && !reqs.some(r => r.status === 'requested' || r.status === 'active')) out.push({ id: 'mf-' + p.id, type: 'maintenance', name: p.name + ' maintenance', to: who, cid: '', amt: p.mf || 0, cycle: 'monthly', next: '', status: 'active', notes: '', at: 0, auto: 'free', k: m.k, end: m.end, left: m.left, mw: p.mw, pid: p.id });
+        if (m.k !== 'none' && !reqs.some(r => r.status === 'requested' || r.status === 'active')) out.push({ id: 'mf-' + p.id, type: 'maintenance', name: p.name + ' maintenance', to: who, cid: '', amt: p.mf || 0, cycle: 'monthly', next: '', status: 'active', notes: '', at: 0, auto: 'free', k: m.k, end: m.end, left: m.left, mw: p.mw, pid: p.id });
       });
       return out; };
     const sAll = () => [...SUB, ...sAuto()].sort((a, b) => (b.status === 'requested') - (a.status === 'requested') || b.at - a.at);
@@ -810,7 +1023,7 @@
     const subErr = (err, what) => { console.error(what, err); return /PERMISSION_DENIED/i.test(String((err && (err.code || err.message)) || '')) ? 'Blocked by the database rules. Allow the signed-in admin to read and write "subscriptions" under users/$uid in Firebase.' : 'Could not ' + what + '. Please try again.'; };
     const sRenewTxt = s => {
       if (s.auto === 'req') return s.status === 'requested' ? 'Asked to subscribe' : s.status === 'declined' ? 'Request declined' : 'Requested by the customer, billed monthly';
-      if (s.auto === 'free') return s.k === 'pending' ? 'Free for ' + mtWeeks(s.mw) + ', starts when the project is completed' : s.k === 'ended' ? 'Free period ended ' + fmtD(s.end) : 'Free until ' + fmtD(s.end) + ' (' + s.left + (s.left === 1 ? ' day' : ' days') + ' left)';
+      if (s.auto === 'free') return s.mw === 0 ? 'No free period set for this project' : s.k === 'pending' ? 'Free for ' + mtWeeks(s.mw) + ', starts when the project is completed' : s.k === 'ended' ? 'Free period ended ' + fmtD(s.end) : 'Free until ' + fmtD(s.end) + ' (' + s.left + (s.left === 1 ? ' day' : ' days') + ' left)';
       const d = sDays(s); if (d === null) return 'No renewal date';
       if (s.status !== 'active') return 'Renewal date ' + fmtD(s.next);
       return d < 0 ? 'Renewal was due ' + fmtD(s.next) + ' (' + (-d) + (d === -1 ? ' day' : ' days') + ' ago)' : d === 0 ? 'Renews today' : 'Renews ' + fmtD(s.next) + ' (in ' + d + (d === 1 ? ' day' : ' days') + ')';
@@ -821,18 +1034,18 @@
       const acts = s.auto === 'req'
         ? `<div class="flex flex-wrap items-center gap-1.5">${s.status === 'requested' ? mb('mtok', 'Activate', 1) + mb('mtno', 'Decline') : mb('mtdel', 'Remove')}</div>`
         : s.auto === 'free'
-        ? `<button data-act="sgoproj" class="px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap glass text-slate-300 hover:text-white transition">Open project</button>`
+        ? `<div class="flex flex-wrap items-center gap-1.5"><button data-act="sfee" data-p="${esc(s.pid)}" class="px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition ${s.amt > 0 ? 'glass text-slate-300 hover:text-white' : 'bg-brand-500 text-white hover:bg-brand-600'}">${s.amt > 0 ? 'Edit fee' : 'Set fee'}</button><button data-act="sgoproj" class="px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap glass text-slate-300 hover:text-white transition">Open project</button></div>`
         : `<div class="flex flex-wrap items-center gap-1.5">${s.status === 'active' && s.next ? `<button data-act="srenew" data-s="${esc(s.id)}" class="px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap ${st === 'active' ? 'glass text-slate-300 hover:text-white' : 'bg-brand-500 text-white hover:bg-brand-600'} transition-colors">Mark renewed</button>` : ''}
               <button data-act="sedit" data-s="${esc(s.id)}" aria-label="Edit ${esc(s.name)}" title="Edit" class="${iIconBtn} hover:text-white hover:bg-white/10">${svg('M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z', 'w-4 h-4')}</button>
               <button data-act="sdel" data-s="${esc(s.id)}" aria-label="Delete ${esc(s.name)}" title="Delete" class="${iIconBtn} hover:text-red-400 hover:bg-red-500/10">${svg(ICON.trash, 'w-4 h-4')}</button></div>`;
       const amt = s.auto === 'free'
-        ? (s.amt > 0 ? `<div class="text-lg font-extrabold">${money(s.amt)}</div><div class="text-xs text-slate-400 -mt-0.5">per month after the free period</div>` : `<div class="text-lg font-extrabold">Free</div><div class="text-xs text-slate-400 -mt-0.5">no paid plan set</div>`)
+        ? (s.amt > 0 ? `<div class="text-lg font-extrabold">${money(s.amt)}</div><div class="text-xs text-slate-400 -mt-0.5">per month after the free period</div>` : `<div class="text-lg font-extrabold">No fee set</div><div class="text-xs text-slate-400 -mt-0.5">use Set fee to add one</div>`)
         : `<div class="text-lg font-extrabold">${money(s.amt)}</div><div class="text-xs text-slate-400 -mt-0.5">per ${SCYCLE[s.cycle].per}</div>`;
       const who = s.auto ? (s.to ? 'Customer: ' + s.to : 'No customer linked') : (s.to ? 'Billed to ' + s.to : 'No customer linked');
       return `<div data-f data-sid="${esc(s.id)}" class="${card} q-card flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-4${subEdit === s.id ? ' i-editing' : ''}${s.status === 'requested' ? ' !border-pink/40' : ''}">
           <div class="min-w-[min(100%,14rem)] flex-1">
             <div class="flex items-center gap-2 flex-wrap"><span class="shrink-0 px-3 py-1 rounded-full text-xs font-semibold ${T.cls}">${T.l}</span><span class="${sBadge(s)}">${SLABEL[st]}</span></div>
-            <div class="mt-2 font-bold break-words">${esc(s.name)}</div>
+            <div class="mt-2 font-bold break-words">${sName(s)}</div>
             <div class="mt-1 text-xs text-slate-400 break-words">${esc(who + ' \u00b7 ' + sRenewTxt(s))}</div>
             ${s.notes ? `<div class="mt-1.5 text-sm text-slate-300 break-words">${esc(s.notes)}</div>` : ''}
           </div>
@@ -867,10 +1080,10 @@
           <div class="grid sm:grid-cols-2 gap-4">
             <label class="${lbl}">Type<select name="type" required class="field mt-1.5">${opts(STYPE)}</select></label>
             <label class="${lbl}">Customer<select name="cust" class="field mt-1.5"><option value="">No customer (internal)</option></select></label>
-            <label class="${lbl}">Name or details<input name="label" required maxlength="120" autocomplete="off" class="field mt-1.5" placeholder="${esc(STYPE.domain.ph)}"/></label>
+            <label class="${lbl}"><span data-llab>Website link</span><input name="label" required maxlength="300" autocomplete="off" autocapitalize="off" spellcheck="false" class="field mt-1.5" placeholder="${esc(STYPE.domain.ph)}"/></label>
             <label class="${lbl}">Amount (PHP)<input name="amt" type="number" inputmode="decimal" min="1" max="1000000000" step="0.01" required class="field mt-1.5" placeholder="1200"/></label>
             <label class="${lbl}">Billing cycle<select name="cycle" required class="field mt-1.5">${opts(SCYCLE)}</select></label>
-            <label class="${lbl}">Next renewal date<input name="next" type="date" required class="field mt-1.5"/></label>
+            <label class="${lbl}">Next renewal date (automatic)<input name="next" type="date" readonly tabindex="-1" aria-readonly="true" class="field mt-1.5 opacity-80 cursor-not-allowed pointer-events-none"/></label>
             <label class="${lbl}">Status<select name="status" required class="field mt-1.5"><option value="active">Active</option><option value="paused">Paused</option><option value="cancelled">Cancelled</option></select></label>
             <label class="${lbl}">Private notes (optional)<input name="notes" maxlength="200" autocomplete="off" class="field mt-1.5" placeholder="e.g. registrar, login email or server"/></label>
           </div>
@@ -889,8 +1102,8 @@
       sel.innerHTML = '<option value="">No customer (internal)</option>' + K.map(c => `<option value="${esc(c.id)}">${esc(nm(c))}</option>`).join('')
         + (s && s.cid && !K.some(c => c.id === s.cid) ? `<option value="${esc(s.cid)}">${esc(s.to)} (removed)</option>` : '');
       if (s) { f.elements.type.value = s.type; sel.value = s.cid || ''; f.elements.label.value = s.name; f.elements.amt.value = s.amt; f.elements.cycle.value = s.cycle; f.elements.next.value = s.next; f.elements.status.value = s.status; f.elements.notes.value = s.notes; }
-      else { f.elements.type.value = 'domain'; f.elements.cycle.value = 'yearly'; f.elements.next.value = dstr(nx); }
-      f.elements.label.placeholder = STYPE[f.elements.type.value].ph;
+      else { f.elements.type.value = 'domain'; f.elements.cycle.value = 'yearly'; }
+      syncSubForm(f);
       const locked = !!(s && s.cid); sel.disabled = locked;
       $('#sHint').textContent = locked ? 'This subscription belongs to ' + s.to + ' and shows in their portal. The customer cannot be changed. Notes stay private.'
         : K.length ? 'Choose a customer to also show it in their portal, or leave it empty to keep it internal. Notes always stay private.'
@@ -913,28 +1126,42 @@
       panel.classList.remove('open'); panel.setAttribute('inert', '');
       const nb = $('#newSubBtn'); if (nb) nb.textContent = '+ New subscription';
     }
-    // the type decides the hint, and (for a new one) a sensible billing cycle
+    // the type decides the label and a sensible billing cycle; the billing cycle decides the next renewal date
+    function syncSubForm(f) {
+      const t = f.elements.type.value; if (!STYPE[t]) return;
+      const link = LINKT.includes(t), lab = f.querySelector('[data-llab]');
+      if (lab) lab.textContent = link ? 'Website link' : 'Name or details';
+      f.elements.label.placeholder = STYPE[t].ph; f.elements.label.inputMode = link ? 'url' : 'text';
+      const cur = f.dataset.edit ? SUB.find(x => x.id === f.dataset.edit) : null, cy = f.elements.cycle.value;
+      if (SCYCLE[cy]) f.elements.next.value = cur && cur.next && cur.cycle === cy ? cur.next : addCycle(cy);   // an edit keeps its date unless the cycle changes
+    }
     $('#view').addEventListener('change', e => {
-      const t = e.target; if (!t || t.name !== 'type' || !t.form || t.form.dataset.form !== 'newsub') return;
-      const f = t.form; if (!STYPE[t.value]) return;
-      f.elements.label.placeholder = STYPE[t.value].ph;
-      if (!f.dataset.edit) { if (t.value === 'domain') f.elements.cycle.value = 'yearly'; else if (t.value === 'maintenance') f.elements.cycle.value = 'monthly'; }
+      const t = e.target; if (!t || !t.form || t.form.dataset.form !== 'newsub') return;
+      const f = t.form;
+      if (t.name === 'type') {
+        if (!STYPE[t.value]) return;
+        if (!f.dataset.edit) { if (t.value === 'domain') f.elements.cycle.value = 'yearly'; else if (t.value === 'maintenance') f.elements.cycle.value = 'monthly'; }
+        syncSubForm(f);
+      } else if (t.name === 'cycle') syncSubForm(f);
     });
     let savingSub = false, subKey = null;
     async function saveSub(f) {
       if (savingSub) return;
       const d = new FormData(f), err = $('#sErr'), btn = $('#sSave'), editId = f.dataset.edit;
-      const type = String(d.get('type') || ''), label = String(d.get('label') || '').trim().replace(/\s+/g, ' ').slice(0, 120);
-      const amt = Math.round(parseFloat(d.get('amt')) * 100) / 100, cycle = String(d.get('cycle') || ''), next = String(d.get('next') || '');
+      const type = String(d.get('type') || ''), linkT = LINKT.includes(type);
+      let label = String(d.get('label') || '').trim().replace(/\s+/g, ' ').slice(0, 300);
+      const amt = Math.round(parseFloat(d.get('amt')) * 100) / 100, cycle = String(d.get('cycle') || '');
       const status = String(d.get('status') || ''), notes = String(d.get('notes') || '').trim().replace(/\s+/g, ' ').slice(0, 200), cid = String(d.get('cust') || '');
       const bad = m => { err.textContent = m; };
       const cur = editId ? SUB.find(x => x.id === editId) : null;
       if (editId && !cur) { hideSubPanel(); return; }
       if (!STYPE[type]) return bad('Choose the subscription type.');
-      if (!label) return bad('Enter the name or details, such as a domain name.');
+      if (!label) return bad(linkT ? 'Enter the website link, for example https://example.com.' : 'Enter the name or details.');
+      if (linkT) { const u = siteUrl(label); if (!u) return bad('That is not a valid website link. Use something like https://example.com.'); label = u; }
+      if (label.length > 120) { if (linkT) return bad('That link is too long. Use a shorter link.'); label = label.slice(0, 120); }
       if (!(amt > 0) || amt > 1e9) return bad('Enter an amount greater than zero.');
       if (!SCYCLE[cycle]) return bad('Choose a billing cycle.');
-      if (!/^\d{4}-\d\d-\d\d$/.test(next)) return bad('Choose the next renewal date.');
+      const next = cur && cur.next && cur.cycle === cycle ? cur.next : addCycle(cycle);   // automatic: one billing cycle from today, unless an edit keeps the same cycle
       if (!['active', 'paused', 'cancelled'].includes(status)) return bad('Choose a status.');
       const cidF = cur && cur.cid ? cur.cid : cid;   // a linked customer cannot be changed
       const c = cidF ? K.find(x => x.id === cidF) : null, keep = !!(cur && cur.cid);
@@ -1016,7 +1243,7 @@
         doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.text(i.num, 192, 30, { align: 'right' });
         doc.setTextColor(120, 128, 160); doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.text('BILLED TO', 18, 62);
         doc.setTextColor(15, 21, 53); doc.setFontSize(13); doc.text(doc.splitTextToSize(i.to, 90), 18, 70);
-        const meta = [['Issued', fmtD(i.at || Date.now())], ['Due', fmtD(i.due)], ['Status', ILABEL[st]]];
+        const meta = [['Issued', fmtD(i.at || Date.now())], i.due ? ['Due', fmtD(i.due)] : ['Payment', PAYT[i.pt] || '-'], ['Status', ILABEL[st]]];
         meta.forEach(([k, v], n) => {
           const y = 62 + n * 8;
           doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(120, 128, 160); doc.text(k, 120, y);
@@ -1024,7 +1251,7 @@
         });
         doc.setFillColor(240, 242, 255); doc.rect(18, 100, 174, 10, 'F');
         doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(67, 81, 232); doc.text('DESCRIPTION', 22, 106.4); doc.text('AMOUNT', 188, 106.4, { align: 'right' });
-        doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(15, 21, 53); const lines = doc.splitTextToSize(i.desc, 112);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(15, 21, 53); const lines = doc.splitTextToSize(i.desc + (PAYT[i.pt] ? ' - ' + PAYT[i.pt] : ''), 112);
         doc.text(lines, 22, 120); doc.text(pdfMoney(i.amt), 188, 120, { align: 'right' });
         const yEnd = 120 + lines.length * 5.5 + 4; doc.setDrawColor(220, 224, 245); doc.line(18, yEnd, 192, yEnd);
         doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(120, 128, 160); doc.text(i.paid ? 'AMOUNT PAID' : 'TOTAL DUE', 120, yEnd + 12);
@@ -1040,22 +1267,64 @@
     const views = {
       subscriptions: () => subView(),
       overview() {
-        const act = projs().filter(p => status(p) === 'active').length;
-        const all = projs().flatMap(p => p.items), done = all.filter(m => m.d).length;
-        const owed = sumAmt(I.filter(i => !i.paid)), paidInv = I.filter(i => i.paid), received = sumAmt(paidInv);
+        const P = projs(), act = P.filter(p => status(p) === 'active').length;
+        const all = P.flatMap(p => p.items), done = all.filter(m => m.d).length;
+        const unpaidInv = I.filter(i => !i.paid), owed = sumAmt(unpaidInv), paidInv = I.filter(i => i.paid), received = sumAmt(paidInv);
         const overall = all.length ? Math.round(done / all.length * 100) : 0;
-        const next = projs().filter(p => !p.archived).map(p => ({ p: p.name, m: p.items.find(m => !m.d) })).filter(x => x.m);
-        const stat = (l, v, g) => `<div data-f class="${card} !p-4 sm:!p-5"><div class="text-xs text-slate-400">${l}</div><div class="stat-v mt-1 text-lg min-[420px]:text-xl sm:text-2xl font-extrabold ${g ? 'gradient-text' : ''}">${v}</div></div>`;
-        return `<p data-f class="text-slate-400 mb-5">Welcome back, <span class="font-semibold text-slate-200">${esc(U.displayName || U.email.split('@')[0])}</span>. Here is where your projects stand.</p>
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-4">${stat('Active projects', act, 1)}${stat('Inclusions done', done + ' / ' + all.length)}${stat('Outstanding', money(owed))}${stat('Quotes to email', Q.filter(q => !q.emailSent).length)}</div>
-        <div class="mt-4 grid lg:grid-cols-[1fr_1.4fr] gap-4">
-          <div data-f class="${card} flex items-center gap-5">
-            <div class="relative w-28 h-28 shrink-0"><svg viewBox="0 0 36 36" class="w-28 h-28 -rotate-90"><defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#5b6cff"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><circle cx="18" cy="18" r="15.5" fill="none" stroke="currentColor" stroke-opacity=".12" stroke-width="3.2"/><circle cx="18" cy="18" r="15.5" fill="none" stroke="url(#g)" stroke-width="3.2" stroke-linecap="round" stroke-dasharray="${(overall * 97.4 / 100).toFixed(1)} 97.4"/></svg><div class="absolute inset-0 flex items-center justify-center font-extrabold text-xl">${overall}%</div></div>
-            <div><div class="font-bold">Overall progress</div><p class="text-sm text-slate-400 mt-1">Across all of your projects.</p></div>
+        const next = P.filter(p => !p.archived).map(p => ({ p: p.name, m: p.items.find(m => !m.d) })).filter(x => x.m);
+        const toMail = Q.filter(q => !q.emailSent).length;
+        const name = U.displayName || U.email.split('@')[0];
+        const hr = new Date().getHours(), hello = hr < 5 ? 'Still up' : hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening';
+        const today = new Date().toLocaleDateString('en', { weekday: 'long', month: 'long', day: 'numeric' });
+        const ph = s => '-' + ((Date.now() / 1000) % s).toFixed(2) + 's';   // keeps the slow animations in phase when the page redraws
+        const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
+        const sub = !P.length ? 'Your workspace is ready. Start a project and it will light up here.'
+          : act ? `${plural(act, 'project')} in motion, ${overall}% of all inclusions delivered.` : 'No project is in motion right now. Tick an inclusion to start one.';
+        const chip = (c, t) => `<span class="ov-chip"><i style="background:${c}"></i>${t}</span>`;
+        const dueTxt = p => {
+          if (!p.due) return { t: 'No target date', late: false };
+          const t = new Date(/^\d{4}-\d\d-\d\d$/.test(p.due) ? p.due + 'T00:00:00' : p.due); if (isNaN(t)) return { t: 'No target date', late: false };
+          const d = Math.ceil((t - Date.now()) / 864e5);
+          return d < 0 ? { t: 'Overdue by ' + plural(-d, 'day'), late: true } : d === 0 ? { t: 'Due today', late: false } : { t: plural(d, 'day') + ' left', late: false };
+        };
+        const tile = (l, v, s, ac, ic, g) => `<div data-f class="ov-tile" style="--ac:${ac}"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="text-xs font-semibold tracking-wide text-slate-400">${l}</div><div class="stat-v mt-1.5 text-xl min-[420px]:text-2xl sm:text-[1.7rem] font-extrabold tracking-tight ${g ? 'gradient-text' : ''}">${v}</div></div><span class="ov-ico">${svg(ic, 'w-[18px] h-[18px]')}</span></div><div class="mt-3 text-xs text-slate-400 truncate">${s}</div></div>`;
+        const seg = p => { const n = Math.max(1, Math.min(12, p.items.length)), on = Math.round(pct(p) * n / 100); return `<div class="ov-seg">${Array.from({ length: n }, (_, k) => `<i class="${k < on ? 'on' : ''}"></i>`).join('')}</div>`; };
+        const live = P.filter(p => !p.archived).sort((a, b) => pct(b) - pct(a)).slice(0, 5);
+        const pulse = live.map(p => { const d = dueTxt(p), s = status(p); return `<div class="ov-row"><div class="flex items-center justify-between gap-3"><div class="min-w-0"><div class="font-semibold truncate">${esc(p.name)}</div><div class="text-xs mt-0.5 truncate ${d.late ? 'text-pink' : 'text-slate-400'}">${esc(d.t)}</div></div><span class="${badgeCls(s)} !px-2.5 !py-0.5">${pct(p)}%</span></div>${seg(p)}</div>`; }).join('') || `<div class="ov-empty">${svg(ICON.projects, 'w-6 h-6')}<span>No active projects yet.</span></div>`;
+        const tl = next.slice(0, 6).map(x => `<li><span class="ov-node"></span><div class="text-sm font-semibold break-words">${esc(x.m.t)}</div><div class="text-xs text-slate-400 truncate">${esc(x.p)}</div></li>`).join('');
+        const tot = owed + received, paidPct = tot ? Math.round(received / tot * 100) : 0;
+        const invRows = I.slice(0, 3).map(i => `<div class="flex items-center gap-3 py-2.5 border-t border-white/10 first:border-0 text-sm"><span class="ov-dot ${i.paid ? 'ok' : 'due'}"></span><span class="truncate min-w-0 flex-1">${esc(i.num)} <span class="text-slate-400">&middot; ${esc(i.desc)}</span></span><span class="shrink-0 font-semibold ${i.paid ? 'text-emerald-300' : 'text-pink'}">${money(i.amt)}</span></div>`).join('') || '<div class="ov-empty">' + svg(ICON.invoices, 'w-6 h-6') + '<span>No invoices yet.</span></div>';
+        const link = (v, t) => `<button type="button" data-act="go" data-v="${v}" class="ov-link">${t}<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>`;
+        return `<section data-f class="ov-hero" style="--ph:${ph(28)}">
+          <div class="relative z-[1] flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-6 sm:gap-8">
+            <div class="min-w-0 max-w-xl">
+              <div class="ov-eyebrow"><span class="ov-live"></span>${esc(today)}</div>
+              <h2 class="mt-3 text-[1.65rem] sm:text-4xl font-extrabold tracking-tight leading-[1.1]">${hello},<br><span class="gradient-text break-words">${esc(name)}</span></h2>
+              <p class="mt-3 text-sm sm:text-base text-slate-400 max-w-md">${esc(sub)}</p>
+              <div class="mt-5 flex flex-wrap gap-2">${chip('#22d3ee', plural(act, 'active project'))}${chip('#f472b6', unpaidInv.length + ' awaiting payment')}${chip('#7c8cff', plural(toMail, 'quote') + ' to email')}</div>
+            </div>
+            <div class="ov-orbit shrink-0 self-center" style="--ph:${ph(24)}">
+              <div class="ov-orbit-ring"><i></i></div>
+              <svg viewBox="0 0 36 36" class="ov-orbit-svg"><defs><linearGradient id="ovg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#7c8cff"/><stop offset=".55" stop-color="#22d3ee"/><stop offset="1" stop-color="#f472b6"/></linearGradient></defs><circle cx="18" cy="18" r="15.5" fill="none" stroke="currentColor" stroke-opacity=".12" stroke-width="2.6"/><circle cx="18" cy="18" r="15.5" fill="none" stroke="url(#ovg)" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="${(overall * 97.4 / 100).toFixed(1)} 97.4"/></svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center"><div class="text-3xl sm:text-4xl font-extrabold tracking-tight">${overall}<span class="text-lg text-slate-400">%</span></div><div class="text-[11px] font-semibold uppercase tracking-[.18em] text-slate-400">delivered</div></div>
+            </div>
           </div>
-          <div data-f class="${card}"><div class="font-bold mb-3">Up next</div>${next.length ? next.map(x => `<div class="flex items-center justify-between gap-3 py-2 border-t border-white/10 first:border-0 text-sm"><span class="truncate">${esc(x.m.t)}</span><span class="text-slate-400 truncate">${esc(x.p)}</span></div>`).join('') : `<p class="text-sm text-slate-400">${projs().length ? 'Everything is complete. 🎉' : 'No projects yet.'}</p>`}</div>
+        </section>
+        <div class="mt-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-4">${tile('Active projects', act, 'of ' + P.length + ' total', '#22d3ee', ICON.projects, 1)}${tile('Inclusions done', done + ' / ' + all.length, overall + '% complete', '#7c8cff', 'M5 13l4 4L19 7')}${tile('Outstanding', money(owed), plural(unpaidInv.length, 'unpaid invoice'), '#f472b6', ICON.invoices)}${tile('Quotes to email', toMail, 'of ' + Q.length + ' received', '#34d399', ICON.messages)}</div>
+        <div class="mt-4 grid lg:grid-cols-[1.35fr_1fr] gap-4">
+          <div data-f class="${card}"><div class="flex items-center justify-between gap-3 mb-1"><div class="font-bold">Project pulse</div>${link('projects', 'All projects')}</div><div class="ov-rows">${pulse}</div></div>
+          <div data-f class="${card}"><div class="flex items-center justify-between gap-3 mb-4"><div class="font-bold">Up next</div>${tl ? `<span class="text-xs text-slate-400">${next.length} open</span>` : ''}</div>${tl ? `<ol class="ov-tl">${tl}</ol>` : `<div class="ov-empty">${svg('M5 13l4 4L19 7', 'w-6 h-6')}<span>${P.length ? 'Everything is complete. 🎉' : 'No projects yet.'}</span></div>`}</div>
         </div>
-        <div data-f class="${card} mt-4"><div class="font-bold mb-3">Recent invoices</div><div class="grid grid-cols-2 gap-3 mb-3"><div class="rounded-xl bg-white/10 p-3"><div class="text-xs text-slate-400">Total paid</div><div class="mt-0.5 text-lg font-extrabold">${paidInv.length} <span class="text-xs font-semibold text-slate-400">of ${I.length} invoice${I.length === 1 ? '' : 's'}</span></div></div><div class="rounded-xl bg-white/10 p-3"><div class="text-xs text-slate-400">Payments received</div><div class="mt-0.5 text-lg font-extrabold text-emerald-300">${money(received)}</div></div></div>${I.slice(0, 3).map(i => `<div class="flex items-center justify-between gap-3 py-2 border-t border-white/10 first:border-0 text-sm"><span class="truncate">${esc(i.num)} · ${esc(i.desc)}</span><span class="font-semibold ${i.paid ? 'text-emerald-300' : 'text-pink'}">${i.paid ? 'Paid' : money(i.amt)}</span></div>`).join('') || '<p class="text-sm text-slate-400">No invoices yet.</p>'}</div>`;
+        <div data-f class="${card} mt-4"><div class="flex items-center justify-between gap-3 mb-4"><div class="font-bold">Cash flow</div>${link('invoices', 'All invoices')}</div>
+          <div class="grid md:grid-cols-2 gap-6 md:gap-8">
+            <div class="min-w-0">
+              <div class="flex items-end justify-between gap-4"><div class="min-w-0"><div class="text-xs font-semibold tracking-wide text-slate-400">Received</div><div class="stat-v mt-1 text-xl sm:text-2xl font-extrabold text-emerald-300">${money(received)}</div></div><div class="min-w-0 text-right"><div class="text-xs font-semibold tracking-wide text-slate-400">Outstanding</div><div class="stat-v mt-1 text-xl sm:text-2xl font-extrabold text-pink">${money(owed)}</div></div></div>
+              <div class="ov-split mt-4"><i style="width:${paidPct}%"></i></div>
+              <div class="mt-2.5 flex items-center justify-between text-xs text-slate-400"><span>${paidInv.length} of ${plural(I.length, 'invoice')} paid</span><span>${paidPct}% collected</span></div>
+            </div>
+            <div class="min-w-0">${invRows}</div>
+          </div>
+        </div>`;
       },
       projects() {
         const list = visible();
@@ -1071,16 +1340,6 @@
         return `<div class="grid grid-cols-2 gap-4 mb-4"><div data-f class="${card}"><div class="text-xs text-slate-400">Outstanding</div><div data-istat="owed" data-v="${owed}" class="stat-v mt-1 text-lg min-[420px]:text-xl sm:text-2xl font-extrabold gradient-text">${money(owed)}</div></div><div data-f class="${card}"><div class="text-xs text-slate-400">Paid to date</div><div data-istat="paid" data-v="${paid}" class="stat-v mt-1 text-lg min-[420px]:text-xl sm:text-2xl font-extrabold">${money(paid)}</div></div></div>
         <div data-f class="flex flex-wrap items-center justify-between gap-3 mb-5"><div class="flex flex-wrap gap-2">${pill('all', 'All (' + I.length + ')')}${pill('unpaid', 'Unpaid (' + unpaid + ')')}${pill('paid', 'Paid (' + (I.length - unpaid) + ')')}</div>
           <button id="newInvBtn" data-act="newinv" class="btn-shine w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white text-sm shadow-lg shadow-brand-500/30">+ New invoice</button></div>
-        <div id="iPanel" class="i-panel" inert><div><form data-form="newinv" data-edit="" class="${card} space-y-4"><div id="iTitle" class="font-bold">New invoice</div>
-          <div class="grid sm:grid-cols-2 gap-4">
-            <label class="${lbl}">Billed to (customer)<select name="cust" required class="field mt-1.5"><option value="">Choose a customer...</option></select></label>
-            <label class="${lbl}">Description<input name="desc" required maxlength="120" autocomplete="off" class="field mt-1.5" placeholder="e.g. Website redesign: deposit"/></label>
-            <label class="${lbl}">Amount (PHP)<input name="amt" type="number" inputmode="decimal" min="1" max="1000000000" step="0.01" required class="field mt-1.5" placeholder="15000"/></label>
-            <label class="${lbl}">Due date<input name="due" type="date" required class="field mt-1.5"/></label>
-          </div>
-          <p id="iHint" class="text-xs text-slate-400 -mt-1"></p>
-          <p id="iErr" class="text-sm text-red-400 min-h-[1.25rem]" role="alert"></p>
-          <div class="flex flex-wrap gap-3"><button type="submit" id="iSave" class="btn-shine px-6 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white">Create invoice</button><button type="button" data-act="icancel" class="px-6 py-3 rounded-xl glass font-semibold text-slate-300 hover:text-white transition">Cancel</button></div></form></div></div>
         ${iError ? `<p class="mb-4 text-sm text-red-400" role="alert">${esc(iError)}</p>` : ''}
         <div id="igrid" data-ids="${I.map(i => i.id).join(',')}" class="space-y-3">${iGridHtml()}</div>`;
       },
@@ -1150,14 +1409,38 @@
         const cl = Object.create(null); I.forEach(i => { const n = i.to || 'Unknown', c = cl[n] || (cl[n] = { b: 0, p: 0 }); c.b += i.amt; if (i.paid) c.p += i.amt; });
         const top = Object.entries(cl).sort((a, b) => b[1].b - a[1].b).slice(0, 5);
         const ledger = paidL.slice().sort((a, b) => b.paidAt - a.paidAt).slice(0, 8);
+        // expenses: salaries, domain, hosting and the rest, counted on every payment date up to today
+        const ex = exBooks(today), net = Math.round((recv - ex.total) * 100) / 100, pl = (n, w) => n + ' ' + w + (n === 1 ? '' : 's'), shortS = n => (n < 0 ? '-' : '') + short(Math.abs(n));
+        months.forEach(m => { m.x = 0; });
+        ex.pays.forEach(p => { const m = months.find(x => x.k === p.d.slice(0, 7)); if (m) m.x += p.amt; });
+        const mx2 = Math.max(1, ...months.map(m => Math.max(m.v, m.x)));
+        const catRows = Object.entries(ex.cat).sort((a, b) => b[1] - a[1]), catSum = Math.round(catRows.reduce((a, c) => a + c[1], 0) * 100) / 100;
+        const exList = EX.map(x => {
+          const n = exDates(x, today).length, paid = Math.round(n * x.amt * 100) / 100, later = x.date > today;
+          const when = x.rep === 'once' ? fmtD(x.date) : EXREP[x.rep].l + ' since ' + fmtD(x.date) + (x.end ? ', stops ' + fmtD(x.end) : '');
+          return `<div data-xid="${esc(x.id)}" class="py-3 border-t border-white/10 first:border-0"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="font-semibold break-words">${esc(x.name)}</div><div class="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-slate-400"><span class="px-2.5 py-0.5 rounded-full bg-brand-500/15 text-brand-400 font-semibold">${esc(EXCAT[x.cat])}</span><span>${esc(when)}</span>${later ? '<span class="text-pink font-semibold">Starts later</span>' : ''}</div>${x.notes ? `<div class="mt-1 text-xs text-slate-500 break-words">${esc(x.notes)}</div>` : ''}</div><div class="shrink-0 text-right"><div class="font-extrabold">${money2(x.amt)}</div><div class="text-xs text-slate-400">${x.rep === 'once' ? (later ? 'Not paid yet' : 'Paid') : pl(n, 'payment') + ' &middot; ' + money2(paid)}</div></div></div><div class="mt-2 flex gap-4"><button data-act="exedit" data-x="${esc(x.id)}" class="text-sm font-semibold text-brand-400 hover:text-white">Edit</button><button data-act="exdel" data-x="${esc(x.id)}" class="text-sm font-semibold text-red-300 hover:text-red-200">Delete</button></div></div>`;
+        }).join('');
         const stat = (l, v, c) => `<div data-f class="${card} !p-4 sm:!p-5"><div class="text-xs text-slate-400">${l}</div><div class="stat-v mt-1 text-lg min-[420px]:text-xl sm:text-2xl font-extrabold ${c || ''}">${v}</div></div>`;
         const row = (a, b) => `<div class="flex items-center justify-between gap-3 py-2 border-t border-white/10 first:border-0 text-sm">${a}${b}</div>`;
         const none = t => `<p class="text-sm text-slate-400">${t}</p>`;
         return `${iError ? `<p class="mb-4 text-sm text-red-400" role="alert">${esc(iError)}</p>` : ''}
-        <div class="flex flex-wrap items-center justify-between gap-3 mb-5"><p data-f class="text-slate-400">Money in, money owed and what needs chasing, taken from your invoices.</p>
-          <button data-f data-act="acsv" class="w-full sm:w-auto px-5 py-2.5 rounded-xl glass text-sm font-semibold text-brand-400 hover:text-white transition">Export CSV</button></div>
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-5"><p data-f class="text-slate-400">Money in, money out, money owed and what needs chasing, taken from your invoices and expenses.</p>
+          <div data-f class="flex flex-wrap items-center gap-2 w-full sm:w-auto"><button data-act="acsv" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl glass text-sm font-semibold text-brand-400 hover:text-white transition">Export CSV</button><button id="newExBtn" data-act="newex" class="btn-shine flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white text-sm shadow-lg shadow-brand-500/30">+ Add expense</button></div></div>
         <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-4">${stat('Total invoiced', money(total))}${stat('Payments received', money(recv), 'gradient-text')}${stat('Outstanding', money(owed))}${stat('Overdue', money(lateAmt), lateAmt ? 'text-red-300' : '')}</div>
         <div data-f class="${card} mt-4"><div class="flex items-center justify-between gap-3"><div class="font-bold">Collection rate</div><div class="font-extrabold">${rate}%</div></div><div class="bar mt-3 h-2 rounded-full bg-white/10"><i style="width:${rate}%"></i></div><p class="mt-2 text-xs text-slate-400">${money(recv)} collected of ${money(total)} invoiced &middot; ${paidL.length} of ${I.length} invoices paid</p></div>
+        <div class="mt-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-4">${stat('Expenses to date', money(ex.total))}${stat('Net profit', money(net), net < 0 ? 'text-red-300' : 'gradient-text')}${stat('Expenses this month', money(ex.thisMonth))}${stat('Monthly running cost', money(ex.run))}</div>
+        <div class="mt-4 grid xl:grid-cols-2 gap-4">
+          <div data-f class="${card}"><div class="font-bold mb-3">Profit &amp; loss</div>
+            ${row('<span>Payments received</span>', `<span class="font-semibold text-emerald-300">${money2(recv)}</span>`)}
+            ${catRows.map(([k, v]) => row(`<span class="truncate text-slate-300">${esc(EXCAT[k])}</span>`, `<span class="shrink-0 font-semibold">&minus; ${money2(v)}</span>`)).join('') || row('<span class="text-slate-400">No expenses recorded yet</span>', '<span class="text-slate-400">&minus; ' + money2(0) + '</span>')}
+            ${row('<span class="font-semibold">Total expenses</span>', `<span class="shrink-0 font-semibold">&minus; ${money2(ex.total)}</span>`)}
+            ${row('<span class="font-extrabold">Net profit</span>', `<span class="shrink-0 font-extrabold ${net < 0 ? 'text-red-300' : 'text-emerald-300'}">${money2(net)}</span>`)}
+            <p class="mt-3 text-xs ${Math.abs(catSum - ex.total) < 0.005 ? 'text-slate-400' : 'text-red-300'}">${Math.abs(catSum - ex.total) < 0.005 ? '&#10003; Categories add up to the total.' : 'The categories do not add up to the total. Please review your expenses.'} Income counts when an invoice is marked paid. Expenses count on every payment date up to today.</p></div>
+          <div data-f class="${card}"><div class="flex items-center justify-between gap-3 mb-3"><div class="font-bold">Income vs expenses &middot; last 6 months</div><div class="flex items-center gap-3 text-[11px] text-slate-400"><span class="inline-flex items-center gap-1.5"><i class="w-2.5 h-2.5 rounded-sm bg-brand-500"></i>Income</span><span class="inline-flex items-center gap-1.5"><i class="w-2.5 h-2.5 rounded-sm bg-pink"></i>Expenses</span></div></div>
+            <div class="h-32 flex items-end gap-2">${months.map(m => `<div class="flex-1 min-w-0 h-full flex items-end justify-center gap-1"><div class="w-full max-w-[1.25rem] rounded-t-md bg-gradient-to-t from-brand-500 to-aqua" style="height:${m.v ? Math.max(4, Math.round(m.v / mx2 * 100)) : 2}%;opacity:${m.v ? 1 : .25}"></div><div class="w-full max-w-[1.25rem] rounded-t-md bg-pink" style="height:${m.x ? Math.max(4, Math.round(m.x / mx2 * 100)) : 2}%;opacity:${m.x ? 1 : .25}"></div></div>`).join('')}</div>
+            <div class="mt-2 flex gap-2">${months.map(m => `<div class="flex-1 min-w-0 text-center"><div class="text-xs text-slate-400">${m.l}</div><div class="text-[10px] truncate ${m.v - m.x < 0 ? 'text-red-300' : 'text-slate-500'}">${m.v || m.x ? shortS(m.v - m.x) : '-'}</div></div>`).join('')}</div>
+            <p class="mt-2 text-[11px] text-slate-500">Figures under each month show income minus expenses.</p></div>
+        </div>
         <div class="mt-4 grid xl:grid-cols-2 gap-4">
           <div data-f class="${card}"><div class="font-bold mb-3">Payments received &middot; last 6 months</div>
             <div class="h-32 flex items-end gap-2">${months.map(m => `<div class="flex-1 min-w-0 h-full flex items-end justify-center"><div class="w-full max-w-[2.5rem] rounded-t-lg bg-gradient-to-t from-brand-500 to-aqua" style="height:${m.v ? Math.max(4, Math.round(m.v / mx * 100)) : 2}%;opacity:${m.v ? 1 : .25}"></div></div>`).join('')}</div>
@@ -1167,7 +1450,11 @@
         <div class="mt-4 grid xl:grid-cols-2 gap-4">
           <div data-f class="${card}"><div class="font-bold mb-3">Top clients</div>${top.map(([n, c]) => row(`<span class="truncate">${esc(n)}</span>`, `<span class="shrink-0 text-right flex flex-col min-[420px]:block"><span class="font-semibold text-emerald-300">${money(c.p)}</span> <span class="text-slate-400">of ${money(c.b)}</span></span>`)).join('') || none('No invoices yet.')}</div>
           <div data-f class="${card}"><div class="font-bold mb-3">Payment ledger</div>${ledger.map(i => row(`<span class="truncate"><span class="text-slate-400">${i.paidAt ? fmtD(i.paidAt) : '-'}</span> &middot; ${esc(i.num)} &middot; ${esc(i.to)}</span>`, `<span class="shrink-0 font-semibold text-emerald-300">${money(i.amt)}</span>`)).join('') || none('No payments received yet.')}</div>
-        </div>`;
+        </div>
+        ${exError ? `<p class="mt-4 text-sm text-red-400" role="alert">${esc(exError)}</p>` : ''}
+        <div data-f class="${card} mt-4"><div class="flex flex-wrap items-center justify-between gap-3 mb-4"><div><div class="font-bold">Expenses</div><p class="text-xs text-slate-400 mt-0.5">Developer salaries, domains, hosting, tools and other costs of running the business.</p></div>
+          <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto"><button data-act="excsv" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl glass text-sm font-semibold text-brand-400 hover:text-white transition">Export CSV</button></div></div>
+          ${exList || none('No expenses yet. Add your developer salaries, domain, hosting and other costs so your net profit is right.')}</div>`;
       },
       messages() {
         const todo = Q.filter(q => !q.emailSent).length;
@@ -1291,17 +1578,32 @@
     }
     // ---------- notifications (bell in the top bar) ----------
     // count = unread chat messages + quotations still to email + overdue invoices
-    let notifLast = 0;
-    function notifItems() {
+    let notifLast = 0, ND = null;
+    // "Mark all as read" remembers how many of each kind were already seen on this device; only newer ones show up again
+    const ndKey = () => 'nd:' + (U ? U.uid : '');
+    const ndGet = () => { if (!ND || ND.k !== ndKey()) { let v = {}; try { v = JSON.parse(localStorage.getItem(ndKey())) || {}; } catch (e) {} ND = { k: ndKey(), v }; } return ND.v; };
+    const ndSave = () => { try { localStorage.setItem(ndKey(), JSON.stringify(ND.v)); } catch (e) {} };
+    function notifItems(raw) {
       const chat = chCust().reduce((n, c) => n + (chOpenNow(c.uid) ? 0 : chUnread(c.uid)), 0);
-      return [
+      const list = [
         { v: 'chat', icon: ICON.chat, t: 'Unread chat messages', n: chat },
         { v: 'messages', icon: ICON.messages, t: 'Quotations to email', n: Q.filter(q => !q.emailSent).length },
         { v: 'invoices', icon: ICON.invoices, t: 'Overdue invoices', n: I.filter(i => istat(i) === 'overdue').length },
         { v: 'subscriptions', icon: ICON.subscriptions, t: 'Subscriptions to renew', n: SUB.filter(x => ['soon', 'overdue'].includes(sstat(x))).length },
         { v: 'subscriptions', icon: ICON.subscriptions, t: 'Maintenance requests to review', n: C.reduce((n, p) => n + mtReqs(p.id).filter(r => r.status === 'requested').length, 0) },
-        { v: 'subscriptions', icon: ICON.subscriptions, t: 'Free maintenance ending or ended', n: C.filter(p => p.mf > 0 && ['soon', 'ended'].includes(mtInfo(p).k) && !mtReqs(p.id).some(r => r.status === 'requested' || r.status === 'active')).length }
-      ].filter(x => x.n > 0);
+        { v: 'subscriptions', icon: ICON.subscriptions, t: 'Free maintenance ending or ended', n: C.filter(p => p.mw > 0 && p.mf > 0 && ['soon', 'ended'].includes(mtInfo(p).k) && !mtReqs(p.id).some(r => r.status === 'requested' || r.status === 'active')).length }
+      ];
+      if (raw || !U) return list.filter(x => x.n > 0);
+      const nd = ndGet(); let ch = false;
+      list.forEach(x => { const base = nd[x.t] || 0; if (x.n < base) { nd[x.t] = x.n; ch = true; x.n = 0; } else x.n -= base; });   // fewer than before: lower the mark so later ones show again
+      if (ch) ndSave();
+      return list.filter(x => x.n > 0);
+    }
+    function markAllRead() {
+      if (!U) return;
+      const nd = ndGet(); notifItems(true).forEach(x => { nd[x.t] = x.n; }); ndSave();
+      chCust().forEach(c => { if (chUnread(c.uid) > 0) update(ref(db, `chats/${c.uid}/meta`), { adminUnread: 0 }).catch(() => {}); });   // chat messages are marked read for real
+      drawNotif(); toast('All notifications marked as read');
     }
     function drawNotif() {
       const wrap = $('#notifWrap'); if (!wrap) return;
@@ -1311,7 +1613,7 @@
       if (total > notifLast) pop(b);
       notifLast = total;
       $('#notifBtn').setAttribute('aria-label', total ? 'Notifications, ' + total + ' new' : 'Notifications');
-      $('#notifMenu').innerHTML = '<div class="px-3 pt-2 pb-1.5 text-xs font-semibold text-slate-400">Notifications</div>' + (items.map(x => `<button type="button" data-nv="${x.v}" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm hover:bg-white/10 transition">${svg(x.icon, 'w-4 h-4 shrink-0 text-brand-400')}<span class="flex-1 min-w-0 truncate">${x.t}</span><span class="shrink-0 min-w-[1.25rem] h-5 px-1.5 rounded-full bg-pink text-white text-[11px] font-bold inline-flex items-center justify-center">${x.n > 99 ? '99+' : x.n}</span></button>`).join('') || '<p class="px-3 py-3 text-sm text-slate-400">You are all caught up.</p>');
+      $('#notifMenu').innerHTML = '<div class="flex items-center justify-between gap-3 px-3 pt-2 pb-1.5"><span class="text-xs font-semibold text-slate-400">Notifications</span>' + (items.length ? '<button type="button" data-nall class="text-xs font-semibold text-brand-400 hover:text-white !bg-transparent">Mark all as read</button>' : '') + '</div>' + (items.map(x => `<button type="button" data-nv="${x.v}" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm hover:bg-white/10 transition">${svg(x.icon, 'w-4 h-4 shrink-0 text-brand-400')}<span class="flex-1 min-w-0 truncate">${x.t}</span><span class="shrink-0 min-w-[1.25rem] h-5 px-1.5 rounded-full bg-pink text-white text-[11px] font-bold inline-flex items-center justify-center">${x.n > 99 ? '99+' : x.n}</span></button>`).join('') || '<p class="px-3 py-3 text-sm text-slate-400">You are all caught up.</p>');
     }
     function closeNotif() { $('#notifMenu').classList.add('hidden'); $('#notifBtn').setAttribute('aria-expanded', 'false'); }
     $('#notifBtn').addEventListener('click', e => {
@@ -1319,7 +1621,7 @@
       const m = $('#notifMenu'), open = m.classList.contains('hidden');
       m.classList.toggle('hidden', !open); $('#notifBtn').setAttribute('aria-expanded', String(open));
     });
-    $('#notifMenu').addEventListener('click', e => { const b = e.target.closest('[data-nv]'); if (b) go(b.dataset.nv); });
+    $('#notifMenu').addEventListener('click', e => { if (e.target.closest('[data-nall]')) { markAllRead(); return; } const b = e.target.closest('[data-nv]'); if (b) go(b.dataset.nv); });
     document.addEventListener('click', e => { if (!$('#notifWrap').contains(e.target)) closeNotif(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeNotif(); });
     function chMarkRead() {
@@ -1542,6 +1844,7 @@
     $('#view').addEventListener('click', async e => {
       const b = e.target.closest('[data-act]'); if (!b) return; const a = b.dataset.act;
       if (a === 'flt') { flt = b.dataset.v; paint(false); }
+      else if (a === 'go') { go(b.dataset.v); }
       else if (a === 'qflt') { qflt = b.dataset.v; document.querySelectorAll('[data-qpill]').forEach(x => x.className = pillCls(x.dataset.v === qflt)); const g = $('#qgrid'); if (g) swapFilter(g, () => drawQ(true)); }
       else if (a === 'qmail') {
         const q = Q.find(x => x.id === b.dataset.q); if (!q) return;
@@ -1571,8 +1874,7 @@
         } else { save(); toast(arch ? 'Project completed and archived' : 'Project reopened'); }
       }
       else if (a === 'iflt') { iflt = b.dataset.v; document.querySelectorAll('[data-ipill]').forEach(x => x.className = pillCls(x.dataset.v === iflt)); const g = $('#igrid'); if (g) swapFilter(g, () => drawI(true)); }
-      else if (a === 'newinv') { if (invOpen) hideInvPanel(); else showInvPanel(null); }
-      else if (a === 'icancel') hideInvPanel();
+      else if (a === 'newinv') showInvPanel(null);
       else if (a === 'sflt') { sflt = b.dataset.v; document.querySelectorAll('[data-spill]').forEach(x => x.className = pillCls(x.dataset.v === sflt)); const g = $('#sgrid'); if (g) swapFilter(g, () => drawS(true)); }
       else if (a === 'newsub') { if (subOpen) hideSubPanel(); else showSubPanel(null); }
       else if (a === 'scancel') hideSubPanel();
@@ -1580,6 +1882,7 @@
       else if (a === 'srenew') renewSub(b.dataset.s, b);
       else if (a === 'sdel') openXSub(b.dataset.s, b);
       else if (a === 'sgoproj') go('projects');
+      else if (a === 'sfee') openFee(b.dataset.p, b);
       else if (a === 'iedit') { const i = I.find(x => x.id === b.dataset.i); if (i) showInvPanel(i); }
       else if (a === 'ipay') {
         const i = I.find(x => x.id === b.dataset.i); if (!i) return;
@@ -1593,9 +1896,20 @@
       }
       else if (a === 'idl') { const i = I.find(x => x.id === b.dataset.i); if (i) downloadPdf(i, b); }
       else if (a === 'idel') { openXDel(b.dataset.i, b); }
+      else if (a === 'newex') showExPanel(null);
+      else if (a === 'excancel') hideExPanel();
+      else if (a === 'exedit') { const x = EX.find(y => y.id === b.dataset.x); if (x) showExPanel(x); }
+      else if (a === 'exdel') openXExp(b.dataset.x, b);
+      else if (a === 'excsv') {
+        const q = v => { v = String(v); if (/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; };
+        const rows = [['Date', 'Description', 'Category', 'Repeats', 'Amount (PHP)', 'Notes']].concat(exBooks(dstr(new Date())).pays.map(p => [p.d, p.e.name, EXCAT[p.e.cat], EXREP[p.e.rep].l, p.amt.toFixed(2), p.e.notes]));
+        const url = URL.createObjectURL(new Blob(['\ufeff' + rows.map(r => r.map(q).join(',')).join('\r\n')], { type: 'text/csv' }));
+        const dl = document.createElement('a'); dl.href = url; dl.download = 'expenses-' + dstr(new Date()) + '.csv'; document.body.appendChild(dl); dl.click(); dl.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000); toast('Expenses exported');
+      }
       else if (a === 'acsv') {
         const q = v => { v = String(v); if (/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; };
-        const rows = [['Invoice', 'Billed to', 'Description', 'Amount (PHP)', 'Due date', 'Status', 'Date paid']].concat(I.map(i => [i.num, i.to, i.desc, i.amt.toFixed(2), i.due, ILABEL[istat(i)], i.paid && i.paidAt ? dstr(new Date(i.paidAt)) : '']));
+        const rows = [['Invoice', 'Billed to', 'Website type', 'Payment type', 'Amount (PHP)', 'Due date', 'Status', 'Date paid']].concat(I.map(i => [i.num, i.to, i.desc, PAYT[i.pt] || '', i.amt.toFixed(2), i.due, ILABEL[istat(i)], i.paid && i.paidAt ? dstr(new Date(i.paidAt)) : '']));
         const url = URL.createObjectURL(new Blob(['\ufeff' + rows.map(r => r.map(q).join(',')).join('\r\n')], { type: 'text/csv' }));
         const dl = document.createElement('a'); dl.href = url; dl.download = 'invoices-' + dstr(new Date()) + '.csv'; document.body.appendChild(dl); dl.click(); dl.remove();
         setTimeout(() => URL.revokeObjectURL(url), 1000); toast('Invoice ledger exported');
@@ -1663,8 +1977,6 @@
       e.preventDefault(); const f = e.target, k = f.dataset.form, d = new FormData(f);
       if (k === 'addinc') {
         await addFeature(f);
-      } else if (k === 'newinv') {
-        await saveInvoice(f);
       } else if (k === 'newsub') {
         await saveSub(f);
       } else if (k === 'newcust') {
@@ -1678,11 +1990,10 @@
 
     async function saveMaint(f) {
       const p = findP(f.dataset.p); if (!p || !p.cloud) return;
-      const d = new FormData(f), weeks = parseInt(d.get('weeks'), 10), fee = Math.round(parseFloat(d.get('fee')));
+      const d = new FormData(f), weeks = parseInt(d.get('weeks'), 10);
       if (!(weeks >= 0 && weeks <= 260)) return toast('Free maintenance must be 0 to 260 weeks.');
-      if (!(fee >= 0 && fee <= 1e7)) return toast('Enter a fee between 0 and 10,000,000.');
       const btn = f.querySelector('button[type="submit"]'); btn.disabled = true;
-      try { await withTimeout(update(ref(db, `users/${U.uid}/projects/${p.id}`), { maintenance: { weeks, fee } }), 12000); toast('Maintenance updated'); }
+      try { await withTimeout(update(ref(db, `users/${U.uid}/projects/${p.id}/maintenance`), { weeks }), 12000); toast('Maintenance updated'); }
       catch (err) { toast(failMsg(err, 'save the maintenance settings')); }
       btn.disabled = false;
     }
@@ -1767,7 +2078,7 @@
         const list = [];
         snap.forEach(ch => {
           const v = ch.val() || {};
-          list.push({ id: ch.key, num: v.number || 'INV', to: v.billedTo || '', cid: v.customerId || '', cuid: v.customerUid || '', desc: v.description || '', amt: +v.amount || 0, due: v.dueDate || '', paid: v.paid === true, paidAt: +v.paidAt || 0, at: +v.createdAt || 0 });
+          list.push({ id: ch.key, num: v.number || 'INV', to: v.billedTo || '', cid: v.customerId || '', cuid: v.customerUid || '', desc: v.description || '', pt: PAYT[v.paymentType] ? v.paymentType : '', amt: +v.amount || 0, due: v.dueDate || '', paid: v.paid === true, paidAt: +v.paidAt || 0, at: +v.createdAt || 0 });
         });
         list.sort((a, b) => b.at - a.at);
         const sig = JSON.stringify(list), wasFirst = first; first = false; iError = '';
@@ -1789,16 +2100,16 @@
     async function saveInvoice(f) {
       if (creatingInv) return;
       const d = new FormData(f), err = $('#iErr'), btn = $('#iSave'), editId = f.dataset.edit;
-      const desc = String(d.get('desc') || '').trim().replace(/\s+/g, ' ').slice(0, 120);
-      const amt = Math.round(parseFloat(d.get('amt')) * 100) / 100, due = String(d.get('due') || '');
+      const desc = String(d.get('webtype') || '').trim().slice(0, 120), pt = String(d.get('paytype') || '');
+      const amt = Math.round(parseFloat(d.get('amt')) * 100) / 100;
       const bad = m => { err.textContent = m; };
       const cur = editId ? I.find(x => x.id === editId) : null;
       if (editId && !cur) { hideInvPanel(); return; }
       const cid = cur && cur.cid ? cur.cid : String(d.get('cust') || '');
       if (!cid) return bad(K.length ? 'Choose the customer this invoice is for.' : 'There are no customers yet. Add the customer on the Customers page first. Invoices can only be created for customers in your database.');
-      if (!desc) return bad('Enter a description.');
+      if (!desc) return bad('Choose the website type.');
+      if (!PAYT[pt]) return bad('Choose the payment type.');
       if (!(amt > 0) || amt > 1e9) return bad('Enter an amount greater than zero.');
-      if (!/^\d{4}-\d\d-\d\d$/.test(due)) return bad('Choose a due date.');
       err.textContent = '';
       creatingInv = true; btn.disabled = true; btn.textContent = 'Saving...';
       try {
@@ -1807,12 +2118,12 @@
         const c = r.c, bt = (c.company || c.name).slice(0, 80), ib = `users/${U.uid}/invoices`;
         if (cur) {
           const linking = !cur.cuid;
-          if (!linking && desc === cur.desc && amt === cur.amt && due === cur.due) { hideInvPanel(); return; }   // nothing changed
-          const up = { [`${ib}/${cur.id}/description`]: desc, [`${ib}/${cur.id}/amount`]: amt, [`${ib}/${cur.id}/dueDate`]: due }, pb = `portal/${c.uid}/invoices/${cur.id}`;
+          if (!linking && desc === cur.desc && amt === cur.amt && pt === cur.pt) { hideInvPanel(); return; }   // nothing changed
+          const up = { [`${ib}/${cur.id}/description`]: desc, [`${ib}/${cur.id}/amount`]: amt, [`${ib}/${cur.id}/paymentType`]: pt }, pb = `portal/${c.uid}/invoices/${cur.id}`;
           if (linking) {
             up[`${ib}/${cur.id}/billedTo`] = bt; up[`${ib}/${cur.id}/customerId`] = c.id; up[`${ib}/${cur.id}/customerUid`] = c.uid;
-            up[pb] = { number: cur.num, description: desc, amount: amt, dueDate: due, paid: cur.paid, paidAt: cur.paid ? (cur.paidAt || 0) : 0, createdAt: cur.at || 0 };
-          } else { up[`${pb}/description`] = desc; up[`${pb}/amount`] = amt; up[`${pb}/dueDate`] = due; }
+            up[pb] = Object.assign({ number: cur.num, description: desc, paymentType: pt, amount: amt, paid: cur.paid, paidAt: cur.paid ? (cur.paidAt || 0) : 0, createdAt: cur.at || 0 }, cur.due ? { dueDate: cur.due } : {});
+          } else { up[`${pb}/description`] = desc; up[`${pb}/amount`] = amt; up[`${pb}/paymentType`] = pt; }
           await withTimeout(update(ref(db), up), 12000);
           hideInvPanel(); toast(cur.num + (linking ? ' linked to ' + bt : ' updated'));
           return;
@@ -1821,8 +2132,8 @@
         if (iflt !== 'all') { iflt = 'all'; document.querySelectorAll('[data-ipill]').forEach(x => x.className = pillCls(x.dataset.v === 'all')); }
         if (!invKey) invKey = push(ref(db, ib)).key;   // reused on retry, so a retry never creates a duplicate
         await withTimeout(update(ref(db), {
-          [`${ib}/${invKey}`]: { number: num, billedTo: bt, customerId: c.id, customerUid: c.uid, description: desc, amount: amt, dueDate: due, paid: false, createdAt: serverTimestamp() },
-          [`portal/${c.uid}/invoices/${invKey}`]: { number: num, description: desc, amount: amt, dueDate: due, paid: false, createdAt: serverTimestamp() }
+          [`${ib}/${invKey}`]: { number: num, billedTo: bt, customerId: c.id, customerUid: c.uid, description: desc, paymentType: pt, amount: amt, paid: false, createdAt: serverTimestamp() },
+          [`portal/${c.uid}/invoices/${invKey}`]: { number: num, description: desc, paymentType: pt, amount: amt, paid: false, createdAt: serverTimestamp() }
         }), 12000);
         invKey = null; hideInvPanel(); toast(num + ' created for ' + bt);
       } catch (e2) {
@@ -1902,15 +2213,14 @@
       if (!end) return showErr('Please choose an end date.', $('#mEnd'));
       if (end < start) return showErr('The end date cannot be before the start date.', $('#mEnd'));
       if (!inc.length) return showErr('Add at least one inclusion.', incIn);
-      const weeks = parseInt($('#mWeeks').value, 10), fee = Math.round(parseFloat($('#mFee').value));
+      const weeks = parseInt($('#mWeeks').value, 10);
       if (!(weeks >= 0 && weeks <= 260)) return showErr('Enter the free maintenance in weeks (0 to 260).', $('#mWeeks'));
-      if (!(fee >= 0 && fee <= 1e7)) return showErr('Enter the maintenance fee in PHP (0 if none).', $('#mFee'));
       mErr.textContent = ''; setSaving(true); flt = 'all';
       try {
         const base = `users/${U.uid}/projects`;
         if (!pendingKey) pendingKey = push(ref(db, base)).key;   // reused on retry, so a retry never creates a duplicate
         await withTimeout(set(ref(db, `${base}/${pendingKey}`), {
-          name, startDate: start, endDate: end, inclusions: inc.map(t => ({ t, d: false })), status: 'pending', maintenance: { weeks, fee },
+          name, startDate: start, endDate: end, inclusions: inc.map(t => ({ t, d: false })), status: 'pending', maintenance: { weeks, fee: 0 },
           requestedBy: U.email || U.displayName || '', createdAt: serverTimestamp()
         }), 12000);
         setSaving(false); closeModal(); toast('Project request submitted');
@@ -1921,6 +2231,48 @@
           : code === 'timeout' ? 'This is taking too long. Check your connection and try again.'
           : 'Could not save the project. Please try again.');
       }
+    });
+
+    // ---------- maintenance fee modal (opened from Subscriptions) ----------
+    const fModal = $('#fModal'), fForm = $('#fForm'), fIn = $('#fIn'), fErr = $('#fErr'), fSave = $('#fSave');
+    let feeP = null, feeBusy = false, feeFocus = null;
+    function openFee(pid, trigger) {
+      const p = findP(pid); if (!p || !p.cloud) return;
+      feeP = p.id; feeFocus = trigger || document.activeElement;
+      $('#fDesc').textContent = p.name; fIn.value = p.mf > 0 ? p.mf : ''; fErr.textContent = '';
+      fModal.classList.add('show');
+      requestAnimationFrame(() => requestAnimationFrame(() => fModal.classList.add('open')));
+      setTimeout(() => fIn.focus(), 60);
+    }
+    function closeFee() {
+      if (feeBusy) return;
+      fModal.classList.remove('open');
+      setTimeout(() => { if (!fModal.classList.contains('open')) fModal.classList.remove('show'); }, 320);
+      if (feeFocus && feeFocus.isConnected && feeFocus.focus) feeFocus.focus();
+      feeP = null;
+    }
+    $('#fBack').addEventListener('click', closeFee);
+    $('#fClose').addEventListener('click', closeFee);
+    $('#fCancel').addEventListener('click', closeFee);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && fModal.classList.contains('open')) closeFee(); });
+    fForm.addEventListener('keydown', e => {   // keep Tab inside the modal
+      if (e.key !== 'Tab') return;
+      const f = [...fForm.querySelectorAll('input, button')].filter(x => !x.disabled && x.offsetParent !== null);
+      if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+    fForm.addEventListener('submit', async e => {
+      e.preventDefault(); if (feeBusy || !feeP) return;
+      const fee = Math.round(parseFloat(fIn.value)), id = feeP;
+      if (!(fee >= 0 && fee <= 1e7)) { fErr.textContent = 'Enter a fee between 0 and 10,000,000.'; fIn.focus(); return; }
+      fErr.textContent = ''; feeBusy = true; fSave.disabled = true; fSave.textContent = 'Saving...';
+      try { await withTimeout(update(ref(db, `users/${U.uid}/projects/${id}/maintenance`), { fee }), 12000); feeBusy = false; closeFee(); toast('Maintenance fee saved'); }
+      catch (err) {
+        const c = String((err && (err.code || err.message)) || '');
+        fErr.textContent = c === 'timeout' ? 'This is taking too long. Check your connection and try again.' : failMsg(err, 'save the maintenance fee');
+      } finally { feeBusy = false; fSave.disabled = false; fSave.textContent = 'Save fee'; }
     });
 
     // ---------- delete project modal ----------
@@ -1993,6 +2345,156 @@
       }
     });
 
+    // ---------- expenses (accounting) ----------
+    // Saved at users/<uid>/expenses/<pushId>: { label, category, amount, date, repeat, endDate, notes, createdAt }.
+    // A repeating expense (developer salary, hosting, domain...) is counted once for every billing date from its start date up to today,
+    // so the books stay right without typing the same expense every month.
+    const EXCAT = { salary: 'Developer salary', domain: 'Domain', hosting: 'Hosting', software: 'Software & tools', marketing: 'Marketing & ads', office: 'Office & utilities', tax: 'Taxes & fees', other: 'Other' };
+    const EXREP = { once: { l: 'One-time', m: 0 }, monthly: { l: 'Monthly', m: 1 }, quarterly: { l: 'Every 3 months', m: 3 }, yearly: { l: 'Yearly', m: 12 } };
+    const EXREP_DEF = { salary: 'monthly', hosting: 'monthly', domain: 'yearly', software: 'monthly' };   // sensible starting point per category
+    const money2 = n => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+    let EX = [], exError = '', exEl = null, exOpen = false, exEdit = null, exSaving = false, exKey = null, exSig = '';
+    const exErr = (err, what) => { console.error(what, err); return /PERMISSION_DENIED/i.test(String((err && (err.code || err.message)) || '')) ? 'Blocked by the database rules. Allow the signed-in admin to read and write "expenses" under users/$uid in Firebase.' : 'Could not ' + what + '. Please try again.'; };
+    // every date this expense has been paid on, up to and including `until` (YYYY-MM-DD)
+    function exDates(e, until) {
+      const out = []; if (!/^\d{4}-\d\d-\d\d$/.test(e.date)) return out;
+      if (e.rep === 'once' || !EXREP[e.rep] || !EXREP[e.rep].m) { if (e.date <= until) out.push(e.date); return out; }
+      const step = EXREP[e.rep].m, end = e.end && e.end < until ? e.end : until, p = e.date.split('-').map(Number);
+      for (let k = 0; k < 720; k++) {
+        const t = new Date(p[0], p[1] - 1 + k * step, 1), last = new Date(t.getFullYear(), t.getMonth() + 1, 0).getDate();
+        const ds = dstr(new Date(t.getFullYear(), t.getMonth(), Math.min(p[2], last)));   // a payment on the 31st lands on the last day of shorter months
+        if (ds > end) break; out.push(ds);
+      }
+      return out;
+    }
+    // everything the books need, worked out in one place
+    function exBooks(today) {
+      const pays = []; EX.forEach(e => exDates(e, today).forEach(d => pays.push({ e, d, amt: e.amt })));
+      pays.sort((a, b) => b.d.localeCompare(a.d));
+      const total = Math.round(pays.reduce((a, p) => a + p.amt, 0) * 100) / 100, cat = Object.create(null), mon = today.slice(0, 7);
+      pays.forEach(p => { cat[p.e.cat] = Math.round(((cat[p.e.cat] || 0) + p.amt) * 100) / 100; });
+      const thisMonth = Math.round(pays.filter(p => p.d.slice(0, 7) === mon).reduce((a, p) => a + p.amt, 0) * 100) / 100;
+      // monthly cost of everything that is still running (a yearly domain counts as one twelfth each month)
+      const run = Math.round(EX.filter(e => EXREP[e.rep] && EXREP[e.rep].m && (!e.end || e.end >= today)).reduce((a, e) => a + e.amt / EXREP[e.rep].m, 0) * 100) / 100;
+      return { pays, total, cat, thisMonth, run };
+    }
+    function exDefaults(f) {
+      const c = f.elements.cat.value, r = EXREP_DEF[c] || 'once';
+      if (!f.dataset.edit) f.elements.rep.value = r;
+      exSyncRep(f);
+    }
+    function exSyncRep(f) {
+      const rep = f.elements.rep.value !== 'once';
+      f.querySelector('[data-exend]').classList.toggle('hidden', !rep);
+      f.querySelector('[data-exdlab]').textContent = rep ? 'First payment date' : 'Date paid';
+      if (!rep) f.elements.end.value = '';
+    }
+    let exFocus = null;
+    function exUI() {
+      if (exEl) return exEl;
+      const lbl = 'block text-sm font-medium text-slate-300';
+      exEl = document.createElement('div'); exEl.id = 'eModal'; exEl.className = 'fixed inset-0 z-[60] items-center justify-center p-4';
+      exEl.setAttribute('role', 'dialog'); exEl.setAttribute('aria-modal', 'true'); exEl.setAttribute('aria-labelledby', 'exTitle');
+      exEl.innerHTML = `<div id="eBack" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+        <form id="eForm" data-edit="" novalidate class="modal-card relative w-full max-w-2xl max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-3xl p-6 sm:p-8">
+          <div class="flex items-start justify-between gap-4 mb-5"><div class="min-w-0"><h2 id="exTitle" class="text-xl font-extrabold tracking-tight">New expense</h2><p class="mt-1 text-sm text-slate-400">Salaries, domain, hosting and other costs of running the business.</p></div>
+            <button type="button" id="eClose" aria-label="Close" class="shrink-0 w-10 h-10 rounded-xl glass flex items-center justify-center text-slate-300 hover:text-white transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <label class="${lbl}">Category<select name="cat" required class="field mt-1.5">${Object.keys(EXCAT).map(k => `<option value="${k}">${esc(EXCAT[k])}</option>`).join('')}</select></label>
+            <label class="${lbl}">Description<input name="label" required maxlength="80" autocomplete="off" class="field mt-1.5" placeholder="e.g. Juan Dela Cruz salary, Hostinger plan"/></label>
+            <label class="${lbl}">Amount (PHP)<input name="amt" type="number" inputmode="decimal" min="0.01" max="1000000000" step="0.01" required class="field mt-1.5" placeholder="15000"/></label>
+            <label class="${lbl}">Repeats<select name="rep" required class="field mt-1.5">${Object.keys(EXREP).map(k => `<option value="${k}">${esc(EXREP[k].l)}</option>`).join('')}</select></label>
+            <label class="${lbl}"><span data-exdlab>Date paid</span><input name="date" type="date" required class="field mt-1.5"/></label>
+            <label class="${lbl} hidden" data-exend>Stops after (optional)<input name="end" type="date" class="field mt-1.5"/></label>
+            <label class="${lbl} sm:col-span-2">Private notes (optional)<input name="notes" maxlength="200" autocomplete="off" class="field mt-1.5" placeholder="e.g. registrar, receipt number or payment method"/></label>
+          </div>
+          <p class="mt-4 text-xs text-slate-400">A repeating expense is counted on every payment date from the first date up to today. Set "Stops after" when a salary, plan or subscription ends.</p>
+          <p id="exErrMsg" class="mt-2 text-sm text-red-400 min-h-[1.25rem]" role="alert"></p>
+          <div class="mt-2 flex flex-wrap justify-end gap-3"><button type="button" id="eCancel" class="px-6 py-3 rounded-xl glass font-semibold text-slate-300 hover:text-white transition">Cancel</button><button type="submit" id="exSave" class="btn-shine px-6 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white">Add expense</button></div></form>`;
+      document.body.appendChild(exEl);
+      const f = exEl.querySelector('form'), close = () => { if (!exSaving) hideExPanel(); };
+      f.elements.cat.addEventListener('change', () => exDefaults(f));
+      f.elements.rep.addEventListener('change', () => exSyncRep(f));
+      f.addEventListener('submit', e => { e.preventDefault(); saveExpense(f); });
+      exEl.querySelector('#eBack').addEventListener('click', close);
+      exEl.querySelector('#eClose').addEventListener('click', close);
+      exEl.querySelector('#eCancel').addEventListener('click', close);
+      document.addEventListener('keydown', e => { if (e.key === 'Escape' && exOpen && !xModal.classList.contains('open')) close(); });
+      return exEl;
+    }
+    function showExPanel(x) {
+      const panel = exUI(), f = panel.querySelector('form'); exEdit = x ? x.id : null; exOpen = true; exFocus = document.activeElement;
+      f.reset(); f.dataset.edit = x ? x.id : '';
+      if (x) { f.elements.cat.value = x.cat; f.elements.label.value = x.name; f.elements.amt.value = x.amt; f.elements.rep.value = x.rep; f.elements.date.value = x.date; f.elements.end.value = x.end; f.elements.notes.value = x.notes; }
+      else { f.elements.cat.value = 'salary'; f.elements.rep.value = EXREP_DEF.salary; f.elements.date.value = dstr(new Date()); }
+      exSyncRep(f);
+      $('#exTitle').textContent = x ? 'Edit expense' : 'New expense'; $('#exSave').textContent = x ? 'Save changes' : 'Add expense'; $('#exErrMsg').textContent = '';
+      panel.classList.add('show');
+      requestAnimationFrame(() => requestAnimationFrame(() => panel.classList.add('open')));
+      setTimeout(() => { if (exOpen) f.elements.label.focus({ preventScroll: true }); }, 120);
+    }
+    function hideExPanel() {
+      exOpen = false; exEdit = null; if (!exEl) return;
+      exEl.classList.remove('open');
+      setTimeout(() => { if (!exEl.classList.contains('open')) exEl.classList.remove('show'); }, 320);
+      if (exFocus && exFocus.isConnected && exFocus.focus) exFocus.focus({ preventScroll: true });
+    }
+    async function saveExpense(f) {
+      if (exSaving) return;
+      const d = new FormData(f), err = $('#exErrMsg'), btn = $('#exSave'), editId = f.dataset.edit, bad = m => { err.textContent = m; };
+      const cat = String(d.get('cat') || ''), rep = String(d.get('rep') || ''), date = String(d.get('date') || ''), end = rep === 'once' ? '' : String(d.get('end') || '');
+      const label = String(d.get('label') || '').trim().replace(/\s+/g, ' ').slice(0, 80), notes = String(d.get('notes') || '').trim().replace(/\s+/g, ' ').slice(0, 200);
+      const amt = Math.round(parseFloat(d.get('amt')) * 100) / 100, cur = editId ? EX.find(x => x.id === editId) : null;
+      if (editId && !cur) { hideExPanel(); return; }
+      if (!EXCAT[cat]) return bad('Choose the category.');
+      if (!label) return bad('Enter a short description.');
+      if (!(amt > 0) || amt > 1e9) return bad('Enter an amount greater than zero.');
+      if (!EXREP[rep]) return bad('Choose how often this is paid.');
+      if (!/^\d{4}-\d\d-\d\d$/.test(date) || isNaN(new Date(date + 'T00:00:00'))) return bad('Enter the date.');
+      if (end && !/^\d{4}-\d\d-\d\d$/.test(end)) return bad('The stop date is not valid.');
+      if (end && end < date) return bad('The stop date cannot be before the first payment date.');
+      err.textContent = ''; exSaving = true; btn.disabled = true; btn.textContent = 'Saving...';
+      try {
+        const base = `users/${U.uid}/expenses`, rec = { label, category: cat, amount: amt, date, repeat: rep, endDate: end || null, notes: notes || null };
+        if (cur) {
+          const up = {}; Object.keys(rec).forEach(k => { up[`${base}/${cur.id}/${k}`] = rec[k]; });
+          await withTimeout(update(ref(db), up), 12000); hideExPanel(); toast('Expense updated');
+        } else {
+          if (!exKey) exKey = push(ref(db, base)).key;   // reused on retry, so a retry never creates a duplicate
+          await withTimeout(update(ref(db), { [`${base}/${exKey}`]: Object.assign({ createdAt: serverTimestamp() }, rec) }), 12000);
+          exKey = null; hideExPanel(); toast('Expense added');
+        }
+      } catch (e2) {
+        const m = String((e2 && (e2.code || e2.message)) || '');
+        err.textContent = m === 'timeout' ? 'This is taking too long. Check your connection and try again.' : exErr(e2, cur ? 'update the expense' : 'save the expense');
+      } finally { exSaving = false; btn.disabled = false; btn.textContent = exEdit ? 'Save changes' : 'Add expense'; }
+    }
+    let offEx = () => {};
+    function watchExpenses() {
+      offEx(); EX = []; exSig = ''; exError = '';
+      offEx = onValue(ref(db, `users/${U.uid}/expenses`), snap => {
+        const list = [];
+        snap.forEach(ch => {
+          const v = ch.val() || {};
+          list.push({ id: ch.key, name: String(v.label || ''), cat: EXCAT[v.category] ? v.category : 'other', amt: Math.round((+v.amount || 0) * 100) / 100, date: String(v.date || ''), rep: EXREP[v.repeat] ? v.repeat : 'once', end: String(v.endDate || ''), notes: String(v.notes || ''), at: +v.createdAt || 0 });
+        });
+        list.sort((a, b) => b.date.localeCompare(a.date) || b.at - a.at);
+        const sig = JSON.stringify(list); exError = '';
+        if (sig === exSig) return;
+        EX = list; exSig = sig;
+        if (document.body.classList.contains('ready') && view === 'accounting') paint(false);
+      }, err => { exError = exErr(err, 'load your expenses'); if (document.body.classList.contains('ready') && view === 'accounting') paint(false); });
+    }
+    function openXExp(id, trigger) {
+      const x = EX.find(y => y.id === id); if (!x) return;
+      xSetup('expense'); delI = { kind: 'expense', id: x.id, num: x.name }; xFocus = trigger || document.activeElement;
+      $('#xDesc').textContent = 'This will permanently delete the ' + EXCAT[x.cat].toLowerCase() + ' expense "' + x.name + '" (' + money2(x.amt) + (x.rep === 'once' ? '' : ', ' + EXREP[x.rep].l.toLowerCase()) + ') and remove every payment counted from it in your accounting. This cannot be undone.';
+      xIn.value = ''; xIn.disabled = false; setXDeleting(false); syncX();
+      xModal.classList.add('show');
+      requestAnimationFrame(() => requestAnimationFrame(() => xModal.classList.add('open')));
+      setTimeout(() => xIn.focus(), 60);
+    }
+
     // ---------- delete invoice modal ----------
     const xModal = $('#xModal'), xForm = $('#xForm'), xIn = $('#xIn'), xBtn = $('#xBtn'), xErr = $('#xErr'), xHint = $('#xHint');
     let X_PHRASE = 'Delete this Invoice', X_LABEL = 'Delete invoice', X_BUSY = 'Deleting...';
@@ -2059,10 +2561,11 @@
         if (t.kind === 'disable') await withTimeout(update(ref(db), { [`users/${U.uid}/customers/${t.id}/disabled`]: true, [`portal/${t.uid}/disabled`]: true, [`portal/${t.uid}/revoked`]: true }), 12000);
         else if (t.kind === 'cust') await withTimeout(update(ref(db), { [`users/${U.uid}/customers/${t.id}`]: null, [`portal/${t.uid}`]: { admin: U.uid, revoked: true } }), 12000);
         else if (t.kind === 'sub') { const up = { [`users/${U.uid}/subscriptions/${t.id}`]: null }; if (t.cuid) up[`portal/${t.cuid}/subscriptions/${t.id}`] = null; await withTimeout(update(ref(db), up), 12000); }
+        else if (t.kind === 'expense') { await withTimeout(update(ref(db), { [`users/${U.uid}/expenses/${t.id}`]: null }), 12000); if (exEdit === t.id) hideExPanel(); }
         else { const up = { [`users/${U.uid}/invoices/${t.id}`]: null }; if (t.cuid) up[`portal/${t.cuid}/invoices/${t.id}`] = null; await withTimeout(update(ref(db), up), 12000); if (invEdit === t.id) hideInvPanel(); }
         setXDeleting(false); closeXDel(); toast(t.kind === 'disable' ? t.num + ' can no longer log in' : t.num + ' deleted');
       } catch (err) {
-        setXDeleting(false); xErr.textContent = t.kind === 'disable' ? kErr(err, 'disable the account') : t.kind === 'cust' ? kErr(err, 'delete the customer') : t.kind === 'sub' ? subErr(err, 'delete the subscription') : invErr(err, 'delete the invoice');
+        setXDeleting(false); xErr.textContent = t.kind === 'disable' ? kErr(err, 'disable the account') : t.kind === 'cust' ? kErr(err, 'delete the customer') : t.kind === 'sub' ? subErr(err, 'delete the subscription') : t.kind === 'expense' ? exErr(err, 'delete the expense') : invErr(err, 'delete the invoice');
       }
     });
 
@@ -2114,7 +2617,8 @@
       const m = { cust: ['Delete this Customer', 'Delete customer', 'Delete customer?', 'Deleting...'],
                   disable: ['Disable Account', 'Disable account', 'Disable account?', 'Disabling...'],
                   invoice: ['Delete this Invoice', 'Delete invoice', 'Delete invoice?', 'Deleting...'],
-                  sub: ['Delete this Subscription', 'Delete subscription', 'Delete subscription?', 'Deleting...'] }[kind];
+                  sub: ['Delete this Subscription', 'Delete subscription', 'Delete subscription?', 'Deleting...'],
+                  expense: ['Delete this Expense', 'Delete expense', 'Delete expense?', 'Deleting...'] }[kind];
       X_PHRASE = m[0]; X_LABEL = m[1]; X_BUSY = m[3];
       $('#xTitle').textContent = m[2]; $('#xPhrase').textContent = X_PHRASE; xIn.placeholder = X_PHRASE;
     }
@@ -2167,7 +2671,7 @@
         repaintP();
       }, () => { PORTAL = { revoked: true }; repaintP(); });
     }
-    const stopAll = () => { chStop(); offProjects(); offMR(); offQuotes(); offInv(); offSub(); offK(); offPortalNode(); Object.values(PW).forEach(f => f()); PW = {}; };
+    const stopAll = () => { chStop(); offProjects(); offMR(); offQuotes(); offInv(); offEx(); offSub(); offK(); offPortalNode(); Object.values(PW).forEach(f => f()); PW = {}; };
 
     // ---------- auth ----------
     function fillUser() { const n = U.displayName || U.email.split('@')[0]; $('#who').textContent = n; $('#avatar').textContent = n[0].toUpperCase(); }
@@ -2182,7 +2686,7 @@
       if (portalBlocked(PORTAL)) { denyPortal(); return; }
       buildNav(); drawNotif();
       if (PORTAL) { view = 'portal'; watchPortal(); }
-      else { view = 'overview'; watchProjects(); watchMaint(); watchQuotes(); watchInvoices(); watchSubs(); watchCustomers(); setTimeout(() => loadPdf().catch(() => {}), 2500); }
+      else { view = 'overview'; watchProjects(); watchMaint(); watchQuotes(); watchInvoices(); watchExpenses(); watchSubs(); watchCustomers(); setTimeout(() => loadPdf().catch(() => {}), 2500); }
       if (!document.body.classList.contains('ready')) { paint(true); document.body.classList.add('ready'); }
     });
   </script>

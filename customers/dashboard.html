@@ -80,6 +80,76 @@ tailwind.config = { theme: { extend: {
   .step.done:not(:last-child)::before { background: linear-gradient(#22d3ee, #5b6cff); opacity: .6; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
 
+  /* ===== Overview (redesign) ===== */
+  @keyframes ovSpin { to { transform: rotate(360deg); } }
+  @keyframes ovPulse { 0% { box-shadow: 0 0 0 0 rgba(34,211,238,.55); } 100% { box-shadow: 0 0 0 9px rgba(34,211,238,0); } }
+  .ov-hero { position: relative; overflow: hidden; border-radius: 28px; padding: 1.5rem; border: 1px solid rgba(255,255,255,.1);
+    background: radial-gradient(120% 140% at 0% 0%, rgba(91,108,255,.26), transparent 55%), radial-gradient(90% 120% at 100% 100%, rgba(34,211,238,.16), transparent 60%), rgba(255,255,255,.03); }
+  @media (min-width: 640px) { .ov-hero { padding: 2.25rem 2.5rem; } }
+  .ov-hero::before { content: ""; position: absolute; width: 460px; height: 460px; right: -140px; top: -210px; border-radius: 9999px; pointer-events: none;
+    background: conic-gradient(from 0deg, #5b6cff, #22d3ee, #f472b6, #5b6cff); filter: blur(90px); opacity: .3; animation: ovSpin 28s linear infinite; animation-delay: var(--ph, 0s); }
+  .ov-hero::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .55;
+    background-image: radial-gradient(rgba(255,255,255,.16) 1px, transparent 1.4px); background-size: 22px 22px;
+    -webkit-mask-image: linear-gradient(115deg, transparent 35%, #000 100%); mask-image: linear-gradient(115deg, transparent 35%, #000 100%); }
+  .ov-eyebrow { display: inline-flex; align-items: center; gap: .55rem; font-size: .72rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: #8e99c9; }
+  .ov-live { width: 8px; height: 8px; border-radius: 9999px; background: #22d3ee; animation: ovPulse 2s ease-out infinite; }
+  .ov-chip { display: inline-flex; align-items: center; gap: .5rem; padding: .38rem .8rem; border-radius: 9999px; font-size: .75rem; font-weight: 600; color: #cdd4f5;
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); }
+  .ov-chip i { width: 7px; height: 7px; border-radius: 9999px; box-shadow: 0 0 10px currentColor; }
+  .ov-orbit { position: relative; width: 9.5rem; height: 9.5rem; }
+  @media (min-width: 640px) { .ov-orbit { width: 11.5rem; height: 11.5rem; } }
+  .ov-orbit-svg { position: absolute; inset: 11%; width: 78%; height: 78%; transform: rotate(-90deg); filter: drop-shadow(0 0 10px rgba(91,108,255,.45)); }
+  .ov-orbit-ring { position: absolute; inset: 0; border-radius: 9999px; border: 1px dashed rgba(124,140,255,.45); animation: ovSpin 24s linear infinite; animation-delay: var(--ph, 0s); }
+  .ov-orbit-ring i { position: absolute; top: -4px; left: 50%; width: 8px; height: 8px; margin-left: -4px; border-radius: 9999px; background: #22d3ee; box-shadow: 0 0 14px 2px rgba(34,211,238,.8); }
+  .ov-tile { position: relative; overflow: hidden; border-radius: 20px; padding: 1.05rem 1.1rem; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.09); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); transition: transform .3s ease, border-color .3s ease; }
+  .ov-tile::before { content: ""; position: absolute; left: 1.1rem; right: 1.1rem; top: 0; height: 2px; border-radius: 0 0 4px 4px; background: linear-gradient(90deg, var(--ac), transparent); opacity: .9; }
+  .ov-tile::after { content: ""; position: absolute; width: 120px; height: 120px; right: -40px; top: -50px; border-radius: 9999px; background: var(--ac); filter: blur(46px); opacity: .16; pointer-events: none; }
+  .ov-tile:hover { transform: translateY(-2px); border-color: rgba(255,255,255,.18); }
+  .ov-ico { flex: none; width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; color: var(--ac); background: rgba(255,255,255,.06); background: color-mix(in srgb, var(--ac) 16%, transparent); }
+  .ov-rows > .ov-row { padding: .95rem 0; border-top: 1px solid rgba(255,255,255,.08); }
+  .ov-rows > .ov-row:first-child { border-top: 0; }
+  .ov-seg { display: flex; gap: 3px; margin-top: .7rem; }
+  .ov-seg i { flex: 1; height: 8px; border-radius: 3px; background: rgba(255,255,255,.1); transition: background .5s ease; }
+  .ov-seg i.on { background: linear-gradient(90deg, #5b6cff, #22d3ee); box-shadow: 0 0 10px rgba(34,211,238,.3); }
+  .ov-link { display: inline-flex; align-items: center; gap: .3rem; font-size: .75rem; font-weight: 700; color: #7c8cff; transition: color .2s ease, gap .2s ease; }
+  .ov-link:hover { color: #fff; gap: .5rem; }
+  .ov-tl { position: relative; padding-left: 1.5rem; }
+  .ov-tl::before { content: ""; position: absolute; left: 5px; top: 8px; bottom: 8px; width: 2px; border-radius: 2px; background: linear-gradient(#5b6cff, #22d3ee 60%, transparent); opacity: .6; }
+  .ov-tl li { position: relative; padding-bottom: 1.05rem; }
+  .ov-tl li:last-child { padding-bottom: 0; }
+  .ov-node { position: absolute; left: -1.5rem; top: .32rem; width: 12px; height: 12px; border-radius: 9999px; background: #0d1226; border: 2px solid #7c8cff; box-shadow: 0 0 0 4px rgba(124,140,255,.14); }
+  .ov-tl li:first-child .ov-node { background: linear-gradient(135deg, #5b6cff, #22d3ee); border-color: transparent; box-shadow: 0 0 16px rgba(34,211,238,.75); }
+  .ov-split { height: 10px; border-radius: 9999px; overflow: hidden; background: linear-gradient(90deg, rgba(244,114,182,.55), rgba(244,114,182,.3)); }
+  .ov-split i { display: block; height: 100%; border-radius: 9999px; background: linear-gradient(90deg, #34d399, #22d3ee); box-shadow: 0 0 14px rgba(52,211,153,.45); transition: width .8s cubic-bezier(.2,.7,.2,1); }
+  .ov-dot { flex: none; width: 8px; height: 8px; border-radius: 9999px; }
+  .ov-dot.ok { background: #34d399; box-shadow: 0 0 8px rgba(52,211,153,.7); }
+  .ov-dot.due { background: #f472b6; box-shadow: 0 0 8px rgba(244,114,182,.7); }
+  .ov-empty { display: flex; align-items: center; gap: .75rem; padding: 1rem .25rem; font-size: .875rem; color: #8e99c9; }
+  html.light .ov-hero { border-color: rgba(15,21,53,.1); background: radial-gradient(120% 140% at 0% 0%, rgba(91,108,255,.18), transparent 55%), radial-gradient(90% 120% at 100% 100%, rgba(34,211,238,.14), transparent 60%), rgba(255,255,255,.7); box-shadow: 0 6px 24px rgba(67,81,232,.07); }
+  html.light .ov-hero::before { opacity: .22; }
+  html.light .ov-hero::after { background-image: radial-gradient(rgba(67,81,232,.2) 1px, transparent 1.4px); }
+  html.light .ov-eyebrow, html.light .ov-empty { color: #55608a; }
+  html.light .ov-chip { color: #1f2650; background: rgba(15,21,53,.05); border-color: rgba(15,21,53,.1); }
+  html.light .ov-tile { background: rgba(255,255,255,.75); border-color: rgba(15,21,53,.1); box-shadow: 0 6px 24px rgba(67,81,232,.07); }
+  html.light .ov-tile:hover { border-color: rgba(15,21,53,.2); }
+  html.light .ov-ico { background: rgba(15,21,53,.05); background: color-mix(in srgb, var(--ac) 14%, transparent); }
+  html.light .ov-rows > .ov-row { border-color: rgba(15,21,53,.1); }
+  html.light .ov-seg i { background: rgba(15,21,53,.1); }
+  html.light .ov-link { color: #4351e8; }
+  html.light .ov-link:hover { color: #0f1535; }
+  html.light .ov-node { background: #fff; }
+  html.light .ov-orbit-ring { border-color: rgba(67,81,232,.4); }
+
+  .ov-att-list > .ov-att { display: flex; flex-wrap: wrap; align-items: center; gap: .85rem 1rem; padding: .95rem 0; border-top: 1px solid rgba(255,255,255,.08); }
+  .ov-att-list > .ov-att:first-child { border-top: 0; padding-bottom: .5rem; }
+  .ov-btn { display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; padding: .5rem 1rem; border-radius: 12px; font-size: .8rem; font-weight: 700; color: #fff;
+    background: linear-gradient(90deg, #5b6cff, #4351e8); box-shadow: 0 6px 16px rgba(91,108,255,.3); transition: transform .2s ease, filter .2s ease; }
+  .ov-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  .ov-quote { padding-left: .95rem; border-left: 3px solid #5b6cff; border-image: linear-gradient(#5b6cff, #22d3ee) 1; }
+  .ov-help { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.1rem 1.25rem; border-radius: 20px; border: 1px dashed rgba(124,140,255,.35); background: rgba(124,140,255,.05); }
+  html.light .ov-att-list > .ov-att { border-color: rgba(15,21,53,.1); }
+  html.light .ov-help { border-color: rgba(67,81,232,.3); background: rgba(67,81,232,.04); }
+
   html.light body { background: #f5f6ff; color: #0f1535; }
   html.light .glass { background: rgba(255,255,255,.75); border-color: rgba(15,21,53,.1); box-shadow: 0 6px 24px rgba(67,81,232,.07); }
   html.light .grid-bg { background-image: linear-gradient(rgba(67,81,232,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(67,81,232,.09) 1px, transparent 1px); }
@@ -277,7 +347,7 @@ const ymd = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0
 const invList = () => Object.entries((PORTAL && PORTAL.invoices && typeof PORTAL.invoices === 'object') ? PORTAL.invoices : {}).map(([id, v]) => { v = v || {}; return { id, num: v.number || 'Invoice', desc: v.description || '', amt: +v.amount || 0, due: v.dueDate || '', paid: v.paid === true, paidAt: +v.paidAt || 0, at: +v.createdAt || 0 }; }).sort((a, b) => b.at - a.at || String(b.num).localeCompare(String(a.num)));
 const iStat = i => i.paid ? 'paid' : (i.due && i.due < ymd(new Date()) ? 'overdue' : 'unpaid');
 const ILABEL = { paid: 'Paid', unpaid: 'Unpaid', overdue: 'Overdue' }, IBADGE = { paid: 'text-emerald-300 bg-emerald-400/15', unpaid: 'text-pink bg-pink/15', overdue: 'text-red-300 bg-red-500/15' };
-const invCard = i => { const s = iStat(i); return `<article data-f class="${card}"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><h3 class="font-bold truncate">${esc(i.num)}</h3><p class="mt-0.5 text-sm text-slate-300 break-words">${esc(i.desc)}</p></div><span class="shrink-0 px-3 py-1 rounded-full text-xs font-semibold ${IBADGE[s]}">${ILABEL[s]}</span></div><div class="mt-4 flex items-end justify-between gap-3"><div class="text-xs ${s === 'overdue' ? 'text-red-300 font-semibold' : 'text-slate-400'}">${i.paid ? (i.paidAt ? 'Paid ' + esc(fmtD(i.paidAt)) : 'Paid') : 'Due ' + esc(fmtD(i.due))}</div><div class="text-xl font-extrabold">${money(i.amt)}</div></div></article>`; };
+const invCard = i => { const s = iStat(i); return `<article data-f class="${card}"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><h3 class="font-bold truncate">${esc(i.num)}</h3><p class="mt-0.5 text-sm text-slate-300 break-words">${esc(i.desc)}</p></div><span class="shrink-0 px-3 py-1 rounded-full text-xs font-semibold ${IBADGE[s]}">${ILABEL[s]}</span></div><div class="mt-4 flex items-end justify-between gap-3"><div class="text-xs ${s === 'overdue' ? 'text-red-300 font-semibold' : 'text-slate-400'}">${i.paid ? (i.paidAt ? 'Paid ' + esc(fmtD(i.paidAt)) : 'Paid') : 'Due ' + esc(fmtD(i.due))}</div><div class="text-xl font-extrabold">${money(i.amt)}</div></div>${i.paid ? `<button type="button" data-act="invpdf" data-id="${esc(i.id)}" class="mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl glass text-sm font-semibold text-slate-300 hover:text-white transition">${svgI('M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2', 'w-4 h-4')}Download PDF</button>` : ''}</article>`; };
 const today0 = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
 const dayDiff = s => Math.round((new Date(s + 'T00:00:00') - today0()) / 864e5);
 
@@ -295,6 +365,8 @@ const subList = () => {
 };
 const subSt = s => { if (s.status !== 'active') return s.status; if (!s.next) return 'active'; const d = dayDiff(s.next); return d < 0 ? 'overdue' : d <= 30 ? 'soon' : 'active'; };
 const subLive = s => ['active', 'soon', 'overdue'].includes(subSt(s));
+// What is billed this month: monthly plans always count; quarterly and yearly plans only count in the month they fall due
+const subBilledNow = s => SUB_C[s.cycle].m === 1 || (!!s.next && s.next.slice(0, 7) === ymd(new Date()).slice(0, 7));
 const subWhen = s => {
   if (s.auto) return 'Billed monthly'; if (!s.next) return '';
   const d = dayDiff(s.next); if (s.status !== 'active') return 'Renewal date ' + fmtD(s.next);
@@ -321,6 +393,90 @@ const svgI = (d, c = 'w-5 h-5') => `<svg class="${c}" fill="none" stroke="curren
 let toastT;
 function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.remove('hidden'); el.style.bottom = 'calc(1.5rem + env(safe-area-inset-bottom, 0px))'; el.style.animation = 'toastIn .4s ease both'; clearTimeout(toastT); toastT = setTimeout(() => { el.style.animation = 'toastOut .35s ease forwards'; toastT = setTimeout(() => el.classList.add('hidden'), 350); }, 2600); }
 function leave(url) { if (leave.on) return; leave.on = true; document.body.classList.add('is-leaving'); setTimeout(() => { location.href = url; }, 650); }
+
+// ---------- invoice PDF (branded with the EM logo) ----------
+// jsPDF is loaded on demand the first time a PDF is requested. The EM logo is drawn as vector shapes, so it stays sharp at any zoom.
+const LOGO_W = 1368, LOGO_H = 474;   // logo bounding box (x 160-1528, y 189-663 in the source artwork)
+const LOGO_SHAPES = [
+  [[390, 189], [937, 189], [850, 306], [327, 306]],
+  [[303, 376], [766, 376], [683, 470], [395, 470], [368, 540], [697, 540], [948, 263], [1140, 470], [1408, 189], [1528, 189], [1528, 663], [1393, 663], [1393, 400], [1140, 653], [885, 400], [885, 663], [160, 663]]
+];
+function drawLogo(doc, x, y, w, rgb) {
+  const k = w / LOGO_W;
+  doc.setFillColor(rgb[0], rgb[1], rgb[2]);
+  LOGO_SHAPES.forEach(pts => {
+    const P = pts.map(([px, py]) => [x + (px - 160) * k, y + (py - 189) * k]);
+    const rel = P.slice(1).map((p, n) => [p[0] - P[n][0], p[1] - P[n][1]]);
+    doc.lines(rel, P[0][0], P[0][1], [1, 1], 'F', true);
+  });
+}
+let jsPdfP = null;
+function loadJsPdf() {
+  if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve(window.jspdf.jsPDF);
+  if (!jsPdfP) jsPdfP = new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload = () => (window.jspdf && window.jspdf.jsPDF) ? res(window.jspdf.jsPDF) : rej(new Error('jsPDF missing'));
+    s.onerror = () => { jsPdfP = null; rej(new Error('jsPDF failed to load')); };
+    document.head.appendChild(s);
+  });
+  return jsPdfP;
+}
+const pdfMoney = n => 'PHP ' + new Intl.NumberFormat('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);   // the built-in PDF font has no peso sign
+async function invoicePdf(i) {
+  const JsPDF = await loadJsPdf();
+  const doc = new JsPDF({ unit: 'mm', format: 'a4' }), W = 210, M = 18, s = iStat(i);
+  const INK = [7, 10, 22], BRAND = [91, 108, 255], AQUA = [34, 211, 238], TXT = [31, 38, 80], MUTED = [110, 120, 150], LINE = [222, 226, 240];
+  // header band with the logo
+  doc.setFillColor(INK[0], INK[1], INK[2]); doc.rect(0, 0, W, 46, 'F');
+  for (let n = 0; n < 60; n++) { const t = n / 59; doc.setFillColor(Math.round(BRAND[0] + (AQUA[0] - BRAND[0]) * t), Math.round(BRAND[1] + (AQUA[1] - BRAND[1]) * t), Math.round(BRAND[2] + (AQUA[2] - BRAND[2]) * t)); doc.rect(n * W / 60, 46, W / 60 + 0.3, 1.6, 'F'); }
+  drawLogo(doc, M, 14, 36, [255, 255, 255]);
+  doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.text('EM Development', M + 42, 22.5);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(160, 170, 210); doc.text('emdevelopmentph@gmail.com', M + 42, 28);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(26); doc.setTextColor(255, 255, 255); doc.text('INVOICE', W - M, 25, { align: 'right' });
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(160, 170, 210); doc.text(String(i.num), W - M, 32, { align: 'right' });
+  // bill to / invoice details
+  let y = 62;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]); doc.text('BILLED TO', M, y); doc.text('INVOICE DETAILS', 118, y);
+  doc.setFontSize(11); doc.setTextColor(TXT[0], TXT[1], TXT[2]);
+  const nm = (PORTAL && PORTAL.name) || (U && U.displayName) || '', co = (PORTAL && PORTAL.company) || '', em = (U && U.email) || '';
+  let by = y + 7;
+  if (nm) { doc.setFont('helvetica', 'bold'); doc.text(nm, M, by); by += 5.5; }
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(80, 90, 125);
+  if (co) { doc.text(co, M, by); by += 5; }
+  if (em) { doc.text(em, M, by); by += 5; }
+  const rows = [['Invoice no.', String(i.num)], ['Issued', i.at ? fmtD(i.at) : '-'], [i.paid ? 'Paid on' : 'Due date', i.paid ? (i.paidAt ? fmtD(i.paidAt) : 'Paid') : (i.due ? fmtD(i.due) : '-')], ['Status', ILABEL[s]]];
+  let dy = y + 7;
+  rows.forEach(([l, v]) => {
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]); doc.text(l, 118, dy);
+    doc.setFont('helvetica', 'bold'); doc.setTextColor(TXT[0], TXT[1], TXT[2]);
+    if (l === 'Status') doc.setTextColor(...(s === 'paid' ? [5, 150, 105] : s === 'overdue' ? [220, 38, 38] : [219, 39, 119]));
+    doc.text(v, W - M, dy, { align: 'right' }); dy += 6;
+  });
+  // line items
+  y = Math.max(by, dy) + 12;
+  doc.setFillColor(243, 245, 255); doc.roundedRect(M, y, W - 2 * M, 10, 2, 2, 'F');
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]); doc.text('DESCRIPTION', M + 4, y + 6.4); doc.text('AMOUNT', W - M - 4, y + 6.4, { align: 'right' });
+  y += 17;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(10.5); doc.setTextColor(TXT[0], TXT[1], TXT[2]);
+  const lines = doc.splitTextToSize(i.desc || 'Website development services', W - 2 * M - 62);
+  doc.text(lines, M + 4, y); doc.setFont('helvetica', 'bold'); doc.text(pdfMoney(i.amt), W - M - 4, y, { align: 'right' });
+  y += Math.max(lines.length * 5, 5) + 5;
+  doc.setDrawColor(LINE[0], LINE[1], LINE[2]); doc.setLineWidth(0.3); doc.line(M, y, W - M, y);
+  // total
+  y += 12;
+  doc.setFillColor(INK[0], INK[1], INK[2]); doc.roundedRect(W - M - 84, y, 84, 20, 3, 3, 'F');
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(160, 170, 210); doc.text(i.paid ? 'TOTAL PAID' : 'TOTAL DUE', W - M - 78, y + 7.5);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(15); doc.setTextColor(255, 255, 255); doc.text(pdfMoney(i.amt), W - M - 6, y + 14.5, { align: 'right' });
+  // footer
+  doc.setDrawColor(LINE[0], LINE[1], LINE[2]); doc.line(M, 270, W - M, 270);
+  drawLogo(doc, M, 275, 14, [91, 108, 255]);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+  doc.text('Thank you for your business.', M + 18, 279);
+  doc.text('Questions? emdevelopmentph@gmail.com', M + 18, 283.5);
+  doc.text('EM Development', W - M, 279, { align: 'right' });
+  doc.save(String(i.num).replace(/[^\w.-]+/g, '_') + '.pdf');
+}
 
 // ---------- state ----------
 let U, PORTAL = undefined, PP = {}, PW = {}, offPortal = () => {}, lastSnap = {};
@@ -465,22 +621,66 @@ function render() {
   let seenPw = false; try { seenPw = !!localStorage.getItem('pwn:' + U.uid); } catch (e) {}
   const stat = (l, val, g) => `<div data-f class="${card} !p-4 sm:!p-5"><div class="text-xs text-slate-400">${l}</div><div class="stat-v mt-1 text-lg min-[420px]:text-xl sm:text-2xl font-extrabold ${g ? 'gradient-text' : ''}">${val}</div></div>`;
   const invAll = invList(), invOwed = invAll.filter(i => !i.paid), owedAmt = invOwed.reduce((a, i) => a + i.amt, 0), paidAmt = invAll.filter(i => i.paid).reduce((a, i) => a + i.amt, 0), overdueN = invOwed.filter(i => iStat(i) === 'overdue').length;
-  const invBanner = invOwed.length ? `<div data-f class="${card} mb-4 flex flex-wrap items-center justify-between gap-3"><div class="min-w-0"><div class="font-bold">${plur(invOwed.length, 'unpaid invoice')}</div><p class="text-sm mt-0.5 ${overdueN ? 'text-red-300' : 'text-slate-400'}">${money(owedAmt)} outstanding${overdueN ? ' &middot; ' + overdueN + ' overdue' : ''}</p></div><button data-act="goinv" class="text-sm font-semibold text-brand-400 hover:text-white">View invoices</button></div>` : '';
-  const mtBanner = ps.filter(mtCanOffer).slice(0, 3).map(p => { const m = mtInfo(p); return `<div data-f class="${card} mb-4 flex flex-wrap items-center justify-between gap-3"><div class="min-w-0" style="min-width:14rem"><div class="font-bold">${m.k === 'soon' ? 'Free maintenance ends in ' + plur(m.left, 'day') : 'Free maintenance has ended'}</div><p class="text-sm text-slate-400 mt-0.5">${esc(p.name)}: keep your website maintained for ${money(p.mf)} per month.</p></div><button data-act="msub" data-p="${esc(p.id)}" class="px-4 py-2 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white text-sm shadow-lg shadow-brand-500/30">Subscribe</button></div>`; }).join('');
-  const subSoon = subList().filter(x => ['soon', 'overdue'].includes(subSt(x))), subBanner = subSoon.length ? `<div data-f class="${card} mb-4 flex flex-wrap items-center justify-between gap-3"><div class="min-w-0"><div class="font-bold">${plur(subSoon.length, 'subscription')} renewing soon</div><p class="text-sm mt-0.5 text-slate-400">${esc(subSoon.slice(0, 2).map(x => x.name).join(', '))}${subSoon.length > 2 ? ' and more' : ''}</p></div><button data-act="gosubs" class="text-sm font-semibold text-brand-400 hover:text-white">View subscriptions</button></div>` : '';
+  const subSoon = subList().filter(x => ['soon', 'overdue'].includes(subSt(x)));
   const mailSubj = encodeURIComponent('Question about my website | ' + (PORTAL.company || PORTAL.name || ''));
-  const overviewV = () => `
-    <div data-f class="mb-5">
-      <p class="text-slate-400">Hi <span class="font-semibold text-slate-200">${esc(PORTAL.name || U.displayName || U.email.split('@')[0])}</span>. Here is how your website is coming along${PORTAL.company ? ' &middot; ' + esc(PORTAL.company) : ''}.</p></div>
-    ${seenPw ? '' : `<div data-f class="${card} mb-4 flex flex-wrap items-center justify-between gap-3"><p class="text-sm text-slate-300 min-w-0 flex-1" style="min-width:14rem">For your security, please change the temporary password we gave you.</p><div class="flex items-center gap-4"><button data-act="gosec" class="text-sm font-semibold text-brand-400 hover:text-white">Change password</button><button data-act="pwdone" class="text-sm font-semibold text-slate-400 hover:text-white">Dismiss</button></div></div>`}
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">${stat('Overall progress', overall + '%', 1)}${stat('Items done', done + ' / ' + all.length)}${stat('Projects', ps.length)}${stat('Delivered', finished)}</div>
-    ${invBanner}${subBanner}${mtBanner}
-    <div class="grid lg:grid-cols-[1fr_1.4fr] gap-4">
-      <div data-f class="${card} flex items-center gap-5">${ring(overall)}<div><div class="font-bold">Overall progress</div><p class="text-sm text-slate-400 mt-1">${all.length ? done + ' of ' + all.length + ' items are complete.' : 'Items will appear once your project starts.'}</p></div></div>
-      <div data-f class="${card}"><div class="font-bold mb-3">Latest update</div>${PORTAL.update ? `<p class="text-sm whitespace-pre-wrap break-words">${esc(PORTAL.update)}</p>${PORTAL.updatedAt ? `<p class="mt-2 text-xs text-slate-400">${esc(fmtD(+PORTAL.updatedAt))}</p>` : ''}` : '<p class="text-sm text-slate-400">No updates yet. We will post news here.</p>'}</div>
+  const overviewV = () => {
+    const name = PORTAL.name || U.displayName || U.email.split('@')[0];
+    const hr = new Date().getHours(), hello = hr < 5 ? 'Still up' : hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening';
+    const todayTxt = new Date().toLocaleDateString('en', { weekday: 'long', month: 'long', day: 'numeric' });
+    const ph = s => '-' + ((Date.now() / 1000) % s).toFixed(2) + 's';   // keeps the slow animations in phase when the page redraws
+    const inProg = ps.filter(p => status(p) === 'active').length;
+    const target = ps.filter(p => !p.archived && p.due && fmtD(p.due)).map(p => p.due).sort()[0];
+    const sub = !ps.length ? (ids.length ? 'Loading your project...' : 'Your project has not been shared yet. We will let you know as soon as it is ready.')
+      : finished === ps.length ? 'Your website has been delivered. Thank you for trusting us.'
+      : all.length ? done + ' of ' + all.length + ' items are complete across ' + plur(ps.length, 'project') + '.' : 'Items will appear here once your project starts.';
+    const chip = (c, t) => `<span class="ov-chip"><i style="background:${c}"></i>${t}</span>`;
+    const chips = [PORTAL.company ? chip('#7c8cff', esc(PORTAL.company)) : '', target ? chip('#22d3ee', 'Target ' + esc(fmtD(target))) : '', finished ? chip('#34d399', finished + ' delivered') : ''].join('');
+    const tile = (l, v, s, ac, ic, g) => `<div data-f class="ov-tile" style="--ac:${ac}"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="text-xs font-semibold tracking-wide text-slate-400">${l}</div><div class="stat-v mt-1.5 text-xl min-[420px]:text-2xl sm:text-[1.7rem] font-extrabold tracking-tight ${g ? 'gradient-text' : ''}">${v}</div></div><span class="ov-ico">${svgI(ic, 'w-[18px] h-[18px]')}</span></div><div class="mt-3 text-xs text-slate-400 truncate">${s}</div></div>`;
+    const seg = p => { const n = Math.max(1, Math.min(12, p.items.length)), on = Math.round(pct(p) * n / 100); return `<div class="ov-seg" role="progressbar" aria-valuenow="${pct(p)}" aria-valuemin="0" aria-valuemax="100" aria-label="${esc(p.name)} progress">${Array.from({ length: n }, (_, k) => `<i class="${k < on ? 'on' : ''}"></i>`).join('')}</div>`; };
+    const link = (a, t) => `<button type="button" data-act="${a}" class="ov-link">${t}<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>`;
+    const CHECK = 'M5 13l4 4L19 7', KEY = 'M21 2l-2 2m-7.6 7.6a5.5 5.5 0 1 1-7.8 7.8 5.5 5.5 0 0 1 7.8-7.8zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4', WRENCH = 'M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.2-.5-.5-2.2z';
+
+    // things that need the customer's attention, kept together in one tidy card
+    const att = (ac, ic, title, subTxt, actions) => `<div class="ov-att"><span class="ov-ico" style="--ac:${ac}">${svgI(ic, 'w-[18px] h-[18px]')}</span><div class="min-w-0 flex-1" style="min-width:12rem"><div class="font-semibold">${title}</div><p class="text-sm text-slate-400 mt-0.5">${subTxt}</p></div><div class="flex items-center gap-4 shrink-0">${actions}</div></div>`;
+    const todo = [];
+    if (!seenPw) todo.push(att('#f59e0b', KEY, 'Secure your account', 'Please change the temporary password we gave you.', `<button data-act="pwdone" class="ov-link !text-slate-400">Dismiss</button><button data-act="gosec" class="ov-btn">Change password</button>`));
+    if (invOwed.length) todo.push(att(overdueN ? '#f87171' : '#f472b6', NAV_ICON.invoices, plur(invOwed.length, 'unpaid invoice'), `<span class="${overdueN ? 'text-red-300' : ''}">${money(owedAmt)} outstanding${overdueN ? ' &middot; ' + overdueN + ' overdue' : ''}</span>`, `<button data-act="goinv" class="ov-btn">View invoices</button>`));
+    if (subSoon.length) todo.push(att('#7c8cff', NAV_ICON.subscriptions, plur(subSoon.length, 'subscription') + ' renewing soon', esc(subSoon.slice(0, 2).map(x => x.name).join(', ')) + (subSoon.length > 2 ? ' and more' : ''), `<button data-act="gosubs" class="ov-btn">View subscriptions</button>`));
+    ps.filter(mtCanOffer).slice(0, 3).forEach(p => { const m = mtInfo(p); todo.push(att('#22d3ee', WRENCH, m.k === 'soon' ? 'Free maintenance ends in ' + plur(m.left, 'day') : 'Free maintenance has ended', esc(p.name) + ': keep your website maintained for ' + esc(money(p.mf)) + ' per month.', `<button data-act="msub" data-p="${esc(p.id)}" class="ov-btn">Subscribe</button>`)); });
+    const attn = todo.length ? `<div data-f class="${card} mt-4"><div class="flex items-center gap-2.5 mb-1"><div class="font-bold">Needs your attention</div><span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-pink/15 text-pink">${todo.length}</span></div><div class="ov-att-list">${todo.join('')}</div></div>` : '';
+
+    const shown = ps.slice().sort((a, b) => (a.archived ? 1 : 0) - (b.archived ? 1 : 0) || pct(b) - pct(a)).slice(0, 5);
+    const rows = shown.map(p => { const s = status(p), tl = timeLine(p), range = p.start ? esc(fmtD(p.start)) + ' &ndash; ' + esc(fmtD(p.due)) : (p.due ? 'Target ' + esc(fmtD(p.due)) : '');
+      return `<div class="ov-row"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="font-semibold truncate">${esc(p.name)}</div>${range ? `<div class="text-xs text-slate-400 mt-0.5 truncate">${range}</div>` : ''}</div><span class="shrink-0 px-2.5 py-0.5 rounded-full text-xs font-semibold ${BADGE[s]}">${LABEL[s]}</span></div>${seg(p)}<div class="mt-2 flex items-center justify-between gap-3 text-xs text-slate-400"><span class="min-w-0">${doneN(p)} of ${p.items.length} items done${tl ? ' &middot; ' + tl : ''}</span><span class="shrink-0 font-bold text-slate-200">${pct(p)}%</span></div></div>`; }).join('')
+      || `<div class="ov-empty">${svgI(NAV_ICON.projects, 'w-6 h-6')}<span>${ids.length ? 'Loading your project...' : 'Your project has not been shared yet.'}</span></div>`;
+
+    const upd = `<div data-f class="${card}"><div class="flex items-center justify-between gap-3 mb-3"><div class="font-bold">Latest update</div>${PORTAL.updatedAt && PORTAL.update ? `<span class="text-xs text-slate-400">${esc(fmtD(+PORTAL.updatedAt))}</span>` : ''}</div>${PORTAL.update ? `<div class="ov-quote"><p class="text-sm whitespace-pre-wrap break-words">${esc(PORTAL.update)}</p><p class="mt-2 text-xs text-slate-400">From EM Development</p></div>` : `<div class="ov-empty">${svgI(NAV_ICON.messages, 'w-6 h-6')}<span>No updates yet. We will post news here.</span></div>`}</div>`;
+    const nx = nextTasks.slice(0, 5).map(x => `<li><span class="ov-node"></span><div class="text-sm font-semibold break-words">${esc(x.m.t)}</div><div class="text-xs text-slate-400 truncate">${esc(x.p)}</div></li>`).join('');
+    const nxt = nextTasks.length ? `<div data-f class="${card}"><div class="flex items-center justify-between gap-3 mb-4"><div class="font-bold">What we are working on next</div><span class="text-xs text-slate-400">${nextTasks.length} open</span></div><ol class="ov-tl">${nx}</ol></div>` : '';
+
+    return `<section data-f class="ov-hero" style="--ph:${ph(28)}">
+      <div class="relative z-[1] flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-6 sm:gap-8">
+        <div class="min-w-0 max-w-xl">
+          <div class="ov-eyebrow"><span class="ov-live"></span>${esc(todayTxt)}</div>
+          <h2 class="mt-3 text-[1.65rem] sm:text-4xl font-extrabold tracking-tight leading-[1.1]">${hello},<br><span class="gradient-text break-words">${esc(name)}</span></h2>
+          <p class="mt-3 text-sm sm:text-base text-slate-400 max-w-md">${esc(sub)}</p>
+          ${chips ? `<div class="mt-5 flex flex-wrap gap-2">${chips}</div>` : ''}
+        </div>
+        <div class="ov-orbit shrink-0 self-center" style="--ph:${ph(24)}">
+          <div class="ov-orbit-ring"><i></i></div>
+          <svg viewBox="0 0 36 36" class="ov-orbit-svg" role="img" aria-label="Overall progress ${overall}%"><defs><linearGradient id="ovg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#7c8cff"/><stop offset=".55" stop-color="#22d3ee"/><stop offset="1" stop-color="#f472b6"/></linearGradient></defs><circle cx="18" cy="18" r="15.5" fill="none" stroke="currentColor" stroke-opacity=".12" stroke-width="2.6"/><circle class="ring" cx="18" cy="18" r="15.5" fill="none" stroke="url(#ovg)" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="${(overall * 97.4 / 100).toFixed(1)} 97.4"/></svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center"><div class="text-3xl sm:text-4xl font-extrabold tracking-tight">${overall}<span class="text-lg text-slate-400">%</span></div><div class="text-[11px] font-semibold uppercase tracking-[.18em] text-slate-400">complete</div></div>
+        </div>
+      </div>
+    </section>
+    ${attn}
+    <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">${tile('Items done', done + ' / ' + all.length, overall + '% complete', '#7c8cff', CHECK, 1)}${tile('Projects', ps.length, inProg + ' in progress', '#22d3ee', NAV_ICON.projects)}${tile('Delivered', finished, 'of ' + ps.length + (ps.length === 1 ? ' project' : ' projects'), '#34d399', 'M5 12.5l4.5 4.5L19 7.5')}${tile('Balance due', money(owedAmt), invOwed.length ? plur(invOwed.length, 'unpaid invoice') : invAll.length ? 'All paid up' : 'No invoices yet', '#f472b6', NAV_ICON.invoices)}</div>
+    <div class="mt-4 grid lg:grid-cols-[1.35fr_1fr] gap-4 items-start">
+      <div data-f class="${card}"><div class="flex items-center justify-between gap-3 mb-1"><div class="font-bold">Project progress</div>${ps.length ? link('goproj', 'View details') : ''}</div><div class="ov-rows">${rows}</div></div>
+      <div class="space-y-4 min-w-0">${upd}${nxt}</div>
     </div>
-    ${nextTasks.length ? `<div data-f class="${card} mt-4"><div class="font-bold mb-3">What we are working on next</div>${nextTasks.map(x => `<div class="flex items-center justify-between gap-3 py-2 border-t border-white/10 first:border-0 text-sm"><span class="truncate">${esc(x.m.t)}</span><span class="text-slate-400 truncate">${esc(x.p)}</span></div>`).join('')}</div>` : ''}
-`;
+    <div data-f class="ov-help mt-4"><div class="min-w-0" style="min-width:14rem"><div class="font-bold">Questions about your website?</div><p class="text-sm text-slate-400 mt-0.5">Reach out any time and our team will get back to you.</p></div><a href="mailto:${CONTACT_EMAIL}?subject=${mailSubj}" class="ov-btn inline-flex items-center gap-2">${svgI(NAV_ICON.messages, 'w-4 h-4')}Email us</a></div>`;
+  };
   const projectsV = () => `
     <p data-f class="text-slate-400 mb-5">Everything included in your website, and how far along each part is.</p>
     <div class="pgrid">${ps.map(projectCard).join('') || `<p class="text-slate-400">${ids.length ? 'Loading your project...' : 'Your project has not been shared yet. We will let you know as soon as it is ready.'}</p>`}</div>
@@ -496,11 +696,12 @@ function render() {
     <div class="grid grid-cols-2 gap-4 mb-4">${stat('Outstanding', money(owedAmt), 1)}${stat('Paid to date', money(paidAmt))}</div>
     <div class="grid md:grid-cols-2 gap-4">${invAll.map(invCard).join('') || '<p class="text-slate-400">No invoices yet. They will appear here as soon as we send one.</p>'}</div>`;
   const subsV = () => {
-    const all = subList(), live = all.filter(subLive), mo = Math.round(live.reduce((a, x) => a + x.amt / SUB_C[x.cycle].m, 0)), soonN = all.filter(x => ['soon', 'overdue'].includes(subSt(x))).length;
+    const all = subList(), live = all.filter(subLive), mo = Math.round(live.filter(subBilledNow).reduce((a, x) => a + x.amt, 0) * 100) / 100, soonN = all.filter(x => ['soon', 'overdue'].includes(subSt(x))).length;
     const pill = (k, l) => `<button type="button" data-spill="${k}" data-act="sflt" data-v="${k}" class="${subPill(subFlt === k)}">${l} (${k === 'all' ? all.length : all.filter(x => x.type === k).length})</button>`;
     return `
     <p data-f class="text-slate-400 mb-5">Your domain, hosting, maintenance and other services with EM Development, and when each one renews.</p>
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">${stat('Active subscriptions', live.length)}${stat('Monthly total', money(mo), 1)}${stat('Renewing soon', soonN)}</div>
+    <p data-f class="-mt-2 mb-5 text-xs text-slate-400">Monthly total counts your monthly plans, plus any quarterly or yearly plan that is due this month.</p>
     <div data-f class="flex flex-wrap gap-2 mb-5">${pill('all', 'All')}${Object.keys(SUB_T).map(k => pill(k, SUB_T[k].l)).join('')}</div>
     <div id="sgrid" class="grid md:grid-cols-2 gap-4">${subGrid()}</div>`;
   };
@@ -539,6 +740,13 @@ function repaint() {
 $('#view').addEventListener('click', async e => {
   const b = e.target.closest('[data-act]'); if (!b) return;
   if (b.dataset.act === 'goinv') go('invoices');
+  else if (b.dataset.act === 'invpdf') {
+    const inv = invList().find(x => x.id === b.dataset.id); if (!inv || !inv.paid || b.disabled) return;
+    const html = b.innerHTML; b.disabled = true; b.innerHTML = '<span class="q-spinner" aria-hidden="true"></span><span>Preparing PDF&hellip;</span>';
+    try { await invoicePdf(inv); toast('Invoice PDF downloaded'); } catch (err) { console.error('invoice pdf', err); toast('Could not create the PDF. Please try again.'); }
+    if (b.isConnected) { b.disabled = false; b.innerHTML = html; }
+  }
+  else if (b.dataset.act === 'goproj') go('projects');
   else if (b.dataset.act === 'sflt') { subFlt = b.dataset.v; subDraw(); }
   else if (b.dataset.act === 'gosubs') go('subscriptions');
   else if (b.dataset.act === 'msub') await maintSub(b);
