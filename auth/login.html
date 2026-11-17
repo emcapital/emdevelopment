@@ -1,30 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Login | EM Development</title>
-  <script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Login | EM Development</title>
+    <script>
     // Apply saved theme before first paint (shared with the home page)
     try { if (localStorage.getItem('theme') === 'light') document.documentElement.classList.add('light'); } catch (e) {}
   </script>
-  <meta name="description" content="Log in to your EM Development account." />
+    <meta name="description" content="Log in to your EM Development account." />
 
-  <!-- PWA (login + admin + customer pages only; index.html is not part of the app) -->
-  <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#070a16" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-title" content="EM Portal" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+    <!-- PWA (login + admin + customer pages only; index.html is not part of the app) -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#070a16" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="EM Portal" />
+    <meta name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="192x192"
+      href="/icons/icon-192.png" />
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap"
+      rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
     tailwind.config = {
       theme: {
         extend: {
@@ -56,7 +61,7 @@
       }
     }
   </script>
-  <style>
+    <style>
     /* ===== No page scroll: the whole page always fits the screen ===== */
     html, body { height: 100%; overflow: hidden; }
     body { background: #070a16; color: #e5e9ff; }
@@ -155,168 +160,268 @@
       *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
     }
   </style>
-</head>
-<body class="font-sans antialiased">
+  </head>
+  <body class="font-sans antialiased">
 
-  <!-- Page transition overlay -->
-  <div id="pageLoader" aria-hidden="true">
-    <div class="pl-content">
-      <div class="pl-ring"></div>
-      <div class="pl-text" id="pageLoaderText">Loading...</div>
-      <div class="pl-bar"><span></span></div>
+    <!-- Page transition overlay -->
+    <div id="pageLoader" aria-hidden="true">
+      <div class="pl-content">
+        <div class="pl-ring"></div>
+        <div class="pl-text" id="pageLoaderText">Loading...</div>
+        <div class="pl-bar"><span></span></div>
+      </div>
     </div>
-  </div>
 
-  <!-- Background -->
-  <div class="fixed inset-0 overflow-hidden pointer-events-none">
-    <div class="absolute inset-0 grid-bg"></div>
-    <div class="absolute -top-24 -left-24 w-[520px] h-[520px] rounded-full bg-brand-500/30 blur-[120px] animate-blob"></div>
-    <div class="absolute top-1/3 -right-24 w-[460px] h-[460px] rounded-full bg-aqua/20 blur-[120px] animate-blob" style="animation-delay:-5s"></div>
-    <div class="absolute bottom-0 left-1/3 w-[380px] h-[380px] rounded-full bg-pink/20 blur-[120px] animate-blob" style="animation-delay:-9s"></div>
-  </div>
+    <!-- Background -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute inset-0 grid-bg"></div>
+      <div
+        class="absolute -top-24 -left-24 w-[520px] h-[520px] rounded-full bg-brand-500/30 blur-[120px] animate-blob"></div>
+      <div
+        class="absolute top-1/3 -right-24 w-[460px] h-[460px] rounded-full bg-aqua/20 blur-[120px] animate-blob"
+        style="animation-delay:-5s"></div>
+      <div
+        class="absolute bottom-0 left-1/3 w-[380px] h-[380px] rounded-full bg-pink/20 blur-[120px] animate-blob"
+        style="animation-delay:-9s"></div>
+    </div>
 
-  <!-- Top bar -->
-  <header class="fixed top-0 inset-x-0 z-50">
-    <div class="max-w-[90rem] mx-auto px-5 sm:px-8 h-16 sm:h-20 flex items-center justify-between">
-      <a href="../index.html" data-home class="fade-item flex items-center gap-3 group" style="--i:0">
-        <span class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-brand-500 to-aqua flex items-center justify-center font-extrabold text-white shadow-lg shadow-brand-500/30 group-hover:rotate-12 transition-transform duration-500">E</span>
-        <span class="text-base sm:text-lg font-bold tracking-tight">EM <span class="text-brand-400">Development</span></span>
-      </a>
-      <div class="fade-item flex items-center gap-2.5" style="--i:1">
-        <a href="../index.html" data-home class="inline-flex items-center gap-2 h-10 sm:h-11 px-3.5 sm:px-4 rounded-full glass text-sm font-medium text-slate-300 hover:text-white hover:-translate-y-0.5 transition-all duration-300">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6" /></svg>
-          <span class="hidden sm:inline">Back to home</span><span class="sm:hidden">Home</span>
+    <!-- Top bar -->
+    <header class="fixed top-0 inset-x-0 z-50">
+      <div
+        class="max-w-[90rem] mx-auto px-5 sm:px-8 h-16 sm:h-20 flex items-center justify-between">
+        <a href="../index.html" data-home
+          class="fade-item flex items-center gap-3 group" style="--i:0">
+          <span
+            class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-brand-500 to-aqua flex items-center justify-center font-extrabold text-white shadow-lg shadow-brand-500/30 group-hover:rotate-12 transition-transform duration-500">E</span>
+          <span class="text-base sm:text-lg font-bold tracking-tight">EM <span
+              class="text-brand-400">Development</span></span>
         </a>
-        <button id="themeBtn" type="button" aria-label="Switch to light mode"
-          class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl glass flex items-center justify-center hover:-translate-y-0.5 transition-transform duration-300">
-          <span class="relative block w-5 h-5">
-            <svg class="theme-icon sun" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2" /><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" /></svg>
-            <svg class="theme-icon moon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2z" /></svg>
-          </span>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <div class="app relative z-[2] grid lg:grid-cols-[1.1fr_1fr] overflow-hidden">
-
-    <!-- Left: brand panel (desktop only) -->
-    <aside class="fade-side hidden lg:flex flex-col justify-center px-14 xl:px-24 pt-24 pb-10 relative">
-      <div class="max-w-xl">
-        <span class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full glass text-sm font-medium text-slate-200">
-          <span class="relative flex w-2.5 h-2.5"><span class="absolute inset-0 rounded-full bg-emerald-400 animate-pulseRing"></span><span class="relative w-2.5 h-2.5 rounded-full bg-emerald-400"></span></span>
-          Client portal
-        </span>
-        <h2 class="mt-6 text-4xl xl:text-5xl font-extrabold leading-[1.1] tracking-tight">
-          Your projects,<br />all in <span class="gradient-text">one place.</span>
-        </h2>
-        <p class="mt-5 text-lg text-slate-400 leading-relaxed max-w-md">Track progress, review designs and stay in touch with your team, anytime and on any device.</p>
-
-        <ul class="mt-8 space-y-4">
-          <li class="flex items-center gap-3.5 text-slate-300">
-            <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-aqua flex items-center justify-center shadow-lg shadow-brand-500/30"><svg class="w-4.5 h-4.5 w-[18px] h-[18px] text-white" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" /></svg></span>
-            Real-time project updates
-          </li>
-          <li class="flex items-center gap-3.5 text-slate-300">
-            <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-pink to-brand-500 flex items-center justify-center shadow-lg shadow-pink/30"><svg class="w-[18px] h-[18px] text-white" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" /></svg></span>
-            Secure access to files and invoices
-          </li>
-          <li class="flex items-center gap-3.5 text-slate-300">
-            <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-aqua to-emerald-400 flex items-center justify-center shadow-lg shadow-aqua/30"><svg class="w-[18px] h-[18px] text-white" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" /></svg></span>
-            Direct line to our developers
-          </li>
-        </ul>
-      </div>
-
-      <!-- Floating cards -->
-      <div class="hide-short absolute right-10 xl:right-16 bottom-14 glass rounded-2xl px-4 py-3 flex items-center gap-3 animate-float" style="animation-delay:-2s">
-        <span class="w-10 h-10 rounded-xl bg-emerald-400/20 text-emerald-300 flex items-center justify-center">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" /></svg>
-        </span>
-        <div><div class="text-xs text-slate-400">Lighthouse score</div><div class="font-bold">100 / 100</div></div>
-      </div>
-      <div class="hide-short absolute right-24 xl:right-40 top-28 glass rounded-2xl px-4 py-3 animate-float" style="animation-delay:-4s">
-        <div class="text-xs text-slate-400">Conversion</div>
-        <div class="font-bold text-aqua">+248%</div>
-      </div>
-    </aside>
-
-    <!-- Right: login card -->
-    <main class="relative flex items-center justify-center px-5 sm:px-8 pt-16 sm:pt-20 pb-4 sm:pb-6 min-h-0">
-      <div class="fade-card relative w-full max-w-[26rem] max-h-full">
-        <div class="absolute -inset-px rounded-[2rem] bg-gradient-to-br from-brand-500/40 via-aqua/20 to-pink/30 blur-xl opacity-60"></div>
-        <div class="card-pad relative glass rounded-[2rem] px-6 sm:px-9 py-7 sm:py-9">
-
-          <div class="text-center">
-            <div class="fade-item hide-xshort mx-auto relative w-14 h-14" style="--i:0">
-              <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-brand-500 to-aqua animate-spinSlow opacity-60 blur-md"></div>
-              <div class="logo-tile relative w-14 h-14 rounded-2xl bg-panel border border-white/10 flex items-center justify-center text-2xl font-extrabold gradient-text">E</div>
-            </div>
-            <h1 class="fade-item mt-4 hide-xshort-mt text-2xl sm:text-3xl font-extrabold tracking-tight" style="--i:1">Welcome <span class="gradient-text">back</span></h1>
-            <p class="fade-item hide-short mt-2 text-slate-400 text-sm" style="--i:2">Log in to continue to your dashboard.</p>
-          </div>
-
-          <form id="loginForm" class="stack-tight mt-6 space-y-4" novalidate>
-            <div class="fade-item" style="--i:3">
-              <label for="email" class="text-sm font-medium text-slate-300">Email</label>
-              <div class="field-wrap relative mt-1.5">
-                <svg class="field-icon" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></svg>
-                <input id="email" class="field" required type="email" name="email" autocomplete="email" placeholder="you@email.com" />
-              </div>
-            </div>
-
-            <div class="fade-item" style="--i:4">
-              <div class="flex items-center justify-between">
-                <label for="password" class="text-sm font-medium text-slate-300">Password</label>
-                <a href="#" id="forgotLink" class="text-xs font-semibold text-brand-400 hover:text-white transition">Forgot password?</a>
-              </div>
-              <div class="field-wrap relative mt-1.5">
-                <svg class="field-icon" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>
-                <input id="password" class="field" style="padding-right:48px" required type="password" name="password" autocomplete="current-password" placeholder="Enter your password" />
-                <button id="togglePw" type="button" aria-label="Show password"
-                  class="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition">
-                  <svg id="eyeOn" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" /><circle cx="12" cy="12" r="3" /></svg>
-                  <svg id="eyeOff" class="w-5 h-5 hidden" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 6.1A9.8 9.8 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.2M6.6 6.7A17 17 0 0 0 2 12s3.5 7 10 7a9.7 9.7 0 0 0 4.4-1M9.9 9.9a3 3 0 0 0 4.2 4.2" /></svg>
-                </button>
-              </div>
-            </div>
-
-            <label class="fade-item inline-flex items-center gap-2.5 text-sm text-slate-300 cursor-pointer select-none" style="--i:5">
-              <input type="checkbox" class="chk" name="remember" /> Remember me
-            </label>
-
-            <p id="loginMsg" class="text-center text-sm h-4 -my-1 opacity-0 transition-opacity duration-500" role="status"></p>
-
-            <button id="loginSubmit" type="submit" style="--i:6"
-              class="fade-item btn-shine w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white shadow-lg shadow-brand-500/30 hover:shadow-brand-500/60 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 flex items-center justify-center gap-3">
-              <span id="loginLabel">Log In</span>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-            </button>
-          </form>
-
-          <div class="hide-short fade-item mt-5 flex items-center gap-3 text-xs text-slate-500" style="--i:7">
-            <span class="flex-1 h-px bg-white/10"></span>or continue with<span class="flex-1 h-px bg-white/10"></span>
-          </div>
-          <div class="hide-short fade-item mt-4 grid grid-cols-2 gap-3" style="--i:8">
-            <button type="button" data-social data-provider="google" class="glass rounded-xl py-2.5 flex items-center justify-center gap-2.5 text-sm font-semibold text-slate-300 hover:text-white hover:-translate-y-0.5 transition-all duration-300">
-              <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.8-5.5 3.8-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.7 2.8 14.6 2 12 2 6.9 2 2.8 6.1 2.8 11.2S6.9 20.4 12 20.4c5.3 0 8.8-3.7 8.8-9 0-.6-.1-1.1-.2-1.6H12z" /></svg>
-              Google
-            </button>
-            <button type="button" data-social data-provider="github" class="glass rounded-xl py-2.5 flex items-center justify-center gap-2.5 text-sm font-semibold text-slate-300 hover:text-white hover:-translate-y-0.5 transition-all duration-300">
-              <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.2-3.4-1.2-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.3-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.300 4.700-4.600 5 .4.3.7.9.7 1.8v2.7c0 .3.2.6.7.5A10 10 0 0 0 12 2z" /></svg>
-              GitHub
-            </button>
-          </div>
-
-          <p class="fade-item mt-5 text-center text-sm text-slate-400" style="--i:9">
-            Don't have an account? <a href="../index.html#contact" data-home class="font-semibold text-brand-400 hover:text-white transition">Contact us</a>
-          </p>
+        <div class="fade-item flex items-center gap-2.5" style="--i:1">
+          <a href="../index.html" data-home
+            class="inline-flex items-center gap-2 h-10 sm:h-11 px-3.5 sm:px-4 rounded-full glass text-sm font-medium text-slate-300 hover:text-white hover:-translate-y-0.5 transition-all duration-300">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor"
+              stroke-width="2.5" viewBox="0 0 24 24"><path
+                d="M19 12H5M11 18l-6-6 6-6" /></svg>
+            <span class="hidden sm:inline">Back to home</span><span
+              class="sm:hidden">Home</span>
+          </a>
+          <button id="themeBtn" type="button" aria-label="Switch to light mode"
+            class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl glass flex items-center justify-center hover:-translate-y-0.5 transition-transform duration-300">
+            <span class="relative block w-5 h-5">
+              <svg class="theme-icon sun" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round"
+                viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2" /><path
+                  d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" /></svg>
+              <svg class="theme-icon moon" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                viewBox="0 0 24 24"><path
+                  d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2z" /></svg>
+            </span>
+          </button>
         </div>
       </div>
-    </main>
-  </div>
+    </header>
 
-  <script type="module">
+    <div
+      class="app relative z-[2] grid lg:grid-cols-[1.1fr_1fr] overflow-hidden">
+
+      <!-- Left: brand panel (desktop only) -->
+      <aside
+        class="fade-side hidden lg:flex flex-col justify-center px-14 xl:px-24 pt-24 pb-10 relative">
+        <div class="max-w-xl">
+          <span
+            class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full glass text-sm font-medium text-slate-200">
+            <span class="relative flex w-2.5 h-2.5"><span
+                class="absolute inset-0 rounded-full bg-emerald-400 animate-pulseRing"></span><span
+                class="relative w-2.5 h-2.5 rounded-full bg-emerald-400"></span></span>
+            Client portal
+          </span>
+          <h2
+            class="mt-6 text-4xl xl:text-5xl font-extrabold leading-[1.1] tracking-tight">
+            Your projects,<br />all in <span class="gradient-text">one
+              place.</span>
+          </h2>
+          <p class="mt-5 text-lg text-slate-400 leading-relaxed max-w-md">Track
+            progress, review designs and stay in touch with your team, anytime
+            and on any device.</p>
+
+          <ul class="mt-8 space-y-4">
+            <li class="flex items-center gap-3.5 text-slate-300">
+              <span
+                class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-aqua flex items-center justify-center shadow-lg shadow-brand-500/30"><svg
+                  class="w-4.5 h-4.5 w-[18px] h-[18px] text-white" fill="none"
+                  stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round"
+                  viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" /></svg></span>
+              Real-time project updates
+            </li>
+            <li class="flex items-center gap-3.5 text-slate-300">
+              <span
+                class="w-9 h-9 rounded-xl bg-gradient-to-br from-pink to-brand-500 flex items-center justify-center shadow-lg shadow-pink/30"><svg
+                  class="w-[18px] h-[18px] text-white" fill="none"
+                  stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round"
+                  viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" /></svg></span>
+              Secure access to files and invoices
+            </li>
+            <li class="flex items-center gap-3.5 text-slate-300">
+              <span
+                class="w-9 h-9 rounded-xl bg-gradient-to-br from-aqua to-emerald-400 flex items-center justify-center shadow-lg shadow-aqua/30"><svg
+                  class="w-[18px] h-[18px] text-white" fill="none"
+                  stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round"
+                  viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" /></svg></span>
+              Direct line to our developers
+            </li>
+          </ul>
+        </div>
+
+        <!-- Floating cards -->
+        <div
+          class="hide-short absolute right-10 xl:right-16 bottom-14 glass rounded-2xl px-4 py-3 flex items-center gap-3 animate-float"
+          style="animation-delay:-2s">
+          <span
+            class="w-10 h-10 rounded-xl bg-emerald-400/20 text-emerald-300 flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor"
+              stroke-width="2.5" viewBox="0 0 24 24"><path
+                d="M5 13l4 4L19 7" /></svg>
+          </span>
+          <div><div class="text-xs text-slate-400">Lighthouse score</div><div
+              class="font-bold">100 / 100</div></div>
+        </div>
+        <div
+          class="hide-short absolute right-24 xl:right-40 top-28 glass rounded-2xl px-4 py-3 animate-float"
+          style="animation-delay:-4s">
+          <div class="text-xs text-slate-400">Conversion</div>
+          <div class="font-bold text-aqua">+248%</div>
+        </div>
+      </aside>
+
+      <!-- Right: login card -->
+      <main
+        class="relative flex items-center justify-center px-5 sm:px-8 pt-16 sm:pt-20 pb-4 sm:pb-6 min-h-0">
+        <div class="fade-card relative w-full max-w-[26rem] max-h-full">
+          <div
+            class="absolute -inset-px rounded-[2rem] bg-gradient-to-br from-brand-500/40 via-aqua/20 to-pink/30 blur-xl opacity-60"></div>
+          <div
+            class="card-pad relative glass rounded-[2rem] px-6 sm:px-9 py-7 sm:py-9">
+
+            <div class="text-center">
+              <div class="fade-item hide-xshort mx-auto relative w-14 h-14"
+                style="--i:0">
+                <div
+                  class="absolute inset-0 rounded-2xl bg-gradient-to-br from-brand-500 to-aqua animate-spinSlow opacity-60 blur-md"></div>
+                <div
+                  class="logo-tile relative w-14 h-14 rounded-2xl bg-panel border border-white/10 flex items-center justify-center text-2xl font-extrabold gradient-text">E</div>
+              </div>
+              <h1
+                class="fade-item mt-4 hide-xshort-mt text-2xl sm:text-3xl font-extrabold tracking-tight"
+                style="--i:1">Welcome <span
+                  class="gradient-text">back</span></h1>
+              <p class="fade-item hide-short mt-2 text-slate-400 text-sm"
+                style="--i:2">Log in to continue to your dashboard.</p>
+            </div>
+
+            <form id="loginForm" class="stack-tight mt-6 space-y-4" novalidate>
+              <div class="fade-item" style="--i:3">
+                <label for="email"
+                  class="text-sm font-medium text-slate-300">Email</label>
+                <div class="field-wrap relative mt-1.5">
+                  <svg class="field-icon" fill="none" stroke="currentColor"
+                    stroke-width="1.8" stroke-linecap="round"
+                    stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3"
+                      y="5" width="18" height="14" rx="2" /><path
+                      d="M3 7l9 6 9-6" /></svg>
+                  <input id="email" class="field" required type="email"
+                    name="email" autocomplete="email"
+                    placeholder="you@email.com" />
+                </div>
+              </div>
+
+              <div class="fade-item" style="--i:4">
+                <div class="flex items-center justify-between">
+                  <label for="password"
+                    class="text-sm font-medium text-slate-300">Password</label>
+                  <a href="#" id="forgotLink"
+                    class="text-xs font-semibold text-brand-400 hover:text-white transition">Forgot
+                    password?</a>
+                </div>
+                <div class="field-wrap relative mt-1.5">
+                  <svg class="field-icon" fill="none" stroke="currentColor"
+                    stroke-width="1.8" stroke-linecap="round"
+                    stroke-linejoin="round" viewBox="0 0 24 24"><rect x="4"
+                      y="11" width="16" height="10" rx="2" /><path
+                      d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>
+                  <input id="password" class="field" style="padding-right:48px"
+                    required type="password" name="password"
+                    autocomplete="current-password"
+                    placeholder="Enter your password" />
+                  <button id="togglePw" type="button" aria-label="Show password"
+                    class="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition">
+                    <svg id="eyeOn" class="w-5 h-5" fill="none"
+                      stroke="currentColor" stroke-width="1.8"
+                      stroke-linecap="round" stroke-linejoin="round"
+                      viewBox="0 0 24 24"><path
+                        d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" /><circle
+                        cx="12" cy="12" r="3" /></svg>
+                    <svg id="eyeOff" class="w-5 h-5 hidden" fill="none"
+                      stroke="currentColor" stroke-width="1.8"
+                      stroke-linecap="round" stroke-linejoin="round"
+                      viewBox="0 0 24 24"><path
+                        d="M3 3l18 18M10.6 6.1A9.8 9.8 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.2M6.6 6.7A17 17 0 0 0 2 12s3.5 7 10 7a9.7 9.7 0 0 0 4.4-1M9.9 9.9a3 3 0 0 0 4.2 4.2" /></svg>
+                  </button>
+                </div>
+              </div>
+
+              <label
+                class="fade-item inline-flex items-center gap-2.5 text-sm text-slate-300 cursor-pointer select-none"
+                style="--i:5">
+                <input type="checkbox" class="chk" name="remember" /> Remember
+                me
+              </label>
+
+              <p id="loginMsg"
+                class="text-center text-sm min-h-[1rem] -my-1 opacity-0 transition-opacity duration-500"
+                role="status"></p>
+
+              <button id="loginSubmit" type="submit" style="--i:6"
+                class="fade-item btn-shine w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white shadow-lg shadow-brand-500/30 hover:shadow-brand-500/60 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 flex items-center justify-center gap-3">
+                <span id="loginLabel">Log In</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                  stroke-width="2.5" viewBox="0 0 24 24"><path
+                    d="M5 12h14M13 6l6 6-6 6" /></svg>
+              </button>
+            </form>
+
+            <div
+              class="hide-short fade-item mt-5 flex items-center gap-3 text-xs text-slate-500"
+              style="--i:7">
+              <span class="flex-1 h-px bg-white/10"></span>or continue with<span
+                class="flex-1 h-px bg-white/10"></span>
+            </div>
+            <div class="hide-short fade-item mt-4 grid grid-cols-2 gap-3"
+              style="--i:8">
+              <button type="button" data-social data-provider="google"
+                class="glass rounded-xl py-2.5 flex items-center justify-center gap-2.5 text-sm font-semibold text-slate-300 hover:text-white hover:-translate-y-0.5 transition-all duration-300">
+                <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24"
+                  fill="currentColor"><path
+                    d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.8-5.5 3.8-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.7 2.8 14.6 2 12 2 6.9 2 2.8 6.1 2.8 11.2S6.9 20.4 12 20.4c5.3 0 8.8-3.7 8.8-9 0-.6-.1-1.1-.2-1.6H12z" /></svg>
+                Google
+              </button>
+              <button type="button" data-social data-provider="github"
+                class="glass rounded-xl py-2.5 flex items-center justify-center gap-2.5 text-sm font-semibold text-slate-300 hover:text-white hover:-translate-y-0.5 transition-all duration-300">
+                <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24"
+                  fill="currentColor"><path
+                    d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.2-3.4-1.2-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.3-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.300 4.700-4.600 5 .4.3.7.9.7 1.8v2.7c0 .3.2.6.7.5A10 10 0 0 0 12 2z" /></svg>
+                GitHub
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script type="module">
     // Light / dark theme toggle (same storage key as the home page)
     const themeBtn = document.getElementById('themeBtn'), rootEl = document.documentElement;
     function syncThemeLabel() {
@@ -372,7 +477,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
     import { getAnalytics, isSupported } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-analytics.js";
     import {
-      getAuth, onAuthStateChanged, signInWithEmailAndPassword, sendPasswordResetEmail,
+      getAuth, onAuthStateChanged, signInWithEmailAndPassword, sendPasswordResetEmail, signOut,
       signInWithPopup, GoogleAuthProvider, GithubAuthProvider,
       setPersistence, browserLocalPersistence, browserSessionPersistence
     } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
@@ -400,8 +505,14 @@
     const db = getDatabase(app);
     // A customer has a record at portal/<uid> (created when the admin adds them); everyone else is an admin
     async function destFor(user) {
-      try { const sn = await get(ref(db, `portal/${user.uid}`)); return sn.exists() ? CUSTOMER_URL : ADMIN_URL; }
-      catch (e) { return ADMIN_URL; }
+      try {
+        const sn = await get(ref(db, `portal/${user.uid}`));
+        if (!sn.exists()) return { url: ADMIN_URL };
+        const v = sn.val() || {};
+        // The admin switched this customer off (or deleted them): they must not get in
+        return (v.revoked || v.disabled) ? { blocked: true } : { url: CUSTOMER_URL };
+      }
+      catch (e) { return { url: ADMIN_URL }; }
     }
 
     // ===== Login UI =====
@@ -411,8 +522,8 @@
     let redirecting = false;
 
     function showMsg(text, ok) {
-      msg.textContent = text;
-      msg.className = 'text-center text-sm h-4 -my-1 transition-opacity duration-500 opacity-100 ' + (ok ? 'text-emerald-300' : 'text-pink');
+      msg.textContent = text; msg.style.opacity = '';
+      msg.className = 'text-center text-sm min-h-[1rem] -my-1 transition-opacity duration-500 opacity-100 ' + (ok ? 'text-emerald-300' : 'text-pink');
     }
     function setLoading(on) {
       const sp = document.getElementById('loginSpin');
@@ -426,17 +537,25 @@
         label.textContent = 'Log In';
       }
     }
-    function goToApp() {
+    async function goToApp() {
       if (redirecting) return;
       redirecting = true;
-      const destP = destFor(auth.currentUser);
+      setLoading(true);
+      const dest = await destFor(auth.currentUser);
+      if (dest.blocked) {
+        try { await signOut(auth); } catch (e) {}
+        redirecting = false; setLoading(false);
+        showMsg('Your account has been disabled. Please contact EM Development.', false);
+        return;
+      }
+      setLoading(false);
       showMsg('✓ Login successful! Redirecting...', true);
       // Success state on the button, then the whole page fades out below
       submit.disabled = true;
       label.textContent = 'Success!';
       submit.style.backgroundImage = 'linear-gradient(90deg, #10b981, #22d3ee)';
       // Loading for 2s, then fade out, then go to the destination dashboard
-      setTimeout(() => leaveTo(destP, 'Loading your dashboard...'), 500);
+      setTimeout(() => leaveTo(dest.url, 'Loading your dashboard...'), 500);
     }
     function friendlyError(err) {
       switch (err && err.code) {
@@ -460,6 +579,12 @@
 
     // Already signed in? Skip the form.
     onAuthStateChanged(auth, user => { if (user) goToApp(); });
+    try {
+      if (sessionStorage.getItem('loginNotice') === 'disabled') {
+        sessionStorage.removeItem('loginNotice');
+        showMsg('Your account has been disabled. Please contact EM Development.', false);
+      }
+    } catch (e) {}
 
     // Email + password
     form.addEventListener('submit', async e => {
@@ -507,7 +632,7 @@
     });
   </script>
 
-  <!-- PWA: service worker registration + install button -->
-  <script src="/pwa.js" defer></script>
-</body>
+    <!-- PWA: service worker registration + install button -->
+    <script src="/pwa.js" defer></script>
+  </body>
 </html>

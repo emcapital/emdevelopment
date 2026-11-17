@@ -767,9 +767,9 @@
         const creds = kCreds ? `<div data-f class="${card} mb-4 !border-emerald-400/30"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="font-bold">Account created for ${esc(kCreds.name)}</div><p class="mt-1 text-sm text-slate-400">${kCreds.mailed ? 'An email was sent to ' + esc(kCreds.email) + ' with a link to sign in and set their own password.' : 'The email could not be sent automatically. Use Copy login details below, or Send password reset in Manage.'}</p></div><button data-act="kdismiss" aria-label="Dismiss" class="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition">${svg('M6 6l12 12M18 6L6 18', 'w-4 h-4')}</button></div><div class="mt-3 grid sm:grid-cols-2 gap-3 text-sm"><div class="min-w-0"><span class="text-slate-400">Email</span><div class="font-semibold break-all">${esc(kCreds.email)}</div></div><div class="min-w-0"><span class="text-slate-400">Temporary password</span><div class="font-mono font-semibold break-all">${esc(kCreds.pw)}</div></div></div><button data-act="kcopy" class="mt-4 px-5 py-2.5 rounded-xl glass text-sm font-semibold text-brand-400 hover:text-white transition">Copy login details</button></div>` : '';
         const kCard = c => {
           const ps = lk(c), v = prog(ps);
-          return `<div data-f data-kid="${esc(c.id)}" class="${card} flex flex-col">
-            <div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="font-bold truncate">${esc(c.name)}</div><div class="text-xs text-slate-400 mt-0.5 truncate">${esc(c.company || 'No company')}${c.at ? ' &middot; Added ' + esc(fmtD(c.at)) : ''}</div></div><span class="shrink-0 px-3 py-1 rounded-full text-xs font-semibold ${ps.length ? BADGE.active : BADGE.pending}">${ps.length ? v + '%' : 'No project'}</span></div>
-            <div class="mt-3 space-y-1 text-sm"><div class="truncate"><span class="text-slate-400">Email:</span> <a class="text-brand-400 hover:text-white font-medium" href="mailto:${esc(c.email)}">${esc(c.email)}</a></div>${c.phone ? `<div class="truncate"><span class="text-slate-400">Phone:</span> ${esc(c.phone)}</div>` : ''}</div>
+          return `<div data-f data-kid="${esc(c.id)}" class="${card} flex flex-col${c.disabled ? ' !border-red-400/40' : ''}">
+            <div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="font-bold truncate">${esc(c.name)}</div><div class="text-xs text-slate-400 mt-0.5 truncate">${esc(c.company || 'No company')}${c.at ? ' &middot; Added ' + esc(fmtD(c.at)) : ''}</div></div><div class="shrink-0 flex flex-wrap justify-end gap-1.5">${c.disabled ? '<span class="px-3 py-1 rounded-full text-xs font-semibold text-red-300 bg-red-500/15">Disabled</span>' : ''}<span class="px-3 py-1 rounded-full text-xs font-semibold ${ps.length ? BADGE.active : BADGE.pending}">${ps.length ? v + '%' : 'No project'}</span></div></div>
+            ${c.disabled ? '<p class="mt-3 text-xs text-red-300">Account disabled. This customer cannot log in until you enable it again.</p>' : ''}<div class="mt-3 space-y-1 text-sm"><div class="truncate"><span class="text-slate-400">Email:</span> <a class="text-brand-400 hover:text-white font-medium" href="mailto:${esc(c.email)}">${esc(c.email)}</a></div>${c.phone ? `<div class="truncate"><span class="text-slate-400">Phone:</span> ${esc(c.phone)}</div>` : ''}</div>
             <div class="mt-4 space-y-3">${ps.map(p => `<div><div class="flex items-center justify-between gap-3 text-sm"><span class="truncate font-semibold">${esc(p.name)}</span><span class="text-slate-400">${pct(p)}%</span></div><div class="bar mt-1.5 h-2 rounded-full bg-white/10"><i style="width:${pct(p)}%"></i></div></div>`).join('') || '<p class="text-sm text-slate-400">No project shared yet. Open Manage below to share one.</p>'}</div>
             ${c.update ? `<div class="mt-4 rounded-xl bg-white/10 p-3 text-sm"><div class="text-xs text-slate-400 mb-1">Latest update${c.updatedAt ? ' &middot; ' + esc(fmtD(c.updatedAt)) : ''}</div><div class="whitespace-pre-wrap break-words">${esc(c.update)}</div></div>` : ''}
             <details data-kd="${esc(c.id)}" ${kOpenSet.has(c.id) ? 'open' : ''} class="mt-4 pt-4 border-t border-white/10"><summary class="cursor-pointer text-sm font-semibold text-brand-400 hover:text-white select-none">Manage</summary>
@@ -777,7 +777,7 @@
               <div class="mt-2 space-y-2">${C.map(p => `<label class="flex items-center gap-3 text-sm text-slate-300 cursor-pointer select-none"><input type="checkbox" class="chk" data-act="klink" data-k="${esc(c.id)}" data-p="${esc(p.id)}" ${c.projects.includes(p.id) ? 'checked' : ''}/><span class="min-w-0 break-words">${esc(p.name)}</span></label>`).join('') || '<p class="text-sm text-slate-400">Create a project first, then share it here.</p>'}</div>
               <label class="${lbl} mt-4">Post a progress update<textarea data-kdraft="${esc(c.id)}" maxlength="300" rows="3" class="field mt-1.5" placeholder="e.g. Your homepage design is ready for review">${esc(kDraft[c.id] || '')}</textarea></label>
               <button data-act="kpost" data-k="${esc(c.id)}" class="mt-3 px-5 py-2.5 rounded-xl bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 transition">Post update</button>
-              <div class="mt-4 flex flex-wrap gap-x-5 gap-y-2"><button data-act="kreset" data-k="${esc(c.id)}" class="text-sm font-semibold text-brand-400 hover:text-white">Send password reset</button><button data-act="kdel" data-k="${esc(c.id)}" class="text-sm font-semibold text-red-400">Delete customer</button></div>
+              <div class="mt-4 flex flex-wrap gap-x-5 gap-y-2"><button data-act="kreset" data-k="${esc(c.id)}" class="text-sm font-semibold text-brand-400 hover:text-white">Send password reset</button><button data-act="ktoggle" data-k="${esc(c.id)}" class="text-sm font-semibold ${c.disabled ? 'text-emerald-300' : 'text-red-400'} hover:text-white">${c.disabled ? 'Enable account' : 'Disable account'}</button><button data-act="kdel" data-k="${esc(c.id)}" class="text-sm font-semibold text-red-400">Delete customer</button></div>
             </details></div>`;
         };
         return `${kError ? `<p class="mb-4 text-sm text-red-400" role="alert">${esc(kError)}</p>` : ''}${creds}
@@ -798,7 +798,7 @@
         <div id="kgrid" class="grid md:grid-cols-2 gap-4">${K.map(kCard).join('') || '<p class="text-slate-400">No customers yet. Create the first account with the button above.</p>'}</div>`;
       },
       portal() {
-        if (!PORTAL || PORTAL.revoked) return `<div data-f class="${card} max-w-xl"><div class="font-bold">Access disabled</div><p class="mt-1 text-sm text-slate-400">Your portal access is no longer active. Please contact EM Development.</p></div>`;
+        if (!PORTAL || PORTAL.revoked || PORTAL.disabled) return `<div data-f class="${card} max-w-xl"><div class="font-bold">Access disabled</div><p class="mt-1 text-sm text-slate-400">Your portal access is no longer active. Please contact EM Development.</p></div>`;
         const ids = Object.keys(PORTAL.projects || {}), ps = ids.map(id => PP[id]).filter(Boolean);
         const all = ps.flatMap(p => p.items), done = all.filter(m => m.d).length, overall = all.length ? Math.round(done / all.length * 100) : 0;
         return `<p data-f class="text-slate-400 mb-5">Hi <span class="font-semibold text-slate-200">${esc(PORTAL.name || U.displayName || '')}</span>. Here is how your website is coming along.</p>
@@ -1153,6 +1153,21 @@
         b.disabled = false;
       }
       else if (a === 'kreset') { const c = K.find(x => x.id === b.dataset.k); if (!c) return; try { await sendPasswordResetEmail(auth, c.email); toast('Reset link sent to ' + c.email); } catch (err) { toast('Could not send the email. Try again later.'); } }
+      else if (a === 'ktoggle') {
+        const c = K.find(x => x.id === b.dataset.k); if (!c || !c.uid) return;
+        const off = !c.disabled;   // true = disable now, false = enable again
+        if (off) { openXDisable(c.id, b); return; }   // disabling needs the typed confirmation
+        const prev = c.disabled; c.disabled = off; b.disabled = true;
+        try {
+          await withTimeout(update(ref(db), {
+            [`users/${U.uid}/customers/${c.id}/disabled`]: off ? true : null,
+            [`portal/${c.uid}/disabled`]: off ? true : null,
+            [`portal/${c.uid}/revoked`]: off ? true : null
+          }), 12000);
+          toast(off ? c.name + ' can no longer log in' : c.name + ' can log in again');
+        } catch (err) { c.disabled = prev; toast(kErr(err, off ? 'disable the account' : 'enable the account')); }
+        b.disabled = false; repaintK();
+      }
       else if (a === 'kdel') openXCust(b.dataset.k, b);
       else if (a === 'pwdone') { try { localStorage.setItem('pwn:' + U.uid, '1'); } catch (e2) {} paint(false); }
       else if (a === 'rpw') { try { await sendPasswordResetEmail(auth, U.email); toast('Reset link sent to ' + U.email); } catch (err) { toast('Could not send the email. Try again later.'); } }
@@ -1445,7 +1460,7 @@
 
     // ---------- delete invoice modal ----------
     const xModal = $('#xModal'), xForm = $('#xForm'), xIn = $('#xIn'), xBtn = $('#xBtn'), xErr = $('#xErr'), xHint = $('#xHint');
-    let X_PHRASE = 'Delete this Invoice', X_LABEL = 'Delete invoice';
+    let X_PHRASE = 'Delete this Invoice', X_LABEL = 'Delete invoice', X_BUSY = 'Deleting...';
     let delI = null, xDeleting = false, xFocus = null;
     const xMatch = () => !!delI && xIn.value === X_PHRASE;   // exact match, including case
     function syncX() {
@@ -1457,7 +1472,7 @@
     }
     function setXDeleting(on) {
       xDeleting = on; xIn.disabled = on;
-      $('#xBtnLabel').textContent = on ? 'Deleting...' : X_LABEL;
+      $('#xBtnLabel').textContent = on ? X_BUSY : X_LABEL;
       const sp = $('#xSpin');
       if (on && !sp) xBtn.insertAdjacentHTML('afterbegin', '<span class="q-spinner" id="xSpin"></span>');
       else if (!on && sp) sp.remove();
@@ -1497,11 +1512,12 @@
       if (xIn.value !== X_PHRASE) { xErr.textContent = 'Type "' + X_PHRASE + '" exactly to confirm.'; xIn.focus(); return; }
       const t = delI; setXDeleting(true);
       try {
-        if (t.kind === 'cust') await withTimeout(update(ref(db), { [`users/${U.uid}/customers/${t.id}`]: null, [`portal/${t.uid}`]: { admin: U.uid, revoked: true } }), 12000);
+        if (t.kind === 'disable') await withTimeout(update(ref(db), { [`users/${U.uid}/customers/${t.id}/disabled`]: true, [`portal/${t.uid}/disabled`]: true, [`portal/${t.uid}/revoked`]: true }), 12000);
+        else if (t.kind === 'cust') await withTimeout(update(ref(db), { [`users/${U.uid}/customers/${t.id}`]: null, [`portal/${t.uid}`]: { admin: U.uid, revoked: true } }), 12000);
         else { await withTimeout(remove(ref(db, `users/${U.uid}/invoices/${t.id}`)), 12000); if (invEdit === t.id) hideInvPanel(); }
-        setXDeleting(false); closeXDel(); toast(t.num + ' deleted');
+        setXDeleting(false); closeXDel(); toast(t.kind === 'disable' ? t.num + ' can no longer log in' : t.num + ' deleted');
       } catch (err) {
-        setXDeleting(false); xErr.textContent = t.kind === 'cust' ? kErr(err, 'delete the customer') : invErr(err, 'delete the invoice');
+        setXDeleting(false); xErr.textContent = t.kind === 'disable' ? kErr(err, 'disable the account') : t.kind === 'cust' ? kErr(err, 'delete the customer') : invErr(err, 'delete the invoice');
       }
     });
 
@@ -1515,7 +1531,7 @@
       offK(); K = []; kSig = ''; kError = '';
       offK = onValue(ref(db, `users/${U.uid}/customers`), snap => {
         const list = [];
-        snap.forEach(ch => { const v = ch.val() || {}; list.push({ id: ch.key, uid: v.uid || '', name: v.name || 'Customer', email: v.email || '', company: v.company || '', phone: v.phone || '', projects: Object.keys(v.projects || {}), update: v.update || '', updatedAt: +v.updatedAt || 0, at: +v.createdAt || 0 }); });
+        snap.forEach(ch => { const v = ch.val() || {}; list.push({ id: ch.key, uid: v.uid || '', name: v.name || 'Customer', email: v.email || '', company: v.company || '', phone: v.phone || '', projects: Object.keys(v.projects || {}), update: v.update || '', updatedAt: +v.updatedAt || 0, at: +v.createdAt || 0, disabled: v.disabled === true }); });
         list.sort((a, b) => b.at - a.at);
         const sig = JSON.stringify(list); kError = '';
         if (sig === kSig) return; K = list; kSig = sig; repaintK();
@@ -1549,14 +1565,26 @@
       }
     }
     function xSetup(kind) {
-      const cust = kind === 'cust';
-      X_PHRASE = cust ? 'Delete this Customer' : 'Delete this Invoice'; X_LABEL = cust ? 'Delete customer' : 'Delete invoice';
-      $('#xTitle').textContent = cust ? 'Delete customer?' : 'Delete invoice?'; $('#xPhrase').textContent = X_PHRASE; xIn.placeholder = X_PHRASE;
+      // [phrase to type, button label, modal title, button label while working]
+      const m = { cust: ['Delete this Customer', 'Delete customer', 'Delete customer?', 'Deleting...'],
+                  disable: ['Disable Account', 'Disable account', 'Disable account?', 'Disabling...'],
+                  invoice: ['Delete this Invoice', 'Delete invoice', 'Delete invoice?', 'Deleting...'] }[kind];
+      X_PHRASE = m[0]; X_LABEL = m[1]; X_BUSY = m[3];
+      $('#xTitle').textContent = m[2]; $('#xPhrase').textContent = X_PHRASE; xIn.placeholder = X_PHRASE;
     }
     function openXCust(id, trigger) {
       const c = K.find(x => x.id === id); if (!c) return;
       xSetup('cust'); delI = { kind: 'cust', id: c.id, uid: c.uid, num: c.name }; xFocus = trigger || document.activeElement;
       $('#xDesc').textContent = 'This removes ' + c.name + ' from your customers and disables their portal access. Their login stays in Firebase Authentication until you delete it there. This cannot be undone.';
+      xIn.value = ''; xIn.disabled = false; setXDeleting(false); syncX();
+      xModal.classList.add('show');
+      requestAnimationFrame(() => requestAnimationFrame(() => xModal.classList.add('open')));
+      setTimeout(() => xIn.focus(), 60);
+    }
+    function openXDisable(id, trigger) {
+      const c = K.find(x => x.id === id); if (!c || !c.uid) return;
+      xSetup('disable'); delI = { kind: 'disable', id: c.id, uid: c.uid, num: c.name }; xFocus = trigger || document.activeElement;
+      $('#xDesc').textContent = c.name + ' will not be able to log in, and anyone using the portal right now will be signed out. Their projects and data are kept, and you can enable the account again at any time.';
       xIn.value = ''; xIn.disabled = false; setXDeleting(false); syncX();
       xModal.classList.add('show');
       requestAnimationFrame(() => requestAnimationFrame(() => xModal.classList.add('open')));
@@ -1568,12 +1596,19 @@
 
     // ---------- customer portal (customer side, read only) ----------
     let offPortalNode = () => {}, PW = {};
+    const portalBlocked = p => !!(p && (p.revoked || p.disabled));
+    // A disabled (or deleted) customer is signed out straight away and the login page tells them why
+    const denyPortal = () => {
+      try { sessionStorage.setItem('loginNotice', 'disabled'); } catch (e) {}
+      signOut(auth).catch(() => leave(LOGIN_URL));   // the signed-out handler below takes them to the login page
+    };
     const repaintP = () => { if (document.body.classList.contains('ready') && view === 'portal') paint(false); };
     function watchPortal() {
       offPortalNode();
       offPortalNode = onValue(ref(db, `portal/${U.uid}`), snap => {
         PORTAL = snap.val() || { revoked: true };
-        const want = PORTAL.revoked ? [] : Object.keys(PORTAL.projects || {});
+        if (portalBlocked(PORTAL)) { denyPortal(); return; }
+        const want = (PORTAL.revoked || PORTAL.disabled) ? [] : Object.keys(PORTAL.projects || {});
         Object.keys(PW).forEach(id => { if (!want.includes(id)) { PW[id](); delete PW[id]; delete PP[id]; } });
         want.forEach(id => {
           if (PW[id]) return;
@@ -1598,6 +1633,7 @@
       if (!user) { stopAll(); if (!leave.on) { document.body.classList.add('ready'); leave(LOGIN_URL); } return; }
       U = user; load(); fillUser();
       try { const sn = await get(ref(db, `portal/${user.uid}`)); PORTAL = sn.exists() ? (sn.val() || { revoked: true }) : null; } catch (e) { PORTAL = null; }
+      if (portalBlocked(PORTAL)) { denyPortal(); return; }
       buildNav();
       if (PORTAL) { view = 'portal'; watchPortal(); }
       else { view = 'overview'; watchProjects(); watchQuotes(); watchInvoices(); watchCustomers(); setTimeout(() => loadPdf().catch(() => {}), 2500); }
