@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport"
-            content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-        <title>Dashboard | EM Development</title>
-        <script>try { if (localStorage.getItem('theme') === 'light') document.documentElement.classList.add('light'); } catch (e) {}</script>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-            rel="stylesheet" />
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Dashboard | EM Development</title>
+    <script>try { if (localStorage.getItem('theme') === 'light') document.documentElement.classList.add('light'); } catch (e) {}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
     tailwind.config = { theme: { extend: {
       fontFamily: { sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'] },
       colors: { ink: '#070a16', panel: '#0d1226', brand: { 400: '#7c8cff', 500: '#5b6cff', 600: '#4351e8' }, aqua: '#22d3ee', pink: '#f472b6' },
@@ -24,7 +24,7 @@
       animation: { blob: 'blob 14s ease-in-out infinite', gradient: 'gradient 6s ease infinite', shine: 'shine 3.5s ease-in-out infinite' }
     } } }
   </script>
-        <style>
+    <style>
     html, body { height: 100%; overflow: hidden; }
     body { background: #070a16; color: #e5e9ff; transition: background-color .5s ease, color .5s ease, opacity .6s ease; }
     ::selection { background: #5b6cff; color: #fff; }
@@ -153,6 +153,13 @@
     @media (max-height: 520px) { .nav-btn { padding-top: .5rem; padding-bottom: .5rem; } #side nav { margin-top: .75rem; } }
     @media (max-width: 359px) { #view { padding-left: .75rem; padding-right: .75rem; } header { padding-left: .75rem; padding-right: .75rem; } }
 
+    /* ===== Notifications (top bar) ===== */
+    @keyframes notifIn { from { opacity: 0; transform: translateY(-6px) scale(.98); } to { opacity: 1; transform: none; } }
+    #notifMenu:not(.hidden) { animation: notifIn .2s ease both; }
+    #notifBadge { box-shadow: 0 0 0 2px #070a16; transition: box-shadow .5s ease; }
+    html.light #notifBadge { box-shadow: 0 0 0 2px #f5f6ff; }
+    html.light #notifMenu button:hover { background: rgba(15,21,53,.06); }
+
     html.light body { background: #f5f6ff; color: #0f1535; }
     html.light .glass { background: rgba(255,255,255,.75); border-color: rgba(15,21,53,.1); box-shadow: 0 6px 24px rgba(67,81,232,.07); }
     html.light .grid-bg { background-image: linear-gradient(rgba(67,81,232,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(67,81,232,.09) 1px, transparent 1px); }
@@ -173,255 +180,289 @@
     html.light .animate-blob { opacity: .55; }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
   </style>
-    </head>
-    <body class="font-sans antialiased">
-        <div class="fixed inset-0 overflow-hidden pointer-events-none">
-            <div class="absolute inset-0 grid-bg"></div>
-            <div
-                class="absolute -top-24 -left-24 w-[520px] h-[520px] rounded-full bg-brand-500/30 blur-[120px] animate-blob"></div>
-            <div
-                class="absolute top-1/3 -right-24 w-[460px] h-[460px] rounded-full bg-aqua/20 blur-[120px] animate-blob"
-                style="animation-delay:-5s"></div>
-            <div
-                class="absolute bottom-0 left-1/3 w-[380px] h-[380px] rounded-full bg-pink/20 blur-[120px] animate-blob"
-                style="animation-delay:-9s"></div>
-        </div>
+  </head>
+  <body class="font-sans antialiased">
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute inset-0 grid-bg"></div>
+      <div
+        class="absolute -top-24 -left-24 w-[520px] h-[520px] rounded-full bg-brand-500/30 blur-[120px] animate-blob"></div>
+      <div
+        class="absolute top-1/3 -right-24 w-[460px] h-[460px] rounded-full bg-aqua/20 blur-[120px] animate-blob"
+        style="animation-delay:-5s"></div>
+      <div
+        class="absolute bottom-0 left-1/3 w-[380px] h-[380px] rounded-full bg-pink/20 blur-[120px] animate-blob"
+        style="animation-delay:-9s"></div>
+    </div>
 
-        <div class="app relative z-[2] flex overflow-hidden">
-            <div id="scrim"
-                class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
-            <aside id="side"
-                class="fade-side glass fixed lg:static inset-y-0 left-0 z-40 w-64 shrink-0 -translate-x-full lg:translate-x-0 flex flex-col p-4 lg:m-3 lg:rounded-3xl">
-                <a href="../index.html" data-leave
-                    class="flex items-center gap-3 px-2 py-2 group">
-                    <span
-                        class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-aqua flex items-center justify-center font-extrabold text-white shadow-lg shadow-brand-500/30 group-hover:rotate-12 transition-transform duration-500">E</span>
-                    <span class="font-bold tracking-tight">EM <span
-                            class="text-brand-400">Development</span></span>
-                </a>
-                <nav id="nav" class="mt-6 space-y-1.5 flex-1"></nav>
-                <p class="px-2 text-xs text-slate-500">Client portal</p>
-            </aside>
+    <div class="app relative z-[2] flex overflow-hidden">
+      <div id="scrim"
+        class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+      <aside id="side"
+        class="fade-side glass fixed lg:static inset-y-0 left-0 z-40 w-64 shrink-0 -translate-x-full lg:translate-x-0 flex flex-col p-4 lg:m-3 lg:rounded-3xl">
+        <a href="../index.html" data-leave
+          class="flex items-center gap-3 px-2 py-2 group">
+          <span
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-aqua flex items-center justify-center font-extrabold text-white shadow-lg shadow-brand-500/30 group-hover:rotate-12 transition-transform duration-500">E</span>
+          <span class="font-bold tracking-tight">EM <span
+              class="text-brand-400">Development</span></span>
+        </a>
+        <nav id="nav" class="mt-6 space-y-1.5 flex-1"></nav>
+        <p class="px-2 text-xs text-slate-500">Client portal</p>
+      </aside>
 
-            <div class="flex-1 min-w-0 flex flex-col">
-                <header
-                    class="h-16 sm:h-20 px-4 sm:px-8 flex items-center justify-between gap-3 shrink-0">
-                    <div class="flex items-center gap-3 min-w-0">
-                        <button id="menuBtn" type="button"
-                            aria-label="Open menu" aria-expanded="false"
-                            aria-controls="side"
-                            class="lg:hidden w-10 h-10 rounded-xl glass flex items-center justify-center">
-                            <svg class="w-5 h-5" fill="none"
-                                stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" viewBox="0 0 24 24"><path
-                                    d="M4 7h16M4 12h16M4 17h16" /></svg>
-                        </button>
-                        <h1 id="title"
-                            class="text-xl sm:text-2xl font-extrabold tracking-tight truncate"></h1>
-                    </div>
-                    <div class="flex items-center gap-2.5">
-                        <button id="themeBtn" type="button"
-                            aria-label="Switch to light mode"
-                            class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl glass flex items-center justify-center hover:-translate-y-0.5 transition-transform duration-300">
-                            <span class="relative block w-5 h-5">
-                                <svg class="theme-icon sun" fill="none"
-                                    stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round"
-                                    viewBox="0 0 24 24"><circle cx="12" cy="12"
-                                        r="4.2" /><path
-                                        d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" /></svg>
-                                <svg class="theme-icon moon" fill="none"
-                                    stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    viewBox="0 0 24 24"><path
-                                        d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2z" /></svg>
-                            </span>
-                        </button>
-                        <div
-                            class="hidden sm:flex items-center gap-2.5 glass rounded-full h-11 pl-1.5 pr-4">
-                            <span id="avatar"
-                                class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-pink flex items-center justify-center text-sm font-bold text-white">?</span>
-                            <span id="who"
-                                class="text-sm font-medium max-w-[10rem] truncate"></span>
-                        </div>
-                        <button id="logoutBtn" type="button"
-                            aria-label="Log out"
-                            class="inline-flex items-center gap-2 h-10 sm:h-11 px-3.5 sm:px-4 rounded-full glass text-sm font-medium text-slate-300 hover:text-white hover:-translate-y-0.5 transition-all duration-300">
-                            <svg class="w-4 h-4" fill="none"
-                                stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round"
-                                viewBox="0 0 24 24"><path
-                                    d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" /></svg>
-                            <span id="logoutLabel" class="hidden sm:inline">Log
-                                out</span>
-                        </button>
-                    </div>
-                </header>
-                <main id="view"
-                    class="flex-1 min-h-0 overflow-y-auto px-4 sm:px-8 pb-8"></main>
+      <div class="flex-1 min-w-0 flex flex-col">
+        <header
+          class="h-16 sm:h-20 px-4 sm:px-8 flex items-center justify-between gap-3 shrink-0">
+          <div class="flex items-center gap-3 min-w-0">
+            <button id="menuBtn" type="button"
+              aria-label="Open menu" aria-expanded="false"
+              aria-controls="side"
+              class="lg:hidden w-10 h-10 rounded-xl glass flex items-center justify-center">
+              <svg class="w-5 h-5" fill="none"
+                stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" viewBox="0 0 24 24"><path
+                  d="M4 7h16M4 12h16M4 17h16" /></svg>
+            </button>
+            <h1 id="title"
+              class="text-xl sm:text-2xl font-extrabold tracking-tight truncate"></h1>
+          </div>
+          <div class="flex items-center gap-2.5">
+            <div id="notifWrap" class="relative hidden">
+              <button id="notifBtn" type="button"
+                aria-label="Notifications" aria-haspopup="true"
+                aria-expanded="false" aria-controls="notifMenu"
+                class="relative w-10 h-10 sm:w-11 sm:h-11 rounded-xl glass flex items-center justify-center hover:-translate-y-0.5 transition-transform duration-300">
+                <svg class="w-5 h-5" fill="none"
+                  stroke="currentColor" stroke-width="1.8"
+                  stroke-linecap="round" stroke-linejoin="round"
+                  viewBox="0 0 24 24"><path
+                    d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" /></svg>
+                <span id="notifBadge"
+                  class="hidden absolute -top-1.5 -right-1.5 min-w-[1.25rem] h-5 px-1.5 rounded-full bg-pink text-white text-[11px] font-bold items-center justify-center"></span>
+              </button>
+              <div id="notifMenu"
+                class="hidden modal-card absolute right-0 top-full mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-2xl p-2 z-50"></div>
             </div>
-        </div>
-        <!-- New project modal -->
-        <div id="modal"
-            class="fixed inset-0 z-[60] items-center justify-center p-4"
-            role="dialog" aria-modal="true" aria-labelledby="mTitle">
-            <div id="mBack"
-                class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-            <form id="mForm" novalidate
-                class="modal-card relative w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-3xl p-6 sm:p-7">
-                <div class="flex items-start justify-between gap-4">
-                    <div>
-                        <h2 id="mTitle"
-                            class="text-xl font-extrabold tracking-tight">New
-                            <span class="gradient-text">project</span></h2>
-                        <p class="mt-1 text-sm text-slate-400">Tell us what you
-                            need and our team will review it.</p>
-                    </div>
-                    <button type="button" id="mClose" aria-label="Close"
-                        class="w-9 h-9 shrink-0 rounded-xl glass flex items-center justify-center text-slate-400 hover:text-white transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                            stroke-width="2.2" stroke-linecap="round"
-                            viewBox="0 0 24 24"><path
-                                d="M6 6l12 12M18 6L6 18" /></svg>
-                    </button>
-                </div>
-
-                <div class="mt-5 space-y-4">
-                    <label
-                        class="block text-sm font-medium text-slate-300">Project
-                        name
-                        <input id="mName" class="field mt-1.5" required
-                            maxlength="60" autocomplete="off"
-                            placeholder="e.g. Online store" />
-                    </label>
-                    <div class="grid sm:grid-cols-2 gap-3">
-                        <label
-                            class="block min-w-0 text-sm font-medium text-slate-300">Start
-                            date
-                            <input id="mStart" type="date" required
-                                class="field mt-1.5" />
-                        </label>
-                        <label
-                            class="block min-w-0 text-sm font-medium text-slate-300">End
-                            date
-                            <input id="mEnd" type="date" required
-                                class="field mt-1.5" />
-                        </label>
-                    </div>
-                    <div>
-                        <label for="incIn"
-                            class="block text-sm font-medium text-slate-300">Inclusions</label>
-                        <div id="incBox"
-                            class="field mt-1.5 !p-2 flex flex-wrap items-center gap-1.5 cursor-text">
-                            <input id="incIn" maxlength="60" autocomplete="off"
-                                class="flex-1 min-w-[9rem] bg-transparent outline-none text-sm px-2 py-1.5"
-                                placeholder="Type an inclusion, press Enter" />
-                        </div>
-                        <div id="sugg"
-                            class="mt-2 flex flex-wrap gap-1.5"></div>
-                    </div>
-                    <p id="mErr" class="text-sm text-pink min-h-[1.25rem]"
-                        role="alert"></p>
-                </div>
-
-                <div class="mt-2 flex items-center justify-end gap-3">
-                    <button type="button" id="mCancel"
-                        class="px-5 py-2.5 rounded-xl glass text-sm font-semibold text-slate-300 hover:text-white transition">Cancel</button>
-                    <button id="mSave" type="submit"
-                        class="btn-shine px-6 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white text-sm shadow-lg shadow-brand-500/30 flex items-center gap-2.5 disabled:opacity-70">
-                        <span id="mSaveLabel">Create project</span>
-                    </button>
-                </div>
-            </form>
+            <button id="themeBtn" type="button"
+              aria-label="Switch to light mode"
+              class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl glass flex items-center justify-center hover:-translate-y-0.5 transition-transform duration-300">
+              <span class="relative block w-5 h-5">
+                <svg class="theme-icon sun" fill="none"
+                  stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round"
+                  viewBox="0 0 24 24"><circle cx="12" cy="12"
+                    r="4.2" /><path
+                    d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" /></svg>
+                <svg class="theme-icon moon" fill="none"
+                  stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  viewBox="0 0 24 24"><path
+                    d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2z" /></svg>
+              </span>
+            </button>
+            <div
+              class="hidden sm:flex items-center gap-2.5 glass rounded-full h-11 pl-1.5 pr-4">
+              <span id="avatar"
+                class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-pink flex items-center justify-center text-sm font-bold text-white">?</span>
+              <span id="who"
+                class="text-sm font-medium max-w-[10rem] truncate"></span>
+            </div>
+            <button id="logoutBtn" type="button"
+              aria-label="Log out"
+              class="inline-flex items-center gap-2 h-10 sm:h-11 px-3.5 sm:px-4 rounded-full glass text-sm font-medium text-slate-300 hover:text-white hover:-translate-y-0.5 transition-all duration-300">
+              <svg class="w-4 h-4" fill="none"
+                stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round"
+                viewBox="0 0 24 24"><path
+                  d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" /></svg>
+              <span id="logoutLabel" class="hidden sm:inline">Log
+                out</span>
+            </button>
+          </div>
+        </header>
+        <main id="view"
+          class="flex-1 min-h-0 overflow-y-auto px-4 sm:px-8 pb-8"></main>
+      </div>
+    </div>
+    <!-- New project modal -->
+    <div id="modal"
+      class="fixed inset-0 z-[60] items-center justify-center p-4"
+      role="dialog" aria-modal="true" aria-labelledby="mTitle">
+      <div id="mBack"
+        class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+      <form id="mForm" novalidate
+        class="modal-card relative w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-3xl p-6 sm:p-7">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h2 id="mTitle"
+              class="text-xl font-extrabold tracking-tight">New
+              <span class="gradient-text">project</span></h2>
+            <p class="mt-1 text-sm text-slate-400">Tell us what you
+              need and our team will review it.</p>
+          </div>
+          <button type="button" id="mClose" aria-label="Close"
+            class="w-9 h-9 shrink-0 rounded-xl glass flex items-center justify-center text-slate-400 hover:text-white transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor"
+              stroke-width="2.2" stroke-linecap="round"
+              viewBox="0 0 24 24"><path
+                d="M6 6l12 12M18 6L6 18" /></svg>
+          </button>
         </div>
 
-        <!-- Delete project modal -->
-        <div id="dModal"
-            class="fixed inset-0 z-[60] items-center justify-center p-4"
-            role="alertdialog" aria-modal="true" aria-labelledby="dTitle"
-            aria-describedby="dDesc">
-            <div id="dBack"
-                class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-            <form id="dForm" novalidate
-                class="modal-card relative w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-3xl p-6 sm:p-7">
-                <div class="flex items-start gap-4">
-                    <span
-                        class="w-11 h-11 shrink-0 rounded-2xl bg-red-500/15 text-red-400 flex items-center justify-center">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round" viewBox="0 0 24 24"><path
-                                d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01" /></svg>
-                    </span>
-                    <div class="min-w-0">
-                        <h2 id="dTitle"
-                            class="text-xl font-extrabold tracking-tight">Delete
-                            project?</h2>
-                        <p id="dDesc" class="mt-1 text-sm text-slate-400"></p>
-                    </div>
-                </div>
-
-                <div class="mt-5">
-                    <label for="dIn"
-                        class="block text-sm font-medium text-slate-300">To
-                        confirm, type <span id="dName"
-                            class="font-bold text-slate-200 break-all select-none"></span>
-                        below</label>
-                    <input id="dIn" class="field mt-1.5" autocomplete="off"
-                        autocapitalize="off" spellcheck="false"
-                        placeholder="Type the project name"
-                        aria-describedby="dHint" />
-                    <p id="dHint" class="mt-2 text-xs min-h-[1rem]"
-                        aria-live="polite"></p>
-                    <p id="dErr"
-                        class="mt-1 text-sm text-red-400 min-h-[1.25rem]"
-                        role="alert"></p>
-                </div>
-
-                <div class="mt-2 flex items-center justify-end gap-3">
-                    <button type="button" id="dCancel"
-                        class="px-5 py-2.5 rounded-xl glass text-sm font-semibold text-slate-300 hover:text-white transition">Cancel</button>
-                    <button id="dBtn" type="submit" disabled
-                        class="btn-danger px-6 py-2.5 rounded-xl bg-gradient-to-r from-red-500 to-red-600 font-bold text-white text-sm shadow-lg shadow-red-500/30 flex items-center gap-2.5 transition">
-                        <span id="dBtnLabel">Delete project</span>
-                    </button>
-                </div>
-            </form>
+        <div class="mt-5 space-y-4">
+          <label
+            class="block text-sm font-medium text-slate-300">Project
+            name
+            <input id="mName" class="field mt-1.5" required
+              maxlength="60" autocomplete="off"
+              placeholder="e.g. Online store" />
+          </label>
+          <div class="grid sm:grid-cols-2 gap-3">
+            <label
+              class="block min-w-0 text-sm font-medium text-slate-300">Start
+              date
+              <input id="mStart" type="date" required
+                class="field mt-1.5" />
+            </label>
+            <label
+              class="block min-w-0 text-sm font-medium text-slate-300">End
+              date
+              <input id="mEnd" type="date" required
+                class="field mt-1.5" />
+            </label>
+          </div>
+          <div>
+            <label for="incIn"
+              class="block text-sm font-medium text-slate-300">Inclusions</label>
+            <div id="incBox"
+              class="field mt-1.5 !p-2 flex flex-wrap items-center gap-1.5 cursor-text">
+              <input id="incIn" maxlength="60" autocomplete="off"
+                class="flex-1 min-w-[9rem] bg-transparent outline-none text-sm px-2 py-1.5"
+                placeholder="Type an inclusion, press Enter" />
+            </div>
+            <div id="sugg"
+              class="mt-2 flex flex-wrap gap-1.5"></div>
+          </div>
+          <p id="mErr" class="text-sm text-pink min-h-[1.25rem]"
+            role="alert"></p>
         </div>
 
-        <!-- Delete invoice modal -->
-        <div id="xModal" class="fixed inset-0 z-[60] items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="xTitle">
-            <div id="xBack" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-            <form id="xForm" novalidate class="modal-card relative w-full max-w-md overflow-y-auto rounded-3xl p-6 sm:p-7">
-                <div class="flex items-start gap-4">
-                    <span class="w-11 h-11 shrink-0 rounded-2xl bg-red-500/15 text-red-400 flex items-center justify-center">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01" /></svg>
-                    </span>
-                    <div class="min-w-0">
-                        <h2 id="xTitle" class="text-xl font-extrabold tracking-tight">Delete invoice?</h2>
-                        <p id="xDesc" class="mt-1 text-sm text-slate-400 break-words"></p>
-                    </div>
-                </div>
-                <div class="mt-5">
-                    <label for="xIn" class="block text-sm font-medium text-slate-300">To confirm, type <span id="xPhrase" class="font-bold text-slate-200 select-none">Delete this Invoice</span> below</label>
-                    <input id="xIn" class="field mt-1.5" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Delete this Invoice" aria-describedby="xHint" />
-                    <p id="xHint" class="mt-2 text-xs min-h-[1rem]" aria-live="polite"></p>
-                    <p id="xErr" class="mt-1 text-sm text-red-400 min-h-[1.25rem]" role="alert"></p>
-                </div>
-                <div class="mt-2 flex items-center justify-end gap-3">
-                    <button type="button" id="xCancel" class="px-5 py-2.5 rounded-xl glass text-sm font-semibold text-slate-300 hover:text-white transition">Cancel</button>
-                    <button id="xBtn" type="submit" disabled class="btn-danger px-6 py-2.5 rounded-xl bg-gradient-to-r from-red-500 to-red-600 font-bold text-white text-sm shadow-lg shadow-red-500/30 flex items-center gap-2.5 transition">
-                        <span id="xBtnLabel">Delete invoice</span>
-                    </button>
-                </div>
-            </form>
+        <div class="mt-2 flex items-center justify-end gap-3">
+          <button type="button" id="mCancel"
+            class="px-5 py-2.5 rounded-xl glass text-sm font-semibold text-slate-300 hover:text-white transition">Cancel</button>
+          <button id="mSave" type="submit"
+            class="btn-shine px-6 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white text-sm shadow-lg shadow-brand-500/30 flex items-center gap-2.5 disabled:opacity-70">
+            <span id="mSaveLabel">Create project</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Delete project modal -->
+    <div id="dModal"
+      class="fixed inset-0 z-[60] items-center justify-center p-4"
+      role="alertdialog" aria-modal="true" aria-labelledby="dTitle"
+      aria-describedby="dDesc">
+      <div id="dBack"
+        class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+      <form id="dForm" novalidate
+        class="modal-card relative w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-3xl p-6 sm:p-7">
+        <div class="flex items-start gap-4">
+          <span
+            class="w-11 h-11 shrink-0 rounded-2xl bg-red-500/15 text-red-400 flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" viewBox="0 0 24 24"><path
+                d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01" /></svg>
+          </span>
+          <div class="min-w-0">
+            <h2 id="dTitle"
+              class="text-xl font-extrabold tracking-tight">Delete
+              project?</h2>
+            <p id="dDesc" class="mt-1 text-sm text-slate-400"></p>
+          </div>
         </div>
 
-        <div id="toast"
-            class="fixed left-1/2 bottom-6 z-50 glass rounded-full px-5 py-2.5 text-sm font-medium hidden"
-            style="transform:translateX(-50%)" role="status"></div>
+        <div class="mt-5">
+          <label for="dIn"
+            class="block text-sm font-medium text-slate-300">To
+            confirm, type <span id="dName"
+              class="font-bold text-slate-200 break-all select-none"></span>
+            below</label>
+          <input id="dIn" class="field mt-1.5" autocomplete="off"
+            autocapitalize="off" spellcheck="false"
+            placeholder="Type the project name"
+            aria-describedby="dHint" />
+          <p id="dHint" class="mt-2 text-xs min-h-[1rem]"
+            aria-live="polite"></p>
+          <p id="dErr"
+            class="mt-1 text-sm text-red-400 min-h-[1.25rem]"
+            role="alert"></p>
+        </div>
 
-        <script type="module">
+        <div class="mt-2 flex items-center justify-end gap-3">
+          <button type="button" id="dCancel"
+            class="px-5 py-2.5 rounded-xl glass text-sm font-semibold text-slate-300 hover:text-white transition">Cancel</button>
+          <button id="dBtn" type="submit" disabled
+            class="btn-danger px-6 py-2.5 rounded-xl bg-gradient-to-r from-red-500 to-red-600 font-bold text-white text-sm shadow-lg shadow-red-500/30 flex items-center gap-2.5 transition">
+            <span id="dBtnLabel">Delete project</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Delete invoice modal -->
+    <div id="xModal"
+      class="fixed inset-0 z-[60] items-center justify-center p-4" role="dialog"
+      aria-modal="true" aria-labelledby="xTitle">
+      <div id="xBack"
+        class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+      <form id="xForm" novalidate
+        class="modal-card relative w-full max-w-md overflow-y-auto rounded-3xl p-6 sm:p-7">
+        <div class="flex items-start gap-4">
+          <span
+            class="w-11 h-11 shrink-0 rounded-2xl bg-red-500/15 text-red-400 flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              viewBox="0 0 24 24"><path
+                d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01" /></svg>
+          </span>
+          <div class="min-w-0">
+            <h2 id="xTitle" class="text-xl font-extrabold tracking-tight">Delete
+              invoice?</h2>
+            <p id="xDesc" class="mt-1 text-sm text-slate-400 break-words"></p>
+          </div>
+        </div>
+        <div class="mt-5">
+          <label for="xIn" class="block text-sm font-medium text-slate-300">To
+            confirm, type <span id="xPhrase"
+              class="font-bold text-slate-200 select-none">Delete this
+              Invoice</span> below</label>
+          <input id="xIn" class="field mt-1.5" autocomplete="off"
+            autocapitalize="off" spellcheck="false"
+            placeholder="Delete this Invoice" aria-describedby="xHint" />
+          <p id="xHint" class="mt-2 text-xs min-h-[1rem]"
+            aria-live="polite"></p>
+          <p id="xErr" class="mt-1 text-sm text-red-400 min-h-[1.25rem]"
+            role="alert"></p>
+        </div>
+        <div class="mt-2 flex items-center justify-end gap-3">
+          <button type="button" id="xCancel"
+            class="px-5 py-2.5 rounded-xl glass text-sm font-semibold text-slate-300 hover:text-white transition">Cancel</button>
+          <button id="xBtn" type="submit" disabled
+            class="btn-danger px-6 py-2.5 rounded-xl bg-gradient-to-r from-red-500 to-red-600 font-bold text-white text-sm shadow-lg shadow-red-500/30 flex items-center gap-2.5 transition">
+            <span id="xBtnLabel">Delete invoice</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div id="toast"
+      class="fixed left-1/2 bottom-6 z-50 glass rounded-full px-5 py-2.5 text-sm font-medium hidden"
+      style="transform:translateX(-50%)" role="status"></div>
+
+    <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut, updateProfile, sendPasswordResetEmail, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
     import { getDatabase, ref, push, set, update, remove, onValue, get, serverTimestamp, increment, query, limitToLast } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
@@ -459,9 +500,10 @@
       portal: 'M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0zM3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18',
       settings: 'M20 21a8 8 0 0 0-16 0M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',
       chat: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z',
+      backup: 'M12 3v12M7 10l5 5 5-5M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2',
       trash: 'M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M10 11v6M14 11v6'
     };
-    const TITLES = { overview: 'Overview', projects: 'Projects', invoices: 'Invoices', accounting: 'Accounting', customers: 'Customers', portal: 'My Website', messages: 'Quotations', chat: 'Chat', settings: 'Account' };
+    const TITLES = { overview: 'Overview', projects: 'Projects', invoices: 'Invoices', accounting: 'Accounting', customers: 'Customers', portal: 'My Website', messages: 'Quotations', chat: 'Chat', backup: 'Backup', settings: 'Account' };
     const svg = (d, c = 'w-5 h-5') => `<svg class="${c}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="${d}"/></svg>`;
     let toastT;
     function toast(t) { const el = $('#toast'); el.textContent = t; el.className = 'fixed left-1/2 z-50 glass rounded-2xl px-5 py-2.5 text-sm font-medium text-center max-w-[calc(100vw-2rem)]'; el.style.bottom = 'calc(1.5rem + env(safe-area-inset-bottom, 0px))'; el.style.animation = 'toastIn .4s ease both'; clearTimeout(toastT); toastT = setTimeout(() => { el.style.animation = 'toastOut .35s ease forwards'; toastT = setTimeout(() => el.classList.add('hidden'), 350); }, 2600); }
@@ -851,6 +893,25 @@
           <div id="qgrid" data-ids="${Q.map(q => q.id).join(',')}" class="grid md:grid-cols-2 gap-4">${qGridHtml()}</div>`;
       },
       chat() { return '<div id="chatHost"></div>'; },
+      backup() {
+        const last = bkLast(), sm = bk.sum;
+        const stat = (n, l) => `<div class="rounded-xl bg-white/5 px-3 py-2.5"><div class="text-lg font-extrabold">${n}</div><div class="text-xs text-slate-400">${l}</div></div>`;
+        return `<div data-f class="${card} max-w-2xl"><div class="font-bold">Back up your data</div>
+          <p class="mt-1.5 text-sm text-slate-400">Downloads one file with everything saved in your Realtime Database: projects, invoices, customers, their portal pages, quotations and chat history. Keep it somewhere safe.</p>
+          <div class="mt-4 flex flex-wrap items-center gap-3"><button data-act="bkdl" ${bk.busy ? 'disabled' : ''} class="btn-shine px-6 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white disabled:opacity-60">${bk.busy === 'dl' ? 'Preparing backup...' : 'Download backup'}</button>
+          <span class="text-xs text-slate-400">${last ? 'Last backup: ' + esc(new Date(last).toLocaleString('en', { dateStyle: 'medium', timeStyle: 'short' })) : 'No backup made on this device yet.'}</span></div>
+          ${bk.err && bk.errAt === 'dl' ? `<p class="mt-3 text-sm text-red-400" role="alert">${esc(bk.err)}</p>` : ''}
+          ${bk.note ? `<p class="mt-3 text-sm text-emerald-300" role="status">${esc(bk.note)}</p>` : ''}</div>
+          <div data-f class="${card} max-w-2xl mt-4"><div class="font-bold">Restore from a backup</div>
+          <p class="mt-1.5 text-sm text-slate-400">Choose a backup file made here. Everything in it is written back to the database. Records with the same ID are overwritten with the backed-up version. Records that are not in the file are left alone.</p>
+          <div class="mt-4 flex flex-wrap items-center gap-3"><label class="inline-flex items-center px-5 py-2.5 rounded-xl glass text-sm font-semibold text-brand-400 hover:text-white cursor-pointer transition ${bk.busy ? 'opacity-60 pointer-events-none' : ''}">Choose backup file<input id="bkFile" type="file" accept=".json,application/json" class="sr-only"/></label>
+          <span class="text-xs text-slate-400 truncate">${bk.file ? esc(bk.file) : 'No file chosen'}</span></div>
+          ${bk.err && bk.errAt === 'rs' ? `<p class="mt-3 text-sm text-red-400" role="alert">${esc(bk.err)}</p>` : ''}
+          ${sm ? `<div class="mt-4"><div class="text-sm text-slate-300">Backup from <b>${esc(new Date(sm.at).toLocaleString('en', { dateStyle: 'medium', timeStyle: 'short' }))}</b></div>
+            <div class="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">${stat(sm.projects, 'Projects')}${stat(sm.invoices, 'Invoices')}${stat(sm.customers, 'Customers')}${stat(sm.quotes, 'Quotations')}${stat(sm.messages, 'Chat messages')}${stat(sm.portals, 'Portal pages')}</div>
+            <div class="mt-4 flex flex-wrap gap-3"><button data-act="bkgo" ${bk.busy ? 'disabled' : ''} class="px-6 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white disabled:opacity-60">${bk.busy === 'rs' ? 'Restoring... ' + esc(bk.prog || '') : 'Restore this backup'}</button>
+            <button data-act="bkclr" ${bk.busy ? 'disabled' : ''} class="px-5 py-3 rounded-xl glass text-sm font-semibold text-slate-300 hover:text-white disabled:opacity-60">Cancel</button></div></div>` : ''}</div>`;
+      },
       settings() {
         return `<form data-f data-form="prof" class="${card} max-w-xl space-y-4"><div class="font-bold">Profile</div>
           <label class="block text-sm font-medium text-slate-300">Display name<input name="name" maxlength="40" value="${esc(U.displayName || '')}" class="field mt-1.5" placeholder="Your name"/></label>
@@ -920,7 +981,7 @@
     }
     let goT;
     function go(v) {
-      closeMenu(); invOpen = false; invEdit = null; view = v;
+      closeMenu(); closeNotif(); invOpen = false; invEdit = null; view = v; if (v !== 'backup' && !bk.busy) { bk.err = ''; bk.note = ''; }
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('on', b.dataset.v === v));
       const el = $('#view'); clearTimeout(goT);
       el.style.transition = 'opacity .16s ease'; el.style.opacity = '0';
@@ -938,10 +999,41 @@
     const chOpenNow = u => view === 'chat' && chSel === u && !document.hidden;
     const chFail = err => /PERMISSION_DENIED/i.test(String((err && (err.code || err.message)) || '')) ? 'Blocked by the database rules. Add the "chats" rules in Firebase.' : 'Could not send or load messages. Please try again.';
     function chBadge() {
+      drawNotif();
       const el = $('#chatBadge'); if (!el) return;
       const n = chCust().reduce((s, c) => s + (chOpenNow(c.uid) ? 0 : chUnread(c.uid)), 0);
       el.textContent = n > 99 ? '99+' : n; el.classList.toggle('hidden', !n); el.classList.toggle('inline-flex', !!n);
     }
+    // ---------- notifications (bell in the top bar) ----------
+    // count = unread chat messages + quotations still to email + overdue invoices
+    let notifLast = 0;
+    function notifItems() {
+      const chat = chCust().reduce((n, c) => n + (chOpenNow(c.uid) ? 0 : chUnread(c.uid)), 0);
+      return [
+        { v: 'chat', icon: ICON.chat, t: 'Unread chat messages', n: chat },
+        { v: 'messages', icon: ICON.messages, t: 'Quotations to email', n: Q.filter(q => !q.emailSent).length },
+        { v: 'invoices', icon: ICON.invoices, t: 'Overdue invoices', n: I.filter(i => istat(i) === 'overdue').length }
+      ].filter(x => x.n > 0);
+    }
+    function drawNotif() {
+      const wrap = $('#notifWrap'); if (!wrap) return;
+      const on = !!U && !PORTAL; wrap.classList.toggle('hidden', !on); if (!on) return;
+      const items = notifItems(), total = items.reduce((n, x) => n + x.n, 0), b = $('#notifBadge');
+      b.textContent = total > 99 ? '99+' : total; b.classList.toggle('hidden', !total); b.classList.toggle('inline-flex', !!total);
+      if (total > notifLast) pop(b);
+      notifLast = total;
+      $('#notifBtn').setAttribute('aria-label', total ? 'Notifications, ' + total + ' new' : 'Notifications');
+      $('#notifMenu').innerHTML = '<div class="px-3 pt-2 pb-1.5 text-xs font-semibold text-slate-400">Notifications</div>' + (items.map(x => `<button type="button" data-nv="${x.v}" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm hover:bg-white/10 transition">${svg(x.icon, 'w-4 h-4 shrink-0 text-brand-400')}<span class="flex-1 min-w-0 truncate">${x.t}</span><span class="shrink-0 min-w-[1.25rem] h-5 px-1.5 rounded-full bg-pink text-white text-[11px] font-bold inline-flex items-center justify-center">${x.n > 99 ? '99+' : x.n}</span></button>`).join('') || '<p class="px-3 py-3 text-sm text-slate-400">You are all caught up.</p>');
+    }
+    function closeNotif() { $('#notifMenu').classList.add('hidden'); $('#notifBtn').setAttribute('aria-expanded', 'false'); }
+    $('#notifBtn').addEventListener('click', e => {
+      e.stopPropagation();
+      const m = $('#notifMenu'), open = m.classList.contains('hidden');
+      m.classList.toggle('hidden', !open); $('#notifBtn').setAttribute('aria-expanded', String(open));
+    });
+    $('#notifMenu').addEventListener('click', e => { const b = e.target.closest('[data-nv]'); if (b) go(b.dataset.nv); });
+    document.addEventListener('click', e => { if (!$('#notifWrap').contains(e.target)) closeNotif(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeNotif(); });
     function chMarkRead() {
       if (!chSel || !chOpenNow(chSel) || !chUnread(chSel)) return;
       update(ref(db, `chats/${chSel}/meta`), { adminUnread: 0 }).catch(() => {});
@@ -1053,8 +1145,90 @@
     }
     document.addEventListener('visibilitychange', () => { if (!document.hidden) { chMarkRead(); chBadge(); chDrawList(); } });
 
+    // ---------- backup & restore of the Realtime Database ----------
+    // One JSON file: { format, version, createdAt, admin, data: { "<database path>": <value> } }.
+    // Paths saved: users/<uid> (projects, invoices, customers), quotes, and for every customer portal/<cuid> and chats/<cuid>.
+    const BK_FORMAT = 'emdev-backup';
+    let bk = { busy: false, err: '', errAt: '', note: '', file: '', data: null, sum: null, prog: '' };
+    const bkLast = () => { try { return +localStorage.getItem('bk:last:' + U.uid) || 0; } catch (e) { return 0; } };
+    const bkCount = o => o && typeof o === 'object' ? Object.keys(o).length : 0;
+    const bkFail = (where, msg) => { bk.busy = false; bk.err = msg; bk.errAt = where; if (view === 'backup') paint(false); };
+    async function bkCollect() {
+      const data = {}, failed = [];
+      const take = async path => { try { const sn = await withTimeout(get(ref(db, path)), 30000); if (sn.exists()) data[path] = sn.val(); } catch (e) { failed.push(path); console.error('backup', path, e); } };
+      // customers come from the database itself, so the list is complete even if the screen has not loaded them
+      let uids = K.map(c => c.uid).filter(Boolean);
+      try { const sn = await withTimeout(get(ref(db, `users/${U.uid}/customers`)), 30000); sn.forEach(ch => { const u = (ch.val() || {}).uid; if (u) uids.push(u); }); } catch (e) {}
+      uids = [...new Set(uids)];
+      await Promise.all([take(`users/${U.uid}`), take('quotes'), ...uids.flatMap(u => [take(`portal/${u}`), take(`chats/${u}`)])]);
+      return { data, failed };
+    }
+    async function bkDownload() {
+      if (PORTAL || bk.busy) return;
+      bk.busy = 'dl'; bk.err = ''; bk.note = ''; paint(false);
+      try {
+        const { data, failed } = await bkCollect();
+        if (failed.includes(`users/${U.uid}`)) return bkFail('dl', 'Could not read your data. It may be blocked by the database rules, or the connection dropped. Nothing was downloaded.');
+        const now = new Date(), file = { format: BK_FORMAT, version: 1, createdAt: now.toISOString(), admin: { uid: U.uid, email: U.email || '' }, data };
+        const blob = new Blob([JSON.stringify(file)], { type: 'application/json' });
+        const a = document.createElement('a'), z = n => String(n).padStart(2, '0');
+        a.href = URL.createObjectURL(blob); a.download = `em-dashboard-backup-${now.getFullYear()}-${z(now.getMonth() + 1)}-${z(now.getDate())}-${z(now.getHours())}${z(now.getMinutes())}.json`;
+        document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+        try { localStorage.setItem('bk:last:' + U.uid, String(now.getTime())); } catch (e) {}
+        bk.busy = false; bk.note = failed.length ? 'Backup downloaded, but these parts could not be read and are not included: ' + failed.join(', ') + '.' : 'Backup downloaded.';
+        paint(false);
+      } catch (err) { console.error(err); bkFail('dl', 'Could not create the backup. Please try again.'); }
+    }
+    // only these paths may be restored, and users/<uid> must be this account's own
+    const bkAllowed = path => path === `users/${U.uid}` || path === 'quotes' || /^(portal|chats)\/[A-Za-z0-9_-]+$/.test(path);
+    function bkParse(text) {
+      let f; try { f = JSON.parse(text); } catch (e) { throw new Error('That file is not a valid backup (it could not be read).'); }
+      if (!f || f.format !== BK_FORMAT || !f.data || typeof f.data !== 'object') throw new Error('That file is not a backup made by this dashboard.');
+      if (f.admin && f.admin.uid && f.admin.uid !== U.uid) throw new Error('This backup belongs to a different account (' + (f.admin.email || f.admin.uid) + ') and cannot be restored here.');
+      const paths = Object.keys(f.data);
+      if (!paths.length) throw new Error('This backup is empty.');
+      const bad = paths.find(x => !bkAllowed(x)); if (bad) throw new Error('This backup contains a location that cannot be restored: ' + bad);
+      const u = f.data[`users/${U.uid}`] || {}, chats = paths.filter(x => x.startsWith('chats/'));
+      return { f, sum: { at: f.createdAt || Date.now(), projects: bkCount(u.projects), invoices: bkCount(u.invoices), customers: bkCount(u.customers), quotes: bkCount(f.data.quotes), portals: paths.filter(x => x.startsWith('portal/')).length, messages: chats.reduce((n, x) => n + bkCount((f.data[x] || {}).messages), 0) } };
+    }
+    // split each section into per-record paths, so restoring overwrites those records and leaves any newer records alone
+    function bkFlatten(data) {
+      const out = {}, put = (base, v, depth) => {
+        if (depth > 0 && v && typeof v === 'object' && !Array.isArray(v)) { Object.keys(v).forEach(k => put(base + '/' + k, v[k], depth - 1)); }
+        else out[base] = v;
+      };
+      Object.keys(data).forEach(path => put(path, data[path], path.startsWith('users/') ? 2 : path.startsWith('chats/') ? 2 : 1));
+      return out;
+    }
+    async function bkPick(file) {
+      bk.err = ''; bk.note = ''; bk.data = null; bk.sum = null; bk.file = file ? file.name : '';
+      if (file) {
+        if (file.size > 60 * 1024 * 1024) bkFail('rs', 'That file is too large to be a backup.');
+        else { try { const r = bkParse(await file.text()); bk.data = r.f.data; bk.sum = r.sum; } catch (e) { bk.err = e.message; bk.errAt = 'rs'; bk.file = ''; } }
+      }
+      paint(false);
+    }
+    async function bkRestore() {
+      if (PORTAL || bk.busy || !bk.data) return;
+      if (!confirm('Restore this backup?\n\nRecords in the file will overwrite the current version of the same records in the database. This cannot be undone. Tip: download a fresh backup first.')) return;
+      bk.busy = 'rs'; bk.err = ''; bk.note = ''; bk.prog = ''; paint(false);
+      const flat = bkFlatten(bk.data), keys = Object.keys(flat), SIZE = 100; let done = 0, failedN = 0;
+      try {
+        for (let i = 0; i < keys.length; i += SIZE) {
+          const part = {}; keys.slice(i, i + SIZE).forEach(k => { part[k] = flat[k]; });
+          try { await withTimeout(update(ref(db), part), 30000); done += Object.keys(part).length; }
+          catch (err) { failedN += Object.keys(part).length; console.error('restore', err); bk.lastErr = err; }
+          bk.prog = Math.min(100, Math.round((i + SIZE) / keys.length * 100)) + '%'; if (view === 'backup') paint(false);
+        }
+        bk.busy = false; bk.prog = '';
+        if (!failedN) { bk.note = 'Restore complete. ' + done + ' items written back to the database.'; bk.data = null; bk.sum = null; bk.file = ''; }
+        else { const denied = /PERMISSION_DENIED/i.test(String((bk.lastErr && (bk.lastErr.code || bk.lastErr.message)) || '')); bk.err = (done ? done + ' items were restored, but ' : 'Nothing was restored. ') + failedN + ' could not be written' + (denied ? ': blocked by the database rules.' : '. Check your connection and try again.'); bk.errAt = 'rs'; }
+        if (view === 'backup') paint(false);
+      } catch (err) { console.error(err); bkFail('rs', 'The restore was interrupted. Please try again.'); }
+    }
+
     // ---------- events ----------
-    const navKeys = () => PORTAL ? ['portal', 'settings'] : ['overview', 'projects', 'invoices', 'accounting', 'customers', 'chat', 'messages', 'settings'];
+    const navKeys = () => PORTAL ? ['portal', 'settings'] : ['overview', 'projects', 'invoices', 'accounting', 'customers', 'chat', 'messages', 'backup', 'settings'];
     const buildNav = () => { $('#nav').innerHTML = navKeys().map(k => `<button data-v="${k}" class="nav-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold text-slate-300 hover:text-white">${svg(ICON[k])}${TITLES[k]}${k === 'chat' ? '<span id="chatBadge" class="hidden ml-auto min-w-[1.25rem] h-5 px-1.5 rounded-full bg-pink text-white text-[11px] font-bold items-center justify-center" aria-label="Unread chat messages"></span>' : ''}</button>`).join(''); chBadge(); };
     buildNav();
     $('#nav').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (b) go(b.dataset.v); });
@@ -1171,8 +1345,12 @@
       else if (a === 'kdel') openXCust(b.dataset.k, b);
       else if (a === 'pwdone') { try { localStorage.setItem('pwn:' + U.uid, '1'); } catch (e2) {} paint(false); }
       else if (a === 'rpw') { try { await sendPasswordResetEmail(auth, U.email); toast('Reset link sent to ' + U.email); } catch (err) { toast('Could not send the email. Try again later.'); } }
+      else if (a === 'bkdl') await bkDownload();
+      else if (a === 'bkgo') await bkRestore();
+      else if (a === 'bkclr') { bk.data = null; bk.sum = null; bk.file = ''; bk.err = ''; paint(false); }
       else if (a === 'reset') { if (confirm('Reset all sample data on this device?')) { S = seed(); save(); paint(false); toast('Sample data reset'); } }
     });
+    $('#view').addEventListener('change', e => { if (e.target && e.target.id === 'bkFile') bkPick(e.target.files[0]); });
     $('#view').addEventListener('submit', async e => {
       e.preventDefault(); const f = e.target, k = f.dataset.form, d = new FormData(f);
       if (k === 'addinc') {
@@ -1227,7 +1405,7 @@
     // ---------- quotations in Firebase Realtime Database ----------
     // Quote requests from the website are saved at quotes/<pushId>. "Email sent" is stored on each one as emailSent / emailSentAt.
     const quoteErr = (err, what) => { console.error(what, err); return /PERMISSION_DENIED/i.test(String((err && (err.code || err.message)) || '')) ? 'Blocked by the database rules. Allow signed-in users to read and write "quotes" in Firebase.' : 'Could not ' + what + '. Please try again.'; };
-    const repaintQ = () => { if (!document.body.classList.contains('ready')) return; if (view === 'messages') updateQView(); else if (view === 'overview') paint(false); };
+    const repaintQ = () => { drawNotif(); if (!document.body.classList.contains('ready')) return; if (view === 'messages') updateQView(); else if (view === 'overview') paint(false); };
     let offQuotes = () => {}, qSig = '';
     function watchQuotes() {
       offQuotes(); Q = []; qSig = ''; qError = '';
@@ -1247,7 +1425,7 @@
     // ---------- invoices in Firebase Realtime Database ----------
     // Saved at users/<uid>/invoices/<pushId>.
     const invErr = (err, what) => { console.error(what, err); return /PERMISSION_DENIED/i.test(String((err && (err.code || err.message)) || '')) ? 'Blocked by the database rules. Add the "invoices" rules under users/$uid in Firebase.' : 'Could not ' + what + '. Please try again.'; };
-    const repaintI = () => { if (!document.body.classList.contains('ready')) return; if (view === 'invoices') updateIView(); else if (view === 'overview' || view === 'accounting') paint(false); };
+    const repaintI = () => { drawNotif(); if (!document.body.classList.contains('ready')) return; if (view === 'invoices') updateIView(); else if (view === 'overview' || view === 'accounting') paint(false); };
     let offInv = () => {}, iSig = '', invKey = null, creatingInv = false;
     function watchInvoices() {
       offInv(); I = []; iSig = ''; iError = ''; let first = true;
@@ -1260,7 +1438,7 @@
         list.sort((a, b) => b.at - a.at);
         const sig = JSON.stringify(list), wasFirst = first; first = false; iError = '';
         if (sig === iSig) return;
-        I = list; iSig = sig;
+        I = list; iSig = sig; drawNotif();
         if (wasFirst) { if (document.body.classList.contains('ready') && (view === 'invoices' || view === 'overview' || view === 'accounting')) paint(true); } else repaintI();
       }, err => { iError = invErr(err, 'load your invoices'); if (document.body.classList.contains('ready') && (view === 'invoices' || view === 'overview' || view === 'accounting')) paint(false); });
     }
@@ -1634,11 +1812,11 @@
       U = user; load(); fillUser();
       try { const sn = await get(ref(db, `portal/${user.uid}`)); PORTAL = sn.exists() ? (sn.val() || { revoked: true }) : null; } catch (e) { PORTAL = null; }
       if (portalBlocked(PORTAL)) { denyPortal(); return; }
-      buildNav();
+      buildNav(); drawNotif();
       if (PORTAL) { view = 'portal'; watchPortal(); }
       else { view = 'overview'; watchProjects(); watchQuotes(); watchInvoices(); watchCustomers(); setTimeout(() => loadPdf().catch(() => {}), 2500); }
       if (!document.body.classList.contains('ready')) { paint(true); document.body.classList.add('ready'); }
     });
   </script>
-    </body>
+  </body>
 </html>

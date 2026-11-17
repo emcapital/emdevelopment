@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>My Website Progress | EM Development</title>
-<script>try { if (localStorage.getItem('theme') === 'light') document.documentElement.classList.add('light'); } catch (e) {}</script>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>My Website Progress | EM Development</title>
+    <script>try { if (localStorage.getItem('theme') === 'light') document.documentElement.classList.add('light'); } catch (e) {}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
 tailwind.config = { theme: { extend: {
   fontFamily: { sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'] },
   colors: { ink: '#070a16', panel: '#0d1226', brand: { 400: '#7c8cff', 500: '#5b6cff', 600: '#4351e8' }, aqua: '#22d3ee', pink: '#f472b6' },
@@ -20,7 +23,7 @@ tailwind.config = { theme: { extend: {
   animation: { blob: 'blob 14s ease-in-out infinite', gradient: 'gradient 6s ease infinite' }
 } } }
 </script>
-<style>
+    <style>
   html, body { height: 100%; overflow: hidden; }
   body { background: #070a16; color: #e5e9ff; transition: background-color .5s ease, color .5s ease, opacity .6s ease; }
   ::selection { background: #5b6cff; color: #fff; }
@@ -94,60 +97,122 @@ tailwind.config = { theme: { extend: {
   html.light .chk { border-color: rgba(15,21,53,.25); background: rgba(15,21,53,.04); }
   html.light .step:not(:last-child)::before { background: rgba(15,21,53,.12); }
   html.light .animate-blob { opacity: .55; }
+  /* notifications (top bar) */
+  @keyframes notifIn { from { opacity: 0; transform: translateY(-6px) scale(.98); } to { opacity: 1; transform: none; } }
+  @keyframes badgePop { 0% { transform: scale(.7); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
+  .badge-pop { animation: badgePop .45s cubic-bezier(.2,.9,.25,1.3); }
+  #notifMenu { background: #0d1226; border: 1px solid rgba(255,255,255,.1); box-shadow: 0 30px 80px rgba(0,0,0,.55); }
+  #notifMenu:not(.hidden) { animation: notifIn .2s ease both; }
+  #notifBadge { box-shadow: 0 0 0 2px #070a16; transition: box-shadow .5s ease; }
+  html.light #notifMenu { background: #fff; border-color: rgba(15,21,53,.12); box-shadow: 0 30px 80px rgba(67,81,232,.22); }
+  html.light #notifBadge { box-shadow: 0 0 0 2px #f5f6ff; }
+  html.light #notifMenu button:hover { background: rgba(15,21,53,.06); }
 </style>
-</head>
-<body class="font-sans antialiased">
-  <div class="fixed inset-0 overflow-hidden pointer-events-none">
-    <div class="absolute inset-0 grid-bg"></div>
-    <div class="absolute -top-24 -left-24 w-[520px] h-[520px] rounded-full bg-brand-500/30 blur-[120px] animate-blob"></div>
-    <div class="absolute top-1/3 -right-24 w-[460px] h-[460px] rounded-full bg-aqua/20 blur-[120px] animate-blob" style="animation-delay:-5s"></div>
-    <div class="absolute bottom-0 left-1/3 w-[380px] h-[380px] rounded-full bg-pink/20 blur-[120px] animate-blob" style="animation-delay:-9s"></div>
-  </div>
-
-  <div class="app relative z-[2] flex overflow-hidden">
-    <div id="scrim" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
-    <aside id="side" class="glass fixed lg:static inset-y-0 left-0 z-40 w-64 shrink-0 -translate-x-full lg:translate-x-0 flex flex-col p-4 lg:m-3 lg:rounded-3xl">
-      <a href="../index.html" data-leave class="flex items-center gap-3 px-2 py-2 group">
-        <span class="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-brand-500 to-aqua flex items-center justify-center font-extrabold text-white shadow-lg shadow-brand-500/30 group-hover:rotate-12 transition-transform duration-500">E</span>
-        <span class="font-bold tracking-tight truncate">EM <span class="text-brand-400">Development</span></span>
-      </a>
-      <nav id="nav" class="mt-6 space-y-1.5 flex-1" aria-label="Portal sections"></nav>
-      <a href="mailto:inquire@emdevelopment.com" class="px-2 text-xs text-slate-500 hover:text-white transition truncate">Need help? inquire@emdevelopment.com</a>
-      <p class="px-2 mt-1 text-xs text-slate-500">Client portal</p>
-    </aside>
-
-    <div class="flex-1 min-w-0 flex flex-col">
-    <header class="h-16 sm:h-20 px-4 sm:px-8 flex items-center justify-between gap-3 shrink-0">
-      <div class="flex items-center gap-3 min-w-0">
-        <button id="menuBtn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="side" class="lg:hidden w-10 h-10 shrink-0 rounded-xl glass flex items-center justify-center">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-        </button>
-        <h1 id="title" class="text-xl sm:text-2xl font-extrabold tracking-tight truncate"></h1>
-      </div>
-      <div class="flex items-center gap-2.5">
-        <button id="themeBtn" type="button" aria-label="Switch to light mode" class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl glass flex items-center justify-center hover:-translate-y-0.5 transition-transform duration-300">
-          <span class="relative block w-5 h-5">
-            <svg class="theme-icon sun" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
-            <svg class="theme-icon moon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2z"/></svg>
-          </span>
-        </button>
-        <div class="hidden sm:flex items-center gap-2.5 glass rounded-full h-11 pl-1.5 pr-4">
-          <span id="avatar" class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-pink flex items-center justify-center text-sm font-bold text-white">?</span>
-          <span id="who" class="text-sm font-medium max-w-[10rem] truncate"></span>
-        </div>
-        <button id="logoutBtn" type="button" aria-label="Log out" class="inline-flex items-center gap-2 h-10 sm:h-11 px-3.5 sm:px-4 rounded-full glass text-sm font-medium text-slate-300 hover:text-white hover:-translate-y-0.5 transition-all duration-300">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-          <span id="logoutLabel" class="hidden sm:inline">Log out</span>
-        </button>
-      </div>
-    </header>
-    <main id="view" class="flex-1 min-h-0 overflow-y-auto px-4 sm:px-8 pb-10"></main>
+  </head>
+  <body class="font-sans antialiased">
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute inset-0 grid-bg"></div>
+      <div
+        class="absolute -top-24 -left-24 w-[520px] h-[520px] rounded-full bg-brand-500/30 blur-[120px] animate-blob"></div>
+      <div
+        class="absolute top-1/3 -right-24 w-[460px] h-[460px] rounded-full bg-aqua/20 blur-[120px] animate-blob"
+        style="animation-delay:-5s"></div>
+      <div
+        class="absolute bottom-0 left-1/3 w-[380px] h-[380px] rounded-full bg-pink/20 blur-[120px] animate-blob"
+        style="animation-delay:-9s"></div>
     </div>
-  </div>
 
-  <div id="toast" class="fixed left-1/2 z-50 glass rounded-2xl px-5 py-2.5 text-sm font-medium text-center max-w-[calc(100vw-2rem)] hidden" role="status"></div>
+    <div class="app relative z-[2] flex overflow-hidden">
+      <div id="scrim"
+        class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+      <aside id="side"
+        class="glass fixed lg:static inset-y-0 left-0 z-40 w-64 shrink-0 -translate-x-full lg:translate-x-0 flex flex-col p-4 lg:m-3 lg:rounded-3xl">
+        <a href="../index.html" data-leave
+          class="flex items-center gap-3 px-2 py-2 group">
+          <span
+            class="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-brand-500 to-aqua flex items-center justify-center font-extrabold text-white shadow-lg shadow-brand-500/30 group-hover:rotate-12 transition-transform duration-500">E</span>
+          <span class="font-bold tracking-tight truncate">EM <span
+              class="text-brand-400">Development</span></span>
+        </a>
+        <nav id="nav" class="mt-6 space-y-1.5 flex-1"
+          aria-label="Portal sections"></nav>
+        <a href="mailto:emdevelopmentph@gmail.com"
+          class="px-2 text-xs text-slate-500 hover:text-white transition truncate">Need
+          help? emdevelopmentph@gmail.com</a>
+        <p class="px-2 mt-1 text-xs text-slate-500">Client portal</p>
+      </aside>
 
-<script type="module">
+      <div class="flex-1 min-w-0 flex flex-col">
+        <header
+          class="h-16 sm:h-20 px-4 sm:px-8 flex items-center justify-between gap-3 shrink-0">
+          <div class="flex items-center gap-3 min-w-0">
+            <button id="menuBtn" type="button" aria-label="Open menu"
+              aria-expanded="false" aria-controls="side"
+              class="lg:hidden w-10 h-10 shrink-0 rounded-xl glass flex items-center justify-center">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round"
+                viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+            </button>
+            <h1 id="title"
+              class="text-xl sm:text-2xl font-extrabold tracking-tight truncate"></h1>
+          </div>
+          <div class="flex items-center gap-2.5">
+            <div id="notifWrap" class="relative hidden">
+              <button id="notifBtn" type="button" aria-label="Notifications"
+                aria-haspopup="true" aria-expanded="false"
+                aria-controls="notifMenu"
+                class="relative w-10 h-10 sm:w-11 sm:h-11 rounded-xl glass flex items-center justify-center hover:-translate-y-0.5 transition-transform duration-300">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                  stroke-width="1.8" stroke-linecap="round"
+                  stroke-linejoin="round" viewBox="0 0 24 24"><path
+                    d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" /></svg>
+                <span id="notifBadge"
+                  class="hidden absolute -top-1.5 -right-1.5 min-w-[1.25rem] h-5 px-1.5 rounded-full bg-pink text-white text-[11px] font-bold items-center justify-center"></span>
+              </button>
+              <div id="notifMenu" role="region" aria-label="Notifications"
+                class="hidden absolute right-0 top-full mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-2xl p-2 z-50 max-sm:fixed max-sm:inset-x-4 max-sm:w-auto max-sm:max-w-none max-sm:mt-0 max-sm:top-[calc(4rem+env(safe-area-inset-top,0px))]"></div>
+            </div>
+            <button id="themeBtn" type="button"
+              aria-label="Switch to light mode"
+              class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl glass flex items-center justify-center hover:-translate-y-0.5 transition-transform duration-300">
+              <span class="relative block w-5 h-5">
+                <svg class="theme-icon sun" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round"
+                  viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2" /><path
+                    d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" /></svg>
+                <svg class="theme-icon moon" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round" viewBox="0 0 24 24"><path
+                    d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2z" /></svg>
+              </span>
+            </button>
+            <div
+              class="hidden sm:flex items-center gap-2.5 glass rounded-full h-11 pl-1.5 pr-4">
+              <span id="avatar"
+                class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-pink flex items-center justify-center text-sm font-bold text-white">?</span>
+              <span id="who"
+                class="text-sm font-medium max-w-[10rem] truncate"></span>
+            </div>
+            <button id="logoutBtn" type="button" aria-label="Log out"
+              class="inline-flex items-center gap-2 h-10 sm:h-11 px-3.5 sm:px-4 rounded-full glass text-sm font-medium text-slate-300 hover:text-white hover:-translate-y-0.5 transition-all duration-300">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                viewBox="0 0 24 24"><path
+                  d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" /></svg>
+              <span id="logoutLabel" class="hidden sm:inline">Log out</span>
+            </button>
+          </div>
+        </header>
+        <main id="view"
+          class="flex-1 min-h-0 overflow-y-auto px-4 sm:px-8 pb-10"></main>
+      </div>
+    </div>
+
+    <div id="toast"
+      class="fixed left-1/2 z-50 glass rounded-2xl px-5 py-2.5 text-sm font-medium text-center max-w-[calc(100vw-2rem)] hidden"
+      role="status"></div>
+
+    <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut, sendPasswordResetEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 import { getDatabase, ref, onValue, get, push, update, serverTimestamp, increment, query, limitToLast } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
@@ -262,7 +327,7 @@ function checkReady(force) {
   const want = PORTAL === undefined ? null : (!PORTAL || PORTAL.revoked ? [] : Object.keys(PORTAL.projects || {}));
   if (!force && (!want || !want.every(id => id in PP))) return false;
   clearTimeout(checkReady.t);
-  render(); document.body.classList.add('ready');
+  nfReady(); render(); document.body.classList.add('ready');
   return true;
 }
 function repaint() {
@@ -302,6 +367,79 @@ $('#scrim').addEventListener('click', closeMenu);
 addEventListener('resize', () => { if (innerWidth >= 1024) closeMenu(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#scrim').classList.contains('hidden')) closeMenu(); });
 
+// ---------- notifications (top bar) ----------
+// Progress on your projects and new updates from the team are remembered on this device, so you also see what happened while you were away.
+// Unread chat messages are shown live from the chat. Read state and the last 30 notifications are kept per login.
+const NF_MAX = 30;
+let NF = { init: false, list: [], sig: {} }, nfPrev = 0;
+const NF_ICON = { progress: 'M4 20V11M10 20V5M16 20v-6M22 20H2', done: 'M20 6L9 17l-5-5', project: NAV_ICON.projects, update: 'M3 11l18-8-8 18-2-8z', message: NAV_ICON.messages };
+const plur = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
+const nfKey = () => 'nf:' + U.uid;
+function nfLoad() {
+  NF = { init: false, list: [], sig: {} };
+  try { const v = JSON.parse(localStorage.getItem(nfKey())); if (v && Array.isArray(v.list)) NF = { init: v.init === true, list: v.list.slice(0, NF_MAX), sig: v.sig && typeof v.sig === 'object' ? v.sig : {} }; } catch (e) {}
+}
+const nfSave = () => { try { localStorage.setItem(nfKey(), JSON.stringify(NF)); } catch (e) {} };
+function nfAdd(type, text, v) {
+  NF.list.unshift({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), type, text, v, at: Date.now(), read: false });
+  if (NF.list.length > NF_MAX) NF.list.length = NF_MAX;
+  if (document.body.classList.contains('ready')) toast(text.length > 90 ? text.slice(0, 89) + '\u2026' : text);   // live change while the page is open
+}
+// the very first visit only records where things stand, so nothing old is announced as new
+function nfReady() { if (!NF.init) { NF.init = true; nfSave(); } }
+function nfProject(p) {
+  const prev = NF.sig[p.id], now = { d: doneN(p), n: p.items.length, a: p.archived ? 1 : 0 };
+  NF.sig[p.id] = now;
+  if (NF.init) {
+    if (!prev) nfAdd('project', 'A new project was shared with you: ' + p.name, 'projects');
+    else {
+      if (!prev.a && now.a) nfAdd('done', p.name + ' has been delivered', 'projects');
+      else if (prev.a && !now.a) nfAdd('project', p.name + ' was reopened', 'projects');
+      else if (now.d > prev.d) nfAdd('progress', p.name + ': ' + plur(now.d - prev.d, 'item') + ' completed (' + pct(p) + '% done)', 'projects');
+      if (now.n > prev.n) nfAdd('project', plur(now.n - prev.n, 'new item') + ' added to ' + p.name, 'projects');
+    }
+  }
+  nfSave();
+}
+function nfPortal() {
+  if (!PORTAL || PORTAL.revoked) return;
+  const t = +PORTAL.updatedAt || 0, prev = NF.sig.__u;
+  NF.sig.__u = t;
+  if (NF.init && t && t > (prev || 0) && PORTAL.update) nfAdd('update', 'New update: ' + String(PORTAL.update).replace(/\s+/g, ' ').slice(0, 80), 'overview');
+  nfSave();
+}
+const nfAgo = t => { const s = Math.max(0, (Date.now() - t) / 1000); return s < 60 ? 'Just now' : s < 3600 ? Math.floor(s / 60) + ' min ago' : s < 86400 ? Math.floor(s / 3600) + ' h ago' : fmtD(t); };
+function nfDraw() {
+  const wrap = $('#notifWrap'); if (!wrap || !U) return;
+  const on = !!PORTAL && !PORTAL.revoked; wrap.classList.toggle('hidden', !on); if (!on) return;
+  const msgs = view === 'messages' ? 0 : unreadC(), unread = NF.list.filter(x => !x.read).length, total = unread + msgs, b = $('#notifBadge');
+  b.textContent = total > 99 ? '99+' : total; b.classList.toggle('hidden', !total); b.classList.toggle('inline-flex', !!total);
+  if (total > nfPrev) { b.classList.remove('badge-pop'); void b.offsetWidth; b.classList.add('badge-pop'); }
+  nfPrev = total;
+  $('#notifBtn').setAttribute('aria-label', total ? 'Notifications, ' + total + ' new' : 'Notifications');
+  const row = (attrs, icon, text, sub, isNew) => `<button type="button" ${attrs} class="w-full flex items-start gap-3 px-3 py-2.5 rounded-xl text-left text-sm hover:bg-white/10 transition ${isNew ? 'bg-brand-500/10' : ''}"><span class="mt-0.5 shrink-0 w-8 h-8 rounded-lg bg-brand-500/15 text-brand-400 flex items-center justify-center">${svgI(icon, 'w-4 h-4')}</span><span class="flex-1 min-w-0"><span class="block break-words ${isNew ? 'font-semibold' : 'text-slate-300'}">${esc(text)}</span><span class="block mt-0.5 text-xs text-slate-400">${esc(sub)}</span></span>${isNew ? '<span class="mt-2 shrink-0 w-2 h-2 rounded-full bg-pink" aria-hidden="true"></span>' : ''}</button>`;
+  const rows = (msgs ? row('data-nv="messages"', NF_ICON.message, plur(msgs, 'unread message') + ' from EM Development', 'Tap to open the chat', true) : '')
+    + NF.list.map(x => row(`data-nid="${esc(x.id)}" data-nv="${esc(x.v || '')}"`, NF_ICON[x.type] || NF_ICON.project, x.text, nfAgo(x.at), !x.read)).join('');
+  const m = $('#notifMenu'), old = m.querySelector('[data-nlist]'), st = old ? old.scrollTop : 0;
+  m.innerHTML = `<div class="flex items-center justify-between gap-3 px-3 pt-2 pb-1.5"><span class="text-xs font-semibold text-slate-400">Notifications</span>${unread ? '<button type="button" data-nall class="text-xs font-semibold text-brand-400 hover:text-white !bg-transparent">Mark all as read</button>' : ''}</div><div data-nlist class="max-h-[min(24rem,60dvh)] overflow-y-auto">${rows || '<p class="px-3 py-8 text-sm text-slate-400 text-center">You are all caught up.</p>'}</div>`;
+  const nl = m.querySelector('[data-nlist]'); if (nl) nl.scrollTop = st;
+}
+const nfClose = () => { $('#notifMenu').classList.add('hidden'); $('#notifBtn').setAttribute('aria-expanded', 'false'); };
+$('#notifBtn').addEventListener('click', () => {
+  const m = $('#notifMenu'), open = m.classList.contains('hidden');
+  m.classList.toggle('hidden', !open); $('#notifBtn').setAttribute('aria-expanded', String(open));
+  if (open) { closeMenu(); nfDraw(); }
+});
+$('#notifMenu').addEventListener('click', e => {
+  if (e.target.closest('[data-nall]')) { NF.list.forEach(x => { x.read = true; }); nfSave(); nfDraw(); return; }
+  const b = e.target.closest('[data-nv]'); if (!b) return;
+  const it = NF.list.find(x => x.id === b.dataset.nid); if (it && !it.read) { it.read = true; nfSave(); }
+  nfClose(); nfDraw(); if (b.dataset.nv) go(b.dataset.nv);
+});
+document.addEventListener('click', e => { if (!$('#notifWrap').contains(e.target)) nfClose(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') nfClose(); });
+setInterval(() => { if (!$('#notifMenu').classList.contains('hidden')) nfDraw(); }, 30000);   // keeps "5 min ago" fresh while it is open
+
 // ---------- messages: one-to-one chat with the EM Development team ----------
 // Saved at chats/<customerUid>/messages/<pushId>. chats/<customerUid>/meta holds the last message and each side's unread count.
 let chatEl = null, chatMsgs = [], chatMeta = {}, chatUid = null, chatErr = '', chatStick = false, chatLoaded = false, chatLast = '', offChatM = () => {}, offChatT = () => {};
@@ -311,6 +449,7 @@ const dayLabel = t => { const k = dayKey(t), n = today0().getTime(); return k ==
 const unreadC = () => +chatMeta.customerUnread || 0;
 const chatFail = err => /PERMISSION_DENIED/i.test(String((err && (err.code || err.message)) || '')) ? 'Messaging is blocked by the database rules. Please contact EM Development.' : 'Could not send or load messages. Please try again.';
 function setBadge() {
+  nfDraw();
   const el = $('#msgBadge'); if (!el) return;
   const n = view === 'messages' ? 0 : unreadC();
   el.textContent = n > 99 ? '99+' : n; el.classList.toggle('hidden', !n); el.classList.toggle('inline-flex', !!n);
@@ -456,6 +595,7 @@ function watchPortal() {
   offPortal();
   offPortal = onValue(ref(db, `portal/${U.uid}`), snap => {
     PORTAL = snap.val() || { revoked: true };
+    nfPortal();
     watchChat();
     const want = PORTAL.revoked ? [] : Object.keys(PORTAL.projects || {});
     Object.keys(PW).forEach(id => { if (!want.includes(id)) { PW[id](); delete PW[id]; delete PP[id]; delete lastSnap[id]; } });
@@ -464,6 +604,7 @@ function watchPortal() {
       PW[id] = onValue(ref(db, `users/${PORTAL.admin}/projects/${id}`), s => {
         const v = s.val();
         PP[id] = v ? { id, name: v.name || 'Untitled project', start: v.startDate, due: v.endDate, items: arr(v.inclusions).map(x => typeof x === 'string' ? { t: x, d: false } : { t: x.t, d: x.d === true }), archived: v.archived === true } : null;
+        if (PP[id]) nfProject(PP[id]);
         repaint();
       }, () => { PP[id] = null; repaint(); });
     });
@@ -489,7 +630,7 @@ $('#logoutBtn').addEventListener('click', async () => {
 });
 onAuthStateChanged(auth, async user => {
   if (!user) { stopAll(); if (!leave.on) { document.body.classList.add('ready'); leave(LOGIN_URL); } return; }
-  U = user;
+  U = user; nfLoad();
   const n = U.displayName || U.email.split('@')[0]; $('#who').textContent = n; $('#avatar').textContent = n[0].toUpperCase();
   // team members (no portal record) belong on the admin dashboard
   let isCustomer = true;
@@ -499,5 +640,5 @@ onAuthStateChanged(auth, async user => {
   clearTimeout(checkReady.t); checkReady.t = setTimeout(() => checkReady(true), 8000);
 });
 </script>
-</body>
+  </body>
 </html>
