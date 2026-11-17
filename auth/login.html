@@ -329,6 +329,7 @@
       signInWithPopup, GoogleAuthProvider, GithubAuthProvider,
       setPersistence, browserLocalPersistence, browserSessionPersistence
     } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAoyAOyfJsqlK_Pe6pmfA5cTexx0IOcH9g",
@@ -346,8 +347,15 @@
     // Analytics only works over http(s) in supported browsers, so never let it break login
     isSupported().then(ok => { if (ok) getAnalytics(app); }).catch(() => {});
 
-    // Where to go after a successful login: change this to your real page
-    const REDIRECT_URL = '../components/dashboard.html';
+    // Where to go after a successful login: admins and customers have their own dashboard
+    const ADMIN_URL = '../components/dashboard.html';
+    const CUSTOMER_URL = '../customers/dashboard.html';
+    const db = getDatabase(app);
+    // A customer has a record at portal/<uid> (created when the admin adds them); everyone else is an admin
+    async function destFor(user) {
+      try { const sn = await get(ref(db, `portal/${user.uid}`)); return sn.exists() ? CUSTOMER_URL : ADMIN_URL; }
+      catch (e) { return ADMIN_URL; }
+    }
 
     // ===== Login UI =====
     const form = document.getElementById('loginForm'), submit = document.getElementById('loginSubmit');
@@ -374,6 +382,7 @@
     function goToApp() {
       if (redirecting) return;
       redirecting = true;
+      const destP = destFor(auth.currentUser);
       showMsg('✓ Login successful! Redirecting...', true);
       // Success state on the button, then the whole page fades out below
       submit.disabled = true;
@@ -381,7 +390,7 @@
       submit.style.backgroundImage = 'linear-gradient(90deg, #10b981, #22d3ee)';
       // Let the success message show briefly, then fade the page out before navigating
       setTimeout(() => document.body.classList.add('is-leaving'), 700);
-      setTimeout(() => { window.location.href = REDIRECT_URL; }, 1500);
+      setTimeout(() => { destP.then(url => { window.location.href = url; }); }, 1500);
     }
     function friendlyError(err) {
       switch (err && err.code) {

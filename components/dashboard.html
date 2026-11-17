@@ -44,7 +44,16 @@
     .q-out { animation: qOut .45s cubic-bezier(.4,0,.6,1) forwards; pointer-events: none; }
     .badge-pop { animation: badgePop .45s cubic-bezier(.2,.9,.25,1.3); }
     .fade-item { animation: itemFade .7s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(80ms + var(--i, 0) * 70ms); }
-    .fade-side { animation: slideFade 1s cubic-bezier(.2,.7,.2,1) .1s both; }
+    /* the slide-in must not run on phones: its final "transform: none" would hold the drawer open over the page */
+    @keyframes sideFadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .fade-side { animation: sideFadeIn .8s ease .1s both; }
+    /* the open drawer on phones and tablets is solid, not see-through */
+    @media (max-width: 1023px) {
+      #side { background: #0d1226; border-color: rgba(255,255,255,.1); -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: 0 0 60px rgba(0,0,0,.55); }
+      html.light #side { background: #ffffff; border-color: rgba(15,21,53,.12); box-shadow: 0 0 60px rgba(67,81,232,.25); }
+    }
+    @media (min-width: 1024px) { .fade-side { animation: slideFade 1s cubic-bezier(.2,.7,.2,1) .1s both; } }
+    @media (max-width: 1023px) { #side.-translate-x-full { visibility: hidden; transition: transform .4s cubic-bezier(.2,.7,.2,1), visibility 0s linear .4s; } }
 
     .grid-bg { background-image: linear-gradient(rgba(124,140,255,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(124,140,255,.08) 1px, transparent 1px); background-size: 56px 56px; mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%); }
     .gradient-text { background: linear-gradient(90deg, #7c8cff, #22d3ee, #f472b6, #7c8cff); background-size: 300% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: gradient 6s ease infinite; }
@@ -68,6 +77,18 @@
     html.theme-switching *, html.theme-switching *::before, html.theme-switching *::after { transition: background-color .5s ease, color .5s ease, border-color .5s ease, box-shadow .5s ease !important; }
     #view { scrollbar-width: thin; scrollbar-color: rgba(124,140,255,.3) transparent; }
     #side { transition: transform .4s cubic-bezier(.2,.7,.2,1); }
+
+    .fade-item.q-flash { animation: qFlash .9s ease-out; }
+    .fade-item.q-out { animation: qOut .45s cubic-bezier(.4,0,.6,1) forwards; }
+    @keyframes toastOut { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, 12px); } }
+    .i-panel { display: grid; grid-template-rows: 0fr; opacity: 0; margin-bottom: 0; transition: grid-template-rows .55s cubic-bezier(.2,.7,.2,1), opacity .4s ease, margin-bottom .55s cubic-bezier(.2,.7,.2,1); }
+    .i-panel.open { grid-template-rows: 1fr; opacity: 1; margin-bottom: 1.25rem; }
+    .i-panel > div { overflow: hidden; min-height: 0; padding: 3px; margin: -3px; }
+    .i-editing { border-color: rgba(124,140,255,.7) !important; box-shadow: 0 0 0 3px rgba(91,108,255,.25); }
+    .q-card, .glass { transition: border-color .4s ease, box-shadow .4s ease, background-color .4s ease; }
+    button, .btn-shine { transition-property: background-color, color, border-color, box-shadow, transform, opacity, filter; transition-duration: .25s; transition-timing-function: ease; }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+    html.light .text-red-300 { color: #dc2626; }
 
     /* ===== New project modal ===== */
     #modal { display: none; }
@@ -106,6 +127,31 @@
     @media (max-width: 639px) { input, textarea, select { font-size: 16px !important; } }   /* stops iOS zooming into fields */
     @media (max-width: 419px) { #mCancel, #mSave, #dCancel, #dBtn { flex: 1; justify-content: center; } }
     @media (hover: none) and (pointer: coarse) { .chk { width: 22px; height: 22px; } }
+
+    /* ===== Delete invoice modal ===== */
+    #xModal { display: none; }
+    #xModal.show { display: flex; }
+    #xBack { opacity: 0; transition: opacity .3s ease; }
+    #xForm { opacity: 0; transform: translateY(18px) scale(.97); transition: opacity .3s ease, transform .35s cubic-bezier(.2,.7,.2,1); }
+    #xModal.open #xBack { opacity: 1; }
+    #xModal.open #xForm { opacity: 1; transform: none; }
+    #xModal { padding: max(1rem, env(safe-area-inset-top, 0px)) max(1rem, env(safe-area-inset-right, 0px)) max(1rem, env(safe-area-inset-bottom, 0px)) max(1rem, env(safe-area-inset-left, 0px)); }
+    #xForm { max-height: calc(100dvh - 2rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); }
+    @media (max-width: 419px) { #xCancel, #xBtn { flex: 1; justify-content: center; } }
+
+    /* ===== Responsive v2 ===== */
+    #view { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+    #view > :not(.max-w-xl) { max-width: 90rem; margin-left: auto; margin-right: auto; }   /* keep ultra-wide screens readable */
+    #side { overflow-y: auto; }
+    .stat-v { overflow-wrap: anywhere; line-height: 1.2; }
+    @media (pointer: coarse) {
+      .nav-btn { min-height: 48px; }
+      button[data-act="iedit"], button[data-act="idl"], button[data-act="idel"], button[data-act="del"], #mClose { width: 44px; height: 44px; }
+      button[data-act="ipay"] { min-height: 44px; }
+    }
+    @media (hover: none) { .hover\:-translate-y-0\.5:hover { transform: none; } }
+    @media (max-height: 520px) { .nav-btn { padding-top: .5rem; padding-bottom: .5rem; } #side nav { margin-top: .75rem; } }
+    @media (max-width: 359px) { #view { padding-left: .75rem; padding-right: .75rem; } header { padding-left: .75rem; padding-right: .75rem; } }
 
     html.light body { background: #f5f6ff; color: #0f1535; }
     html.light .glass { background: rgba(255,255,255,.75); border-color: rgba(15,21,53,.1); box-shadow: 0 6px 24px rgba(67,81,232,.07); }
@@ -343,21 +389,51 @@
             </form>
         </div>
 
+        <!-- Delete invoice modal -->
+        <div id="xModal" class="fixed inset-0 z-[60] items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="xTitle">
+            <div id="xBack" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+            <form id="xForm" novalidate class="modal-card relative w-full max-w-md overflow-y-auto rounded-3xl p-6 sm:p-7">
+                <div class="flex items-start gap-4">
+                    <span class="w-11 h-11 shrink-0 rounded-2xl bg-red-500/15 text-red-400 flex items-center justify-center">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01" /></svg>
+                    </span>
+                    <div class="min-w-0">
+                        <h2 id="xTitle" class="text-xl font-extrabold tracking-tight">Delete invoice?</h2>
+                        <p id="xDesc" class="mt-1 text-sm text-slate-400 break-words"></p>
+                    </div>
+                </div>
+                <div class="mt-5">
+                    <label for="xIn" class="block text-sm font-medium text-slate-300">To confirm, type <span id="xPhrase" class="font-bold text-slate-200 select-none">Delete this Invoice</span> below</label>
+                    <input id="xIn" class="field mt-1.5" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Delete this Invoice" aria-describedby="xHint" />
+                    <p id="xHint" class="mt-2 text-xs min-h-[1rem]" aria-live="polite"></p>
+                    <p id="xErr" class="mt-1 text-sm text-red-400 min-h-[1.25rem]" role="alert"></p>
+                </div>
+                <div class="mt-2 flex items-center justify-end gap-3">
+                    <button type="button" id="xCancel" class="px-5 py-2.5 rounded-xl glass text-sm font-semibold text-slate-300 hover:text-white transition">Cancel</button>
+                    <button id="xBtn" type="submit" disabled class="btn-danger px-6 py-2.5 rounded-xl bg-gradient-to-r from-red-500 to-red-600 font-bold text-white text-sm shadow-lg shadow-red-500/30 flex items-center gap-2.5 transition">
+                        <span id="xBtnLabel">Delete invoice</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
         <div id="toast"
             class="fixed left-1/2 bottom-6 z-50 glass rounded-full px-5 py-2.5 text-sm font-medium hidden"
             style="transform:translateX(-50%)" role="status"></div>
 
         <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut, updateProfile, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-    import { getDatabase, ref, push, set, update, remove, onValue, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+    import { getAuth, onAuthStateChanged, signOut, updateProfile, sendPasswordResetEmail, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+    import { getDatabase, ref, push, set, update, remove, onValue, get, serverTimestamp, increment, query, limitToLast } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-    const app = initializeApp({
+    const FB = {
       apiKey: "AIzaSyAoyAOyfJsqlK_Pe6pmfA5cTexx0IOcH9g", authDomain: "moren-325fd.firebaseapp.com",
       databaseURL: "https://moren-325fd-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "moren-325fd",
       storageBucket: "moren-325fd.firebasestorage.app", messagingSenderId: "1015241645428",
       appId: "1:1015241645428:web:2d6366a8bdc38a5fb72021", measurementId: "G-1HDSV3V8P1"
-    });
+    };
+    const app = initializeApp(FB);
+    let app2; const acctAuth = () => getAuth(app2 || (app2 = initializeApp(FB, 'accounts')));
     const auth = getAuth(app);
     const db = getDatabase(app);
     const LOGIN_URL = '../auth/login.html'; // path to login.html, relative to this file
@@ -378,28 +454,27 @@
       projects: 'M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',
       invoices: 'M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6',
       messages: 'M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM3 7l9 6 9-6',
+      accounting: 'M4 20V11M10 20V5M16 20v-6M22 20H2',
+      customers: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8',
+      portal: 'M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0zM3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18',
       settings: 'M20 21a8 8 0 0 0-16 0M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',
+      chat: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z',
       trash: 'M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M10 11v6M14 11v6'
     };
-    const TITLES = { overview: 'Overview', projects: 'Projects', invoices: 'Invoices', messages: 'Quotations', settings: 'Account' };
+    const TITLES = { overview: 'Overview', projects: 'Projects', invoices: 'Invoices', accounting: 'Accounting', customers: 'Customers', portal: 'My Website', messages: 'Quotations', chat: 'Chat', settings: 'Account' };
     const svg = (d, c = 'w-5 h-5') => `<svg class="${c}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="${d}"/></svg>`;
     let toastT;
-    function toast(t) { const el = $('#toast'); el.textContent = t; el.className = 'fixed left-1/2 z-50 glass rounded-2xl px-5 py-2.5 text-sm font-medium text-center max-w-[calc(100vw-2rem)]'; el.style.bottom = 'calc(1.5rem + env(safe-area-inset-bottom, 0px))'; el.style.animation = 'toastIn .4s ease both'; clearTimeout(toastT); toastT = setTimeout(() => el.classList.add('hidden'), 2600); }
+    function toast(t) { const el = $('#toast'); el.textContent = t; el.className = 'fixed left-1/2 z-50 glass rounded-2xl px-5 py-2.5 text-sm font-medium text-center max-w-[calc(100vw-2rem)]'; el.style.bottom = 'calc(1.5rem + env(safe-area-inset-bottom, 0px))'; el.style.animation = 'toastIn .4s ease both'; clearTimeout(toastT); toastT = setTimeout(() => { el.style.animation = 'toastOut .35s ease forwards'; toastT = setTimeout(() => el.classList.add('hidden'), 350); }, 2600); }
     function leave(url) { if (leave.on) return; leave.on = true; document.body.classList.add('is-leaving'); setTimeout(() => { location.href = url; }, 650); }
 
     // ---------- data (stored per user in this browser) ----------
-    let U, S, C = [], Q = [], qError = '', view = 'overview', flt = 'all', qflt = 'all';   // C = projects saved in Firebase Realtime Database
+    let U, S, C = [], Q = [], I = [], K = [], PORTAL = null, PP = {}, kOpen = false, kCreds = null, kBusy = false, kError = '', kOpenSet = new Set(), kDraft = {}, qError = '', iError = '', view = 'overview', flt = 'all', qflt = 'all', iflt = 'all', invOpen = false, invEdit = null;   // C = projects saved in Firebase Realtime Database
     const projs = () => [...C, ...S.projects];
     const key = () => 'emdev:' + U.uid;
     const save = () => { try { localStorage.setItem(key(), JSON.stringify(S)); } catch (e) {} };
     const seed = () => ({
       v: 2,
       projects: [],
-      invoices: [
-        { id: 'INV-1042', for: 'Website Redesign: deposit', amt: 12000, due: '2026-10-30', paid: true },
-        { id: 'INV-1051', for: 'Website Redesign: milestone 2', amt: 15000, due: '2026-12-10', paid: false },
-        { id: 'INV-1057', for: 'Booking App: kickoff', amt: 18000, due: '2026-12-22', paid: false }
-      ]
     });
     function load() {
       try { S = JSON.parse(localStorage.getItem(key())); } catch (e) {}
@@ -429,14 +504,64 @@
             <form data-form="addinc" data-p="${esc(p.id)}" data-add class="mt-4 flex items-center gap-2${p.archived ? ' hidden' : ''}"><input name="t" maxlength="60" autocomplete="off" aria-label="Add a feature to ${esc(p.name)}" placeholder="Add a new feature..." class="field !py-2 min-w-0 text-sm"/><button type="submit" class="shrink-0 px-4 py-2 rounded-xl glass text-sm font-semibold text-brand-400 hover:text-white transition">+ Add</button></form>
             <div data-slot data-k="${slotKey(p)}">${actHtml(p)}</div></div>`;
     }
-    const qWhen = t => t ? fmtD(t) + ' \u00b7 ' + fmtT(t) : '';
+    // ---------- list helpers (quotations + invoices) ----------
+    const pillCls = on => 'px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 ' + (on ? 'bg-brand-500 text-white' : 'glass text-slate-300 hover:text-white');
+    // fade a card out, then close the gap it leaves
+    function collapseOut(n) {
+      if (n._gone) return; n._gone = true;
+      n.style.height = n.offsetHeight + 'px'; n.style.overflow = 'hidden'; n.style.boxSizing = 'border-box';
+      n.classList.add('q-out'); void n.offsetHeight;
+      const t = '.45s cubic-bezier(.4,0,.2,1) .1s';
+      n.style.transition = 'height ' + t + ', padding ' + t + ', margin ' + t + ', border-width ' + t;
+      n.style.height = '0px'; n.style.paddingTop = '0px'; n.style.paddingBottom = '0px'; n.style.marginTop = '0px'; n.style.marginBottom = '0px'; n.style.borderWidth = '0px';
+    }
+    // redraw just the list (not the whole view), so open forms and the scroll position are untouched; `all` staggers every card in
+    function redrawList(grid, html, ids, key, all) {
+      const have = new Set([...grid.querySelectorAll('[' + key + ']')].map(n => n.getAttribute(key)));
+      grid.dataset.ids = ids.join(',');
+      grid.innerHTML = html;
+      grid.querySelectorAll('[data-f]').forEach((el, i) => { if (all || !have.has(el.getAttribute(key))) { el.classList.add('fade-item'); el.style.setProperty('--i', all ? i : 0); } });
+    }
+    function swapFilter(grid, draw) {
+      grid.style.transition = 'opacity .18s ease'; grid.style.opacity = '0'; clearTimeout(grid._t);
+      grid._t = setTimeout(() => { draw(); grid.style.opacity = '1'; }, 190);
+    }
+    function tweenMoney(el, to) {
+      const from = el._cur != null ? el._cur : (parseFloat(el.dataset.v) || 0);
+      el.dataset.v = to; cancelAnimationFrame(el._r);
+      if (from === to) { el._cur = to; el.textContent = money(to); return; }
+      const t0 = performance.now(), D = 700;
+      const step = t => {
+        const k = Math.min(1, (t - t0) / D), e = 1 - Math.pow(1 - k, 3);
+        el._cur = from + (to - from) * e; el.textContent = money(k < 1 ? Math.round(el._cur) : to);
+        if (k < 1) el._r = requestAnimationFrame(step);
+      };
+      el._r = requestAnimationFrame(step);
+    }
+    const flash = n => { n.classList.remove('q-flash'); void n.offsetWidth; n.classList.add('q-flash'); };
+    const pop = el => { el.classList.remove('badge-pop'); void el.offsetWidth; el.classList.add('badge-pop'); };
+
+    // ---------- quotations ----------
+    const qWhen = t => t ? fmtD(t) + ' · ' + fmtT(t) : '';
     const qBadge = q => 'shrink-0 px-3 py-1 rounded-full text-xs font-semibold transition-colors duration-500 ' + (q.emailSent ? BADGE.completed : BADGE.pending);
-    const qSentHtml = q => 'Email sent' + (q.emailSent && q.emailAt ? ` <span style="animation:itemFade .5s ease both" class="font-normal text-slate-400">\u00b7 ${esc(qWhen(q.emailAt))}</span>` : '');
+    const qSentHtml = q => 'Email sent' + (q.emailSent && q.emailAt ? ` <span style="animation:itemFade .5s ease both" class="font-normal text-slate-400">· ${esc(qWhen(q.emailAt))}</span>` : '');
+    const qList = () => Q.filter(q => qflt === 'all' || (qflt === 'todo' ? !q.emailSent : q.emailSent));
+    const qCard = q => {
+      const subj = encodeURIComponent('Your free quotation | EM Development'), body = encodeURIComponent('Hi ' + q.name + ',\n\nThank you for reaching out to EM Development about ' + q.service + '.\n\n');
+      return `<div data-f data-qid="${esc(q.id)}" data-sent="${q.emailSent ? 1 : 0}" class="${card} q-card flex flex-col">
+        <div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="font-bold truncate">${esc(q.name)}</div><div class="text-xs text-slate-400 mt-0.5">${esc(qWhen(q.at))}</div></div><span data-qbadge class="${qBadge(q)}">${q.emailSent ? 'Emailed' : 'To email'}</span></div>
+        <div class="mt-3 inline-flex self-start px-3 py-1 rounded-full text-xs font-semibold bg-brand-500/20 text-brand-400">${esc(q.service || 'General inquiry')}</div>
+        <p class="mt-3 text-sm text-slate-300 whitespace-pre-wrap break-words">${esc(q.details || '')}</p>
+        <div class="mt-4 space-y-1 text-sm"><div class="truncate"><span class="text-slate-400">Email:</span> <a class="text-brand-400 hover:text-white font-medium" href="mailto:${esc(q.email)}?subject=${subj}&body=${body}">${esc(q.email)}</a></div>${q.phone ? `<div class="truncate"><span class="text-slate-400">Phone:</span> <a class="text-brand-400 hover:text-white font-medium" href="tel:${esc(q.phone)}">${esc(q.phone)}</a></div>` : ''}</div>
+        <label class="mt-auto pt-4 border-t border-white/10 flex items-center gap-3 text-sm font-semibold cursor-pointer select-none"><input type="checkbox" class="chk" data-act="qmail" data-q="${esc(q.id)}" ${q.emailSent ? 'checked' : ''}/><span data-qtxt data-h="${esc(qSentHtml(q))}">${qSentHtml(q)}</span></label></div>`;
+    };
+    const qGridHtml = () => qList().map(qCard).join('') || `<p class="text-slate-400">${qError ? '' : Q.length ? 'Nothing in this list.' : 'No quotations yet.'}</p>`;
+    const drawQ = all => { const g = $('#qgrid'); if (g) redrawList(g, qGridHtml(), Q.map(q => q.id), 'data-qid', all); };
     let qt;
     // update the quotation cards in place (no re-render), so the badge, check mark and glow can animate
     function updateQView() {
       const grid = $('#qgrid'); if (!grid) return paint(false);
-      if (grid.dataset.ids !== Q.map(q => q.id).join(',')) return paint(false);   // a quotation was added or removed
+      if (grid.dataset.ids !== Q.map(q => q.id).join(',')) drawQ(false);   // a quotation was added or removed
       const todo = Q.filter(q => !q.emailSent).length;
       const cnt = { all: 'All (' + Q.length + ')', todo: 'To email (' + todo + ')', sent: 'Emailed (' + (Q.length - todo) + ')' };
       document.querySelectorAll('[data-qpill]').forEach(b => { const t = cnt[b.dataset.qpill]; if (b.textContent !== t) b.textContent = t; });
@@ -445,29 +570,159 @@
         const q = Q.find(x => x.id === n.dataset.qid); if (!q) return;
         const was = n.dataset.sent === '1'; n.dataset.sent = q.emailSent ? '1' : '0';
         const bd = n.querySelector('[data-qbadge]'), txt = q.emailSent ? 'Emailed' : 'To email';
-        if (bd.textContent !== txt) { bd.textContent = txt; bd.className = qBadge(q); bd.classList.remove('badge-pop'); void bd.offsetWidth; bd.classList.add('badge-pop'); }
+        if (bd.textContent !== txt) { bd.textContent = txt; bd.className = qBadge(q); pop(bd); }
         const cb = n.querySelector('input[data-act="qmail"]'); if (cb.checked !== q.emailSent) cb.checked = q.emailSent;
         const t = n.querySelector('[data-qtxt]'), h = qSentHtml(q); if (t.dataset.h !== h) { t.dataset.h = h; t.innerHTML = h; }
-        if (q.emailSent && !was) { n.classList.remove('q-flash'); void n.offsetWidth; n.classList.add('q-flash'); }
+        if (q.emailSent && !was) flash(n);
       });
-      // a card that no longer belongs in this filter fades out first, then the list is redrawn
-      const want = Q.filter(q => qflt === 'all' || (qflt === 'todo' ? !q.emailSent : q.emailSent)).map(q => q.id);
+      // cards that no longer belong in this filter fade out and close the gap; cards that now belong fade in
+      const want = qList().map(q => q.id), shown = nodes.map(n => n.dataset.qid);
+      const gone = nodes.filter(n => !want.includes(n.dataset.qid)), added = want.some(id => !shown.includes(id));
       clearTimeout(qt);
-      if (want.join(',') !== nodes.map(n => n.dataset.qid).join(',')) {
-        nodes.forEach(n => { if (!want.includes(n.dataset.qid)) n.classList.add('q-out'); });
-        qt = setTimeout(() => { if (view === 'messages') paint(false); }, 700);
+      if (gone.length || added) {
+        gone.forEach(collapseOut);
+        qt = setTimeout(() => { if (view === 'messages') drawQ(false); }, gone.length ? 650 : 0);
       }
+    }
+
+    // ---------- invoices ----------
+    const dstr = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    const sumAmt = arr => arr.reduce((a, i) => a + i.amt, 0);
+    const istat = i => i.paid ? 'paid' : (i.due && i.due < dstr(new Date()) ? 'overdue' : 'unpaid');
+    const IBADGE = { paid: BADGE.completed, unpaid: BADGE.pending, overdue: 'text-red-300 bg-red-500/15' };
+    const ILABEL = { paid: 'Paid', unpaid: 'Unpaid', overdue: 'Overdue' };
+    const iBadge = i => 'shrink-0 px-3 py-1 rounded-full text-xs font-semibold transition-colors duration-500 ' + IBADGE[istat(i)];
+    const iBtn = i => 'px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors duration-500 ' + (i.paid ? 'glass text-slate-300 hover:text-white' : 'bg-brand-500 text-white hover:bg-brand-600');
+    const iPaidTxt = i => i.paid && i.paidAt ? ' · Paid ' + fmtD(i.paidAt) : '';
+    const iMeta = i => 'Billed to ' + i.to + ' · Due ' + fmtD(i.due);
+    const iIconBtn = 'w-9 h-9 rounded-lg flex items-center justify-center text-slate-400 transition';
+    const iList = () => I.filter(i => iflt === 'all' || (iflt === 'unpaid' ? !i.paid : i.paid));
+    const iCard = i => `<div data-f data-iid="${esc(i.id)}" data-paid="${i.paid ? 1 : 0}" data-sent="${i.paid ? 1 : 0}" class="${card} q-card flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-4${invEdit === i.id ? ' i-editing' : ''}">
+          <div class="min-w-[min(100%,14rem)] flex-1">
+            <div class="flex items-center gap-3 flex-wrap"><span class="font-bold">${esc(i.num)}</span><span data-ibadge class="${iBadge(i)}">${ILABEL[istat(i)]}</span></div>
+            <div data-idesc class="mt-1 text-sm text-slate-300 break-words">${esc(i.desc)}</div>
+            <div class="mt-1 text-xs text-slate-400 break-words"><span data-imeta>${esc(iMeta(i))}</span><span data-ipaid>${esc(iPaidTxt(i))}</span></div>
+          </div>
+          <div class="flex flex-wrap items-center justify-between sm:justify-end gap-x-4 gap-y-3 sm:shrink-0">
+            <div data-iamt data-v="${i.amt}" class="text-lg font-extrabold">${money(i.amt)}</div>
+            <div class="flex flex-wrap items-center gap-1.5">
+              <button data-act="ipay" data-i="${esc(i.id)}" data-ibtn class="${iBtn(i)}">${i.paid ? 'Mark unpaid' : 'Mark paid'}</button>
+              <button data-act="iedit" data-i="${esc(i.id)}" aria-label="Edit ${esc(i.num)}" title="Edit" class="${iIconBtn} hover:text-white hover:bg-white/10">${svg('M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z', 'w-4 h-4')}</button>
+              <button data-act="idl" data-i="${esc(i.id)}" aria-label="Download ${esc(i.num)} as PDF" title="Download PDF" class="${iIconBtn} hover:text-white hover:bg-white/10">${svg('M12 4v12M7 11l5 5 5-5M5 20h14', 'w-4 h-4')}</button>
+              <button data-act="idel" data-i="${esc(i.id)}" aria-label="Delete ${esc(i.num)}" title="Delete" class="${iIconBtn} hover:text-red-400 hover:bg-red-500/10">${svg(ICON.trash, 'w-4 h-4')}</button>
+            </div>
+          </div></div>`;
+    const iGridHtml = () => iList().map(iCard).join('') || `<p class="text-slate-400">${iError ? '' : I.length ? 'Nothing in this list.' : 'No invoices yet. Create your first one with the button above.'}</p>`;
+    const drawI = all => { const g = $('#igrid'); if (g) redrawList(g, iGridHtml(), I.map(i => i.id), 'data-iid', all); };
+    let it;
+    // update the invoice cards in place (no re-render), so the badge, button, totals and edited values can animate
+    function updateIView() {
+      const grid = $('#igrid'); if (!grid) return paint(false);
+      if (grid.dataset.ids !== I.map(i => i.id).join(',')) drawI(false);   // an invoice was added or removed
+      const unpaid = I.filter(i => !i.paid).length;
+      const cnt = { all: 'All (' + I.length + ')', unpaid: 'Unpaid (' + unpaid + ')', paid: 'Paid (' + (I.length - unpaid) + ')' };
+      document.querySelectorAll('[data-ipill]').forEach(b => { const t = cnt[b.dataset.ipill]; if (b.textContent !== t) b.textContent = t; });
+      const o = document.querySelector('[data-istat="owed"]'), pd = document.querySelector('[data-istat="paid"]');
+      if (o) tweenMoney(o, sumAmt(I.filter(i => !i.paid))); if (pd) tweenMoney(pd, sumAmt(I.filter(i => i.paid)));
+      const nodes = [...grid.querySelectorAll('[data-iid]')];
+      nodes.forEach(n => {
+        const i = I.find(x => x.id === n.dataset.iid); if (!i) return;
+        const was = n.dataset.paid === '1'; n.dataset.paid = i.paid ? '1' : '0'; n.dataset.sent = i.paid ? '1' : '0';
+        let changed = i.paid && !was;
+        const bd = n.querySelector('[data-ibadge]'), txt = ILABEL[istat(i)];
+        if (bd.textContent !== txt) { bd.textContent = txt; bd.className = iBadge(i); pop(bd); }
+        const bt = n.querySelector('[data-ibtn]'), bl = i.paid ? 'Mark unpaid' : 'Mark paid'; if (bt.textContent !== bl) bt.textContent = bl; bt.className = iBtn(i);
+        const pt = n.querySelector('[data-ipaid]'), ptx = iPaidTxt(i); if (pt.textContent !== ptx) pt.textContent = ptx;
+        const ds = n.querySelector('[data-idesc]'); if (ds.textContent !== i.desc) { ds.textContent = i.desc; changed = true; }
+        const mt = n.querySelector('[data-imeta]'), mtx = iMeta(i); if (mt.textContent !== mtx) { mt.textContent = mtx; changed = true; }
+        const am = n.querySelector('[data-iamt]'); if (+am.dataset.v !== i.amt) { tweenMoney(am, i.amt); changed = true; }
+        if (changed) flash(n);
+      });
+      const want = iList().map(i => i.id), shown = nodes.map(n => n.dataset.iid);
+      const gone = nodes.filter(n => !want.includes(n.dataset.iid)), added = want.some(id => !shown.includes(id));
+      clearTimeout(it);
+      if (gone.length || added) {
+        gone.forEach(collapseOut);
+        it = setTimeout(() => { if (view === 'invoices') drawI(false); }, gone.length ? 650 : 0);
+      }
+    }
+    // invoice panel (create + edit share one form that slides open and closed)
+    function showInvPanel(inv) {
+      const panel = $('#iPanel'); if (!panel) return;
+      const f = panel.querySelector('form'), dd = new Date(); dd.setDate(dd.getDate() + 14);
+      invEdit = inv ? inv.id : null; invOpen = true;
+      f.reset(); f.dataset.edit = inv ? inv.id : '';
+      if (inv) { f.elements.to.value = inv.to; f.elements.desc.value = inv.desc; f.elements.amt.value = inv.amt; f.elements.due.value = inv.due; } else f.elements.due.value = dstr(dd);
+      $('#iTitle').textContent = inv ? 'Edit ' + inv.num : 'New invoice';
+      $('#iSave').textContent = inv ? 'Save changes' : 'Create invoice';
+      $('#iErr').textContent = '';
+      document.querySelectorAll('.i-editing').forEach(n => n.classList.remove('i-editing'));
+      if (inv) { const n = document.querySelector('[data-iid="' + CSS.escape(inv.id) + '"]'); if (n) n.classList.add('i-editing'); }
+      panel.classList.add('open'); panel.removeAttribute('inert');
+      const nb = $('#newInvBtn'); if (nb) nb.textContent = 'Close';
+      $('#view').scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => { if (invOpen) f.elements.to.focus({ preventScroll: true }); }, 380);
+    }
+    function hideInvPanel() {
+      const panel = $('#iPanel'); invOpen = false; invEdit = null;
+      document.querySelectorAll('.i-editing').forEach(n => n.classList.remove('i-editing'));
+      if (!panel) return;
+      if (panel.contains(document.activeElement)) document.activeElement.blur();
+      panel.classList.remove('open'); panel.setAttribute('inert', '');
+      const nb = $('#newInvBtn'); if (nb) nb.textContent = '+ New invoice';
+    }
+    // PDF (jsPDF is loaded the first time it's needed)
+    let pdfLib = null;
+    const loadPdf = () => pdfLib || (pdfLib = new Promise((res, rej) => {
+      if (window.jspdf) return res(window.jspdf.jsPDF);
+      const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+      sc.onload = () => res(window.jspdf.jsPDF); sc.onerror = () => { pdfLib = null; rej(new Error('load')); };
+      document.head.appendChild(sc);
+    }));
+    const pdfMoney = n => 'PHP ' + Number(n).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    async function downloadPdf(i, btn) {
+      btn.disabled = true; btn.classList.add('opacity-50');
+      try {
+        const JsPDF = await loadPdf(), doc = new JsPDF({ unit: 'mm', format: 'a4' }), st = istat(i);
+        doc.setProperties({ title: i.num + ' | EM Development' });
+        doc.setFillColor(67, 81, 232); doc.rect(0, 0, 210, 44, 'F');
+        doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.text('EM Development', 18, 21);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.text('Website & Mobile App Development', 18, 28);
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(26); doc.text('INVOICE', 192, 22, { align: 'right' });
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.text(i.num, 192, 30, { align: 'right' });
+        doc.setTextColor(120, 128, 160); doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.text('BILLED TO', 18, 62);
+        doc.setTextColor(15, 21, 53); doc.setFontSize(13); doc.text(doc.splitTextToSize(i.to, 90), 18, 70);
+        const meta = [['Issued', fmtD(i.at || Date.now())], ['Due', fmtD(i.due)], ['Status', ILABEL[st]]];
+        meta.forEach(([k, v], n) => {
+          const y = 62 + n * 8;
+          doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(120, 128, 160); doc.text(k, 120, y);
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(st === 'paid' && k === 'Status' ? 5 : st === 'overdue' && k === 'Status' ? 220 : 15, st === 'paid' && k === 'Status' ? 150 : st === 'overdue' && k === 'Status' ? 38 : 21, st === 'paid' && k === 'Status' ? 105 : st === 'overdue' && k === 'Status' ? 38 : 53); doc.text(v, 192, y, { align: 'right' });
+        });
+        doc.setFillColor(240, 242, 255); doc.rect(18, 100, 174, 10, 'F');
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(67, 81, 232); doc.text('DESCRIPTION', 22, 106.4); doc.text('AMOUNT', 188, 106.4, { align: 'right' });
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(15, 21, 53); const lines = doc.splitTextToSize(i.desc, 112);
+        doc.text(lines, 22, 120); doc.text(pdfMoney(i.amt), 188, 120, { align: 'right' });
+        const yEnd = 120 + lines.length * 5.5 + 4; doc.setDrawColor(220, 224, 245); doc.line(18, yEnd, 192, yEnd);
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(120, 128, 160); doc.text(i.paid ? 'AMOUNT PAID' : 'TOTAL DUE', 120, yEnd + 12);
+        doc.setFontSize(18); doc.setTextColor(15, 21, 53); doc.text(pdfMoney(i.amt), 192, yEnd + 12, { align: 'right' });
+        if (st === 'paid') { doc.setDrawColor(5, 150, 105); doc.setLineWidth(.8); doc.roundedRect(18, yEnd + 5, 34, 12, 2, 2, 'S'); doc.setTextColor(5, 150, 105); doc.setFontSize(13); doc.text('PAID', 35, yEnd + 13.2, { align: 'center' }); }
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(120, 128, 160);
+        doc.text('Thank you for your business.', 105, 266, { align: 'center' });
+        doc.text('inquire@emdevelopment.com  |  (+63) 920 501 8789  |  Cebu City, Cebu, Philippines', 105, 272, { align: 'center' });
+        doc.save(i.num + '.pdf');
+      } catch (err) { console.error('pdf', err); toast('Could not create the PDF. Check your connection and try again.'); }
+      btn.disabled = false; btn.classList.remove('opacity-50');
     }
     const views = {
       overview() {
         const act = projs().filter(p => status(p) === 'active').length;
         const all = projs().flatMap(p => p.items), done = all.filter(m => m.d).length;
-        const owed = S.invoices.filter(i => !i.paid).reduce((a, i) => a + i.amt, 0);
+        const owed = sumAmt(I.filter(i => !i.paid)), paidInv = I.filter(i => i.paid), received = sumAmt(paidInv);
         const overall = all.length ? Math.round(done / all.length * 100) : 0;
         const next = projs().filter(p => !p.archived).map(p => ({ p: p.name, m: p.items.find(m => !m.d) })).filter(x => x.m);
-        const stat = (l, v, g) => `<div data-f class="${card} !p-4 sm:!p-5"><div class="text-xs text-slate-400">${l}</div><div class="mt-1 text-lg min-[420px]:text-xl sm:text-2xl font-extrabold ${g ? 'gradient-text' : ''}">${v}</div></div>`;
+        const stat = (l, v, g) => `<div data-f class="${card} !p-4 sm:!p-5"><div class="text-xs text-slate-400">${l}</div><div class="stat-v mt-1 text-lg min-[420px]:text-xl sm:text-2xl font-extrabold ${g ? 'gradient-text' : ''}">${v}</div></div>`;
         return `<p data-f class="text-slate-400 mb-5">Welcome back, <span class="font-semibold text-slate-200">${esc(U.displayName || U.email.split('@')[0])}</span>. Here is where your projects stand.</p>
-        <div class="grid grid-cols-2 xl:grid-cols-4 gap-4">${stat('Active projects', act, 1)}${stat('Inclusions done', done + ' / ' + all.length)}${stat('Outstanding', money(owed))}${stat('Quotes to email', Q.filter(q => !q.emailSent).length)}</div>
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-4">${stat('Active projects', act, 1)}${stat('Inclusions done', done + ' / ' + all.length)}${stat('Outstanding', money(owed))}${stat('Quotes to email', Q.filter(q => !q.emailSent).length)}</div>
         <div class="mt-4 grid lg:grid-cols-[1fr_1.4fr] gap-4">
           <div data-f class="${card} flex items-center gap-5">
             <div class="relative w-28 h-28 shrink-0"><svg viewBox="0 0 36 36" class="w-28 h-28 -rotate-90"><defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#5b6cff"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><circle cx="18" cy="18" r="15.5" fill="none" stroke="currentColor" stroke-opacity=".12" stroke-width="3.2"/><circle cx="18" cy="18" r="15.5" fill="none" stroke="url(#g)" stroke-width="3.2" stroke-linecap="round" stroke-dasharray="${(overall * 97.4 / 100).toFixed(1)} 97.4"/></svg><div class="absolute inset-0 flex items-center justify-center font-extrabold text-xl">${overall}%</div></div>
@@ -475,7 +730,7 @@
           </div>
           <div data-f class="${card}"><div class="font-bold mb-3">Up next</div>${next.length ? next.map(x => `<div class="flex items-center justify-between gap-3 py-2 border-t border-white/10 first:border-0 text-sm"><span class="truncate">${esc(x.m.t)}</span><span class="text-slate-400 truncate">${esc(x.p)}</span></div>`).join('') : `<p class="text-sm text-slate-400">${projs().length ? 'Everything is complete. 🎉' : 'No projects yet.'}</p>`}</div>
         </div>
-        <div data-f class="${card} mt-4"><div class="font-bold mb-3">Recent invoices</div>${S.invoices.slice(0, 3).map(i => `<div class="flex items-center justify-between gap-3 py-2 border-t border-white/10 first:border-0 text-sm"><span class="truncate">${esc(i.id)} · ${esc(i.for)}</span><span class="font-semibold ${i.paid ? 'text-emerald-300' : 'text-pink'}">${i.paid ? 'Paid' : money(i.amt)}</span></div>`).join('')}</div>`;
+        <div data-f class="${card} mt-4"><div class="font-bold mb-3">Recent invoices</div><div class="grid grid-cols-2 gap-3 mb-3"><div class="rounded-xl bg-white/10 p-3"><div class="text-xs text-slate-400">Total paid</div><div class="mt-0.5 text-lg font-extrabold">${paidInv.length} <span class="text-xs font-semibold text-slate-400">of ${I.length} invoice${I.length === 1 ? '' : 's'}</span></div></div><div class="rounded-xl bg-white/10 p-3"><div class="text-xs text-slate-400">Payments received</div><div class="mt-0.5 text-lg font-extrabold text-emerald-300">${money(received)}</div></div></div>${I.slice(0, 3).map(i => `<div class="flex items-center justify-between gap-3 py-2 border-t border-white/10 first:border-0 text-sm"><span class="truncate">${esc(i.num)} · ${esc(i.desc)}</span><span class="font-semibold ${i.paid ? 'text-emerald-300' : 'text-pink'}">${i.paid ? 'Paid' : money(i.amt)}</span></div>`).join('') || '<p class="text-sm text-slate-400">No invoices yet.</p>'}</div>`;
       },
       projects() {
         const list = visible();
@@ -485,31 +740,117 @@
           <div id="pgrid" data-all="${projs().map(p => p.id).join(',')}" class="pgrid">${list.map(projCard).join('') || `<p class="text-slate-400">${flt === 'all' ? 'No projects yet.' : 'No ' + flt + ' projects.'}</p>`}</div>`;
       },
       invoices() {
-        const owed = S.invoices.filter(i => !i.paid).reduce((a, i) => a + i.amt, 0), paid = S.invoices.filter(i => i.paid).reduce((a, i) => a + i.amt, 0);
-        return `<div class="grid grid-cols-2 gap-4 mb-4"><div data-f class="${card}"><div class="text-xs text-slate-400">Outstanding</div><div class="mt-1 text-lg min-[420px]:text-xl sm:text-2xl font-extrabold gradient-text">${money(owed)}</div></div><div data-f class="${card}"><div class="text-xs text-slate-400">Paid to date</div><div class="mt-1 text-lg min-[420px]:text-xl sm:text-2xl font-extrabold">${money(paid)}</div></div></div>
-        <div data-f class="${card} !p-0 overflow-x-auto hidden sm:block"><table class="w-full text-sm min-w-[560px]"><thead class="text-left text-xs text-slate-400"><tr><th class="p-4">Invoice</th><th class="p-4">Due</th><th class="p-4">Amount</th><th class="p-4">Status</th><th class="p-4"></th></tr></thead><tbody>
-        ${S.invoices.map(i => `<tr class="border-t border-white/10"><td class="p-4"><div class="font-semibold">${esc(i.id)}</div><div class="text-xs text-slate-400">${esc(i.for)}</div></td><td class="p-4 text-slate-400">${fmtD(i.due)}</td><td class="p-4 font-semibold">${money(i.amt)}</td>
-          <td class="p-4"><span class="px-3 py-1 rounded-full text-xs font-semibold ${i.paid ? BADGE.completed : BADGE.pending}">${i.paid ? 'Paid' : 'Unpaid'}</span></td>
-          <td class="p-4 text-right whitespace-nowrap"><button data-act="dl" data-id="${i.id}" class="text-brand-400 hover:text-white font-semibold mr-4">Download</button>${i.paid ? '' : `<button data-act="pay" data-id="${i.id}" class="px-4 py-1.5 rounded-lg bg-brand-500 text-white font-semibold">Pay</button>`}</td></tr>`).join('')}</tbody></table></div>
-        <div class="sm:hidden space-y-3">${S.invoices.map(i => `<div data-f class="${card} !p-4"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="font-semibold">${esc(i.id)}</div><div class="text-xs text-slate-400 break-words">${esc(i.for)}</div></div><span class="shrink-0 px-3 py-1 rounded-full text-xs font-semibold ${i.paid ? BADGE.completed : BADGE.pending}">${i.paid ? 'Paid' : 'Unpaid'}</span></div>
-          <div class="mt-3 flex items-end justify-between gap-3"><div><div class="text-xs text-slate-400">Due ${fmtD(i.due)}</div><div class="text-lg font-bold">${money(i.amt)}</div></div><div class="flex items-center gap-3 shrink-0"><button data-act="dl" data-id="${i.id}" class="text-brand-400 hover:text-white font-semibold text-sm py-2">Download</button>${i.paid ? '' : `<button data-act="pay" data-id="${i.id}" class="px-4 py-2 rounded-lg bg-brand-500 text-white font-semibold text-sm">Pay</button>`}</div></div></div>`).join('')}</div>`;
+        const owed = sumAmt(I.filter(i => !i.paid)), paid = sumAmt(I.filter(i => i.paid)), unpaid = I.filter(i => !i.paid).length;
+        const pill = (f, l) => `<button data-ipill="${f}" data-act="iflt" data-v="${f}" class="${pillCls(iflt === f)}">${l}</button>`;
+        const lbl = 'block text-sm font-medium text-slate-300';
+        return `<div class="grid grid-cols-2 gap-4 mb-4"><div data-f class="${card}"><div class="text-xs text-slate-400">Outstanding</div><div data-istat="owed" data-v="${owed}" class="stat-v mt-1 text-lg min-[420px]:text-xl sm:text-2xl font-extrabold gradient-text">${money(owed)}</div></div><div data-f class="${card}"><div class="text-xs text-slate-400">Paid to date</div><div data-istat="paid" data-v="${paid}" class="stat-v mt-1 text-lg min-[420px]:text-xl sm:text-2xl font-extrabold">${money(paid)}</div></div></div>
+        <div data-f class="flex flex-wrap items-center justify-between gap-3 mb-5"><div class="flex flex-wrap gap-2">${pill('all', 'All (' + I.length + ')')}${pill('unpaid', 'Unpaid (' + unpaid + ')')}${pill('paid', 'Paid (' + (I.length - unpaid) + ')')}</div>
+          <button id="newInvBtn" data-act="newinv" class="btn-shine w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white text-sm shadow-lg shadow-brand-500/30">+ New invoice</button></div>
+        <div id="iPanel" class="i-panel" inert><div><form data-form="newinv" data-edit="" class="${card} space-y-4"><div id="iTitle" class="font-bold">New invoice</div>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <label class="${lbl}">Billed to<input name="to" required maxlength="80" autocomplete="off" class="field mt-1.5" placeholder="Client or company name"/></label>
+            <label class="${lbl}">Description<input name="desc" required maxlength="120" autocomplete="off" class="field mt-1.5" placeholder="e.g. Website redesign: deposit"/></label>
+            <label class="${lbl}">Amount (PHP)<input name="amt" type="number" inputmode="decimal" min="1" max="1000000000" step="0.01" required class="field mt-1.5" placeholder="15000"/></label>
+            <label class="${lbl}">Due date<input name="due" type="date" required class="field mt-1.5"/></label>
+          </div>
+          <p id="iErr" class="text-sm text-red-400 min-h-[1.25rem]" role="alert"></p>
+          <div class="flex flex-wrap gap-3"><button type="submit" id="iSave" class="btn-shine px-6 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white">Create invoice</button><button type="button" data-act="icancel" class="px-6 py-3 rounded-xl glass font-semibold text-slate-300 hover:text-white transition">Cancel</button></div></form></div></div>
+        ${iError ? `<p class="mb-4 text-sm text-red-400" role="alert">${esc(iError)}</p>` : ''}
+        <div id="igrid" data-ids="${I.map(i => i.id).join(',')}" class="space-y-3">${iGridHtml()}</div>`;
+      },
+      customers() {
+        const lk = c => c.projects.map(findP).filter(Boolean);
+        const prog = ps => { const a = ps.flatMap(p => p.items); return a.length ? Math.round(a.filter(m => m.d).length / a.length * 100) : 0; };
+        const links = K.reduce((n, c) => n + lk(c).length, 0), avg = K.length ? Math.round(K.reduce((n, c) => n + prog(lk(c)), 0) / K.length) : 0;
+        const stat = (l, v, g) => `<div data-f class="${card} !p-4 sm:!p-5"><div class="text-xs text-slate-400">${l}</div><div class="stat-v mt-1 text-lg min-[420px]:text-xl sm:text-2xl font-extrabold ${g ? 'gradient-text' : ''}">${v}</div></div>`;
+        const lbl = 'block text-sm font-medium text-slate-300';
+        const creds = kCreds ? `<div data-f class="${card} mb-4 !border-emerald-400/30"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="font-bold">Account created for ${esc(kCreds.name)}</div><p class="mt-1 text-sm text-slate-400">${kCreds.mailed ? 'An email was sent to ' + esc(kCreds.email) + ' with a link to sign in and set their own password.' : 'The email could not be sent automatically. Use Copy login details below, or Send password reset in Manage.'}</p></div><button data-act="kdismiss" aria-label="Dismiss" class="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition">${svg('M6 6l12 12M18 6L6 18', 'w-4 h-4')}</button></div><div class="mt-3 grid sm:grid-cols-2 gap-3 text-sm"><div class="min-w-0"><span class="text-slate-400">Email</span><div class="font-semibold break-all">${esc(kCreds.email)}</div></div><div class="min-w-0"><span class="text-slate-400">Temporary password</span><div class="font-mono font-semibold break-all">${esc(kCreds.pw)}</div></div></div><button data-act="kcopy" class="mt-4 px-5 py-2.5 rounded-xl glass text-sm font-semibold text-brand-400 hover:text-white transition">Copy login details</button></div>` : '';
+        const kCard = c => {
+          const ps = lk(c), v = prog(ps);
+          return `<div data-f data-kid="${esc(c.id)}" class="${card} flex flex-col">
+            <div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="font-bold truncate">${esc(c.name)}</div><div class="text-xs text-slate-400 mt-0.5 truncate">${esc(c.company || 'No company')}${c.at ? ' &middot; Added ' + esc(fmtD(c.at)) : ''}</div></div><span class="shrink-0 px-3 py-1 rounded-full text-xs font-semibold ${ps.length ? BADGE.active : BADGE.pending}">${ps.length ? v + '%' : 'No project'}</span></div>
+            <div class="mt-3 space-y-1 text-sm"><div class="truncate"><span class="text-slate-400">Email:</span> <a class="text-brand-400 hover:text-white font-medium" href="mailto:${esc(c.email)}">${esc(c.email)}</a></div>${c.phone ? `<div class="truncate"><span class="text-slate-400">Phone:</span> ${esc(c.phone)}</div>` : ''}</div>
+            <div class="mt-4 space-y-3">${ps.map(p => `<div><div class="flex items-center justify-between gap-3 text-sm"><span class="truncate font-semibold">${esc(p.name)}</span><span class="text-slate-400">${pct(p)}%</span></div><div class="bar mt-1.5 h-2 rounded-full bg-white/10"><i style="width:${pct(p)}%"></i></div></div>`).join('') || '<p class="text-sm text-slate-400">No project shared yet. Open Manage below to share one.</p>'}</div>
+            ${c.update ? `<div class="mt-4 rounded-xl bg-white/10 p-3 text-sm"><div class="text-xs text-slate-400 mb-1">Latest update${c.updatedAt ? ' &middot; ' + esc(fmtD(c.updatedAt)) : ''}</div><div class="whitespace-pre-wrap break-words">${esc(c.update)}</div></div>` : ''}
+            <details data-kd="${esc(c.id)}" ${kOpenSet.has(c.id) ? 'open' : ''} class="mt-4 pt-4 border-t border-white/10"><summary class="cursor-pointer text-sm font-semibold text-brand-400 hover:text-white select-none">Manage</summary>
+              <div class="mt-3 text-xs text-slate-400">Projects this customer can see</div>
+              <div class="mt-2 space-y-2">${C.map(p => `<label class="flex items-center gap-3 text-sm text-slate-300 cursor-pointer select-none"><input type="checkbox" class="chk" data-act="klink" data-k="${esc(c.id)}" data-p="${esc(p.id)}" ${c.projects.includes(p.id) ? 'checked' : ''}/><span class="min-w-0 break-words">${esc(p.name)}</span></label>`).join('') || '<p class="text-sm text-slate-400">Create a project first, then share it here.</p>'}</div>
+              <label class="${lbl} mt-4">Post a progress update<textarea data-kdraft="${esc(c.id)}" maxlength="300" rows="3" class="field mt-1.5" placeholder="e.g. Your homepage design is ready for review">${esc(kDraft[c.id] || '')}</textarea></label>
+              <button data-act="kpost" data-k="${esc(c.id)}" class="mt-3 px-5 py-2.5 rounded-xl bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 transition">Post update</button>
+              <div class="mt-4 flex flex-wrap gap-x-5 gap-y-2"><button data-act="kreset" data-k="${esc(c.id)}" class="text-sm font-semibold text-brand-400 hover:text-white">Send password reset</button><button data-act="kdel" data-k="${esc(c.id)}" class="text-sm font-semibold text-red-400">Delete customer</button></div>
+            </details></div>`;
+        };
+        return `${kError ? `<p class="mb-4 text-sm text-red-400" role="alert">${esc(kError)}</p>` : ''}${creds}
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">${stat('Customers', K.length, 1)}${stat('Projects shared', links)}${stat('Average progress', avg + '%')}</div>
+        <div data-f class="flex flex-wrap items-center justify-between gap-3 mb-5"><p class="text-sm text-slate-400 max-w-xl">Create a login for each customer so they can follow their website's progress.</p>
+          <button data-act="newk" class="btn-shine w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white text-sm shadow-lg shadow-brand-500/30">+ New customer</button></div>
+        <div id="kPanel" class="i-panel${kOpen ? ' open' : ''}"${kOpen ? '' : ' inert'}><div><form data-form="newcust" novalidate class="${card} space-y-4"><div class="font-bold">New customer account</div>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <label class="${lbl}">Full name<input name="name" required maxlength="60" autocomplete="off" class="field mt-1.5" placeholder="Customer name"/></label>
+            <label class="${lbl}">Company or website<input name="company" maxlength="80" autocomplete="off" class="field mt-1.5" placeholder="e.g. Cebu Bakery"/></label>
+            <label class="${lbl}">Email (their login)<input name="email" type="email" required maxlength="120" autocomplete="off" class="field mt-1.5" placeholder="name@company.com"/></label>
+            <label class="${lbl}">Phone (optional)<input name="phone" maxlength="30" autocomplete="off" class="field mt-1.5" placeholder="+63 900 000 0000"/></label>
+            <div class="sm:col-span-2 rounded-xl bg-white/10 p-3 text-sm text-slate-300">Their temporary password will be <span class="font-mono font-bold">123456</span>. We email them straight away with a link to sign in and set their own password.</div>
+          </div>
+          <div><div class="${lbl}">Projects to share</div><div class="mt-2 grid sm:grid-cols-2 gap-2">${C.map(p => `<label class="flex items-center gap-3 text-sm text-slate-300 cursor-pointer select-none"><input type="checkbox" class="chk" name="proj" value="${esc(p.id)}"/><span class="min-w-0 break-words">${esc(p.name)}</span></label>`).join('') || '<p class="text-sm text-slate-400">No projects yet. You can share one later.</p>'}</div></div>
+          <p id="kErrMsg" class="text-sm text-red-400 min-h-[1.25rem]" role="alert"></p>
+          <div class="flex flex-wrap gap-3"><button type="submit" id="kSave" class="btn-shine px-6 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white">Create account</button><button type="button" data-act="kcancel" class="px-6 py-3 rounded-xl glass font-semibold text-slate-300 hover:text-white transition">Cancel</button></div></form></div></div>
+        <div id="kgrid" class="grid md:grid-cols-2 gap-4">${K.map(kCard).join('') || '<p class="text-slate-400">No customers yet. Create the first account with the button above.</p>'}</div>`;
+      },
+      portal() {
+        if (!PORTAL || PORTAL.revoked) return `<div data-f class="${card} max-w-xl"><div class="font-bold">Access disabled</div><p class="mt-1 text-sm text-slate-400">Your portal access is no longer active. Please contact EM Development.</p></div>`;
+        const ids = Object.keys(PORTAL.projects || {}), ps = ids.map(id => PP[id]).filter(Boolean);
+        const all = ps.flatMap(p => p.items), done = all.filter(m => m.d).length, overall = all.length ? Math.round(done / all.length * 100) : 0;
+        return `<p data-f class="text-slate-400 mb-5">Hi <span class="font-semibold text-slate-200">${esc(PORTAL.name || U.displayName || '')}</span>. Here is how your website is coming along.</p>
+        ${(() => { let seen = false; try { seen = !!localStorage.getItem('pwn:' + U.uid); } catch (e) {} return seen ? '' : `<div data-f class="${card} mb-4 flex flex-wrap items-center justify-between gap-3"><p class="text-sm text-slate-300 min-w-0 flex-1" style="min-width:14rem">For your security, please change the temporary password we gave you.</p><div class="flex items-center gap-4"><button data-act="rpw" class="text-sm font-semibold text-brand-400 hover:text-white">Email me a reset link</button><button data-act="pwdone" class="text-sm font-semibold text-slate-400 hover:text-white">Dismiss</button></div></div>`; })()}
+        <div class="grid lg:grid-cols-[1fr_1.4fr] gap-4">
+          <div data-f class="${card} flex items-center gap-5">
+            <div class="relative w-28 h-28 shrink-0"><svg viewBox="0 0 36 36" class="w-28 h-28 -rotate-90"><defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#5b6cff"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><circle cx="18" cy="18" r="15.5" fill="none" stroke="currentColor" stroke-opacity=".12" stroke-width="3.2"/><circle cx="18" cy="18" r="15.5" fill="none" stroke="url(#g)" stroke-width="3.2" stroke-linecap="round" stroke-dasharray="${(overall * 97.4 / 100).toFixed(1)} 97.4"/></svg><div class="absolute inset-0 flex items-center justify-center font-extrabold text-xl">${overall}%</div></div>
+            <div><div class="font-bold">Overall progress</div><p class="text-sm text-slate-400 mt-1">${done} of ${all.length} items done.</p></div></div>
+          <div data-f class="${card}"><div class="font-bold mb-3">Latest update</div>${PORTAL.update ? `<p class="text-sm whitespace-pre-wrap break-words">${esc(PORTAL.update)}</p><p class="mt-2 text-xs text-slate-400">${PORTAL.updatedAt ? esc(fmtD(PORTAL.updatedAt)) : ''}</p>` : '<p class="text-sm text-slate-400">No updates yet. We will post news here.</p>'}</div>
+        </div>
+        <div class="mt-4 pgrid">${ps.map(p => `<div data-f class="${card}"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="font-bold truncate">${esc(p.name)}</div><div class="text-xs text-slate-400 mt-0.5">${p.start ? fmtD(p.start) + ' \u2013 ' + fmtD(p.due) : 'Target ' + fmtD(p.due)}</div></div><span class="${badgeCls(status(p))}">${status(p)}</span></div><div class="mt-4 flex items-center gap-3"><div class="bar flex-1 h-2 rounded-full bg-white/10"><i style="width:${pct(p)}%"></i></div><span class="text-sm font-bold w-10 text-right">${pct(p)}%</span></div><div class="mt-4 space-y-2">${p.items.map(m => `<label class="flex items-center gap-3 text-sm text-slate-300 py-0.5"><input type="checkbox" class="chk" disabled ${m.d ? 'checked' : ''}/><span class="${spanCls(m)}">${esc(m.t)}</span></label>`).join('')}</div></div>`).join('') || `<p class="text-slate-400">${ids.length ? 'Loading your project...' : 'Your project has not been shared yet.'}</p>`}</div>`;
+      },
+      accounting() {
+        const today = dstr(new Date()), total = sumAmt(I), paidL = I.filter(i => i.paid), recv = sumAmt(paidL);
+        const open = I.filter(i => !i.paid), owed = sumAmt(open), lateAmt = sumAmt(open.filter(i => i.due && i.due < today));
+        const rate = total ? Math.round(recv / total * 100) : 0, short = n => '\u20B1' + new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(n);
+        const aging = [0, 0, 0, 0], AL = ['Not yet due', '1\u201330 days late', '31\u201360 days late', 'Over 60 days late'];
+        open.forEach(i => { const d = i.due && i.due < today ? Math.floor((new Date(today + 'T00:00:00') - new Date(i.due + 'T00:00:00')) / 864e5) : 0; aging[!d ? 0 : d <= 30 ? 1 : d <= 60 ? 2 : 3] += i.amt; });
+        const ym = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'), n0 = new Date();
+        const months = Array.from({ length: 6 }, (_, k) => { const d = new Date(n0.getFullYear(), n0.getMonth() - 5 + k, 1); return { k: ym(d), l: d.toLocaleDateString('en', { month: 'short' }), v: 0 }; });
+        paidL.forEach(i => { const m = i.paidAt && months.find(x => x.k === ym(new Date(i.paidAt))); if (m) m.v += i.amt; });
+        const mx = Math.max(1, ...months.map(m => m.v));
+        const cl = Object.create(null); I.forEach(i => { const n = i.to || 'Unknown', c = cl[n] || (cl[n] = { b: 0, p: 0 }); c.b += i.amt; if (i.paid) c.p += i.amt; });
+        const top = Object.entries(cl).sort((a, b) => b[1].b - a[1].b).slice(0, 5);
+        const ledger = paidL.slice().sort((a, b) => b.paidAt - a.paidAt).slice(0, 8);
+        const stat = (l, v, c) => `<div data-f class="${card} !p-4 sm:!p-5"><div class="text-xs text-slate-400">${l}</div><div class="stat-v mt-1 text-lg min-[420px]:text-xl sm:text-2xl font-extrabold ${c || ''}">${v}</div></div>`;
+        const row = (a, b) => `<div class="flex items-center justify-between gap-3 py-2 border-t border-white/10 first:border-0 text-sm">${a}${b}</div>`;
+        const none = t => `<p class="text-sm text-slate-400">${t}</p>`;
+        return `${iError ? `<p class="mb-4 text-sm text-red-400" role="alert">${esc(iError)}</p>` : ''}
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-5"><p data-f class="text-slate-400">Money in, money owed and what needs chasing, taken from your invoices.</p>
+          <button data-f data-act="acsv" class="w-full sm:w-auto px-5 py-2.5 rounded-xl glass text-sm font-semibold text-brand-400 hover:text-white transition">Export CSV</button></div>
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-4">${stat('Total invoiced', money(total))}${stat('Payments received', money(recv), 'gradient-text')}${stat('Outstanding', money(owed))}${stat('Overdue', money(lateAmt), lateAmt ? 'text-red-300' : '')}</div>
+        <div data-f class="${card} mt-4"><div class="flex items-center justify-between gap-3"><div class="font-bold">Collection rate</div><div class="font-extrabold">${rate}%</div></div><div class="bar mt-3 h-2 rounded-full bg-white/10"><i style="width:${rate}%"></i></div><p class="mt-2 text-xs text-slate-400">${money(recv)} collected of ${money(total)} invoiced &middot; ${paidL.length} of ${I.length} invoices paid</p></div>
+        <div class="mt-4 grid xl:grid-cols-2 gap-4">
+          <div data-f class="${card}"><div class="font-bold mb-3">Payments received &middot; last 6 months</div>
+            <div class="h-32 flex items-end gap-2">${months.map(m => `<div class="flex-1 min-w-0 h-full flex items-end justify-center"><div class="w-full max-w-[2.5rem] rounded-t-lg bg-gradient-to-t from-brand-500 to-aqua" style="height:${m.v ? Math.max(4, Math.round(m.v / mx * 100)) : 2}%;opacity:${m.v ? 1 : .25}"></div></div>`).join('')}</div>
+            <div class="mt-2 flex gap-2">${months.map(m => `<div class="flex-1 min-w-0 text-center"><div class="text-xs text-slate-400">${m.l}</div><div class="text-[10px] text-slate-500 truncate">${m.v ? short(m.v) : '-'}</div></div>`).join('')}</div></div>
+          <div data-f class="${card}"><div class="font-bold mb-3">Receivables aging</div>${owed ? AL.map((l, k) => `<div class="py-1.5"><div class="flex items-center justify-between gap-3 text-sm"><span class="${k ? 'text-slate-300' : ''}">${l}</span><span class="font-semibold ${k && aging[k] ? 'text-red-300' : ''}">${money(aging[k])}</span></div><div class="bar mt-1.5 h-1.5 rounded-full bg-white/10"><i style="width:${Math.round(aging[k] / owed * 100)}%"></i></div></div>`).join('') : none('Nothing outstanding. Everything is paid.')}</div>
+        </div>
+        <div class="mt-4 grid xl:grid-cols-2 gap-4">
+          <div data-f class="${card}"><div class="font-bold mb-3">Top clients</div>${top.map(([n, c]) => row(`<span class="truncate">${esc(n)}</span>`, `<span class="shrink-0 text-right flex flex-col min-[420px]:block"><span class="font-semibold text-emerald-300">${money(c.p)}</span> <span class="text-slate-400">of ${money(c.b)}</span></span>`)).join('') || none('No invoices yet.')}</div>
+          <div data-f class="${card}"><div class="font-bold mb-3">Payment ledger</div>${ledger.map(i => row(`<span class="truncate"><span class="text-slate-400">${i.paidAt ? fmtD(i.paidAt) : '-'}</span> &middot; ${esc(i.num)} &middot; ${esc(i.to)}</span>`, `<span class="shrink-0 font-semibold text-emerald-300">${money(i.amt)}</span>`)).join('') || none('No payments received yet.')}</div>
+        </div>`;
       },
       messages() {
-        const todo = Q.filter(q => !q.emailSent).length, list = Q.filter(q => qflt === 'all' || (qflt === 'todo' ? !q.emailSent : q.emailSent));
-        const pill = (f, l) => `<button data-qpill="${f}" data-act="qflt" data-v="${f}" class="px-4 py-2 rounded-full text-sm font-semibold transition ${qflt === f ? 'bg-brand-500 text-white' : 'glass text-slate-300 hover:text-white'}">${l}</button>`;
-        const qCard = q => {
-          const subj = encodeURIComponent('Your free quotation | EM Development'), body = encodeURIComponent('Hi ' + q.name + ',\n\nThank you for reaching out to EM Development about ' + q.service + '.\n\n');
-          return `<div data-f data-qid="${esc(q.id)}" data-sent="${q.emailSent ? 1 : 0}" class="${card} q-card flex flex-col">
-            <div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="font-bold truncate">${esc(q.name)}</div><div class="text-xs text-slate-400 mt-0.5">${esc(qWhen(q.at))}</div></div><span data-qbadge class="${qBadge(q)}">${q.emailSent ? 'Emailed' : 'To email'}</span></div>
-            <div class="mt-3 inline-flex self-start px-3 py-1 rounded-full text-xs font-semibold bg-brand-500/20 text-brand-400">${esc(q.service || 'General inquiry')}</div>
-            <p class="mt-3 text-sm text-slate-300 whitespace-pre-wrap break-words">${esc(q.details || '')}</p>
-            <div class="mt-4 space-y-1 text-sm"><div class="truncate"><span class="text-slate-400">Email:</span> <a class="text-brand-400 hover:text-white font-medium" href="mailto:${esc(q.email)}?subject=${subj}&body=${body}">${esc(q.email)}</a></div>${q.phone ? `<div class="truncate"><span class="text-slate-400">Phone:</span> <a class="text-brand-400 hover:text-white font-medium" href="tel:${esc(q.phone)}">${esc(q.phone)}</a></div>` : ''}</div>
-            <label class="mt-auto pt-4 border-t border-white/10 flex items-center gap-3 text-sm font-semibold cursor-pointer select-none"><input type="checkbox" class="chk" data-act="qmail" data-q="${esc(q.id)}" ${q.emailSent ? 'checked' : ''}/><span data-qtxt data-h="${esc(qSentHtml(q))}">${qSentHtml(q)}</span></label></div>`;
-        };
+        const todo = Q.filter(q => !q.emailSent).length;
+        const pill = (f, l) => `<button data-qpill="${f}" data-act="qflt" data-v="${f}" class="${pillCls(qflt === f)}">${l}</button>`;
         return `<div data-f class="flex flex-wrap items-center justify-between gap-3 mb-5"><div class="flex flex-wrap gap-2">${pill('all', 'All (' + Q.length + ')')}${pill('todo', 'To email (' + todo + ')')}${pill('sent', 'Emailed (' + (Q.length - todo) + ')')}</div></div>
           ${qError ? `<p class="mb-4 text-sm text-red-400" role="alert">${esc(qError)}</p>` : ''}
-          <div id="qgrid" data-ids="${Q.map(q => q.id).join(',')}" class="grid md:grid-cols-2 gap-4">${list.map(qCard).join('') || `<p class="text-slate-400">${qError ? '' : Q.length ? 'Nothing in this list.' : 'No quotations yet.'}</p>`}</div>`;
+          <div id="qgrid" data-ids="${Q.map(q => q.id).join(',')}" class="grid md:grid-cols-2 gap-4">${qGridHtml()}</div>`;
       },
+      chat() { return '<div id="chatHost"></div>'; },
       settings() {
         return `<form data-f data-form="prof" class="${card} max-w-xl space-y-4"><div class="font-bold">Profile</div>
           <label class="block text-sm font-medium text-slate-300">Display name<input name="name" maxlength="40" value="${esc(U.displayName || '')}" class="field mt-1.5" placeholder="Your name"/></label>
@@ -517,13 +858,14 @@
           <button class="btn-shine px-6 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white">Save changes</button></form>
           <div data-f class="${card} max-w-xl mt-4 space-y-3"><div class="font-bold">Security &amp; data</div>
           <button data-act="rpw" class="block text-sm font-semibold text-brand-400 hover:text-white">Email me a password reset link</button>
-          <button data-act="reset" class="block text-sm font-semibold text-pink">Reset sample data</button></div>`;
+          ${PORTAL ? '' : '<button data-act="reset" class="block text-sm font-semibold text-pink">Reset sample data</button>'}</div>`;
       }
     };
 
     function paint(anim) {
       const v = $('#view'), top = v.scrollTop;
       v.innerHTML = views[view]();
+      const chh = v.querySelector('#chatHost'); if (chh) { chh.replaceWith(chUI()); chMount(); }   // the chat is built once, so a half-typed reply survives redraws
       if (anim) { v.scrollTop = 0; v.querySelectorAll('[data-f]').forEach((el, i) => { el.classList.add('fade-item'); el.style.setProperty('--i', i); }); } else v.scrollTop = top;
       $('#title').textContent = TITLES[view];
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('on', b.dataset.v === view));
@@ -565,7 +907,7 @@
     let rt;
     function refresh() {
       if (!document.body.classList.contains('ready')) return;
-      if (view === 'overview') return paint(false);
+      if (view === 'overview' || view === 'customers') return paint(false);
       if (view !== 'projects') return;
       const grid = $('#pgrid'); if (!grid) return paint(false);
       clearTimeout(rt);
@@ -576,10 +918,145 @@
       if (visible().map(p => String(p.id)).join(',') !== nodes.map(n => n.dataset.pid).join(','))
         rt = setTimeout(() => { if (view === 'projects') paint(false); }, 1000);
     }
-    function go(v) { view = v; paint(true); closeMenu(); }
+    let goT;
+    function go(v) {
+      closeMenu(); invOpen = false; invEdit = null; view = v;
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+      const el = $('#view'); clearTimeout(goT);
+      el.style.transition = 'opacity .16s ease'; el.style.opacity = '0';
+      goT = setTimeout(() => { paint(true); el.style.opacity = '1'; }, 170);
+    }
+
+    // ---------- chat with customers (one to one) ----------
+    // Saved at chats/<customerUid>/messages/<pushId>. chats/<customerUid>/meta holds the last message and each side's unread count.
+    let chEl = null, chMeta = {}, chOffMeta = {}, chMsgs = [], chOffMsgs = () => {}, chSel = null, chErr = '', chFilter = '', chStick = false;
+    const chTime = t => { if (!t) return ''; const d = new Date(t); return d.toDateString() === new Date().toDateString() ? fmtT(t) : d.toLocaleDateString('en', { month: 'short', day: 'numeric' }); };
+    const chDay = t => { const d = new Date(t || Date.now()); return d.toDateString() === new Date().toDateString() ? 'Today' : d.toDateString() === new Date(Date.now() - 864e5).toDateString() ? 'Yesterday' : fmtD(t); };
+    const chCust = () => K.filter(c => c.uid);
+    const chName = u => { const c = K.find(x => x.uid === u); return c ? c.name : 'Customer'; };
+    const chUnread = u => +((chMeta[u] || {}).adminUnread) || 0;
+    const chOpenNow = u => view === 'chat' && chSel === u && !document.hidden;
+    const chFail = err => /PERMISSION_DENIED/i.test(String((err && (err.code || err.message)) || '')) ? 'Blocked by the database rules. Add the "chats" rules in Firebase.' : 'Could not send or load messages. Please try again.';
+    function chBadge() {
+      const el = $('#chatBadge'); if (!el) return;
+      const n = chCust().reduce((s, c) => s + (chOpenNow(c.uid) ? 0 : chUnread(c.uid)), 0);
+      el.textContent = n > 99 ? '99+' : n; el.classList.toggle('hidden', !n); el.classList.toggle('inline-flex', !!n);
+    }
+    function chMarkRead() {
+      if (!chSel || !chOpenNow(chSel) || !chUnread(chSel)) return;
+      update(ref(db, `chats/${chSel}/meta`), { adminUnread: 0 }).catch(() => {});
+    }
+    // keep one listener per customer's meta, so the list shows the last message and unread count without loading every conversation
+    function chSync() {
+      if (PORTAL) return;
+      const uids = chCust().map(c => c.uid);
+      Object.keys(chOffMeta).forEach(u => { if (!uids.includes(u)) { chOffMeta[u](); delete chOffMeta[u]; delete chMeta[u]; } });
+      uids.forEach(u => {
+        if (chOffMeta[u]) return;
+        chOffMeta[u] = onValue(ref(db, `chats/${u}/meta`), s => {
+          const prev = chMeta[u], v = s.val() || {}; chMeta[u] = v;
+          if (prev !== undefined && v.lastFrom === 'customer' && (+v.lastAt || 0) !== (+prev.lastAt || 0) && !chOpenNow(u)) toast('New message from ' + chName(u));
+          chBadge(); chDrawList(); chMarkRead();
+        }, err => { chErr = chFail(err); chDrawThread(); });
+      });
+      if (chSel && !uids.includes(chSel)) chSelect(null);
+      chBadge(); chDrawList();
+    }
+    function chStop() { Object.values(chOffMeta).forEach(f => f()); chOffMeta = {}; chOffMsgs(); chOffMsgs = () => {}; }
+    function chDrawList() {
+      if (!chEl) return;
+      const q = chFilter.trim().toLowerCase();
+      const rows = chCust().filter(c => !q || (c.name + ' ' + c.email + ' ' + c.company).toLowerCase().includes(q))
+        .map(c => ({ c, m: chMeta[c.uid] || {} })).sort((a, b) => (+b.m.lastAt || 0) - (+a.m.lastAt || 0) || a.c.name.localeCompare(b.c.name));
+      chEl.querySelector('[data-cl]').innerHTML = rows.map(({ c, m }) => {
+        const un = chOpenNow(c.uid) ? 0 : (+m.adminUnread || 0);
+        return `<button type="button" data-cu="${esc(c.uid)}" ${chSel === c.uid ? 'aria-current="true"' : ''} class="w-full text-left flex items-center gap-3 px-4 py-3 border-b border-white/10 transition hover:bg-white/10 ${chSel === c.uid ? 'bg-white/10' : ''}">
+          <span class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-brand-500 to-pink flex items-center justify-center font-bold text-white">${esc((c.name || '?')[0].toUpperCase())}</span>
+          <span class="min-w-0 flex-1"><span class="flex items-center justify-between gap-2"><span class="font-semibold truncate text-sm">${esc(c.name)}</span><span class="shrink-0 text-[10px] text-slate-500">${esc(chTime(+m.lastAt))}</span></span>
+          <span class="flex items-center justify-between gap-2 mt-0.5"><span class="text-xs truncate ${un ? 'text-slate-200 font-semibold' : 'text-slate-400'}">${m.lastText ? (m.lastFrom === 'admin' ? 'You: ' : '') + esc(m.lastText) : '<span class="text-slate-500">No messages yet</span>'}</span>${un ? `<span class="shrink-0 min-w-[1.25rem] h-5 px-1.5 rounded-full bg-pink text-white text-[11px] font-bold inline-flex items-center justify-center">${un > 99 ? '99+' : un}</span>` : ''}</span></span></button>`;
+      }).join('') || `<p class="p-5 text-sm text-slate-400">${chCust().length ? 'No customers match your search.' : 'No customers yet. Create one in Customers, then chat with them here.'}</p>`;
+    }
+    function chDrawThread() {
+      if (!chEl) return;
+      const sel = !!chSel;
+      chEl.querySelector('[data-cs]').className = 'w-full lg:w-80 shrink-0 lg:border-r border-white/10 flex-col ' + (sel ? 'hidden lg:flex' : 'flex');
+      chEl.querySelector('[data-cm]').className = 'flex-1 min-w-0 flex-col ' + (sel ? 'flex' : 'hidden lg:flex');
+      chEl.querySelector('[data-cempty]').className = 'flex-1 flex-col items-center justify-center text-center px-6 ' + (sel ? 'hidden' : 'flex');
+      chEl.querySelector('[data-cthread]').className = 'flex-1 min-h-0 flex-col ' + (sel ? 'flex' : 'hidden');
+      if (!sel) return;
+      const c = K.find(x => x.uid === chSel) || {}, list = chEl.querySelector('[data-cmsgs]');
+      chEl.querySelector('[data-cname]').textContent = c.name || 'Customer'; chEl.querySelector('[data-cmail]').textContent = c.email || '';
+      chEl.querySelector('[data-cav]').textContent = (c.name || '?')[0].toUpperCase(); chEl.querySelector('[data-cerr]').textContent = chErr;
+      const stick = chStick || list.scrollHeight - list.scrollTop - list.clientHeight < 80; chStick = false;
+      let last = '', html = '';
+      chMsgs.forEach(m => {
+        const day = chDay(m.at);
+        if (day !== last) { html += `<div class="text-center my-3"><span class="px-3 py-1 rounded-full text-[11px] font-semibold bg-white/10 text-slate-400">${esc(day)}</span></div>`; last = day; }
+        const mine = m.from === 'admin';
+        html += `<div class="flex ${mine ? 'justify-end' : 'justify-start'} mb-1.5"><div class="max-w-[82%] sm:max-w-[70%] min-w-0"><div class="px-4 py-2.5 text-sm whitespace-pre-wrap break-words ${mine ? 'rounded-2xl rounded-br-md bg-gradient-to-br from-brand-500 to-brand-600 text-white' : 'rounded-2xl rounded-bl-md glass'}">${esc(m.text)}</div><div class="mt-0.5 px-1 text-[10px] text-slate-500 ${mine ? 'text-right' : ''}">${m.at ? esc(fmtT(m.at)) : 'Sending...'}</div></div></div>`;
+      });
+      list.innerHTML = html || `<div class="h-full flex flex-col items-center justify-center text-center px-6"><p class="font-semibold">No messages yet</p><p class="mt-1 text-sm text-slate-400">Send the first message to start the conversation with ${esc(c.name || 'this customer')}.</p></div>`;
+      if (stick) list.scrollTop = list.scrollHeight;
+    }
+    function chSelect(u) {
+      chOffMsgs(); chOffMsgs = () => {}; chSel = u; chMsgs = []; chErr = ''; chStick = true;
+      chDrawList(); chDrawThread(); chBadge();
+      if (!u) return;
+      chOffMsgs = onValue(query(ref(db, `chats/${u}/messages`), limitToLast(200)), snap => {
+        if (chSel !== u) return;
+        const l = []; snap.forEach(x => { const v = x.val() || {}; l.push({ id: x.key, from: v.from === 'admin' ? 'admin' : 'customer', text: String(v.text || ''), at: +v.at || 0 }); });
+        chMsgs = l; chErr = ''; chDrawThread(); chMarkRead();
+      }, err => { chErr = chFail(err); chDrawThread(); });
+      chMarkRead();
+      if (innerWidth >= 1024) setTimeout(() => { const t = chEl && chEl.querySelector('textarea'); if (t && chSel === u) t.focus({ preventScroll: true }); }, 60);
+    }
+    function chMount() { chStick = true; chDrawList(); chDrawThread(); chBadge(); chMarkRead(); }
+    function chUI() {
+      if (chEl) return chEl;
+      chEl = document.createElement('section'); chEl.id = 'chat'; chEl.setAttribute('data-f', '');
+      chEl.className = card + ' !p-0 flex overflow-hidden'; chEl.style.height = 'calc(100dvh - 8.5rem)'; chEl.style.minHeight = '24rem';
+      chEl.innerHTML = `<div data-cs class="w-full lg:w-80 shrink-0 lg:border-r border-white/10 flex flex-col">
+          <div class="p-3 border-b border-white/10"><input data-csearch type="search" autocomplete="off" aria-label="Search customers" placeholder="Search customers..." class="field !py-2 text-sm"/></div>
+          <div data-cl class="flex-1 min-h-0 overflow-y-auto"></div></div>
+        <div data-cm class="flex-1 min-w-0 flex-col hidden lg:flex">
+          <div data-cempty class="flex-1 flex-col items-center justify-center text-center px-6 flex"><span class="w-12 h-12 rounded-2xl bg-brand-500/15 text-brand-400 flex items-center justify-center">${svg(ICON.chat)}</span><p class="mt-3 font-semibold">Select a customer</p><p class="mt-1 text-sm text-slate-400">Pick a customer on the left to read and reply to their messages.</p></div>
+          <div data-cthread class="flex-1 min-h-0 flex-col hidden">
+            <div class="flex items-center gap-3 px-4 py-3 border-b border-white/10"><button type="button" data-cback aria-label="Back to customers" class="lg:hidden w-9 h-9 shrink-0 rounded-lg glass flex items-center justify-center text-slate-300 hover:text-white">${svg('M19 12H5M11 18l-6-6 6-6', 'w-4 h-4')}</button><span data-cav class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-brand-500 to-pink flex items-center justify-center font-bold text-white"></span><div class="min-w-0"><div data-cname class="font-bold truncate"></div><div data-cmail class="text-xs text-slate-400 truncate"></div></div></div>
+            <div data-cmsgs class="flex-1 min-h-0 overflow-y-auto px-4 sm:px-5 py-4" role="log" aria-live="polite" aria-label="Messages"></div>
+            <p data-cerr class="px-5 pb-2 text-xs text-red-400 empty:hidden" role="alert"></p>
+            <form novalidate class="p-3 border-t border-white/10 flex items-end gap-2"><textarea name="t" rows="1" maxlength="1000" autocomplete="off" aria-label="Message" placeholder="Type a reply..." class="field resize-none" style="max-height:8rem"></textarea><button type="submit" aria-label="Send message" class="shrink-0 w-11 h-11 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 text-white flex items-center justify-center shadow-lg shadow-brand-500/30">${svg('M22 2L11 13M22 2l-7 20-4-9-9-4z', 'w-5 h-5')}</button></form>
+          </div></div>`;
+      const f = chEl.querySelector('form'), ta = f.elements.t;
+      const grow = () => { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 128) + 'px'; };
+      chEl.addEventListener('click', e => {
+        if (e.target.closest('[data-cback]')) { chSelect(null); return; }
+        const b = e.target.closest('[data-cu]'); if (b) chSelect(b.dataset.cu);
+      });
+      chEl.querySelector('[data-csearch]').addEventListener('input', e => { chFilter = e.target.value; chDrawList(); });
+      ta.addEventListener('input', grow);
+      ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); f.requestSubmit(); } });   // Enter sends, Shift+Enter adds a line
+      f.addEventListener('submit', async e => {
+        e.preventDefault(); e.stopPropagation();
+        const u = chSel, text = ta.value.trim().slice(0, 1000); if (!u || !text) return;
+        ta.value = ''; grow(); chErr = ''; chStick = true;
+        try {
+          const base = `chats/${u}`, k = push(ref(db, `${base}/messages`)).key;
+          await update(ref(db), {
+            [`${base}/messages/${k}`]: { from: 'admin', text, at: serverTimestamp() },
+            [`${base}/meta/lastText`]: text.slice(0, 80), [`${base}/meta/lastFrom`]: 'admin', [`${base}/meta/lastAt`]: serverTimestamp(),
+            [`${base}/meta/customerUnread`]: increment(1), [`${base}/meta/adminUnread`]: 0
+          });
+        } catch (err) { console.error('send message', err); if (chSel === u && !ta.value) { ta.value = text; grow(); } chErr = chFail(err); chDrawThread(); }
+        ta.focus();
+      });
+      return chEl;
+    }
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) { chMarkRead(); chBadge(); chDrawList(); } });
 
     // ---------- events ----------
-    $('#nav').innerHTML = Object.keys(TITLES).map(k => `<button data-v="${k}" class="nav-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold text-slate-300 hover:text-white">${svg(ICON[k])}${TITLES[k]}</button>`).join('');
+    const navKeys = () => PORTAL ? ['portal', 'settings'] : ['overview', 'projects', 'invoices', 'accounting', 'customers', 'chat', 'messages', 'settings'];
+    const buildNav = () => { $('#nav').innerHTML = navKeys().map(k => `<button data-v="${k}" class="nav-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold text-slate-300 hover:text-white">${svg(ICON[k])}${TITLES[k]}${k === 'chat' ? '<span id="chatBadge" class="hidden ml-auto min-w-[1.25rem] h-5 px-1.5 rounded-full bg-pink text-white text-[11px] font-bold items-center justify-center" aria-label="Unread chat messages"></span>' : ''}</button>`).join(''); chBadge(); };
+    buildNav();
     $('#nav').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (b) go(b.dataset.v); });
     const closeMenu = () => { $('#side').classList.add('-translate-x-full'); $('#scrim').classList.add('hidden'); $('#menuBtn').setAttribute('aria-expanded', 'false'); };
     $('#menuBtn').addEventListener('click', () => { $('#side').classList.remove('-translate-x-full'); $('#scrim').classList.remove('hidden'); $('#menuBtn').setAttribute('aria-expanded', 'true'); });
@@ -598,10 +1075,12 @@
       syncTheme(); clearTimeout(window.__tt); window.__tt = setTimeout(() => root.classList.remove('theme-switching'), 650);
     });
 
+    // once an entrance animation ends, drop its class so later animations (glow, fade-out) can play
+    $('#view').addEventListener('animationend', e => { const n = e.target; if (n.classList && n.classList.contains('fade-item') && e.animationName === 'itemFade') { n.classList.remove('fade-item'); n.style.removeProperty('--i'); } });
     $('#view').addEventListener('click', async e => {
       const b = e.target.closest('[data-act]'); if (!b) return; const a = b.dataset.act;
       if (a === 'flt') { flt = b.dataset.v; paint(false); }
-      else if (a === 'qflt') { qflt = b.dataset.v; paint(false); }
+      else if (a === 'qflt') { qflt = b.dataset.v; document.querySelectorAll('[data-qpill]').forEach(x => x.className = pillCls(x.dataset.v === qflt)); const g = $('#qgrid'); if (g) swapFilter(g, () => drawQ(true)); }
       else if (a === 'qmail') {
         const q = Q.find(x => x.id === b.dataset.q); if (!q) return;
         const val = b.checked, prev = { s: q.emailSent, t: q.emailAt };
@@ -629,13 +1108,53 @@
           catch (err) { const q = findP(b.dataset.p); if (q) q.archived = !arch; toast(failMsg(err, arch ? 'complete the project' : 'reopen the project')); refresh(); }
         } else { save(); toast(arch ? 'Project completed and archived' : 'Project reopened'); }
       }
-      else if (a === 'pay') { const i = S.invoices.find(x => x.id === b.dataset.id); i.paid = true; save(); paint(false); toast(i.id + ' marked as paid'); }
-      else if (a === 'dl') {
-        const i = S.invoices.find(x => x.id === b.dataset.id);
-        const txt = `EM Development\nInvoice ${i.id}\n\nFor: ${i.for}\nAmount: ${money(i.amt)}\nDue: ${fmtD(i.due)}\nStatus: ${i.paid ? 'Paid' : 'Unpaid'}\nBilled to: ${U.email}\n`;
-        const url = URL.createObjectURL(new Blob([txt], { type: 'text/plain' })), l = document.createElement('a');
-        l.href = url; l.download = i.id + '.txt'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+      else if (a === 'iflt') { iflt = b.dataset.v; document.querySelectorAll('[data-ipill]').forEach(x => x.className = pillCls(x.dataset.v === iflt)); const g = $('#igrid'); if (g) swapFilter(g, () => drawI(true)); }
+      else if (a === 'newinv') { if (invOpen) hideInvPanel(); else showInvPanel(null); }
+      else if (a === 'icancel') hideInvPanel();
+      else if (a === 'iedit') { const i = I.find(x => x.id === b.dataset.i); if (i) showInvPanel(i); }
+      else if (a === 'ipay') {
+        const i = I.find(x => x.id === b.dataset.i); if (!i) return;
+        const val = !i.paid, prev = { p: i.paid, t: i.paidAt };
+        i.paid = val; i.paidAt = val ? Date.now() : 0; repaintI();   // show it right away; the database write follows
+        try { await update(ref(db, `users/${U.uid}/invoices/${i.id}`), { paid: val, paidAt: val ? serverTimestamp() : null }); toast(i.num + (val ? ' marked as paid' : ' marked as unpaid')); }
+        catch (err) { const r = I.find(x => x.id === b.dataset.i); if (r) { r.paid = prev.p; r.paidAt = prev.t; } toast(invErr(err, 'update the invoice')); repaintI(); }
       }
+      else if (a === 'idl') { const i = I.find(x => x.id === b.dataset.i); if (i) downloadPdf(i, b); }
+      else if (a === 'idel') { openXDel(b.dataset.i, b); }
+      else if (a === 'acsv') {
+        const q = v => { v = String(v); if (/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; };
+        const rows = [['Invoice', 'Billed to', 'Description', 'Amount (PHP)', 'Due date', 'Status', 'Date paid']].concat(I.map(i => [i.num, i.to, i.desc, i.amt.toFixed(2), i.due, ILABEL[istat(i)], i.paid && i.paidAt ? dstr(new Date(i.paidAt)) : '']));
+        const url = URL.createObjectURL(new Blob(['\ufeff' + rows.map(r => r.map(q).join(',')).join('\r\n')], { type: 'text/csv' }));
+        const dl = document.createElement('a'); dl.href = url; dl.download = 'invoices-' + dstr(new Date()) + '.csv'; document.body.appendChild(dl); dl.click(); dl.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000); toast('Invoice ledger exported');
+      }
+      else if (a === 'newk') { kOpen = !kOpen; const pn = $('#kPanel'); if (pn) { pn.classList.toggle('open', kOpen); pn.toggleAttribute('inert', !kOpen); } }
+      else if (a === 'kcancel') { kOpen = false; const pn = $('#kPanel'); if (pn) { pn.classList.remove('open'); pn.setAttribute('inert', ''); } }
+      else if (a === 'kdismiss') { kCreds = null; paint(false); }
+      else if (a === 'kcopy') {
+        if (!kCreds) return;
+        const t = 'Hi ' + kCreds.name + ',\n\nEM Development has created an account for you so you can track the progress of your website development.\n\nLogin: ' + new URL(LOGIN_URL, location.href).href + '\nEmail: ' + kCreds.email + '\nTemporary password: ' + kCreds.pw + '\n\nPlease sign in and change your password right away.';
+        try { await navigator.clipboard.writeText(t); toast('Login details copied'); } catch (e2) { toast('Could not copy. Select the text and copy it manually.'); }
+      }
+      else if (a === 'klink') {
+        const c = K.find(x => x.id === b.dataset.k); if (!c || !c.uid) return;
+        const pid = b.dataset.p, on = b.checked, prev = c.projects.slice();
+        c.projects = on ? [...new Set([...c.projects, pid])] : c.projects.filter(x => x !== pid);
+        const pm = {}; c.projects.forEach(id => { pm[id] = true; }); const val = c.projects.length ? pm : null;
+        try { await withTimeout(update(ref(db), { [`users/${U.uid}/customers/${c.id}/projects`]: val, [`portal/${c.uid}/projects`]: val }), 12000); toast(on ? 'Project shared' : 'Project hidden'); }
+        catch (err) { c.projects = prev; toast(kErr(err, 'update the shared projects')); repaintK(); }
+      }
+      else if (a === 'kpost') {
+        const c = K.find(x => x.id === b.dataset.k); if (!c || !c.uid) return;
+        const ta = b.closest('[data-kid]').querySelector('textarea'), t = ta.value.trim().slice(0, 300); if (!t) { ta.focus(); return; }
+        b.disabled = true;
+        try { await withTimeout(update(ref(db), { [`users/${U.uid}/customers/${c.id}/update`]: t, [`users/${U.uid}/customers/${c.id}/updatedAt`]: serverTimestamp(), [`portal/${c.uid}/update`]: t, [`portal/${c.uid}/updatedAt`]: serverTimestamp() }), 12000); delete kDraft[c.id]; toast('Update posted'); }
+        catch (err) { toast(kErr(err, 'post the update')); }
+        b.disabled = false;
+      }
+      else if (a === 'kreset') { const c = K.find(x => x.id === b.dataset.k); if (!c) return; try { await sendPasswordResetEmail(auth, c.email); toast('Reset link sent to ' + c.email); } catch (err) { toast('Could not send the email. Try again later.'); } }
+      else if (a === 'kdel') openXCust(b.dataset.k, b);
+      else if (a === 'pwdone') { try { localStorage.setItem('pwn:' + U.uid, '1'); } catch (e2) {} paint(false); }
       else if (a === 'rpw') { try { await sendPasswordResetEmail(auth, U.email); toast('Reset link sent to ' + U.email); } catch (err) { toast('Could not send the email. Try again later.'); } }
       else if (a === 'reset') { if (confirm('Reset all sample data on this device?')) { S = seed(); save(); paint(false); toast('Sample data reset'); } }
     });
@@ -643,6 +1162,10 @@
       e.preventDefault(); const f = e.target, k = f.dataset.form, d = new FormData(f);
       if (k === 'addinc') {
         await addFeature(f);
+      } else if (k === 'newinv') {
+        await saveInvoice(f);
+      } else if (k === 'newcust') {
+        await saveCustomer(f);
       } else if (k === 'prof') {
         try { await updateProfile(auth.currentUser, { displayName: d.get('name').trim() }); fillUser(); toast('Profile updated'); } catch (err) { toast('Could not save your profile.'); }
       }
@@ -704,6 +1227,61 @@
         if (sig === qSig) return;
         Q = list; qSig = sig; repaintQ();
       }, err => { qError = quoteErr(err, 'load the quotations'); repaintQ(); });
+    }
+
+    // ---------- invoices in Firebase Realtime Database ----------
+    // Saved at users/<uid>/invoices/<pushId>.
+    const invErr = (err, what) => { console.error(what, err); return /PERMISSION_DENIED/i.test(String((err && (err.code || err.message)) || '')) ? 'Blocked by the database rules. Add the "invoices" rules under users/$uid in Firebase.' : 'Could not ' + what + '. Please try again.'; };
+    const repaintI = () => { if (!document.body.classList.contains('ready')) return; if (view === 'invoices') updateIView(); else if (view === 'overview' || view === 'accounting') paint(false); };
+    let offInv = () => {}, iSig = '', invKey = null, creatingInv = false;
+    function watchInvoices() {
+      offInv(); I = []; iSig = ''; iError = ''; let first = true;
+      offInv = onValue(ref(db, `users/${U.uid}/invoices`), snap => {
+        const list = [];
+        snap.forEach(ch => {
+          const v = ch.val() || {};
+          list.push({ id: ch.key, num: v.number || 'INV', to: v.billedTo || '', desc: v.description || '', amt: +v.amount || 0, due: v.dueDate || '', paid: v.paid === true, paidAt: +v.paidAt || 0, at: +v.createdAt || 0 });
+        });
+        list.sort((a, b) => b.at - a.at);
+        const sig = JSON.stringify(list), wasFirst = first; first = false; iError = '';
+        if (sig === iSig) return;
+        I = list; iSig = sig;
+        if (wasFirst) { if (document.body.classList.contains('ready') && (view === 'invoices' || view === 'overview' || view === 'accounting')) paint(true); } else repaintI();
+      }, err => { iError = invErr(err, 'load your invoices'); if (document.body.classList.contains('ready') && (view === 'invoices' || view === 'overview' || view === 'accounting')) paint(false); });
+    }
+    async function saveInvoice(f) {
+      if (creatingInv) return;
+      const d = new FormData(f), err = $('#iErr'), btn = $('#iSave'), editId = f.dataset.edit;
+      const to = String(d.get('to') || '').trim().replace(/\s+/g, ' ').slice(0, 80), desc = String(d.get('desc') || '').trim().replace(/\s+/g, ' ').slice(0, 120);
+      const amt = Math.round(parseFloat(d.get('amt')) * 100) / 100, due = String(d.get('due') || '');
+      const bad = m => { err.textContent = m; };
+      if (!to) return bad('Enter who this invoice is billed to.');
+      if (!desc) return bad('Enter a description.');
+      if (!(amt > 0) || amt > 1e9) return bad('Enter an amount greater than zero.');
+      if (!/^\d{4}-\d\d-\d\d$/.test(due)) return bad('Choose a due date.');
+      err.textContent = '';
+      if (editId) {
+        const i = I.find(x => x.id === editId); if (!i) { hideInvPanel(); return; }
+        if (to === i.to && desc === i.desc && amt === i.amt && due === i.due) { hideInvPanel(); return; }   // nothing changed
+        const prev = { to: i.to, desc: i.desc, amt: i.amt, due: i.due };
+        i.to = to; i.desc = desc; i.amt = amt; i.due = due; hideInvPanel(); updateIView();   // show it right away; the database write follows
+        try { await withTimeout(update(ref(db, `users/${U.uid}/invoices/${i.id}`), { billedTo: to, description: desc, amount: amt, dueDate: due }), 12000); toast(i.num + ' updated'); }
+        catch (e2) { const r = I.find(x => x.id === editId); if (r) Object.assign(r, { to: prev.to, desc: prev.desc, amt: prev.amt, due: prev.due }); updateIView(); toast(invErr(e2, 'update the invoice')); }
+        return;
+      }
+      creatingInv = true; btn.disabled = true; btn.textContent = 'Saving...';
+      const num = 'INV-' + (I.reduce((m, x) => Math.max(m, parseInt(String(x.num).replace(/\D/g, ''), 10) || 0), 1000) + 1);
+      if (iflt !== 'all') { iflt = 'all'; document.querySelectorAll('[data-ipill]').forEach(x => x.className = pillCls(x.dataset.v === 'all')); }
+      try {
+        const base = `users/${U.uid}/invoices`;
+        if (!invKey) invKey = push(ref(db, base)).key;   // reused on retry, so a retry never creates a duplicate
+        await withTimeout(set(ref(db, `${base}/${invKey}`), { number: num, billedTo: to, description: desc, amount: amt, dueDate: due, paid: false, createdAt: serverTimestamp() }), 12000);
+        invKey = null; hideInvPanel(); toast(num + ' created');
+      } catch (e2) {
+        const c = String((e2 && (e2.code || e2.message)) || '');
+        err.textContent = c === 'timeout' ? 'This is taking too long. Check your connection and try again.' : invErr(e2, 'save the invoice');
+      }
+      creatingInv = false; btn.disabled = false; btn.textContent = invEdit ? 'Save changes' : 'Create invoice';
     }
 
     // ---------- new project modal ----------
@@ -865,15 +1443,164 @@
       }
     });
 
+    // ---------- delete invoice modal ----------
+    const xModal = $('#xModal'), xForm = $('#xForm'), xIn = $('#xIn'), xBtn = $('#xBtn'), xErr = $('#xErr'), xHint = $('#xHint');
+    let X_PHRASE = 'Delete this Invoice', X_LABEL = 'Delete invoice';
+    let delI = null, xDeleting = false, xFocus = null;
+    const xMatch = () => !!delI && xIn.value === X_PHRASE;   // exact match, including case
+    function syncX() {
+      const ok = xMatch();
+      xBtn.disabled = !ok || xDeleting; xErr.textContent = '';
+      if (!xIn.value) { xHint.className = 'mt-2 text-xs min-h-[1rem]'; xHint.textContent = ''; }
+      else if (ok) { xHint.className = 'mt-2 text-xs min-h-[1rem] text-emerald-300 font-semibold'; xHint.textContent = '\u2713 Phrase matches'; }
+      else { xHint.className = 'mt-2 text-xs min-h-[1rem] text-slate-400'; xHint.textContent = 'The phrase must match exactly, including capitals and spaces.'; }
+    }
+    function setXDeleting(on) {
+      xDeleting = on; xIn.disabled = on;
+      $('#xBtnLabel').textContent = on ? 'Deleting...' : X_LABEL;
+      const sp = $('#xSpin');
+      if (on && !sp) xBtn.insertAdjacentHTML('afterbegin', '<span class="q-spinner" id="xSpin"></span>');
+      else if (!on && sp) sp.remove();
+      xBtn.disabled = on || !xMatch();
+    }
+    function openXDel(id, trigger) {
+      const i = I.find(x => x.id === id); if (!i) return;
+      xSetup('invoice'); delI = { kind: 'invoice', id: i.id, num: i.num }; xFocus = trigger || document.activeElement;
+      $('#xDesc').textContent = 'This will permanently delete ' + i.num + ' (' + money(i.amt) + (i.to ? ', billed to ' + i.to : '') + '). This cannot be undone.';
+      xIn.value = ''; xIn.disabled = false; setXDeleting(false); syncX();
+      xModal.classList.add('show');
+      requestAnimationFrame(() => requestAnimationFrame(() => xModal.classList.add('open')));
+      setTimeout(() => xIn.focus(), 60);
+    }
+    function closeXDel() {
+      if (xDeleting) return;
+      xModal.classList.remove('open');
+      setTimeout(() => { if (!xModal.classList.contains('open')) xModal.classList.remove('show'); }, 320);
+      if (xFocus && xFocus.isConnected && xFocus.focus) xFocus.focus();
+      delI = null;
+    }
+    xIn.addEventListener('input', syncX);
+    $('#xBack').addEventListener('click', closeXDel);
+    $('#xCancel').addEventListener('click', closeXDel);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && xModal.classList.contains('open')) closeXDel(); });
+    xForm.addEventListener('keydown', e => {   // keep Tab inside the modal
+      if (e.key !== 'Tab') return;
+      const f = [...xForm.querySelectorAll('input, button')].filter(x => !x.disabled && x.offsetParent !== null);
+      if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+    xForm.addEventListener('submit', async e => {
+      e.preventDefault(); if (xDeleting || !delI) return;
+      // re-check on submit too, so pressing Enter can never skip the phrase check
+      if (xIn.value !== X_PHRASE) { xErr.textContent = 'Type "' + X_PHRASE + '" exactly to confirm.'; xIn.focus(); return; }
+      const t = delI; setXDeleting(true);
+      try {
+        if (t.kind === 'cust') await withTimeout(update(ref(db), { [`users/${U.uid}/customers/${t.id}`]: null, [`portal/${t.uid}`]: { admin: U.uid, revoked: true } }), 12000);
+        else { await withTimeout(remove(ref(db, `users/${U.uid}/invoices/${t.id}`)), 12000); if (invEdit === t.id) hideInvPanel(); }
+        setXDeleting(false); closeXDel(); toast(t.num + ' deleted');
+      } catch (err) {
+        setXDeleting(false); xErr.textContent = t.kind === 'cust' ? kErr(err, 'delete the customer') : invErr(err, 'delete the invoice');
+      }
+    });
+
+    // ---------- customers (admin side) ----------
+    // Saved at users/<adminUid>/customers/<id>. Each customer also gets portal/<customerUid>, which tells their login whose projects to show.
+    const TEMP_PW = '123456';   // every new customer starts with this; the email tells them to change it
+    const kErr = (err, what) => { console.error(what, err); return /PERMISSION_DENIED/i.test(String((err && (err.code || err.message)) || '')) ? 'Blocked by the database rules. Add the "portal" and "customers" rules in Firebase.' : 'Could not ' + what + '. Please try again.'; };
+    const repaintK = () => { chSync(); if (document.body.classList.contains('ready') && view === 'customers') paint(false); };
+    let offK = () => {}, kSig = '';
+    function watchCustomers() {
+      offK(); K = []; kSig = ''; kError = '';
+      offK = onValue(ref(db, `users/${U.uid}/customers`), snap => {
+        const list = [];
+        snap.forEach(ch => { const v = ch.val() || {}; list.push({ id: ch.key, uid: v.uid || '', name: v.name || 'Customer', email: v.email || '', company: v.company || '', phone: v.phone || '', projects: Object.keys(v.projects || {}), update: v.update || '', updatedAt: +v.updatedAt || 0, at: +v.createdAt || 0 }); });
+        list.sort((a, b) => b.at - a.at);
+        const sig = JSON.stringify(list); kError = '';
+        if (sig === kSig) return; K = list; kSig = sig; repaintK();
+      }, err => { kError = kErr(err, 'load your customers'); repaintK(); });
+    }
+    async function saveCustomer(f) {
+      if (kBusy) return;
+      const d = new FormData(f), err = $('#kErrMsg'), btn = $('#kSave'), bad = m => { err.textContent = m; };
+      const name = String(d.get('name') || '').trim().replace(/\s+/g, ' ').slice(0, 60), company = String(d.get('company') || '').trim().replace(/\s+/g, ' ').slice(0, 80);
+      const email = String(d.get('email') || '').trim().toLowerCase(), phone = String(d.get('phone') || '').trim().slice(0, 30), pw = TEMP_PW;
+      const shared = d.getAll('proj').filter(id => C.some(p => p.id === id));
+      if (!name) return bad("Enter the customer's name.");
+      if (!/^\S+@\S+\.\S+$/.test(email)) return bad('Enter a valid email address.');
+      err.textContent = ''; kBusy = true; btn.disabled = true; btn.textContent = 'Creating...';
+      try {
+        const a2 = acctAuth(), cred = await withTimeout(createUserWithEmailAndPassword(a2, email, pw), 15000);
+        try { await updateProfile(cred.user, { displayName: name }); } catch (e) {}
+        const cuid = cred.user.uid; await signOut(a2).catch(() => {});
+        const cid = push(ref(db, `users/${U.uid}/customers`)).key, pm = {}; shared.forEach(id => { pm[id] = true; });
+        const projects = shared.length ? pm : null;
+        await withTimeout(update(ref(db), {
+          [`users/${U.uid}/customers/${cid}`]: { name, email, company, phone, uid: cuid, projects, createdAt: serverTimestamp() },
+          [`portal/${cuid}`]: { admin: U.uid, cid, name, email, company, projects, update: '', updatedAt: 0 }
+        }), 12000);
+        let mailed = true; try { await sendPasswordResetEmail(auth, email); } catch (e) { mailed = false; }   // Firebase emails them a link to set their own password
+        kCreds = { name, email, pw, mailed }; kOpen = false; kBusy = false; toast(mailed ? 'Account created and email sent' : 'Account created, but the email could not be sent'); paint(false);
+      } catch (e) {
+        kBusy = false; btn.disabled = false; btn.textContent = 'Create account';
+        const c = String((e && (e.code || e.message)) || '');
+        bad(/email-already-in-use/.test(c) ? 'That email already has an account.' : /invalid-email/.test(c) ? 'That email address is not valid.' : /weak-password/.test(c) ? 'Choose a stronger password (8+ characters).' : /PERMISSION_DENIED/i.test(c) ? 'The login was created, but the database rules blocked saving the customer. Add the "portal" and "customers" rules in Firebase.' : c === 'timeout' ? 'This is taking too long. Check your connection and try again.' : 'Could not create the account. Please try again.');
+      }
+    }
+    function xSetup(kind) {
+      const cust = kind === 'cust';
+      X_PHRASE = cust ? 'Delete this Customer' : 'Delete this Invoice'; X_LABEL = cust ? 'Delete customer' : 'Delete invoice';
+      $('#xTitle').textContent = cust ? 'Delete customer?' : 'Delete invoice?'; $('#xPhrase').textContent = X_PHRASE; xIn.placeholder = X_PHRASE;
+    }
+    function openXCust(id, trigger) {
+      const c = K.find(x => x.id === id); if (!c) return;
+      xSetup('cust'); delI = { kind: 'cust', id: c.id, uid: c.uid, num: c.name }; xFocus = trigger || document.activeElement;
+      $('#xDesc').textContent = 'This removes ' + c.name + ' from your customers and disables their portal access. Their login stays in Firebase Authentication until you delete it there. This cannot be undone.';
+      xIn.value = ''; xIn.disabled = false; setXDeleting(false); syncX();
+      xModal.classList.add('show');
+      requestAnimationFrame(() => requestAnimationFrame(() => xModal.classList.add('open')));
+      setTimeout(() => xIn.focus(), 60);
+    }
+    // keep open "Manage" panels and half-typed updates when the list redraws
+    $('#view').addEventListener('toggle', e => { const d = e.target; if (d.dataset && d.dataset.kd) { if (d.open) kOpenSet.add(d.dataset.kd); else kOpenSet.delete(d.dataset.kd); } }, true);
+    $('#view').addEventListener('input', e => { const t = e.target; if (t.dataset && t.dataset.kdraft) kDraft[t.dataset.kdraft] = t.value; });
+
+    // ---------- customer portal (customer side, read only) ----------
+    let offPortalNode = () => {}, PW = {};
+    const repaintP = () => { if (document.body.classList.contains('ready') && view === 'portal') paint(false); };
+    function watchPortal() {
+      offPortalNode();
+      offPortalNode = onValue(ref(db, `portal/${U.uid}`), snap => {
+        PORTAL = snap.val() || { revoked: true };
+        const want = PORTAL.revoked ? [] : Object.keys(PORTAL.projects || {});
+        Object.keys(PW).forEach(id => { if (!want.includes(id)) { PW[id](); delete PW[id]; delete PP[id]; } });
+        want.forEach(id => {
+          if (PW[id]) return;
+          PW[id] = onValue(ref(db, `users/${PORTAL.admin}/projects/${id}`), s => {
+            const v = s.val();
+            PP[id] = v ? { id, name: v.name || 'Untitled project', start: v.startDate, due: v.endDate, items: arr(v.inclusions).map(x => typeof x === 'string' ? { t: x, d: false } : { t: x.t, d: x.d === true }), archived: v.archived === true } : null;
+            repaintP();
+          }, () => { PP[id] = null; repaintP(); });
+        });
+        repaintP();
+      }, () => { PORTAL = { revoked: true }; repaintP(); });
+    }
+    const stopAll = () => { chStop(); offProjects(); offQuotes(); offInv(); offK(); offPortalNode(); Object.values(PW).forEach(f => f()); PW = {}; };
+
     // ---------- auth ----------
     function fillUser() { const n = U.displayName || U.email.split('@')[0]; $('#who').textContent = n; $('#avatar').textContent = n[0].toUpperCase(); }
     $('#logoutBtn').addEventListener('click', async () => {
       const b = $('#logoutBtn'), l = $('#logoutLabel'); b.disabled = true; l.textContent = 'Logging out...';
       try { await signOut(auth); leave(LOGIN_URL); } catch (err) { b.disabled = false; l.textContent = 'Log out'; toast('Could not log out. Please try again.'); }
     });
-    onAuthStateChanged(auth, user => {
-      if (!user) { offProjects(); offQuotes(); if (!leave.on) { document.body.classList.add('ready'); leave(LOGIN_URL); } return; }
-      U = user; load(); fillUser(); watchProjects(); watchQuotes();
+    onAuthStateChanged(auth, async user => {
+      if (!user) { stopAll(); if (!leave.on) { document.body.classList.add('ready'); leave(LOGIN_URL); } return; }
+      U = user; load(); fillUser();
+      try { const sn = await get(ref(db, `portal/${user.uid}`)); PORTAL = sn.exists() ? (sn.val() || { revoked: true }) : null; } catch (e) { PORTAL = null; }
+      buildNav();
+      if (PORTAL) { view = 'portal'; watchPortal(); }
+      else { view = 'overview'; watchProjects(); watchQuotes(); watchInvoices(); watchCustomers(); setTimeout(() => loadPdf().catch(() => {}), 2500); }
       if (!document.body.classList.contains('ready')) { paint(true); document.body.classList.add('ready'); }
     });
   </script>
