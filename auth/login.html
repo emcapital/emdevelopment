@@ -69,11 +69,12 @@
     }
   </script>
     <style>
-    /* ===== No page scroll: the whole page always fits the screen ===== */
-    html, body { height: 100%; overflow: hidden; }
+    /* ===== The page scrolls only when it has to (small or landscape screens, on-screen keyboard) ===== */
+    html { -webkit-text-size-adjust: 100%; }
+    html, body { min-height: 100%; overflow-x: hidden; }
     body { background: #070a16; color: #e5e9ff; }
     ::selection { background: #5b6cff; color: #fff; }
-    .app { height: 100vh; height: 100dvh; }
+    .app { min-height: 100vh; min-height: 100dvh; }
 
     /* ===== Fade in ===== */
     @keyframes pageFade { from { opacity: 0; } to { opacity: 1; } }
@@ -120,7 +121,7 @@
     .btn-shine::after { content: ""; position: absolute; top: 0; left: 0; width: 40%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent); animation: shine 3.5s ease-in-out infinite; }
 
     /* Inputs */
-    .field { width: 100%; border-radius: 12px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); padding: 12px 14px 12px 44px; transition: border-color .25s, box-shadow .25s, background-color .25s; }
+    .field { width: 100%; border-radius: 12px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); min-height: 48px; font-size: 16px; padding: 12px 14px 12px 44px; transition: border-color .25s, box-shadow .25s, background-color .25s; }
     .field::placeholder { color: #6b7599; }
     .field:focus { outline: none; border-color: #7c8cff; box-shadow: 0 0 0 4px rgba(91,108,255,.2); }
     .field-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: #6b7599; pointer-events: none; transition: color .25s; }
@@ -146,9 +147,33 @@
     .chk:checked::after { content: ""; width: 9px; height: 5px; border-left: 2px solid #fff; border-bottom: 2px solid #fff; transform: rotate(-45deg) translate(1px, -1px); }
     .chk:focus-visible { outline: none; box-shadow: 0 0 0 4px rgba(91,108,255,.25); }
 
-    /* Shorter screens: hide extras and tighten spacing so nothing ever scrolls */
-    @media (max-height: 760px) { .hide-short { display: none !important; } .card-pad { padding-top: 20px !important; padding-bottom: 20px !important; } }
-    @media (max-height: 620px) { .hide-xshort { display: none !important; } .stack-tight > * + * { margin-top: 10px !important; } }
+    /* ===== Layout (all devices, notches and home bars included) ===== */
+    .login-head { padding-top: env(safe-area-inset-top); padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+    .login-main { padding: calc(5.25rem + env(safe-area-inset-top)) max(1.25rem, env(safe-area-inset-right)) calc(2rem + env(safe-area-inset-bottom)) max(1.25rem, env(safe-area-inset-left)); }
+    @media (min-width: 640px) { .login-main { padding-top: calc(6.25rem + env(safe-area-inset-top)); padding-left: max(2rem, env(safe-area-inset-left)); padding-right: max(2rem, env(safe-area-inset-right)); } }
+    @media (max-height: 520px) { .login-main { padding-top: calc(4.5rem + env(safe-area-inset-top)); } }
+    html.pwa .brand-text { display: inline; }
+
+    /* Message pop-up: bottom-right on desktop, full width at the bottom on phones */
+    .login-toast { position: fixed; z-index: 10000; right: max(1rem, env(safe-area-inset-right)); bottom: max(1rem, env(safe-area-inset-bottom)); width: min(24rem, calc(100vw - 2rem)); display: flex; align-items: flex-start; gap: 12px; padding: 14px 12px 14px 14px; border-radius: 16px; background: rgba(13,18,38,.94); border: 1px solid rgba(255,255,255,.12); box-shadow: 0 18px 50px rgba(0,0,0,.45); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); color: #e5e9ff; opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(18px) scale(.97); transition: opacity .35s ease, transform .45s cubic-bezier(.2,.8,.2,1), visibility 0s linear .45s; }
+    .login-toast.show { opacity: 1; visibility: visible; pointer-events: auto; transform: none; transition: opacity .35s ease, transform .45s cubic-bezier(.2,.8,.2,1), visibility 0s; }
+    .login-toast .lt-icon { flex: none; width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+    .login-toast .lt-icon svg { width: 18px; height: 18px; }
+    .login-toast .lt-text { flex: 1; min-width: 0; padding-top: 5px; font-size: 14px; line-height: 1.45; overflow-wrap: anywhere; }
+    .login-toast .lt-close { flex: none; width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #8d97c4; background: transparent; border: 0; cursor: pointer; transition: background-color .2s, color .2s; }
+    .login-toast .lt-close:hover { background: rgba(255,255,255,.08); color: #fff; }
+    .login-toast.ok { border-color: rgba(16,185,129,.45); }
+    .login-toast.ok .lt-icon { background: rgba(16,185,129,.18); color: #6ee7b7; }
+    .login-toast.err { border-color: rgba(244,114,182,.45); }
+    .login-toast.err .lt-icon { background: rgba(244,114,182,.16); color: #f9a8d4; }
+    @media (max-width: 639px) { .login-toast { left: max(1rem, env(safe-area-inset-left)); width: auto; } }
+    html.light .login-toast { background: rgba(255,255,255,.97); color: #0f1535; border-color: rgba(15,21,53,.12); box-shadow: 0 18px 50px rgba(67,81,232,.22); }
+    html.light .login-toast .lt-close { color: #6b7599; }
+    html.light .login-toast .lt-close:hover { background: rgba(15,21,53,.07); color: #0f1535; }
+    html.light .login-toast.ok { border-color: rgba(5,150,105,.4); }
+    html.light .login-toast.ok .lt-icon { background: rgba(16,185,129,.14); color: #047857; }
+    html.light .login-toast.err { border-color: rgba(190,24,93,.35); }
+    html.light .login-toast.err .lt-icon { background: rgba(219,39,119,.10); color: #be185d; }
 
     /* ===== Light mode ===== */
     html.light body { background: #f5f6ff; color: #0f1535; }
@@ -204,7 +229,7 @@
     </div>
 
     <!-- Top bar -->
-    <header class="fixed top-0 inset-x-0 z-50">
+    <header class="login-head absolute top-0 inset-x-0 z-50">
       <div
         class="max-w-[90rem] mx-auto px-5 sm:px-8 h-16 sm:h-20 flex items-center justify-between">
         <a href="../index.html" data-home
@@ -212,7 +237,9 @@
           <span
             class="w-12 h-9 sm:w-14 sm:h-10 rounded-xl bg-gradient-to-br from-brand-500 to-aqua flex items-center justify-center shadow-lg shadow-brand-500/30 group-hover:scale-110 transition-transform duration-500"><span
               class="em-logo w-7 sm:w-8"></span></span>
-          <span class="text-base sm:text-lg font-bold tracking-tight">EM <span
+          <span
+            class="brand-text hidden min-[430px]:inline whitespace-nowrap text-base sm:text-lg font-bold tracking-tight">EM
+            <span
               class="text-brand-400">Development</span></span>
         </a>
         <div class="fade-item flex items-center gap-2.5" style="--i:1">
@@ -246,7 +273,7 @@
 
       <!-- Left: brand panel (desktop only) -->
       <aside
-        class="fade-side hidden lg:flex flex-col justify-center px-14 xl:px-24 pt-24 pb-10 relative">
+        class="fade-side hidden lg:flex flex-col justify-center relative px-12 xl:px-20 pt-28 pb-12">
         <div class="max-w-xl">
           <span
             class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full glass text-sm font-medium text-slate-200">
@@ -293,40 +320,39 @@
               Direct line to our developers
             </li>
           </ul>
-        </div>
 
-        <!-- Floating cards -->
-        <div
-          class="hide-short absolute right-10 xl:right-16 bottom-14 glass rounded-2xl px-4 py-3 flex items-center gap-3 animate-float"
-          style="animation-delay:-2s">
-          <span
-            class="w-10 h-10 rounded-xl bg-emerald-400/20 text-emerald-300 flex items-center justify-center">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor"
-              stroke-width="2.5" viewBox="0 0 24 24"><path
-                d="M5 13l4 4L19 7" /></svg>
-          </span>
-          <div><div class="text-xs text-slate-400">Lighthouse score</div><div
-              class="font-bold">100 / 100</div></div>
-        </div>
-        <div
-          class="hide-short absolute right-24 xl:right-40 top-28 glass rounded-2xl px-4 py-3 animate-float"
-          style="animation-delay:-4s">
-          <div class="text-xs text-slate-400">Conversion</div>
-          <div class="font-bold text-aqua">+248%</div>
+          <div class="mt-10 flex flex-wrap gap-3">
+            <div
+              class="glass rounded-2xl px-4 py-3 flex items-center gap-3 animate-float"
+              style="animation-delay:-2s">
+              <span
+                class="w-10 h-10 rounded-xl bg-emerald-400/20 text-emerald-300 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                  stroke-width="2.5" viewBox="0 0 24 24"><path
+                    d="M5 13l4 4L19 7" /></svg>
+              </span>
+              <div><div class="text-xs text-slate-400">Lighthouse
+                  score</div><div class="font-bold">100 / 100</div></div>
+            </div>
+            <div class="glass rounded-2xl px-4 py-3 animate-float"
+              style="animation-delay:-4s">
+              <div class="text-xs text-slate-400">Conversion</div>
+              <div class="font-bold text-aqua">+248%</div>
+            </div>
+          </div>
         </div>
       </aside>
 
       <!-- Right: login card -->
-      <main
-        class="relative flex items-center justify-center px-5 sm:px-8 pt-16 sm:pt-20 pb-4 sm:pb-6 min-h-0">
-        <div class="fade-card relative w-full max-w-[26rem] max-h-full">
+      <main class="login-main relative flex items-center justify-center">
+        <div class="fade-card relative w-full max-w-[26rem]">
           <div
             class="absolute -inset-px rounded-[2rem] bg-gradient-to-br from-brand-500/40 via-aqua/20 to-pink/30 blur-xl opacity-60"></div>
           <div
-            class="card-pad relative glass rounded-[2rem] px-6 sm:px-9 py-7 sm:py-9">
+            class="relative glass rounded-[2rem] px-6 sm:px-9 py-8 sm:py-10">
 
             <div class="text-center">
-              <div class="fade-item hide-xshort mx-auto relative w-20 h-14"
+              <div class="fade-item mx-auto relative w-20 h-14"
                 style="--i:0">
                 <div
                   class="absolute inset-0 rounded-2xl bg-gradient-to-br from-brand-500 to-aqua animate-spinSlow opacity-60 blur-md"></div>
@@ -335,14 +361,14 @@
                     class="em-logo em-logo-grad w-12"></span></div>
               </div>
               <h1
-                class="fade-item mt-4 hide-xshort-mt text-2xl sm:text-3xl font-extrabold tracking-tight"
+                class="fade-item mt-5 text-2xl sm:text-3xl font-extrabold tracking-tight"
                 style="--i:1">Welcome <span
                   class="gradient-text">back</span></h1>
-              <p class="fade-item hide-short mt-2 text-slate-400 text-sm"
+              <p class="fade-item mt-2 text-slate-400 text-sm"
                 style="--i:2">Log in to continue to your dashboard.</p>
             </div>
 
-            <form id="loginForm" class="stack-tight mt-6 space-y-4" novalidate>
+            <form id="loginForm" class="mt-8 space-y-5" novalidate>
               <div class="fade-item" style="--i:3">
                 <label for="email"
                   class="text-sm font-medium text-slate-300">Email</label>
@@ -359,13 +385,8 @@
               </div>
 
               <div class="fade-item" style="--i:4">
-                <div class="flex items-center justify-between">
-                  <label for="password"
-                    class="text-sm font-medium text-slate-300">Password</label>
-                  <a href="#" id="forgotLink"
-                    class="text-xs font-semibold text-brand-400 hover:text-white transition">Forgot
-                    password?</a>
-                </div>
+                <label for="password"
+                  class="text-sm font-medium text-slate-300">Password</label>
                 <div class="field-wrap relative mt-1.5">
                   <svg class="field-icon" fill="none" stroke="currentColor"
                     stroke-width="1.8" stroke-linecap="round"
@@ -393,16 +414,17 @@
                 </div>
               </div>
 
-              <label
-                class="fade-item inline-flex items-center gap-2.5 text-sm text-slate-300 cursor-pointer select-none"
+              <div class="fade-item flex items-center justify-between gap-3"
                 style="--i:5">
-                <input type="checkbox" class="chk" name="remember" /> Remember
-                me
-              </label>
-
-              <p id="loginMsg"
-                class="text-center text-sm min-h-[1rem] -my-1 opacity-0 transition-opacity duration-500"
-                role="status"></p>
+                <label
+                  class="inline-flex items-center gap-2.5 text-sm text-slate-300 cursor-pointer select-none py-1">
+                  <input type="checkbox" class="chk" name="remember" /> Remember
+                  me
+                </label>
+                <a href="#" id="forgotLink"
+                  class="text-sm font-semibold text-brand-400 hover:text-white transition py-1">Forgot
+                  password?</a>
+              </div>
 
               <button id="loginSubmit" type="submit" style="--i:6"
                 class="fade-item btn-shine w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white shadow-lg shadow-brand-500/30 hover:shadow-brand-500/60 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 flex items-center justify-center gap-3">
@@ -412,9 +434,25 @@
                     d="M5 12h14M13 6l6 6-6 6" /></svg>
               </button>
             </form>
+
+            <p class="fade-item mt-6 text-center text-xs text-slate-500"
+              style="--i:7">New here? Your account is set up by the EM
+              Development team.</p>
           </div>
         </div>
       </main>
+    </div>
+
+    <!-- Message pop-up (bottom right) -->
+    <div id="loginMsg" class="login-toast" role="status" aria-live="polite">
+      <span class="lt-icon" id="ltIcon"></span>
+      <span class="lt-text" id="ltText"></span>
+      <button type="button" class="lt-close" id="ltClose"
+        aria-label="Close message">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+          stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24"><path
+            d="M6 6l12 12M18 6L6 18" /></svg>
+      </button>
     </div>
 
     <script type="module">
@@ -517,9 +555,16 @@
     const emailEl = document.getElementById('email'), rememberEl = form.querySelector('[name="remember"]');
     let redirecting = false;
 
+    function hideMsg() { clearTimeout(window.__toastT); msg.classList.remove('show'); }
+    document.getElementById('ltClose').addEventListener('click', hideMsg);
     function showMsg(text, ok) {
-      msg.textContent = text; msg.style.opacity = '';
-      msg.className = 'text-center text-sm min-h-[1rem] -my-1 transition-opacity duration-500 opacity-100 ' + (ok ? 'text-emerald-300' : 'text-pink');
+      const ICON_OK = '<svg fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" /></svg>';
+      const ICON_ERR = '<svg fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M12 7v6M12 17h.01" /></svg>';
+      document.getElementById('ltText').textContent = String(text).replace(/^\u2713\s*/, '');
+      document.getElementById('ltIcon').innerHTML = ok ? ICON_OK : ICON_ERR;
+      msg.className = 'login-toast show ' + (ok ? 'ok' : 'err');
+      clearTimeout(window.__toastT);
+      if (!/Redirecting/.test(text)) window.__toastT = setTimeout(hideMsg, 7000);   // closes itself, except the login success message, which stays until the redirect
     }
     function setLoading(on) {
       const sp = document.getElementById('loginSpin');
@@ -588,7 +633,7 @@
       const email = emailEl.value.trim(), pass = pw.value;
       if (!email || !/^\S+@\S+\.\S+$/.test(email)) { showMsg('Please enter a valid email address.', false); return; }
       if (!pass) { showMsg('Please enter your password.', false); return; }
-      msg.style.opacity = 0;
+      hideMsg();
       setLoading(true);
       try {
         await setPersistence(auth, rememberEl.checked ? browserLocalPersistence : browserSessionPersistence);
