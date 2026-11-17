@@ -2,7 +2,7 @@
  * Serves only the PWA pages (login, admin dashboard, customer dashboard).
  * The public home page (index.html) is never touched: it always goes to the network.
  * Bump VERSION whenever you change this file or want everyone to refresh cached pages. */
-const VERSION = 'v1';
+const VERSION = 'v2';
 const PAGES = `em-pages-${VERSION}`;
 const ASSETS = `em-assets-${VERSION}`;
 
@@ -29,8 +29,12 @@ const isFirebaseSdk = u => u.hostname === 'www.gstatic.com' && u.pathname.starts
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const cache = await caches.open(PAGES);
-    // Add one by one so a missing page (404) does not break the whole install
-    await Promise.all(PRECACHE.map(url => cache.add(new Request(url, { cache: 'reload' })).catch(() => {})));
+    // Fetch one by one so a missing page (404) does not break the whole install, and keep a clean copy of each.
+    // A response that followed a redirect (for example /offline.html -> /offline when Vercel "cleanUrls" is on) cannot be used
+    // to answer a page load, so the browser shows "site can't be reached" when offline. clean() removes that problem.
+    await Promise.all(PRECACHE.map(async url => {
+      try { const res = await fetch(new Request(url, { cache: 'reload' })); if (res.ok) await cache.put(url, await clean(res)); } catch (e) {}
+    }));
     await self.skipWaiting();
   })());
 });
@@ -78,15 +82,27 @@ self.addEventListener('fetch', event => {
   }
 });
 
+// A copy of a response that followed a redirect, rebuilt so it is allowed to answer a page load
+async function clean(res) {
+  if (!res || !res.redirected) return res;
+  return new Response(await res.blob(), { status: res.status, statusText: res.statusText, headers: res.headers });
+}
+// Look a page up by its path with or without ".html", so /auth/login and /auth/login.html both find the saved copy
+async function findPage(cache, pathname) {
+  const names = [pathname, pathname.replace(/\.html$/, ''), pathname.endsWith('.html') ? pathname : pathname + '.html'];
+  for (const n of names) { const hit = await cache.match(n); if (hit) return clean(hit); }
+  return null;
+}
+
 async function networkFirst(event, req) {
-  const cache = await caches.open(PAGES);
+  const cache = await caches.open(PAGES), path = new URL(req.url).pathname;
   try {
     const fresh = (await event.preloadResponse) || (await fetch(req));
-    if (fresh && fresh.ok) cache.put(req, fresh.clone());
+    if (fresh && fresh.ok) clean(fresh.clone()).then(r => cache.put(path, r)).catch(() => {});
     return fresh;
   } catch (err) {
-    const cached = (await cache.match(req, { ignoreSearch: true })) || (await caches.match('/offline.html'));
-    return cached || new Response('You are offline.', { status: 503, headers: { 'Content-Type': 'text/plain' } });
+    const page = (await findPage(cache, path)) || (await findPage(cache, '/offline.html'));
+    return page || new Response('You are offline.', { status: 503, headers: { 'Content-Type': 'text/plain' } });
   }
 }
 
