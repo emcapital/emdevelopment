@@ -63,6 +63,9 @@
     .field { width: 100%; border-radius: 12px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); padding: 11px 14px; transition: border-color .25s, box-shadow .25s; }
     .field::placeholder { color: #6b7599; }
     .field:focus { outline: none; border-color: #7c8cff; box-shadow: 0 0 0 4px rgba(91,108,255,.2); }
+    select.field option { background: #0d1226; color: #e5e9ff; }
+    html.light select.field option { background: #fff; color: #0f1535; }
+    select.field:disabled { opacity: .65; cursor: not-allowed; }
     .chk { appearance: none; -webkit-appearance: none; flex: none; width: 18px; height: 18px; border-radius: 6px; border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.05); display: inline-grid; place-content: center; cursor: pointer; transition: all .25s ease; }
     .chk:checked { background: linear-gradient(135deg, #5b6cff, #22d3ee); border-color: transparent; }
     .chk:checked::after { content: ""; width: 9px; height: 5px; border-left: 2px solid #fff; border-bottom: 2px solid #fff; transform: rotate(-45deg) translate(1px, -1px); }
@@ -332,6 +335,25 @@
                 class="field mt-1.5" />
             </label>
           </div>
+          <div class="grid sm:grid-cols-2 gap-3">
+            <label class="block min-w-0 text-sm font-medium text-slate-300">Free
+              maintenance (weeks)
+              <input id="mWeeks" type="number" inputmode="numeric" min="0"
+                max="260" step="1" required
+                class="field mt-1.5" placeholder="e.g. 12" />
+            </label>
+            <label
+              class="block min-w-0 text-sm font-medium text-slate-300">Maintenance
+              fee after (PHP / month)
+              <input id="mFee" type="number" inputmode="numeric" min="0"
+                max="10000000" step="1" required
+                class="field mt-1.5" placeholder="e.g. 1500" />
+            </label>
+          </div>
+          <p class="-mt-1 text-xs text-slate-400">Free maintenance starts the
+            day you complete the project. When it ends, the customer is notified
+            and can subscribe at this fee. Use 0 for no free period or no paid
+            plan.</p>
           <div>
             <label for="incIn"
               class="block text-sm font-medium text-slate-300">Inclusions</label>
@@ -494,6 +516,7 @@
       overview: 'M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z',
       projects: 'M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',
       invoices: 'M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6',
+      subscriptions: 'M21 12a9 9 0 0 1-15.5 6.2L3 16M3 12a9 9 0 0 1 15.5-6.2L21 8M21 3v5h-5M3 21v-5h5',
       messages: 'M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM3 7l9 6 9-6',
       accounting: 'M4 20V11M10 20V5M16 20v-6M22 20H2',
       customers: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8',
@@ -503,13 +526,14 @@
       backup: 'M12 3v12M7 10l5 5 5-5M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2',
       trash: 'M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M10 11v6M14 11v6'
     };
-    const TITLES = { overview: 'Overview', projects: 'Projects', invoices: 'Invoices', accounting: 'Accounting', customers: 'Customers', portal: 'My Website', messages: 'Quotations', chat: 'Chat', backup: 'Backup', settings: 'Account' };
+    const TITLES = { overview: 'Overview', projects: 'Projects', invoices: 'Invoices', subscriptions: 'Subscriptions', accounting: 'Accounting', customers: 'Customers', portal: 'My Website', messages: 'Quotations', chat: 'Chat', backup: 'Backup', settings: 'Account' };
     const svg = (d, c = 'w-5 h-5') => `<svg class="${c}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="${d}"/></svg>`;
     let toastT;
     function toast(t) { const el = $('#toast'); el.textContent = t; el.className = 'fixed left-1/2 z-50 glass rounded-2xl px-5 py-2.5 text-sm font-medium text-center max-w-[calc(100vw-2rem)]'; el.style.bottom = 'calc(1.5rem + env(safe-area-inset-bottom, 0px))'; el.style.animation = 'toastIn .4s ease both'; clearTimeout(toastT); toastT = setTimeout(() => { el.style.animation = 'toastOut .35s ease forwards'; toastT = setTimeout(() => el.classList.add('hidden'), 350); }, 2600); }
     function leave(url) { if (leave.on) return; leave.on = true; document.body.classList.add('is-leaving'); setTimeout(() => { location.href = url; }, 650); }
 
     // ---------- data (stored per user in this browser) ----------
+    let SUB = [], sflt = 'all', subOpen = false, subEdit = null, subError = '';
     let U, S, C = [], Q = [], I = [], K = [], PORTAL = null, PP = {}, kOpen = false, kCreds = null, kBusy = false, kError = '', kOpenSet = new Set(), kDraft = {}, qError = '', iError = '', view = 'overview', flt = 'all', qflt = 'all', iflt = 'all', invOpen = false, invEdit = null;   // C = projects saved in Firebase Realtime Database
     const projs = () => [...C, ...S.projects];
     const key = () => 'emdev:' + U.uid;
@@ -537,6 +561,34 @@
     const badgeCls = s => `shrink-0 px-3 py-1 rounded-full text-xs font-semibold capitalize ${BADGE[s]}`;
     const spanCls = m => (m.d ? 'line-through opacity-60 ' : '') + 'min-w-0 break-words';
     const listHtml = p => p.items.map((m, i) => `<label class="flex items-center gap-3 text-sm text-slate-300 cursor-pointer select-none py-0.5"><input type="checkbox" class="chk" data-act="inc" data-p="${esc(p.id)}" data-i="${i}" ${m.d ? 'checked' : ''} ${p.archived ? 'disabled' : ''}/><span class="${spanCls(m)}">${esc(m.t)}</span></label>`).join('');
+    // ---------- maintenance ----------
+    // Set when the project is created (weeks of free maintenance + the fee after). The free period runs from the day the project is completed.
+    // Customers send a subscription request, saved at maintenance/<customerUid>/<projectId>, and the admin activates or declines it here.
+    let MR = {};
+    const MT_DAY = 864e5;
+    function mtInfo(p) {
+      if (!p.cloud || !p.hasM) return { k: 'none' };
+      if (!p.archived || !p.arAt) return { k: 'pending' };
+      const end = p.arAt + p.mw * 7 * MT_DAY, left = Math.ceil((end - Date.now()) / MT_DAY);
+      return { k: left > 14 ? 'free' : left > 0 ? 'soon' : 'ended', end, left };
+    }
+    const mtReqs = pid => Object.keys(MR || {}).filter(u => MR[u] && MR[u][pid]).map(u => Object.assign({ u }, MR[u][pid]));
+    const mtWho = u => { const c = K.find(x => x.uid === u); return c ? (c.company || c.name) : 'A customer'; };
+    const mtWeeks = n => n ? n + (n === 1 ? ' week' : ' weeks') : 'none';
+    const mtSig = p => [p.hasM, p.mw, p.mf, p.arAt, p.archived, JSON.stringify(mtReqs(p.id)), K.length].join('|');
+    function mtHtml(p) {
+      if (!p.cloud) return '';
+      const m = mtInfo(p), fee = p.mf > 0 ? money(p.mf) + ' per month after the free period' : 'No paid plan fee set';
+      const line = m.k === 'none' ? 'Maintenance is not set for this project.'
+        : m.k === 'pending' ? 'Free maintenance: ' + mtWeeks(p.mw) + ' (starts when the project is completed)'
+        : m.k === 'ended' ? 'Free maintenance ended ' + fmtD(m.end)
+        : 'Free maintenance until ' + fmtD(m.end) + ' (' + m.left + (m.left === 1 ? ' day' : ' days') + ' left)';
+      const tone = m.k === 'ended' ? 'text-red-300' : m.k === 'soon' ? 'text-pink' : '';
+      const reqs = mtReqs(p.id).map(r => `<div class="mt-2 flex flex-wrap items-center justify-between gap-2"><span class="min-w-0 break-words">${esc(mtWho(r.u))} &middot; <b>${esc(r.status === 'requested' ? 'requested a subscription' : r.status)}</b></span><span class="flex gap-1.5">${r.status === 'requested' ? `<button type="button" data-act="mtok" data-u="${esc(r.u)}" data-p="${esc(p.id)}" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-500 text-white hover:bg-brand-600 transition">Activate</button><button type="button" data-act="mtno" data-u="${esc(r.u)}" data-p="${esc(p.id)}" class="px-3 py-1.5 rounded-lg text-xs font-semibold glass text-slate-300 hover:text-white transition">Decline</button>` : `<button type="button" data-act="mtdel" data-u="${esc(r.u)}" data-p="${esc(p.id)}" class="px-3 py-1.5 rounded-lg text-xs font-semibold glass text-slate-300 hover:text-white transition">Remove</button>`}</span></div>`).join('');
+      return `<div class="font-semibold ${tone}">${esc(line)}</div><div class="text-xs text-slate-400 mt-0.5">${esc(fee)}</div>${reqs}
+        <details class="mt-2"><summary class="cursor-pointer text-xs font-semibold text-brand-400 hover:text-white">Edit maintenance</summary>
+          <form data-form="maint" data-p="${esc(p.id)}" class="mt-2 flex flex-wrap items-end gap-2"><label class="text-xs text-slate-400">Free weeks<input name="weeks" type="number" min="0" max="260" step="1" required value="${p.mw}" class="field !py-2 mt-1 w-28"/></label><label class="text-xs text-slate-400">Fee (PHP / month)<input name="fee" type="number" min="0" max="10000000" step="1" required value="${p.mf}" class="field !py-2 mt-1 w-36"/></label><button type="submit" class="px-4 py-2 rounded-xl glass text-sm font-semibold text-brand-400 hover:text-white transition">Save</button></form></details>`;
+    }
     function projCard(p) {
       const s = status(p), v = pct(p);
       return `<div data-f data-pid="${esc(p.id)}" class="${card}">
@@ -544,6 +596,7 @@
             <div class="mt-4 flex items-center gap-3"><div class="bar flex-1 h-2 rounded-full bg-white/10"><i style="width:${v}%"></i></div><span data-pct data-v="${v}" class="text-sm font-bold w-10 text-right">${v}%</span></div>
             <div data-list class="mt-4 space-y-2">${listHtml(p)}</div>
             <form data-form="addinc" data-p="${esc(p.id)}" data-add class="mt-4 flex items-center gap-2${p.archived ? ' hidden' : ''}"><input name="t" maxlength="60" autocomplete="off" aria-label="Add a feature to ${esc(p.name)}" placeholder="Add a new feature..." class="field !py-2 min-w-0 text-sm"/><button type="submit" class="shrink-0 px-4 py-2 rounded-xl glass text-sm font-semibold text-brand-400 hover:text-white transition">+ Add</button></form>
+            <div data-mt data-sig="${esc(mtSig(p))}" class="mt-4 rounded-xl border border-white/10 px-3.5 py-3 text-sm${p.cloud ? '' : ' hidden'}">${mtHtml(p)}</div>
             <div data-slot data-k="${slotKey(p)}">${actHtml(p)}</div></div>`;
     }
     // ---------- list helpers (quotations + invoices) ----------
@@ -636,7 +689,9 @@
     const iBadge = i => 'shrink-0 px-3 py-1 rounded-full text-xs font-semibold transition-colors duration-500 ' + IBADGE[istat(i)];
     const iBtn = i => 'px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors duration-500 ' + (i.paid ? 'glass text-slate-300 hover:text-white' : 'bg-brand-500 text-white hover:bg-brand-600');
     const iPaidTxt = i => i.paid && i.paidAt ? ' · Paid ' + fmtD(i.paidAt) : '';
-    const iMeta = i => 'Billed to ' + i.to + ' · Due ' + fmtD(i.due);
+    const iMeta = i => 'Billed to ' + i.to + ' · Due ' + fmtD(i.due) + (i.cuid ? '' : ' · Not linked to a customer');
+    // an invoice is mirrored to the customer's portal only while that customer still exists in the database
+    const invMirror = i => !!(i.cid && i.cuid && K.some(c => c.id === i.cid && c.uid === i.cuid));
     const iIconBtn = 'w-9 h-9 rounded-lg flex items-center justify-center text-slate-400 transition';
     const iList = () => I.filter(i => iflt === 'all' || (iflt === 'unpaid' ? !i.paid : i.paid));
     const iCard = i => `<div data-f data-iid="${esc(i.id)}" data-paid="${i.paid ? 1 : 0}" data-sent="${i.paid ? 1 : 0}" class="${card} q-card flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-4${invEdit === i.id ? ' i-editing' : ''}">
@@ -694,7 +749,15 @@
       const f = panel.querySelector('form'), dd = new Date(); dd.setDate(dd.getDate() + 14);
       invEdit = inv ? inv.id : null; invOpen = true;
       f.reset(); f.dataset.edit = inv ? inv.id : '';
-      if (inv) { f.elements.to.value = inv.to; f.elements.desc.value = inv.desc; f.elements.amt.value = inv.amt; f.elements.due.value = inv.due; } else f.elements.due.value = dstr(dd);
+      const sel = f.elements.cust, nm = c => c.name + (c.company ? ' \u00b7 ' + c.company : '') + (c.email ? ' (' + c.email + ')' : '');
+      sel.innerHTML = '<option value="">' + (K.length ? 'Choose a customer...' : 'No customers yet') + '</option>' + K.map(c => `<option value="${esc(c.id)}"${c.disabled || !c.uid ? ' disabled' : ''}>${esc(nm(c))}${c.disabled ? ' (disabled)' : ''}</option>`).join('')
+        + (inv && inv.cid && !K.some(c => c.id === inv.cid) ? `<option value="${esc(inv.cid)}">${esc(inv.to)} (removed)</option>` : '');
+      const locked = !!(inv && inv.cid); sel.value = locked ? inv.cid : ''; sel.disabled = locked;
+      $('#iHint').textContent = locked ? 'This invoice belongs to ' + inv.to + ' and shows in their portal. The customer cannot be changed.'
+        : inv ? 'This invoice is not linked to a customer yet. Choose one so it shows in their portal.'
+        : K.length ? 'Only customers saved in your Customers list can be invoiced. The invoice also appears in their portal.'
+        : 'Add a customer on the Customers page first. Invoices can only be created for customers in your database.';
+      if (inv) { f.elements.desc.value = inv.desc; f.elements.amt.value = inv.amt; f.elements.due.value = inv.due; } else f.elements.due.value = dstr(dd);
       $('#iTitle').textContent = inv ? 'Edit ' + inv.num : 'New invoice';
       $('#iSave').textContent = inv ? 'Save changes' : 'Create invoice';
       $('#iErr').textContent = '';
@@ -703,7 +766,7 @@
       panel.classList.add('open'); panel.removeAttribute('inert');
       const nb = $('#newInvBtn'); if (nb) nb.textContent = 'Close';
       $('#view').scrollTo({ top: 0, behavior: 'smooth' });
-      setTimeout(() => { if (invOpen) f.elements.to.focus({ preventScroll: true }); }, 380);
+      setTimeout(() => { if (invOpen) (locked ? f.elements.desc : f.elements.cust).focus({ preventScroll: true }); }, 380);
     }
     function hideInvPanel() {
       const panel = $('#iPanel'); invOpen = false; invEdit = null;
@@ -713,6 +776,225 @@
       panel.classList.remove('open'); panel.setAttribute('inert', '');
       const nb = $('#newInvBtn'); if (nb) nb.textContent = '+ New invoice';
     }
+    // ---------- subscriptions (Domain, Hosting, Maintenance, Others) ----------
+    // Saved at users/<uid>/subscriptions/<pushId>. Maintenance plans that customers requested and you activated also show here (read-only).
+    const STYPE = {
+      domain: { l: 'Domain', cls: 'text-aqua bg-aqua/15', ph: 'e.g. example.com' },
+      hosting: { l: 'Hosting', cls: 'text-brand-400 bg-brand-500/20', ph: 'e.g. Business hosting plan' },
+      maintenance: { l: 'Maintenance', cls: 'text-emerald-300 bg-emerald-400/15', ph: 'e.g. Website maintenance' },
+      other: { l: 'Others', cls: 'text-pink bg-pink/15', ph: 'e.g. SSL certificate or business email' }
+    };
+    const SCYCLE = { monthly: { l: 'Monthly', m: 1, per: 'month' }, quarterly: { l: 'Every 3 months', m: 3, per: '3 months' }, yearly: { l: 'Yearly', m: 12, per: 'year' } };
+    const SLABEL = { active: 'Active', soon: 'Renews soon', overdue: 'Renewal due', paused: 'Paused', cancelled: 'Cancelled', requested: 'Awaiting approval', declined: 'Declined', free: 'Free period', freesoon: 'Free ends soon', freeended: 'Free period ended' };
+    const SBADGE = { active: BADGE.completed, soon: BADGE.pending, overdue: IBADGE.overdue, paused: 'text-slate-300 bg-white/10', cancelled: 'text-slate-400 bg-white/10', requested: BADGE.pending, declined: IBADGE.overdue, free: BADGE.active, freesoon: BADGE.pending, freeended: IBADGE.overdue };
+    const sDays = s => s.next ? Math.round((new Date(s.next + 'T00:00:00') - new Date(dstr(new Date()) + 'T00:00:00')) / 864e5) : null;
+    const sstat = s => {
+      if (s.auto === 'free') return s.k === 'soon' ? 'freesoon' : s.k === 'ended' ? 'freeended' : 'free';
+      if (['cancelled', 'paused', 'requested', 'declined'].includes(s.status)) return s.status;
+      const d = sDays(s); return d === null ? 'active' : d < 0 ? 'overdue' : d <= 30 ? 'soon' : 'active';
+    };
+    const sLive = s => ['active', 'soon', 'overdue'].includes(sstat(s));
+    const sMo = s => (+s.amt || 0) / SCYCLE[s.cycle].m;
+    // Maintenance lives here too: customer requests (approve or decline them below) and each project's free maintenance period.
+    const sAuto = () => { const out = [];
+      C.forEach(p => {
+        const reqs = mtReqs(p.id), own = K.find(x => (x.projects || []).map(String).includes(String(p.id))), who = own ? (own.company || own.name) : '';
+        reqs.forEach(r => out.push({ id: 'mt-' + r.u + '-' + p.id, type: 'maintenance', name: p.name + ' maintenance', to: mtWho(r.u), cid: '', amt: +r.fee || p.mf || 0, cycle: 'monthly', next: '', status: r.status === 'active' ? 'active' : r.status === 'declined' ? 'declined' : 'requested', notes: '', at: +r.requestedAt || 0, auto: 'req', u: r.u, pid: p.id }));
+        const m = mtInfo(p);
+        if (p.mw > 0 && m.k !== 'none' && !reqs.some(r => r.status === 'requested' || r.status === 'active')) out.push({ id: 'mf-' + p.id, type: 'maintenance', name: p.name + ' maintenance', to: who, cid: '', amt: p.mf || 0, cycle: 'monthly', next: '', status: 'active', notes: '', at: 0, auto: 'free', k: m.k, end: m.end, left: m.left, mw: p.mw, pid: p.id });
+      });
+      return out; };
+    const sAll = () => [...SUB, ...sAuto()].sort((a, b) => (b.status === 'requested') - (a.status === 'requested') || b.at - a.at);
+    const sList = () => sAll().filter(s => sflt === 'all' || s.type === sflt);
+    const sBadge = s => 'shrink-0 px-3 py-1 rounded-full text-xs font-semibold ' + SBADGE[sstat(s)];
+    const subErr = (err, what) => { console.error(what, err); return /PERMISSION_DENIED/i.test(String((err && (err.code || err.message)) || '')) ? 'Blocked by the database rules. Allow the signed-in admin to read and write "subscriptions" under users/$uid in Firebase.' : 'Could not ' + what + '. Please try again.'; };
+    const sRenewTxt = s => {
+      if (s.auto === 'req') return s.status === 'requested' ? 'Asked to subscribe' : s.status === 'declined' ? 'Request declined' : 'Requested by the customer, billed monthly';
+      if (s.auto === 'free') return s.k === 'pending' ? 'Free for ' + mtWeeks(s.mw) + ', starts when the project is completed' : s.k === 'ended' ? 'Free period ended ' + fmtD(s.end) : 'Free until ' + fmtD(s.end) + ' (' + s.left + (s.left === 1 ? ' day' : ' days') + ' left)';
+      const d = sDays(s); if (d === null) return 'No renewal date';
+      if (s.status !== 'active') return 'Renewal date ' + fmtD(s.next);
+      return d < 0 ? 'Renewal was due ' + fmtD(s.next) + ' (' + (-d) + (d === -1 ? ' day' : ' days') + ' ago)' : d === 0 ? 'Renews today' : 'Renews ' + fmtD(s.next) + ' (in ' + d + (d === 1 ? ' day' : ' days') + ')';
+    };
+    const sCard = s => {
+      const T = STYPE[s.type] || STYPE.other, st = sstat(s);
+      const mb = (a, l, on) => `<button type="button" data-act="${a}" data-u="${esc(s.u)}" data-p="${esc(s.pid)}" class="px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition ${on ? 'bg-brand-500 text-white hover:bg-brand-600' : 'glass text-slate-300 hover:text-white'}">${l}</button>`;
+      const acts = s.auto === 'req'
+        ? `<div class="flex flex-wrap items-center gap-1.5">${s.status === 'requested' ? mb('mtok', 'Activate', 1) + mb('mtno', 'Decline') : mb('mtdel', 'Remove')}</div>`
+        : s.auto === 'free'
+        ? `<button data-act="sgoproj" class="px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap glass text-slate-300 hover:text-white transition">Open project</button>`
+        : `<div class="flex flex-wrap items-center gap-1.5">${s.status === 'active' && s.next ? `<button data-act="srenew" data-s="${esc(s.id)}" class="px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap ${st === 'active' ? 'glass text-slate-300 hover:text-white' : 'bg-brand-500 text-white hover:bg-brand-600'} transition-colors">Mark renewed</button>` : ''}
+              <button data-act="sedit" data-s="${esc(s.id)}" aria-label="Edit ${esc(s.name)}" title="Edit" class="${iIconBtn} hover:text-white hover:bg-white/10">${svg('M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z', 'w-4 h-4')}</button>
+              <button data-act="sdel" data-s="${esc(s.id)}" aria-label="Delete ${esc(s.name)}" title="Delete" class="${iIconBtn} hover:text-red-400 hover:bg-red-500/10">${svg(ICON.trash, 'w-4 h-4')}</button></div>`;
+      const amt = s.auto === 'free'
+        ? (s.amt > 0 ? `<div class="text-lg font-extrabold">${money(s.amt)}</div><div class="text-xs text-slate-400 -mt-0.5">per month after the free period</div>` : `<div class="text-lg font-extrabold">Free</div><div class="text-xs text-slate-400 -mt-0.5">no paid plan set</div>`)
+        : `<div class="text-lg font-extrabold">${money(s.amt)}</div><div class="text-xs text-slate-400 -mt-0.5">per ${SCYCLE[s.cycle].per}</div>`;
+      const who = s.auto ? (s.to ? 'Customer: ' + s.to : 'No customer linked') : (s.to ? 'Billed to ' + s.to : 'No customer linked');
+      return `<div data-f data-sid="${esc(s.id)}" class="${card} q-card flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-4${subEdit === s.id ? ' i-editing' : ''}${s.status === 'requested' ? ' !border-pink/40' : ''}">
+          <div class="min-w-[min(100%,14rem)] flex-1">
+            <div class="flex items-center gap-2 flex-wrap"><span class="shrink-0 px-3 py-1 rounded-full text-xs font-semibold ${T.cls}">${T.l}</span><span class="${sBadge(s)}">${SLABEL[st]}</span></div>
+            <div class="mt-2 font-bold break-words">${esc(s.name)}</div>
+            <div class="mt-1 text-xs text-slate-400 break-words">${esc(who + ' \u00b7 ' + sRenewTxt(s))}</div>
+            ${s.notes ? `<div class="mt-1.5 text-sm text-slate-300 break-words">${esc(s.notes)}</div>` : ''}
+          </div>
+          <div class="flex flex-wrap items-center justify-between sm:justify-end gap-x-4 gap-y-3 sm:shrink-0">
+            <div>${amt}</div>
+            ${acts}
+          </div></div>`;
+    };
+    const sGridHtml = () => sList().map(sCard).join('') || `<p class="text-slate-400">${subError ? '' : sAll().length ? 'Nothing in this list.' : 'No subscriptions yet. Add your first one with the button above.'}</p>`;
+    const drawS = all => { const g = $('#sgrid'); if (g) redrawList(g, sGridHtml(), sList().map(s => s.id), 'data-sid', all); };
+    const sCounts = () => { const a = sAll(), c = { all: 'All (' + a.length + ')' }; Object.keys(STYPE).forEach(k => { c[k] = STYPE[k].l + ' (' + a.filter(s => s.type === k).length + ')'; }); return c; };
+    const sStats = () => { const a = sAll(); return { active: a.filter(sLive).length, mrr: Math.round(a.filter(sLive).reduce((n, s) => n + sMo(s), 0)), due: a.filter(s => ['soon', 'overdue'].includes(sstat(s))).length, req: a.filter(s => s.status === 'requested').length }; };
+    // update the list, counts and totals in place, so an open form is not disturbed
+    function updateSView() {
+      const grid = $('#sgrid'); if (!grid) return paint(false);
+      const c = sCounts(), st = sStats();
+      document.querySelectorAll('[data-spill]').forEach(b => { const t = c[b.dataset.spill]; if (b.textContent !== t) b.textContent = t; });
+      const a = document.querySelector('[data-sstat="active"]'), m = document.querySelector('[data-sstat="mrr"]'), d = document.querySelector('[data-sstat="due"]'), q = document.querySelector('[data-sstat="req"]');
+      if (a) a.textContent = st.active; if (m) tweenMoney(m, st.mrr); if (d) d.textContent = st.due; if (q) q.textContent = st.req;
+      drawS(false);
+    }
+    function subView() {
+      subOpen = false; subEdit = null;
+      const c = sCounts(), st = sStats(), lbl = 'block text-sm font-medium text-slate-300';
+      const pill = k => `<button data-spill="${k}" data-act="sflt" data-v="${k}" class="${pillCls(sflt === k)}">${c[k]}</button>`;
+      const stat = (k, l, v, g, raw) => `<div data-f class="${card} !p-4 sm:!p-5"><div class="text-xs text-slate-400">${l}</div><div data-sstat="${k}" ${raw != null ? `data-v="${raw}"` : ''} class="stat-v mt-1 text-lg min-[420px]:text-xl sm:text-2xl font-extrabold ${g ? 'gradient-text' : ''}">${v}</div></div>`;
+      const opts = o => Object.keys(o).map(k => `<option value="${k}">${esc(o[k].l)}</option>`).join('');
+      return `<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">${stat('active', 'Active subscriptions', st.active)}${stat('mrr', 'Monthly recurring', money(st.mrr), true, st.mrr)}${stat('due', 'Renewals due (30 days)', st.due)}${stat('req', 'Maintenance to review', st.req)}</div>
+        <div data-f class="flex flex-wrap items-center justify-between gap-3 mb-5"><div class="flex flex-wrap gap-2">${['all', ...Object.keys(STYPE)].map(pill).join('')}</div>
+          <button id="newSubBtn" data-act="newsub" class="btn-shine w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white text-sm shadow-lg shadow-brand-500/30">+ New subscription</button></div>
+        <div id="sPanel" class="i-panel" inert><div><form data-form="newsub" data-edit="" class="${card} space-y-4"><div id="sTitle" class="font-bold">New subscription</div>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <label class="${lbl}">Type<select name="type" required class="field mt-1.5">${opts(STYPE)}</select></label>
+            <label class="${lbl}">Customer<select name="cust" class="field mt-1.5"><option value="">No customer (internal)</option></select></label>
+            <label class="${lbl}">Name or details<input name="label" required maxlength="120" autocomplete="off" class="field mt-1.5" placeholder="${esc(STYPE.domain.ph)}"/></label>
+            <label class="${lbl}">Amount (PHP)<input name="amt" type="number" inputmode="decimal" min="1" max="1000000000" step="0.01" required class="field mt-1.5" placeholder="1200"/></label>
+            <label class="${lbl}">Billing cycle<select name="cycle" required class="field mt-1.5">${opts(SCYCLE)}</select></label>
+            <label class="${lbl}">Next renewal date<input name="next" type="date" required class="field mt-1.5"/></label>
+            <label class="${lbl}">Status<select name="status" required class="field mt-1.5"><option value="active">Active</option><option value="paused">Paused</option><option value="cancelled">Cancelled</option></select></label>
+            <label class="${lbl}">Private notes (optional)<input name="notes" maxlength="200" autocomplete="off" class="field mt-1.5" placeholder="e.g. registrar, login email or server"/></label>
+          </div>
+          <p id="sHint" class="text-xs text-slate-400 -mt-1"></p>
+          <p id="sErr" class="text-sm text-red-400 min-h-[1.25rem]" role="alert"></p>
+          <div class="flex flex-wrap gap-3"><button type="submit" id="sSave" class="btn-shine px-6 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white">Add subscription</button><button type="button" data-act="scancel" class="px-6 py-3 rounded-xl glass font-semibold text-slate-300 hover:text-white transition">Cancel</button></div></form></div></div>
+        ${subError ? `<p class="mb-4 text-sm text-red-400" role="alert">${esc(subError)}</p>` : ''}
+        <div id="sgrid" data-ids="${sList().map(s => s.id).join(',')}" class="space-y-3">${sGridHtml()}</div>`;
+    }
+    function showSubPanel(s) {
+      const panel = $('#sPanel'); if (!panel) return;
+      const f = panel.querySelector('form'), nx = new Date(); nx.setFullYear(nx.getFullYear() + 1);
+      subEdit = s ? s.id : null; subOpen = true;
+      f.reset(); f.dataset.edit = s ? s.id : '';
+      const sel = f.elements.cust, nm = c => c.name + (c.company ? ' \u00b7 ' + c.company : '');
+      sel.innerHTML = '<option value="">No customer (internal)</option>' + K.map(c => `<option value="${esc(c.id)}">${esc(nm(c))}</option>`).join('')
+        + (s && s.cid && !K.some(c => c.id === s.cid) ? `<option value="${esc(s.cid)}">${esc(s.to)} (removed)</option>` : '');
+      if (s) { f.elements.type.value = s.type; sel.value = s.cid || ''; f.elements.label.value = s.name; f.elements.amt.value = s.amt; f.elements.cycle.value = s.cycle; f.elements.next.value = s.next; f.elements.status.value = s.status; f.elements.notes.value = s.notes; }
+      else { f.elements.type.value = 'domain'; f.elements.cycle.value = 'yearly'; f.elements.next.value = dstr(nx); }
+      f.elements.label.placeholder = STYPE[f.elements.type.value].ph;
+      const locked = !!(s && s.cid); sel.disabled = locked;
+      $('#sHint').textContent = locked ? 'This subscription belongs to ' + s.to + ' and shows in their portal. The customer cannot be changed. Notes stay private.'
+        : K.length ? 'Choose a customer to also show it in their portal, or leave it empty to keep it internal. Notes always stay private.'
+        : 'Add customers on the Customers page to show subscriptions in their portal. Notes always stay private.';
+      $('#sTitle').textContent = s ? 'Edit subscription' : 'New subscription';
+      $('#sSave').textContent = s ? 'Save changes' : 'Add subscription';
+      $('#sErr').textContent = '';
+      document.querySelectorAll('.i-editing').forEach(n => n.classList.remove('i-editing'));
+      if (s) { const n = document.querySelector('[data-sid="' + CSS.escape(s.id) + '"]'); if (n) n.classList.add('i-editing'); }
+      panel.classList.add('open'); panel.removeAttribute('inert');
+      const nb = $('#newSubBtn'); if (nb) nb.textContent = 'Close';
+      $('#view').scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => { if (subOpen) f.elements.label.focus({ preventScroll: true }); }, 380);
+    }
+    function hideSubPanel() {
+      const panel = $('#sPanel'); subOpen = false; subEdit = null;
+      document.querySelectorAll('.i-editing').forEach(n => n.classList.remove('i-editing'));
+      if (!panel) return;
+      if (panel.contains(document.activeElement)) document.activeElement.blur();
+      panel.classList.remove('open'); panel.setAttribute('inert', '');
+      const nb = $('#newSubBtn'); if (nb) nb.textContent = '+ New subscription';
+    }
+    // the type decides the hint, and (for a new one) a sensible billing cycle
+    $('#view').addEventListener('change', e => {
+      const t = e.target; if (!t || t.name !== 'type' || !t.form || t.form.dataset.form !== 'newsub') return;
+      const f = t.form; if (!STYPE[t.value]) return;
+      f.elements.label.placeholder = STYPE[t.value].ph;
+      if (!f.dataset.edit) { if (t.value === 'domain') f.elements.cycle.value = 'yearly'; else if (t.value === 'maintenance') f.elements.cycle.value = 'monthly'; }
+    });
+    let savingSub = false, subKey = null;
+    async function saveSub(f) {
+      if (savingSub) return;
+      const d = new FormData(f), err = $('#sErr'), btn = $('#sSave'), editId = f.dataset.edit;
+      const type = String(d.get('type') || ''), label = String(d.get('label') || '').trim().replace(/\s+/g, ' ').slice(0, 120);
+      const amt = Math.round(parseFloat(d.get('amt')) * 100) / 100, cycle = String(d.get('cycle') || ''), next = String(d.get('next') || '');
+      const status = String(d.get('status') || ''), notes = String(d.get('notes') || '').trim().replace(/\s+/g, ' ').slice(0, 200), cid = String(d.get('cust') || '');
+      const bad = m => { err.textContent = m; };
+      const cur = editId ? SUB.find(x => x.id === editId) : null;
+      if (editId && !cur) { hideSubPanel(); return; }
+      if (!STYPE[type]) return bad('Choose the subscription type.');
+      if (!label) return bad('Enter the name or details, such as a domain name.');
+      if (!(amt > 0) || amt > 1e9) return bad('Enter an amount greater than zero.');
+      if (!SCYCLE[cycle]) return bad('Choose a billing cycle.');
+      if (!/^\d{4}-\d\d-\d\d$/.test(next)) return bad('Choose the next renewal date.');
+      if (!['active', 'paused', 'cancelled'].includes(status)) return bad('Choose a status.');
+      const cidF = cur && cur.cid ? cur.cid : cid;   // a linked customer cannot be changed
+      const c = cidF ? K.find(x => x.id === cidF) : null, keep = !!(cur && cur.cid);
+      if (cidF && !c && !keep) return bad('That customer is not in your Customers list.');
+      if (c && !c.uid) return bad('That customer has no portal login yet, so they could not see this subscription.');
+      const cuid = c ? c.uid : keep ? cur.cuid : '', mirror = !!(c && cuid);   // mirrored to portal/<customerUid>/subscriptions so the customer sees it
+      const to = c ? (c.company || c.name).slice(0, 80) : keep ? cur.to : '';
+      err.textContent = '';
+      savingSub = true; btn.disabled = true; btn.textContent = 'Saving...';
+      try {
+        const base = `users/${U.uid}/subscriptions`, rec = { type, label, amount: amt, cycle, nextDue: next, status, notes: notes || null, billedTo: to || null, customerId: cidF || null, customerUid: cuid || null };
+        const pub = { type, label, amount: amt, cycle, nextDue: next, status };   // what the customer sees (notes stay private)
+        if (cur) {
+          const up = {}; Object.keys(rec).forEach(k => { up[`${base}/${cur.id}/${k}`] = rec[k]; });
+          if (mirror) { const pb = `portal/${cuid}/subscriptions/${cur.id}`; if (cur.cuid === cuid) Object.keys(pub).forEach(k => { up[`${pb}/${k}`] = pub[k]; }); else up[pb] = Object.assign({ createdAt: serverTimestamp() }, pub); }
+          await withTimeout(update(ref(db), up), 12000);
+          hideSubPanel(); toast('Subscription updated');
+        } else {
+          if (sflt !== 'all') { sflt = 'all'; document.querySelectorAll('[data-spill]').forEach(x => x.className = pillCls(x.dataset.v === 'all')); }
+          if (!subKey) subKey = push(ref(db, base)).key;   // reused on retry, so a retry never creates a duplicate
+          const up = { [`${base}/${subKey}`]: Object.assign({ createdAt: serverTimestamp() }, rec) };
+          if (mirror) up[`portal/${cuid}/subscriptions/${subKey}`] = Object.assign({ createdAt: serverTimestamp() }, pub);
+          await withTimeout(update(ref(db), up), 12000);
+          subKey = null; hideSubPanel(); toast(STYPE[type].l + ' subscription added');
+        }
+      } catch (e2) {
+        const m = String((e2 && (e2.code || e2.message)) || '');
+        err.textContent = m === 'timeout' ? 'This is taking too long. Check your connection and try again.' : subErr(e2, cur ? 'update the subscription' : 'save the subscription');
+      } finally { savingSub = false; btn.disabled = false; btn.textContent = subEdit ? 'Save changes' : 'Add subscription'; }
+    }
+    // push the renewal date forward by one billing cycle
+    async function renewSub(id, btn) {
+      const s = SUB.find(x => x.id === id); if (!s || !s.next) return;
+      const dt = new Date(s.next + 'T00:00:00'), day = dt.getDate(); dt.setMonth(dt.getMonth() + SCYCLE[s.cycle].m); if (dt.getDate() !== day) dt.setDate(0);
+      const nx = dstr(dt); btn.disabled = true;
+      try {
+        const up = { [`users/${U.uid}/subscriptions/${id}/nextDue`]: nx };
+        if (s.cuid && K.some(c => c.id === s.cid && c.uid === s.cuid)) up[`portal/${s.cuid}/subscriptions/${id}/nextDue`] = nx;
+        await withTimeout(update(ref(db), up), 12000); toast(s.name + ' renewed until ' + fmtD(nx));
+      }
+      catch (e2) { toast(subErr(e2, 'renew the subscription')); }
+      btn.disabled = false;
+    }
+    let offSub = () => {}, sSig = '';
+    function watchSubs() {
+      offSub(); SUB = []; sSig = ''; subError = ''; let first = true;
+      offSub = onValue(ref(db, `users/${U.uid}/subscriptions`), snap => {
+        const list = [];
+        snap.forEach(ch => {
+          const v = ch.val() || {};
+          list.push({ id: ch.key, type: STYPE[v.type] ? v.type : 'other', name: String(v.label || ''), to: String(v.billedTo || ''), cid: String(v.customerId || ''), cuid: String(v.customerUid || ''), amt: +v.amount || 0, cycle: SCYCLE[v.cycle] ? v.cycle : 'monthly', next: String(v.nextDue || ''), status: ['active', 'paused', 'cancelled'].includes(v.status) ? v.status : 'active', notes: String(v.notes || ''), at: +v.createdAt || 0 });
+        });
+        list.sort((a, b) => b.at - a.at);
+        const sig = JSON.stringify(list), wasFirst = first; first = false; subError = '';
+        if (sig === sSig) return;
+        SUB = list; sSig = sig; drawNotif();
+        if (document.body.classList.contains('ready') && view === 'subscriptions') { if (wasFirst) paint(true); else updateSView(); }
+      }, err => { subError = subErr(err, 'load your subscriptions'); if (document.body.classList.contains('ready') && view === 'subscriptions') paint(false); });
+    }
+
     // PDF (jsPDF is loaded the first time it's needed)
     let pdfLib = null;
     const loadPdf = () => pdfLib || (pdfLib = new Promise((res, rej) => {
@@ -756,6 +1038,7 @@
       btn.disabled = false; btn.classList.remove('opacity-50');
     }
     const views = {
+      subscriptions: () => subView(),
       overview() {
         const act = projs().filter(p => status(p) === 'active').length;
         const all = projs().flatMap(p => p.items), done = all.filter(m => m.d).length;
@@ -790,11 +1073,12 @@
           <button id="newInvBtn" data-act="newinv" class="btn-shine w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white text-sm shadow-lg shadow-brand-500/30">+ New invoice</button></div>
         <div id="iPanel" class="i-panel" inert><div><form data-form="newinv" data-edit="" class="${card} space-y-4"><div id="iTitle" class="font-bold">New invoice</div>
           <div class="grid sm:grid-cols-2 gap-4">
-            <label class="${lbl}">Billed to<input name="to" required maxlength="80" autocomplete="off" class="field mt-1.5" placeholder="Client or company name"/></label>
+            <label class="${lbl}">Billed to (customer)<select name="cust" required class="field mt-1.5"><option value="">Choose a customer...</option></select></label>
             <label class="${lbl}">Description<input name="desc" required maxlength="120" autocomplete="off" class="field mt-1.5" placeholder="e.g. Website redesign: deposit"/></label>
             <label class="${lbl}">Amount (PHP)<input name="amt" type="number" inputmode="decimal" min="1" max="1000000000" step="0.01" required class="field mt-1.5" placeholder="15000"/></label>
             <label class="${lbl}">Due date<input name="due" type="date" required class="field mt-1.5"/></label>
           </div>
+          <p id="iHint" class="text-xs text-slate-400 -mt-1"></p>
           <p id="iErr" class="text-sm text-red-400 min-h-[1.25rem]" role="alert"></p>
           <div class="flex flex-wrap gap-3"><button type="submit" id="iSave" class="btn-shine px-6 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white">Create invoice</button><button type="button" data-act="icancel" class="px-6 py-3 rounded-xl glass font-semibold text-slate-300 hover:text-white transition">Cancel</button></div></form></div></div>
         ${iError ? `<p class="mb-4 text-sm text-red-400" role="alert">${esc(iError)}</p>` : ''}
@@ -964,6 +1248,7 @@
       });
       const slot = n.querySelector('[data-slot]'), k = slotKey(p);
       if (slot.dataset.k !== k) { slot.dataset.k = k; slot.innerHTML = actHtml(p); }
+      const mt = n.querySelector('[data-mt]'), sg = mtSig(p); if (mt && mt.dataset.sig !== sg) { mt.dataset.sig = sg; mt.innerHTML = mtHtml(p); }
     }
     let rt;
     function refresh() {
@@ -981,7 +1266,7 @@
     }
     let goT;
     function go(v) {
-      closeMenu(); closeNotif(); invOpen = false; invEdit = null; view = v; if (v !== 'backup' && !bk.busy) { bk.err = ''; bk.note = ''; }
+      closeMenu(); closeNotif(); invOpen = false; invEdit = null; subOpen = false; subEdit = null; view = v; if (v !== 'backup' && !bk.busy) { bk.err = ''; bk.note = ''; }
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('on', b.dataset.v === v));
       const el = $('#view'); clearTimeout(goT);
       el.style.transition = 'opacity .16s ease'; el.style.opacity = '0';
@@ -1012,7 +1297,10 @@
       return [
         { v: 'chat', icon: ICON.chat, t: 'Unread chat messages', n: chat },
         { v: 'messages', icon: ICON.messages, t: 'Quotations to email', n: Q.filter(q => !q.emailSent).length },
-        { v: 'invoices', icon: ICON.invoices, t: 'Overdue invoices', n: I.filter(i => istat(i) === 'overdue').length }
+        { v: 'invoices', icon: ICON.invoices, t: 'Overdue invoices', n: I.filter(i => istat(i) === 'overdue').length },
+        { v: 'subscriptions', icon: ICON.subscriptions, t: 'Subscriptions to renew', n: SUB.filter(x => ['soon', 'overdue'].includes(sstat(x))).length },
+        { v: 'subscriptions', icon: ICON.subscriptions, t: 'Maintenance requests to review', n: C.reduce((n, p) => n + mtReqs(p.id).filter(r => r.status === 'requested').length, 0) },
+        { v: 'subscriptions', icon: ICON.subscriptions, t: 'Free maintenance ending or ended', n: C.filter(p => p.mf > 0 && ['soon', 'ended'].includes(mtInfo(p).k) && !mtReqs(p.id).some(r => r.status === 'requested' || r.status === 'active')).length }
       ].filter(x => x.n > 0);
     }
     function drawNotif() {
@@ -1160,7 +1448,7 @@
       let uids = K.map(c => c.uid).filter(Boolean);
       try { const sn = await withTimeout(get(ref(db, `users/${U.uid}/customers`)), 30000); sn.forEach(ch => { const u = (ch.val() || {}).uid; if (u) uids.push(u); }); } catch (e) {}
       uids = [...new Set(uids)];
-      await Promise.all([take(`users/${U.uid}`), take('quotes'), ...uids.flatMap(u => [take(`portal/${u}`), take(`chats/${u}`)])]);
+      await Promise.all([take(`users/${U.uid}`), take('quotes'), ...uids.flatMap(u => [take(`portal/${u}`), take(`chats/${u}`), take(`maintenance/${u}`)])]);
       return { data, failed };
     }
     async function bkDownload() {
@@ -1180,7 +1468,7 @@
       } catch (err) { console.error(err); bkFail('dl', 'Could not create the backup. Please try again.'); }
     }
     // only these paths may be restored, and users/<uid> must be this account's own
-    const bkAllowed = path => path === `users/${U.uid}` || path === 'quotes' || /^(portal|chats)\/[A-Za-z0-9_-]+$/.test(path);
+    const bkAllowed = path => path === `users/${U.uid}` || path === 'quotes' || /^(portal|chats|maintenance)\/[A-Za-z0-9_-]+$/.test(path);
     function bkParse(text) {
       let f; try { f = JSON.parse(text); } catch (e) { throw new Error('That file is not a valid backup (it could not be read).'); }
       if (!f || f.format !== BK_FORMAT || !f.data || typeof f.data !== 'object') throw new Error('That file is not a backup made by this dashboard.');
@@ -1197,7 +1485,7 @@
         if (depth > 0 && v && typeof v === 'object' && !Array.isArray(v)) { Object.keys(v).forEach(k => put(base + '/' + k, v[k], depth - 1)); }
         else out[base] = v;
       };
-      Object.keys(data).forEach(path => put(path, data[path], path.startsWith('users/') ? 2 : path.startsWith('chats/') ? 2 : 1));
+      Object.keys(data).forEach(path => put(path, data[path], path.startsWith('users/') || path.startsWith('chats/') || path.startsWith('portal/') ? 2 : 1));
       return out;
     }
     async function bkPick(file) {
@@ -1228,7 +1516,7 @@
     }
 
     // ---------- events ----------
-    const navKeys = () => PORTAL ? ['portal', 'settings'] : ['overview', 'projects', 'invoices', 'accounting', 'customers', 'chat', 'messages', 'backup', 'settings'];
+    const navKeys = () => PORTAL ? ['portal', 'settings'] : ['overview', 'projects', 'invoices', 'subscriptions', 'accounting', 'customers', 'chat', 'messages', 'backup', 'settings'];
     const buildNav = () => { $('#nav').innerHTML = navKeys().map(k => `<button data-v="${k}" class="nav-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold text-slate-300 hover:text-white">${svg(ICON[k])}${TITLES[k]}${k === 'chat' ? '<span id="chatBadge" class="hidden ml-auto min-w-[1.25rem] h-5 px-1.5 rounded-full bg-pink text-white text-[11px] font-bold items-center justify-center" aria-label="Unread chat messages"></span>' : ''}</button>`).join(''); chBadge(); };
     buildNav();
     $('#nav').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (b) go(b.dataset.v); });
@@ -1285,12 +1573,22 @@
       else if (a === 'iflt') { iflt = b.dataset.v; document.querySelectorAll('[data-ipill]').forEach(x => x.className = pillCls(x.dataset.v === iflt)); const g = $('#igrid'); if (g) swapFilter(g, () => drawI(true)); }
       else if (a === 'newinv') { if (invOpen) hideInvPanel(); else showInvPanel(null); }
       else if (a === 'icancel') hideInvPanel();
+      else if (a === 'sflt') { sflt = b.dataset.v; document.querySelectorAll('[data-spill]').forEach(x => x.className = pillCls(x.dataset.v === sflt)); const g = $('#sgrid'); if (g) swapFilter(g, () => drawS(true)); }
+      else if (a === 'newsub') { if (subOpen) hideSubPanel(); else showSubPanel(null); }
+      else if (a === 'scancel') hideSubPanel();
+      else if (a === 'sedit') { const x = SUB.find(y => y.id === b.dataset.s); if (x) showSubPanel(x); }
+      else if (a === 'srenew') renewSub(b.dataset.s, b);
+      else if (a === 'sdel') openXSub(b.dataset.s, b);
+      else if (a === 'sgoproj') go('projects');
       else if (a === 'iedit') { const i = I.find(x => x.id === b.dataset.i); if (i) showInvPanel(i); }
       else if (a === 'ipay') {
         const i = I.find(x => x.id === b.dataset.i); if (!i) return;
         const val = !i.paid, prev = { p: i.paid, t: i.paidAt };
         i.paid = val; i.paidAt = val ? Date.now() : 0; repaintI();   // show it right away; the database write follows
-        try { await update(ref(db, `users/${U.uid}/invoices/${i.id}`), { paid: val, paidAt: val ? serverTimestamp() : null }); toast(i.num + (val ? ' marked as paid' : ' marked as unpaid')); }
+        try {
+          const ib = `users/${U.uid}/invoices/${i.id}`, up = { [`${ib}/paid`]: val, [`${ib}/paidAt`]: val ? serverTimestamp() : null };
+          if (invMirror(i)) { const pb = `portal/${i.cuid}/invoices/${i.id}`; up[`${pb}/paid`] = val; up[`${pb}/paidAt`] = val ? serverTimestamp() : null; }   // the customer sees it too
+          await update(ref(db), up); toast(i.num + (val ? ' marked as paid' : ' marked as unpaid')); }
         catch (err) { const r = I.find(x => x.id === b.dataset.i); if (r) { r.paid = prev.p; r.paidAt = prev.t; } toast(invErr(err, 'update the invoice')); repaintI(); }
       }
       else if (a === 'idl') { const i = I.find(x => x.id === b.dataset.i); if (i) downloadPdf(i, b); }
@@ -1345,6 +1643,16 @@
       else if (a === 'kdel') openXCust(b.dataset.k, b);
       else if (a === 'pwdone') { try { localStorage.setItem('pwn:' + U.uid, '1'); } catch (e2) {} paint(false); }
       else if (a === 'rpw') { try { await sendPasswordResetEmail(auth, U.email); toast('Reset link sent to ' + U.email); } catch (err) { toast('Could not send the email. Try again later.'); } }
+      else if (a === 'mtok' || a === 'mtno' || a === 'mtdel') {
+        const path = `maintenance/${b.dataset.u}/${b.dataset.p}`;
+        if (a === 'mtdel' && !confirm('Remove this maintenance record? The customer will be able to request again.')) return;
+        b.disabled = true;
+        try {
+          if (a === 'mtdel') await withTimeout(remove(ref(db, path)), 12000);
+          else await withTimeout(update(ref(db, path), { status: a === 'mtok' ? 'active' : 'declined', decidedAt: serverTimestamp() }), 12000);
+          toast(a === 'mtok' ? 'Maintenance subscription activated' : a === 'mtno' ? 'Request declined' : 'Record removed');
+        } catch (err) { b.disabled = false; toast(failMsg(err, 'update the maintenance request')); }
+      }
       else if (a === 'bkdl') await bkDownload();
       else if (a === 'bkgo') await bkRestore();
       else if (a === 'bkclr') { bk.data = null; bk.sum = null; bk.file = ''; bk.err = ''; paint(false); }
@@ -1357,12 +1665,27 @@
         await addFeature(f);
       } else if (k === 'newinv') {
         await saveInvoice(f);
+      } else if (k === 'newsub') {
+        await saveSub(f);
       } else if (k === 'newcust') {
         await saveCustomer(f);
+      } else if (k === 'maint') {
+        await saveMaint(f);
       } else if (k === 'prof') {
         try { await updateProfile(auth.currentUser, { displayName: d.get('name').trim() }); fillUser(); toast('Profile updated'); } catch (err) { toast('Could not save your profile.'); }
       }
     });
+
+    async function saveMaint(f) {
+      const p = findP(f.dataset.p); if (!p || !p.cloud) return;
+      const d = new FormData(f), weeks = parseInt(d.get('weeks'), 10), fee = Math.round(parseFloat(d.get('fee')));
+      if (!(weeks >= 0 && weeks <= 260)) return toast('Free maintenance must be 0 to 260 weeks.');
+      if (!(fee >= 0 && fee <= 1e7)) return toast('Enter a fee between 0 and 10,000,000.');
+      const btn = f.querySelector('button[type="submit"]'); btn.disabled = true;
+      try { await withTimeout(update(ref(db, `users/${U.uid}/projects/${p.id}`), { maintenance: { weeks, fee } }), 12000); toast('Maintenance updated'); }
+      catch (err) { toast(failMsg(err, 'save the maintenance settings')); }
+      btn.disabled = false;
+    }
 
     // ---------- add a feature (inclusion) to an existing project ----------
     async function addFeature(f) {
@@ -1392,14 +1715,25 @@
         const list = [];
         snap.forEach(ch => {
           const v = ch.val() || {};
-          list.push({ id: ch.key, cloud: true, name: v.name || 'Untitled project', start: v.startDate, due: v.endDate, items: arr(v.inclusions).map(x => typeof x === 'string' ? { t: x, d: false } : { t: x.t, d: x.d === true }), archived: v.archived === true, at: v.createdAt || 0 });
+          list.push({ id: ch.key, cloud: true, name: v.name || 'Untitled project', start: v.startDate, due: v.endDate, items: arr(v.inclusions).map(x => typeof x === 'string' ? { t: x, d: false } : { t: x.t, d: x.d === true }), archived: v.archived === true, at: v.createdAt || 0, arAt: +v.archivedAt || 0, hasM: !!v.maintenance, mw: v.maintenance ? Math.max(0, +v.maintenance.weeks || 0) : 0, mf: v.maintenance ? Math.max(0, +v.maintenance.fee || 0) : 0 });
         });
         list.sort((a, b) => b.at - a.at);
         const sig = JSON.stringify(list), wasFirst = first; first = false;
         if (sig === cloudSig) return;
-        C = list; cloudSig = sig;
+        C = list; cloudSig = sig; drawNotif();
+        if (document.body.classList.contains('ready') && view === 'subscriptions') updateSView();
         if (wasFirst) { if (document.body.classList.contains('ready') && (view === 'projects' || view === 'overview')) paint(true); } else refresh();
       }, () => toast('Could not load your saved projects.'));
+    }
+
+    // ---------- maintenance requests in Firebase Realtime Database ----------
+    let offMR = () => {};
+    function watchMaint() {
+      offMR(); MR = {};
+      offMR = onValue(ref(db, 'maintenance'), snap => {
+        MR = snap.val() || {}; drawNotif();
+        if (document.body.classList.contains('ready')) { if (view === 'subscriptions') updateSView(); else if (view === 'projects' || view === 'overview') paint(false); }
+      }, () => {});
     }
 
     // ---------- quotations in Firebase Realtime Database ----------
@@ -1424,7 +1758,7 @@
 
     // ---------- invoices in Firebase Realtime Database ----------
     // Saved at users/<uid>/invoices/<pushId>.
-    const invErr = (err, what) => { console.error(what, err); return /PERMISSION_DENIED/i.test(String((err && (err.code || err.message)) || '')) ? 'Blocked by the database rules. Add the "invoices" rules under users/$uid in Firebase.' : 'Could not ' + what + '. Please try again.'; };
+    const invErr = (err, what) => { console.error(what, err); return /PERMISSION_DENIED/i.test(String((err && (err.code || err.message)) || '')) ? 'Blocked by the database rules. Add the "invoices" rules under users/$uid and let the admin write portal/$cuid/invoices in Firebase.' : 'Could not ' + what + '. Please try again.'; };
     const repaintI = () => { drawNotif(); if (!document.body.classList.contains('ready')) return; if (view === 'invoices') updateIView(); else if (view === 'overview' || view === 'accounting') paint(false); };
     let offInv = () => {}, iSig = '', invKey = null, creatingInv = false;
     function watchInvoices() {
@@ -1433,7 +1767,7 @@
         const list = [];
         snap.forEach(ch => {
           const v = ch.val() || {};
-          list.push({ id: ch.key, num: v.number || 'INV', to: v.billedTo || '', desc: v.description || '', amt: +v.amount || 0, due: v.dueDate || '', paid: v.paid === true, paidAt: +v.paidAt || 0, at: +v.createdAt || 0 });
+          list.push({ id: ch.key, num: v.number || 'INV', to: v.billedTo || '', cid: v.customerId || '', cuid: v.customerUid || '', desc: v.description || '', amt: +v.amount || 0, due: v.dueDate || '', paid: v.paid === true, paidAt: +v.paidAt || 0, at: +v.createdAt || 0 });
         });
         list.sort((a, b) => b.at - a.at);
         const sig = JSON.stringify(list), wasFirst = first; first = false; iError = '';
@@ -1442,39 +1776,59 @@
         if (wasFirst) { if (document.body.classList.contains('ready') && (view === 'invoices' || view === 'overview' || view === 'accounting')) paint(true); } else repaintI();
       }, err => { iError = invErr(err, 'load your invoices'); if (document.body.classList.contains('ready') && (view === 'invoices' || view === 'overview' || view === 'accounting')) paint(false); });
     }
+    // An invoice is only valid for a customer that exists in the database. It is saved under the admin and mirrored to
+    // portal/<customerUid>/invoices/<id> in one atomic write, so it shows in that customer's own dashboard.
+    async function invCustomer(cid) {
+      const sn = await withTimeout(get(ref(db, `users/${U.uid}/customers/${cid}`)), 12000);
+      if (!sn.exists()) return { err: 'That customer is not in your database. Choose a customer from your Customers list.' };
+      const v = sn.val() || {};
+      if (!v.uid) return { err: 'That customer has no portal login yet, so they could not see the invoice.' };
+      if (v.disabled === true) return { err: 'That customer account is disabled. Enable it on the Customers page first.' };
+      return { c: { id: cid, uid: v.uid, name: String(v.name || 'Customer'), company: String(v.company || '') } };
+    }
     async function saveInvoice(f) {
       if (creatingInv) return;
       const d = new FormData(f), err = $('#iErr'), btn = $('#iSave'), editId = f.dataset.edit;
-      const to = String(d.get('to') || '').trim().replace(/\s+/g, ' ').slice(0, 80), desc = String(d.get('desc') || '').trim().replace(/\s+/g, ' ').slice(0, 120);
+      const desc = String(d.get('desc') || '').trim().replace(/\s+/g, ' ').slice(0, 120);
       const amt = Math.round(parseFloat(d.get('amt')) * 100) / 100, due = String(d.get('due') || '');
       const bad = m => { err.textContent = m; };
-      if (!to) return bad('Enter who this invoice is billed to.');
+      const cur = editId ? I.find(x => x.id === editId) : null;
+      if (editId && !cur) { hideInvPanel(); return; }
+      const cid = cur && cur.cid ? cur.cid : String(d.get('cust') || '');
+      if (!cid) return bad(K.length ? 'Choose the customer this invoice is for.' : 'There are no customers yet. Add the customer on the Customers page first. Invoices can only be created for customers in your database.');
       if (!desc) return bad('Enter a description.');
       if (!(amt > 0) || amt > 1e9) return bad('Enter an amount greater than zero.');
       if (!/^\d{4}-\d\d-\d\d$/.test(due)) return bad('Choose a due date.');
       err.textContent = '';
-      if (editId) {
-        const i = I.find(x => x.id === editId); if (!i) { hideInvPanel(); return; }
-        if (to === i.to && desc === i.desc && amt === i.amt && due === i.due) { hideInvPanel(); return; }   // nothing changed
-        const prev = { to: i.to, desc: i.desc, amt: i.amt, due: i.due };
-        i.to = to; i.desc = desc; i.amt = amt; i.due = due; hideInvPanel(); updateIView();   // show it right away; the database write follows
-        try { await withTimeout(update(ref(db, `users/${U.uid}/invoices/${i.id}`), { billedTo: to, description: desc, amount: amt, dueDate: due }), 12000); toast(i.num + ' updated'); }
-        catch (e2) { const r = I.find(x => x.id === editId); if (r) Object.assign(r, { to: prev.to, desc: prev.desc, amt: prev.amt, due: prev.due }); updateIView(); toast(invErr(e2, 'update the invoice')); }
-        return;
-      }
       creatingInv = true; btn.disabled = true; btn.textContent = 'Saving...';
-      const num = 'INV-' + (I.reduce((m, x) => Math.max(m, parseInt(String(x.num).replace(/\D/g, ''), 10) || 0), 1000) + 1);
-      if (iflt !== 'all') { iflt = 'all'; document.querySelectorAll('[data-ipill]').forEach(x => x.className = pillCls(x.dataset.v === 'all')); }
       try {
-        const base = `users/${U.uid}/invoices`;
-        if (!invKey) invKey = push(ref(db, base)).key;   // reused on retry, so a retry never creates a duplicate
-        await withTimeout(set(ref(db, `${base}/${invKey}`), { number: num, billedTo: to, description: desc, amount: amt, dueDate: due, paid: false, createdAt: serverTimestamp() }), 12000);
-        invKey = null; hideInvPanel(); toast(num + ' created');
+        const r = await invCustomer(cid);   // checked against the database itself, not just the list on screen
+        if (r.err) return bad(r.err);
+        const c = r.c, bt = (c.company || c.name).slice(0, 80), ib = `users/${U.uid}/invoices`;
+        if (cur) {
+          const linking = !cur.cuid;
+          if (!linking && desc === cur.desc && amt === cur.amt && due === cur.due) { hideInvPanel(); return; }   // nothing changed
+          const up = { [`${ib}/${cur.id}/description`]: desc, [`${ib}/${cur.id}/amount`]: amt, [`${ib}/${cur.id}/dueDate`]: due }, pb = `portal/${c.uid}/invoices/${cur.id}`;
+          if (linking) {
+            up[`${ib}/${cur.id}/billedTo`] = bt; up[`${ib}/${cur.id}/customerId`] = c.id; up[`${ib}/${cur.id}/customerUid`] = c.uid;
+            up[pb] = { number: cur.num, description: desc, amount: amt, dueDate: due, paid: cur.paid, paidAt: cur.paid ? (cur.paidAt || 0) : 0, createdAt: cur.at || 0 };
+          } else { up[`${pb}/description`] = desc; up[`${pb}/amount`] = amt; up[`${pb}/dueDate`] = due; }
+          await withTimeout(update(ref(db), up), 12000);
+          hideInvPanel(); toast(cur.num + (linking ? ' linked to ' + bt : ' updated'));
+          return;
+        }
+        const num = 'INV-' + (I.reduce((m, x) => Math.max(m, parseInt(String(x.num).replace(/\D/g, ''), 10) || 0), 1000) + 1);
+        if (iflt !== 'all') { iflt = 'all'; document.querySelectorAll('[data-ipill]').forEach(x => x.className = pillCls(x.dataset.v === 'all')); }
+        if (!invKey) invKey = push(ref(db, ib)).key;   // reused on retry, so a retry never creates a duplicate
+        await withTimeout(update(ref(db), {
+          [`${ib}/${invKey}`]: { number: num, billedTo: bt, customerId: c.id, customerUid: c.uid, description: desc, amount: amt, dueDate: due, paid: false, createdAt: serverTimestamp() },
+          [`portal/${c.uid}/invoices/${invKey}`]: { number: num, description: desc, amount: amt, dueDate: due, paid: false, createdAt: serverTimestamp() }
+        }), 12000);
+        invKey = null; hideInvPanel(); toast(num + ' created for ' + bt);
       } catch (e2) {
         const c = String((e2 && (e2.code || e2.message)) || '');
-        err.textContent = c === 'timeout' ? 'This is taking too long. Check your connection and try again.' : invErr(e2, 'save the invoice');
-      }
-      creatingInv = false; btn.disabled = false; btn.textContent = invEdit ? 'Save changes' : 'Create invoice';
+        err.textContent = c === 'timeout' ? 'This is taking too long. Check your connection and try again.' : invErr(e2, cur ? 'update the invoice' : 'save the invoice');
+      } finally { creatingInv = false; btn.disabled = false; btn.textContent = invEdit ? 'Save changes' : 'Create invoice'; }
     }
 
     // ---------- new project modal ----------
@@ -1548,12 +1902,15 @@
       if (!end) return showErr('Please choose an end date.', $('#mEnd'));
       if (end < start) return showErr('The end date cannot be before the start date.', $('#mEnd'));
       if (!inc.length) return showErr('Add at least one inclusion.', incIn);
+      const weeks = parseInt($('#mWeeks').value, 10), fee = Math.round(parseFloat($('#mFee').value));
+      if (!(weeks >= 0 && weeks <= 260)) return showErr('Enter the free maintenance in weeks (0 to 260).', $('#mWeeks'));
+      if (!(fee >= 0 && fee <= 1e7)) return showErr('Enter the maintenance fee in PHP (0 if none).', $('#mFee'));
       mErr.textContent = ''; setSaving(true); flt = 'all';
       try {
         const base = `users/${U.uid}/projects`;
         if (!pendingKey) pendingKey = push(ref(db, base)).key;   // reused on retry, so a retry never creates a duplicate
         await withTimeout(set(ref(db, `${base}/${pendingKey}`), {
-          name, startDate: start, endDate: end, inclusions: inc.map(t => ({ t, d: false })), status: 'pending',
+          name, startDate: start, endDate: end, inclusions: inc.map(t => ({ t, d: false })), status: 'pending', maintenance: { weeks, fee },
           requestedBy: U.email || U.displayName || '', createdAt: serverTimestamp()
         }), 12000);
         setSaving(false); closeModal(); toast('Project request submitted');
@@ -1658,8 +2015,17 @@
     }
     function openXDel(id, trigger) {
       const i = I.find(x => x.id === id); if (!i) return;
-      xSetup('invoice'); delI = { kind: 'invoice', id: i.id, num: i.num }; xFocus = trigger || document.activeElement;
-      $('#xDesc').textContent = 'This will permanently delete ' + i.num + ' (' + money(i.amt) + (i.to ? ', billed to ' + i.to : '') + '). This cannot be undone.';
+      xSetup('invoice'); delI = { kind: 'invoice', id: i.id, num: i.num, cuid: invMirror(i) ? i.cuid : '' }; xFocus = trigger || document.activeElement;
+      $('#xDesc').textContent = 'This will permanently delete ' + i.num + ' (' + money(i.amt) + (i.to ? ', billed to ' + i.to : '') + ')' + (invMirror(i) ? ' and remove it from their dashboard' : '') + '. This cannot be undone.';
+      xIn.value = ''; xIn.disabled = false; setXDeleting(false); syncX();
+      xModal.classList.add('show');
+      requestAnimationFrame(() => requestAnimationFrame(() => xModal.classList.add('open')));
+      setTimeout(() => xIn.focus(), 60);
+    }
+    function openXSub(id, trigger) {
+      const x = SUB.find(y => y.id === id); if (!x) return;
+      xSetup('sub'); delI = { kind: 'sub', id: x.id, num: x.name, cuid: x.cuid && K.some(c => c.id === x.cid && c.uid === x.cuid) ? x.cuid : '' }; xFocus = trigger || document.activeElement;
+      $('#xDesc').textContent = 'This will permanently delete the ' + STYPE[x.type].l.toLowerCase() + ' subscription "' + x.name + '" (' + money(x.amt) + ' per ' + SCYCLE[x.cycle].per + ')' + (x.to ? ' for ' + x.to : '') + (delI.cuid ? ' and remove it from their dashboard' : '') + '. This cannot be undone.';
       xIn.value = ''; xIn.disabled = false; setXDeleting(false); syncX();
       xModal.classList.add('show');
       requestAnimationFrame(() => requestAnimationFrame(() => xModal.classList.add('open')));
@@ -1692,10 +2058,11 @@
       try {
         if (t.kind === 'disable') await withTimeout(update(ref(db), { [`users/${U.uid}/customers/${t.id}/disabled`]: true, [`portal/${t.uid}/disabled`]: true, [`portal/${t.uid}/revoked`]: true }), 12000);
         else if (t.kind === 'cust') await withTimeout(update(ref(db), { [`users/${U.uid}/customers/${t.id}`]: null, [`portal/${t.uid}`]: { admin: U.uid, revoked: true } }), 12000);
-        else { await withTimeout(remove(ref(db, `users/${U.uid}/invoices/${t.id}`)), 12000); if (invEdit === t.id) hideInvPanel(); }
+        else if (t.kind === 'sub') { const up = { [`users/${U.uid}/subscriptions/${t.id}`]: null }; if (t.cuid) up[`portal/${t.cuid}/subscriptions/${t.id}`] = null; await withTimeout(update(ref(db), up), 12000); }
+        else { const up = { [`users/${U.uid}/invoices/${t.id}`]: null }; if (t.cuid) up[`portal/${t.cuid}/invoices/${t.id}`] = null; await withTimeout(update(ref(db), up), 12000); if (invEdit === t.id) hideInvPanel(); }
         setXDeleting(false); closeXDel(); toast(t.kind === 'disable' ? t.num + ' can no longer log in' : t.num + ' deleted');
       } catch (err) {
-        setXDeleting(false); xErr.textContent = t.kind === 'disable' ? kErr(err, 'disable the account') : t.kind === 'cust' ? kErr(err, 'delete the customer') : invErr(err, 'delete the invoice');
+        setXDeleting(false); xErr.textContent = t.kind === 'disable' ? kErr(err, 'disable the account') : t.kind === 'cust' ? kErr(err, 'delete the customer') : t.kind === 'sub' ? subErr(err, 'delete the subscription') : invErr(err, 'delete the invoice');
       }
     });
 
@@ -1703,7 +2070,7 @@
     // Saved at users/<adminUid>/customers/<id>. Each customer also gets portal/<customerUid>, which tells their login whose projects to show.
     const TEMP_PW = '123456';   // every new customer starts with this; the email tells them to change it
     const kErr = (err, what) => { console.error(what, err); return /PERMISSION_DENIED/i.test(String((err && (err.code || err.message)) || '')) ? 'Blocked by the database rules. Add the "portal" and "customers" rules in Firebase.' : 'Could not ' + what + '. Please try again.'; };
-    const repaintK = () => { chSync(); if (document.body.classList.contains('ready') && view === 'customers') paint(false); };
+    const repaintK = () => { chSync(); if (document.body.classList.contains('ready')) { if (view === 'customers') paint(false); else if (view === 'subscriptions') updateSView(); } };
     let offK = () => {}, kSig = '';
     function watchCustomers() {
       offK(); K = []; kSig = ''; kError = '';
@@ -1746,7 +2113,8 @@
       // [phrase to type, button label, modal title, button label while working]
       const m = { cust: ['Delete this Customer', 'Delete customer', 'Delete customer?', 'Deleting...'],
                   disable: ['Disable Account', 'Disable account', 'Disable account?', 'Disabling...'],
-                  invoice: ['Delete this Invoice', 'Delete invoice', 'Delete invoice?', 'Deleting...'] }[kind];
+                  invoice: ['Delete this Invoice', 'Delete invoice', 'Delete invoice?', 'Deleting...'],
+                  sub: ['Delete this Subscription', 'Delete subscription', 'Delete subscription?', 'Deleting...'] }[kind];
       X_PHRASE = m[0]; X_LABEL = m[1]; X_BUSY = m[3];
       $('#xTitle').textContent = m[2]; $('#xPhrase').textContent = X_PHRASE; xIn.placeholder = X_PHRASE;
     }
@@ -1799,7 +2167,7 @@
         repaintP();
       }, () => { PORTAL = { revoked: true }; repaintP(); });
     }
-    const stopAll = () => { chStop(); offProjects(); offQuotes(); offInv(); offK(); offPortalNode(); Object.values(PW).forEach(f => f()); PW = {}; };
+    const stopAll = () => { chStop(); offProjects(); offMR(); offQuotes(); offInv(); offSub(); offK(); offPortalNode(); Object.values(PW).forEach(f => f()); PW = {}; };
 
     // ---------- auth ----------
     function fillUser() { const n = U.displayName || U.email.split('@')[0]; $('#who').textContent = n; $('#avatar').textContent = n[0].toUpperCase(); }
@@ -1814,7 +2182,7 @@
       if (portalBlocked(PORTAL)) { denyPortal(); return; }
       buildNav(); drawNotif();
       if (PORTAL) { view = 'portal'; watchPortal(); }
-      else { view = 'overview'; watchProjects(); watchQuotes(); watchInvoices(); watchCustomers(); setTimeout(() => loadPdf().catch(() => {}), 2500); }
+      else { view = 'overview'; watchProjects(); watchMaint(); watchQuotes(); watchInvoices(); watchSubs(); watchCustomers(); setTimeout(() => loadPdf().catch(() => {}), 2500); }
       if (!document.body.classList.contains('ready')) { paint(true); document.body.classList.add('ready'); }
     });
   </script>

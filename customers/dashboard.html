@@ -97,6 +97,7 @@ tailwind.config = { theme: { extend: {
   html.light .chk { border-color: rgba(15,21,53,.25); background: rgba(15,21,53,.04); }
   html.light .step:not(:last-child)::before { background: rgba(15,21,53,.12); }
   html.light .animate-blob { opacity: .55; }
+  html.light .text-red-300, html.light .text-red-400 { color: #dc2626; }
   /* notifications (top bar) */
   @keyframes notifIn { from { opacity: 0; transform: translateY(-6px) scale(.98); } to { opacity: 1; transform: none; } }
   @keyframes badgePop { 0% { transform: scale(.7); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
@@ -107,6 +108,37 @@ tailwind.config = { theme: { extend: {
   html.light #notifMenu { background: #fff; border-color: rgba(15,21,53,.12); box-shadow: 0 30px 80px rgba(67,81,232,.22); }
   html.light #notifBadge { box-shadow: 0 0 0 2px #f5f6ff; }
   html.light #notifMenu button:hover { background: rgba(15,21,53,.06); }
+  /* modal (subscribe confirmation) */
+  @keyframes mdlScrimIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes mdlScrimOut { from { opacity: 1; } to { opacity: 0; } }
+  @keyframes mdlIn { from { opacity: 0; transform: translateY(18px) scale(.95); } to { opacity: 1; transform: none; } }
+  @keyframes mdlOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(10px) scale(.97); } }
+  @keyframes mdlSheetIn { from { transform: translateY(100%); } to { transform: none; } }
+  @keyframes mdlSheetOut { from { transform: none; } to { transform: translateY(100%); } }
+  @keyframes mdlPop { 0% { transform: scale(.6); opacity: 0; } 60% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); } }
+  #mdl { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+  #mdl .mdl-scrim { position: absolute; inset: 0; background: rgba(4,6,16,.68); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); animation: mdlScrimIn .25s ease both; }
+  #mdl .mdl-card { position: relative; width: 100%; max-width: 26rem; max-height: 100%; overflow-y: auto; background: #0d1226; border: 1px solid rgba(255,255,255,.1); border-radius: 1.5rem; box-shadow: 0 30px 80px rgba(0,0,0,.6); padding: 1.75rem 1.5rem 1.5rem; animation: mdlIn .35s cubic-bezier(.2,.8,.2,1) both; outline: none; }
+  #mdl.closing .mdl-scrim { animation: mdlScrimOut .22s ease forwards; }
+  #mdl.closing .mdl-card { animation: mdlOut .22s ease forwards; }
+  #mdl .mdl-pop { animation: mdlPop .5s cubic-bezier(.2,.9,.25,1.3) both; }
+  #mdl .mdl-sum { border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.04); border-radius: 1rem; }
+  #mdl .mdl-div { border-color: rgba(255,255,255,.1); }
+  html.light #mdl .mdl-scrim { background: rgba(15,21,53,.38); }
+  html.light #mdl .mdl-card { background: #fff; border-color: rgba(15,21,53,.12); box-shadow: 0 30px 80px rgba(67,81,232,.25); }
+  html.light #mdl .mdl-sum { border-color: rgba(15,21,53,.1); background: rgba(15,21,53,.03); }
+  html.light #mdl .mdl-div { border-color: rgba(15,21,53,.1); }
+  html.light #mdl .mdl-ghost { background: rgba(15,21,53,.05); }
+  html.light #mdl .mdl-ghost:hover { background: rgba(15,21,53,.09); }
+  #mdl .mdl-ghost { background: rgba(255,255,255,.06); transition: background-color .25s ease; }
+  #mdl .mdl-ghost:hover { background: rgba(255,255,255,.1); }
+  #mdl button:focus-visible { outline: 2px solid #7c8cff; outline-offset: 2px; }
+  #mdl button:disabled { opacity: .7; cursor: default; }
+  @media (max-width: 639px) {
+    #mdl { align-items: flex-end; padding: 0; }
+    #mdl .mdl-card { max-width: none; border-radius: 1.5rem 1.5rem 0 0; padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px)); animation-name: mdlSheetIn; animation-duration: .4s; }
+    #mdl.closing .mdl-card { animation-name: mdlSheetOut; }
+  }
 </style>
   </head>
   <body class="font-sans antialiased">
@@ -136,9 +168,9 @@ tailwind.config = { theme: { extend: {
         </a>
         <nav id="nav" class="mt-6 space-y-1.5 flex-1"
           aria-label="Portal sections"></nav>
-        <a href="mailto:emdevelopmentph@gmail.com"
+        <a href="mailto:inquire@emdevelopment.com"
           class="px-2 text-xs text-slate-500 hover:text-white transition truncate">Need
-          help? emdevelopmentph@gmail.com</a>
+          help? inquire@emdevelopment.com</a>
         <p class="px-2 mt-1 text-xs text-slate-500">Client portal</p>
       </aside>
 
@@ -215,7 +247,7 @@ tailwind.config = { theme: { extend: {
     <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut, sendPasswordResetEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-import { getDatabase, ref, onValue, get, push, update, serverTimestamp, increment, query, limitToLast } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+import { getDatabase, ref, onValue, get, push, set, update, serverTimestamp, increment, query, limitToLast } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 const FB = {
   apiKey: "AIzaSyAoyAOyfJsqlK_Pe6pmfA5cTexx0IOcH9g", authDomain: "moren-325fd.firebaseapp.com",
@@ -239,8 +271,43 @@ const status = p => p.archived ? 'completed' : doneN(p) === 0 ? 'pending' : 'act
 const LABEL = { pending: 'Not started', active: 'In progress', completed: 'Completed' };
 const BADGE = { active: 'text-aqua bg-aqua/15', completed: 'text-emerald-300 bg-emerald-400/15', pending: 'text-pink bg-pink/15' };
 const card = 'glass rounded-2xl p-5';
+const money = n => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(n);
+const ymd = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+// invoices are created by EM Development and mirrored to portal/<your uid>/invoices, so they arrive with the portal record
+const invList = () => Object.entries((PORTAL && PORTAL.invoices && typeof PORTAL.invoices === 'object') ? PORTAL.invoices : {}).map(([id, v]) => { v = v || {}; return { id, num: v.number || 'Invoice', desc: v.description || '', amt: +v.amount || 0, due: v.dueDate || '', paid: v.paid === true, paidAt: +v.paidAt || 0, at: +v.createdAt || 0 }; }).sort((a, b) => b.at - a.at || String(b.num).localeCompare(String(a.num)));
+const iStat = i => i.paid ? 'paid' : (i.due && i.due < ymd(new Date()) ? 'overdue' : 'unpaid');
+const ILABEL = { paid: 'Paid', unpaid: 'Unpaid', overdue: 'Overdue' }, IBADGE = { paid: 'text-emerald-300 bg-emerald-400/15', unpaid: 'text-pink bg-pink/15', overdue: 'text-red-300 bg-red-500/15' };
+const invCard = i => { const s = iStat(i); return `<article data-f class="${card}"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><h3 class="font-bold truncate">${esc(i.num)}</h3><p class="mt-0.5 text-sm text-slate-300 break-words">${esc(i.desc)}</p></div><span class="shrink-0 px-3 py-1 rounded-full text-xs font-semibold ${IBADGE[s]}">${ILABEL[s]}</span></div><div class="mt-4 flex items-end justify-between gap-3"><div class="text-xs ${s === 'overdue' ? 'text-red-300 font-semibold' : 'text-slate-400'}">${i.paid ? (i.paidAt ? 'Paid ' + esc(fmtD(i.paidAt)) : 'Paid') : 'Due ' + esc(fmtD(i.due))}</div><div class="text-xl font-extrabold">${money(i.amt)}</div></div></article>`; };
 const today0 = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
 const dayDiff = s => Math.round((new Date(s + 'T00:00:00') - today0()) / 864e5);
+
+// ---------- subscriptions (Domain, Hosting, Maintenance, Others) ----------
+// Added by EM Development and mirrored to portal/<your uid>/subscriptions. Your own active maintenance plan also shows here.
+const SUB_T = { domain: { l: 'Domain', cls: 'text-aqua bg-aqua/15' }, hosting: { l: 'Hosting', cls: 'text-brand-400 bg-brand-500/20' }, maintenance: { l: 'Maintenance', cls: 'text-emerald-300 bg-emerald-400/15' }, other: { l: 'Others', cls: 'text-pink bg-pink/15' } };
+const SUB_C = { monthly: { m: 1, per: 'month' }, quarterly: { m: 3, per: '3 months' }, yearly: { m: 12, per: 'year' } };
+const SUB_L = { active: 'Active', soon: 'Renews soon', overdue: 'Renewal due', paused: 'Paused', cancelled: 'Cancelled' };
+const SUB_B = { active: 'text-emerald-300 bg-emerald-400/15', soon: 'text-pink bg-pink/15', overdue: 'text-red-300 bg-red-500/15', paused: 'text-slate-300 bg-white/10', cancelled: 'text-slate-400 bg-white/10' };
+let subFlt = 'all';
+const subList = () => {
+  const own = Object.entries((PORTAL && PORTAL.subscriptions && typeof PORTAL.subscriptions === 'object') ? PORTAL.subscriptions : {}).map(([id, v]) => { v = v || {}; return { id, type: SUB_T[v.type] ? v.type : 'other', name: String(v.label || ''), amt: +v.amount || 0, cycle: SUB_C[v.cycle] ? v.cycle : 'monthly', next: String(v.nextDue || ''), status: ['active', 'paused', 'cancelled'].includes(v.status) ? v.status : 'active', at: +v.createdAt || 0 }; });
+  const mt = Object.entries(MT || {}).filter(([, r]) => r && r.status === 'active').map(([pid, r]) => ({ id: 'mt-' + pid, type: 'maintenance', name: (PP[pid] ? PP[pid].name : String(r.name || 'Your website')) + ' maintenance', amt: +r.fee || 0, cycle: 'monthly', next: '', status: 'active', at: +r.requestedAt || 0, auto: true }));
+  return [...own, ...mt].sort((a, b) => b.at - a.at);
+};
+const subSt = s => { if (s.status !== 'active') return s.status; if (!s.next) return 'active'; const d = dayDiff(s.next); return d < 0 ? 'overdue' : d <= 30 ? 'soon' : 'active'; };
+const subLive = s => ['active', 'soon', 'overdue'].includes(subSt(s));
+const subWhen = s => {
+  if (s.auto) return 'Billed monthly'; if (!s.next) return '';
+  const d = dayDiff(s.next); if (s.status !== 'active') return 'Renewal date ' + fmtD(s.next);
+  return d < 0 ? 'Renewal was due ' + fmtD(s.next) : d === 0 ? 'Renews today' : 'Renews ' + fmtD(s.next) + ' (in ' + d + (d === 1 ? ' day' : ' days') + ')';
+};
+const subPill = on => 'px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 ' + (on ? 'bg-brand-500 text-white' : 'glass text-slate-300 hover:text-white');
+const subCard = s => { const T = SUB_T[s.type], st = subSt(s); return `<article data-f class="${card}"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold ${T.cls}">${T.l}</span><h3 class="mt-2 font-bold break-words">${esc(s.name)}</h3></div><span class="shrink-0 px-3 py-1 rounded-full text-xs font-semibold ${SUB_B[st]}">${SUB_L[st]}</span></div><div class="mt-4 flex items-end justify-between gap-3"><div class="text-xs ${st === 'overdue' ? 'text-red-300 font-semibold' : 'text-slate-400'}">${esc(subWhen(s))}</div><div class="text-right shrink-0"><div class="text-lg font-extrabold">${money(s.amt)}</div><div class="text-xs text-slate-400 -mt-0.5">per ${SUB_C[s.cycle].per}</div></div></div></article>`; };
+const subGrid = () => { const all = subList(), l = all.filter(x => subFlt === 'all' || x.type === subFlt); return l.map(subCard).join('') || `<p class="text-slate-400">${all.length ? 'Nothing in this list.' : 'No subscriptions yet. Your domain, hosting and maintenance plans will appear here once we set them up.'}</p>`; };
+function subDraw() {
+  const g = $('#sgrid'); if (!g) return;
+  g.innerHTML = subGrid(); g.querySelectorAll('[data-f]').forEach((el, i) => { el.classList.add('fade-item'); el.style.setProperty('--i', i); });
+  document.querySelectorAll('[data-spill]').forEach(b => { b.className = subPill(b.dataset.v === subFlt); });
+}
 const timeLine = p => {
   if (p.archived) return '<span class="text-emerald-300 font-semibold">Delivered</span>';
   if (!p.due) return '';
@@ -257,6 +324,114 @@ function leave(url) { if (leave.on) return; leave.on = true; document.body.class
 
 // ---------- state ----------
 let U, PORTAL = undefined, PP = {}, PW = {}, offPortal = () => {}, lastSnap = {};
+let MT = {}, mtLoaded = false, mtUid = null, offMT = () => {};   // maintenance subscription requests: maintenance/<your uid>/<projectId>
+
+// ---------- maintenance ----------
+// The admin sets the free weeks and the monthly fee on each project. The free period runs from the day the project is delivered.
+// When it is about to end (14 days) or has ended, you are notified and can subscribe; the request is saved for the team to confirm.
+const DAY = 864e5;
+function mtInfo(p) {
+  if (!p.hasM) return { k: 'none' };
+  if (!p.archived || !p.arAt) return { k: 'pending' };
+  const end = p.arAt + p.mw * 7 * DAY, left = Math.ceil((end - Date.now()) / DAY);
+  return { k: left > 14 ? 'free' : left > 0 ? 'soon' : 'ended', end, left };
+}
+const mtCanOffer = p => mtLoaded && p.mf > 0 && ['soon', 'ended'].includes(mtInfo(p).k) && !MT[p.id];
+function mtBlock(p) {
+  const m = mtInfo(p); if (m.k === 'none') return '';
+  const req = MT[p.id] || null, offer = p.mf > 0, days = n => n + (n === 1 ? ' day' : ' days');
+  let head, sub, warn = false;
+  if (m.k === 'pending') { head = 'Free maintenance'; sub = p.mw ? plur(p.mw, 'week') + ' of free maintenance start the day your website is delivered.' : 'No free maintenance period is included.'; }
+  else if (m.k === 'free') { head = 'Free maintenance active'; sub = 'Included until ' + fmtD(m.end) + ' (' + days(m.left) + ' left).'; }
+  else if (m.k === 'soon') { head = 'Free maintenance ends soon'; sub = 'Your free maintenance ends on ' + fmtD(m.end) + ' (' + days(m.left) + ' left).'; warn = true; }
+  else { head = 'Free maintenance has ended'; sub = 'It ended on ' + fmtD(m.end) + '.'; warn = true; }
+  let act = '';
+  if (req && req.status === 'active') { head = 'Maintenance subscription active'; sub = 'Thank you. Your website stays maintained at ' + money(+req.fee || p.mf) + ' per month.'; warn = false; }
+  else if (req && req.status === 'requested') { head = 'Subscription requested'; sub = 'We received your request and will confirm it with you shortly.'; warn = false; }
+  else if (req && req.status === 'declined') { head = 'Subscription not available'; sub = 'We could not accept this request. Please contact us to talk about maintenance.'; }
+  else if (offer && (m.k === 'soon' || m.k === 'ended') && mtLoaded) act = `<button type="button" data-act="msub" data-p="${esc(p.id)}" class="mt-3 px-4 py-2 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white text-sm shadow-lg shadow-brand-500/30">Subscribe &middot; ${esc(money(p.mf))} / month</button>`;
+  else if (offer && (m.k === 'pending' || m.k === 'free')) sub += ' After that, you can subscribe for ' + money(p.mf) + ' per month.';
+  return `<div class="mt-4 rounded-xl border border-white/10 px-3.5 py-3 text-sm"><div class="font-semibold ${warn ? 'text-pink' : ''}">${esc(head)}</div><p class="mt-0.5 text-slate-400">${esc(sub)}</p>${act}</div>`;
+}
+// Subscribe confirmation modal. send() must return true on success, false on failure (it shows its own error toast).
+function subModal(p, send) {
+  if ($('#mdl')) return;
+  const prev = document.activeElement, fee = money(p.mf);
+  const ico = (d, c) => `<svg class="${c}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="${d}"/></svg>`;
+  const el = document.createElement('div'); el.id = 'mdl';
+  el.innerHTML = `<div class="mdl-scrim" data-x></div>
+    <div class="mdl-card" role="dialog" aria-modal="true" aria-labelledby="mdlT" aria-describedby="mdlD" tabindex="-1">
+      <div id="mdlBody">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-500 to-aqua flex items-center justify-center text-white shadow-lg shadow-brand-500/30">${ico('M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.2-.5-.5-2.2z', 'w-7 h-7')}</div>
+        <h2 id="mdlT" class="mt-4 text-xl font-extrabold tracking-tight">Subscribe to maintenance</h2>
+        <p id="mdlD" class="mt-1.5 text-sm text-slate-400">Keep your website updated, secure and running smoothly. Our team will confirm your request with you shortly.</p>
+        <div class="mdl-sum mt-5 px-4 py-3.5">
+          <div class="flex items-start justify-between gap-4 text-sm"><span class="text-slate-400 shrink-0">Website</span><span class="font-semibold text-right min-w-0 break-words">${esc(p.name)}</span></div>
+          <div class="mdl-div border-t my-3"></div>
+          <div class="flex items-center justify-between gap-4"><span class="text-sm text-slate-400">Monthly fee</span><span class="text-lg font-extrabold gradient-text">${esc(fee)}<span class="text-xs font-semibold"> / month</span></span></div>
+        </div>
+        <div class="mt-6 flex flex-col-reverse sm:flex-row gap-2.5">
+          <button type="button" data-no class="mdl-ghost sm:flex-1 px-4 py-3 rounded-xl text-sm font-semibold text-slate-300">Not now</button>
+          <button type="button" data-ok class="sm:flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white text-sm shadow-lg shadow-brand-500/30 inline-flex items-center justify-center gap-2">Confirm subscription</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(el);
+  const cardEl = el.querySelector('.mdl-card'), body = el.querySelector('#mdlBody');
+  let busy = false;
+  const close = () => {
+    if (!el.isConnected || el.classList.contains('closing')) return;
+    el.classList.add('closing'); document.removeEventListener('keydown', onKey, true);
+    setTimeout(() => { el.remove(); try { prev && prev.isConnected && prev.focus({ preventScroll: true }); } catch (x) {} }, 230);
+  };
+  function onKey(e) {
+    if (e.key === 'Escape') { e.stopPropagation(); if (!busy) close(); return; }
+    if (e.key !== 'Tab') return;
+    const f = [...cardEl.querySelectorAll('button:not([disabled])')];
+    if (!f.length) { e.preventDefault(); cardEl.focus(); return; }
+    const a = document.activeElement, first = f[0], last = f[f.length - 1];
+    if (!cardEl.contains(a)) { e.preventDefault(); first.focus(); }
+    else if (e.shiftKey && a === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && a === last) { e.preventDefault(); first.focus(); }
+  }
+  document.addEventListener('keydown', onKey, true);
+  el.addEventListener('click', async e => {
+    if (e.target.closest('[data-x]') || e.target.closest('[data-no]') || e.target.closest('[data-done]')) { if (!busy) close(); return; }
+    const ok = e.target.closest('[data-ok]'); if (!ok || busy) return;
+    busy = true;
+    const no = el.querySelector('[data-no]'), label = ok.innerHTML;
+    ok.disabled = true; if (no) no.disabled = true;
+    ok.innerHTML = '<span class="q-spinner" aria-hidden="true"></span><span>Sending request&hellip;</span>';
+    let done = false; try { done = await send(); } catch (x) { done = false; }
+    busy = false;
+    if (!el.isConnected) return;
+    if (!done) { ok.disabled = false; ok.innerHTML = label; if (no) no.disabled = false; ok.focus(); return; }
+    body.innerHTML = `<div class="text-center py-2">
+        <div class="mdl-pop mx-auto w-16 h-16 rounded-full bg-emerald-400/15 text-emerald-300 flex items-center justify-center">${ico('M5 12.5l4.5 4.5L19 7.5', 'w-8 h-8')}</div>
+        <h2 id="mdlT" class="mt-4 text-xl font-extrabold tracking-tight">Request sent</h2>
+        <p id="mdlD" class="mt-1.5 text-sm text-slate-400">Thank you! We received your subscription request for <span class="font-semibold text-slate-300">${esc(p.name)}</span> and will confirm it with you shortly.</p>
+        <button type="button" data-done class="mt-6 w-full px-4 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white text-sm shadow-lg shadow-brand-500/30">Done</button>
+      </div>`;
+    const d = body.querySelector('[data-done]'); if (d) d.focus();
+  });
+  const okBtn = el.querySelector('[data-ok]'); if (okBtn) okBtn.focus({ preventScroll: true });
+}
+function maintSub(b) {
+  const p = PP[b.dataset.p]; if (!p || !mtCanOffer(p) || !PORTAL || PORTAL.revoked) return;
+  subModal(p, async () => {
+    if (!mtCanOffer(p) || !PORTAL || PORTAL.revoked) { toast('This subscription is no longer available.'); return false; }
+    try { await set(ref(db, `maintenance/${U.uid}/${p.id}`), { status: 'requested', fee: p.mf, name: String(p.name).slice(0, 200), requestedAt: serverTimestamp() }); return true; }
+    catch (err) { console.error('maintenance request', err); toast(/PERMISSION_DENIED/i.test(String((err && (err.code || err.message)) || '')) ? 'Could not send the request (blocked by the database rules). Please contact us.' : 'Could not send the request. Please try again.'); return false; }
+  });
+}
+function watchMaint() {
+  if (!PORTAL || PORTAL.revoked) { offMT(); mtUid = null; MT = {}; return; }
+  if (mtUid === U.uid) return; mtUid = U.uid; mtLoaded = false;
+  offMT = onValue(ref(db, `maintenance/${U.uid}`), snap => {
+    MT = snap.val() || {}; mtLoaded = true; nfMaint();
+    if (document.body.classList.contains('ready')) repaint();
+  }, () => { MT = {}; mtLoaded = true; nfMaint(); });
+}
 
 // ---------- view ----------
 function ring(v) {
@@ -272,6 +447,7 @@ function projectCard(p) {
     <div class="mt-4 flex items-center gap-3"><div class="bar flex-1 h-2 rounded-full bg-white/10" role="progressbar" aria-valuenow="${v}" aria-valuemin="0" aria-valuemax="100" aria-label="${esc(p.name)} progress"><i style="width:${v}%"></i></div><span class="text-sm font-bold w-10 text-right">${v}%</span></div>
     <p class="mt-2 text-xs text-slate-400">${doneN(p)} of ${p.items.length} items done${timeLine(p) ? ' &middot; ' + timeLine(p) : ''}</p>
     <ol class="mt-4 space-y-3">${p.items.map((m, i) => `<li class="step ${m.d ? 'done' : ''} flex items-start gap-3 text-sm ${m.d ? 'text-slate-300' : ''}"><input type="checkbox" class="chk mt-px" disabled aria-label="${esc(m.t)}" ${m.d ? 'checked' : ''}/><span class="min-w-0 break-words ${m.d ? 'line-through opacity-60' : ''}">${esc(m.t)}${i === nextIdx && !p.archived ? ' <span class="ml-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-aqua/15 text-aqua align-middle">Up next</span>' : ''}</span></li>`).join('')}</ol>
+    ${mtBlock(p)}
   </article>`;
 }
 function render() {
@@ -288,12 +464,17 @@ function render() {
   const finished = ps.filter(p => p.archived).length, nextTasks = ps.filter(p => !p.archived).map(p => ({ p: p.name, m: p.items.find(m => !m.d) })).filter(x => x.m);
   let seenPw = false; try { seenPw = !!localStorage.getItem('pwn:' + U.uid); } catch (e) {}
   const stat = (l, val, g) => `<div data-f class="${card} !p-4 sm:!p-5"><div class="text-xs text-slate-400">${l}</div><div class="stat-v mt-1 text-lg min-[420px]:text-xl sm:text-2xl font-extrabold ${g ? 'gradient-text' : ''}">${val}</div></div>`;
+  const invAll = invList(), invOwed = invAll.filter(i => !i.paid), owedAmt = invOwed.reduce((a, i) => a + i.amt, 0), paidAmt = invAll.filter(i => i.paid).reduce((a, i) => a + i.amt, 0), overdueN = invOwed.filter(i => iStat(i) === 'overdue').length;
+  const invBanner = invOwed.length ? `<div data-f class="${card} mb-4 flex flex-wrap items-center justify-between gap-3"><div class="min-w-0"><div class="font-bold">${plur(invOwed.length, 'unpaid invoice')}</div><p class="text-sm mt-0.5 ${overdueN ? 'text-red-300' : 'text-slate-400'}">${money(owedAmt)} outstanding${overdueN ? ' &middot; ' + overdueN + ' overdue' : ''}</p></div><button data-act="goinv" class="text-sm font-semibold text-brand-400 hover:text-white">View invoices</button></div>` : '';
+  const mtBanner = ps.filter(mtCanOffer).slice(0, 3).map(p => { const m = mtInfo(p); return `<div data-f class="${card} mb-4 flex flex-wrap items-center justify-between gap-3"><div class="min-w-0" style="min-width:14rem"><div class="font-bold">${m.k === 'soon' ? 'Free maintenance ends in ' + plur(m.left, 'day') : 'Free maintenance has ended'}</div><p class="text-sm text-slate-400 mt-0.5">${esc(p.name)}: keep your website maintained for ${money(p.mf)} per month.</p></div><button data-act="msub" data-p="${esc(p.id)}" class="px-4 py-2 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white text-sm shadow-lg shadow-brand-500/30">Subscribe</button></div>`; }).join('');
+  const subSoon = subList().filter(x => ['soon', 'overdue'].includes(subSt(x))), subBanner = subSoon.length ? `<div data-f class="${card} mb-4 flex flex-wrap items-center justify-between gap-3"><div class="min-w-0"><div class="font-bold">${plur(subSoon.length, 'subscription')} renewing soon</div><p class="text-sm mt-0.5 text-slate-400">${esc(subSoon.slice(0, 2).map(x => x.name).join(', '))}${subSoon.length > 2 ? ' and more' : ''}</p></div><button data-act="gosubs" class="text-sm font-semibold text-brand-400 hover:text-white">View subscriptions</button></div>` : '';
   const mailSubj = encodeURIComponent('Question about my website | ' + (PORTAL.company || PORTAL.name || ''));
   const overviewV = () => `
     <div data-f class="mb-5">
       <p class="text-slate-400">Hi <span class="font-semibold text-slate-200">${esc(PORTAL.name || U.displayName || U.email.split('@')[0])}</span>. Here is how your website is coming along${PORTAL.company ? ' &middot; ' + esc(PORTAL.company) : ''}.</p></div>
     ${seenPw ? '' : `<div data-f class="${card} mb-4 flex flex-wrap items-center justify-between gap-3"><p class="text-sm text-slate-300 min-w-0 flex-1" style="min-width:14rem">For your security, please change the temporary password we gave you.</p><div class="flex items-center gap-4"><button data-act="gosec" class="text-sm font-semibold text-brand-400 hover:text-white">Change password</button><button data-act="pwdone" class="text-sm font-semibold text-slate-400 hover:text-white">Dismiss</button></div></div>`}
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">${stat('Overall progress', overall + '%', 1)}${stat('Items done', done + ' / ' + all.length)}${stat('Projects', ps.length)}${stat('Delivered', finished)}</div>
+    ${invBanner}${subBanner}${mtBanner}
     <div class="grid lg:grid-cols-[1fr_1.4fr] gap-4">
       <div data-f class="${card} flex items-center gap-5">${ring(overall)}<div><div class="font-bold">Overall progress</div><p class="text-sm text-slate-400 mt-1">${all.length ? done + ' of ' + all.length + ' items are complete.' : 'Items will appear once your project starts.'}</p></div></div>
       <div data-f class="${card}"><div class="font-bold mb-3">Latest update</div>${PORTAL.update ? `<p class="text-sm whitespace-pre-wrap break-words">${esc(PORTAL.update)}</p>${PORTAL.updatedAt ? `<p class="mt-2 text-xs text-slate-400">${esc(fmtD(+PORTAL.updatedAt))}</p>` : ''}` : '<p class="text-sm text-slate-400">No updates yet. We will post news here.</p>'}</div>
@@ -310,8 +491,21 @@ function render() {
     <div data-f class="${card} max-w-2xl mt-4 flex flex-wrap items-center justify-between gap-3"><div class="min-w-0"><div class="font-bold">Questions or changes?</div><p class="text-sm text-slate-400 mt-0.5">Reach out any time and our team will get back to you.</p></div>
       <a href="mailto:${CONTACT_EMAIL}?subject=${mailSubj}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white text-sm shadow-lg shadow-brand-500/30">${svgI('M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM3 7l9 6 9-6', 'w-4 h-4')}Email EM Development</a></div>
     <div data-f class="mt-4 max-w-2xl"><button data-act="rpw" class="text-xs font-semibold text-slate-400 hover:text-white">Email me a password reset link</button></div>`;
+  const invoicesV = () => `
+    <p data-f class="text-slate-400 mb-5">Invoices from EM Development for your website. Our team records your payments here.</p>
+    <div class="grid grid-cols-2 gap-4 mb-4">${stat('Outstanding', money(owedAmt), 1)}${stat('Paid to date', money(paidAmt))}</div>
+    <div class="grid md:grid-cols-2 gap-4">${invAll.map(invCard).join('') || '<p class="text-slate-400">No invoices yet. They will appear here as soon as we send one.</p>'}</div>`;
+  const subsV = () => {
+    const all = subList(), live = all.filter(subLive), mo = Math.round(live.reduce((a, x) => a + x.amt / SUB_C[x.cycle].m, 0)), soonN = all.filter(x => ['soon', 'overdue'].includes(subSt(x))).length;
+    const pill = (k, l) => `<button type="button" data-spill="${k}" data-act="sflt" data-v="${k}" class="${subPill(subFlt === k)}">${l} (${k === 'all' ? all.length : all.filter(x => x.type === k).length})</button>`;
+    return `
+    <p data-f class="text-slate-400 mb-5">Your domain, hosting, maintenance and other services with EM Development, and when each one renews.</p>
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">${stat('Active subscriptions', live.length)}${stat('Monthly total', money(mo), 1)}${stat('Renewing soon', soonN)}</div>
+    <div data-f class="flex flex-wrap gap-2 mb-5">${pill('all', 'All')}${Object.keys(SUB_T).map(k => pill(k, SUB_T[k].l)).join('')}</div>
+    <div id="sgrid" class="grid md:grid-cols-2 gap-4">${subGrid()}</div>`;
+  };
   const messagesV = () => '<div id="chatHost"></div>';
-  v.innerHTML = ({ overview: overviewV, projects: projectsV, messages: messagesV, account: accountV })[view]();
+  v.innerHTML = ({ overview: overviewV, projects: projectsV, invoices: invoicesV, subscriptions: subsV, messages: messagesV, account: accountV })[view]();
   const host = v.querySelector('#secHost'); if (host) host.replaceWith(getSec());   // the security form is built once, so typing survives live updates
   const chost = v.querySelector('#chatHost');   // the chat is built once too, so a half-typed message survives live updates
   if (chost) { chost.replaceWith(getChat()); const l = chatEl.querySelector('[data-clist]'); l.scrollTop = chatStick ? l.scrollHeight : (l._st || 0); chatStick = false; markRead(); }
@@ -344,14 +538,18 @@ function repaint() {
 }
 $('#view').addEventListener('click', async e => {
   const b = e.target.closest('[data-act]'); if (!b) return;
-  if (b.dataset.act === 'gosec') { go('account'); setTimeout(() => { const i = $('#security input'); if (i) i.focus({ preventScroll: true }); }, 450); }
+  if (b.dataset.act === 'goinv') go('invoices');
+  else if (b.dataset.act === 'sflt') { subFlt = b.dataset.v; subDraw(); }
+  else if (b.dataset.act === 'gosubs') go('subscriptions');
+  else if (b.dataset.act === 'msub') await maintSub(b);
+  else if (b.dataset.act === 'gosec') { go('account'); setTimeout(() => { const i = $('#security input'); if (i) i.focus({ preventScroll: true }); }, 450); }
   else if (b.dataset.act === 'pwdone') { try { localStorage.setItem('pwn:' + U.uid, '1'); } catch (x) {} repaint(); }
   else if (b.dataset.act === 'rpw') { try { await sendPasswordResetEmail(auth, U.email); toast('Reset link sent to ' + U.email); } catch (x) { toast('Could not send the email. Try again later.'); } }
 });
 
 // ---------- sidebar + sections ----------
-const TITLES = { overview: 'Overview', projects: 'Projects', messages: 'Messages', account: 'Account' };
-const NAV_ICON = { overview: 'M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z', projects: 'M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z', messages: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z', account: 'M20 21a8 8 0 0 0-16 0M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z' };
+const TITLES = { overview: 'Overview', projects: 'Projects', invoices: 'Invoices', subscriptions: 'Subscriptions', messages: 'Messages', account: 'Account' };
+const NAV_ICON = { overview: 'M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z', projects: 'M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z', invoices: 'M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6', subscriptions: 'M21 12a9 9 0 0 1-15.5 6.2L3 16M3 12a9 9 0 0 1 15.5-6.2L21 8M21 3v5h-5M3 21v-5h5', messages: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z', account: 'M20 21a8 8 0 0 0-16 0M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z' };
 let view = 'overview', goT;
 $('#nav').innerHTML = Object.keys(TITLES).map(k => `<button type="button" data-v="${k}" class="nav-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold text-slate-300 hover:text-white">${svgI(NAV_ICON[k])}${TITLES[k]}${k === 'messages' ? '<span id="msgBadge" class="hidden ml-auto min-w-[1.25rem] h-5 px-1.5 rounded-full bg-pink text-white text-[11px] font-bold items-center justify-center" aria-label="Unread messages"></span>' : ''}</button>`).join('');
 const closeMenu = () => { $('#side').classList.add('-translate-x-full'); $('#scrim').classList.add('hidden'); $('#menuBtn').setAttribute('aria-expanded', 'false'); };
@@ -372,7 +570,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#scrim
 // Unread chat messages are shown live from the chat. Read state and the last 30 notifications are kept per login.
 const NF_MAX = 30;
 let NF = { init: false, list: [], sig: {} }, nfPrev = 0;
-const NF_ICON = { progress: 'M4 20V11M10 20V5M16 20v-6M22 20H2', done: 'M20 6L9 17l-5-5', project: NAV_ICON.projects, update: 'M3 11l18-8-8 18-2-8z', message: NAV_ICON.messages };
+const NF_ICON = { progress: 'M4 20V11M10 20V5M16 20v-6M22 20H2', done: 'M20 6L9 17l-5-5', project: NAV_ICON.projects, update: 'M3 11l18-8-8 18-2-8z', invoice: NAV_ICON.invoices, maintenance: 'M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.4 2.4-2.6-.6-.6-2.6z', message: NAV_ICON.messages, subscription: NAV_ICON.subscriptions };
 const plur = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
 const nfKey = () => 'nf:' + U.uid;
 function nfLoad() {
@@ -401,11 +599,45 @@ function nfProject(p) {
   }
   nfSave();
 }
+// tells you when the free maintenance is about to end (14 days) or has ended, and a subscription is possible
+function nfMaint() {
+  if (!PORTAL || PORTAL.revoked || !mtLoaded) return;
+  Object.values(PP).filter(Boolean).forEach(p => {
+    if (!(p.mf > 0)) return;   // no paid plan has been set for this project
+    const m = mtInfo(p), k = 'm:' + p.id, was = NF.sig[k]; NF.sig[k] = m.k;
+    if (!NF.init || was === m.k || MT[p.id]) return;
+    if (m.k === 'soon') nfAdd('maintenance', 'Free maintenance for ' + p.name + ' ends in ' + plur(m.left, 'day') + '. Subscribe for ' + money(p.mf) + ' per month.', 'projects');
+    else if (m.k === 'ended') nfAdd('maintenance', 'Free maintenance for ' + p.name + ' has ended. Subscribe for ' + money(p.mf) + ' per month to keep it covered.', 'projects');
+  });
+  nfSave();
+}
+setInterval(() => { if (U) { nfMaint(); nfSubs(); } }, 600000);   // the free period can run out while the page stays open
+// tells you about a new subscription, and when one is about to renew (30 days) or is due
+function nfSubs() {
+  if (!PORTAL || PORTAL.revoked) return;
+  subList().filter(x => !x.auto).forEach(x => {
+    const st = subSt(x), k = 's:' + x.id, was = NF.sig[k]; NF.sig[k] = st;
+    if (!NF.init) return;
+    if (was === undefined) nfAdd('subscription', 'New ' + SUB_T[x.type].l.toLowerCase() + ' subscription: ' + x.name, 'subscriptions');
+    else if (was !== st && st === 'soon') nfAdd('subscription', x.name + ' renews on ' + fmtD(x.next) + '.', 'subscriptions');
+    else if (was !== st && st === 'overdue') nfAdd('subscription', x.name + ' was due for renewal on ' + fmtD(x.next) + '.', 'subscriptions');
+  });
+  nfSave();
+}
 function nfPortal() {
   if (!PORTAL || PORTAL.revoked) return;
   const t = +PORTAL.updatedAt || 0, prev = NF.sig.__u;
   NF.sig.__u = t;
   if (NF.init && t && t > (prev || 0) && PORTAL.update) nfAdd('update', 'New update: ' + String(PORTAL.update).replace(/\s+/g, ' ').slice(0, 80), 'overview');
+  const inv = PORTAL.invoices && typeof PORTAL.invoices === 'object' ? PORTAL.invoices : {};
+  Object.keys(inv).forEach(id => {
+    const v = inv[id] || {}, k = 'i:' + id, was = NF.sig[k], now = { p: v.paid === true ? 1 : 0 }, label = v.number || 'Invoice';
+    NF.sig[k] = now;
+    if (!NF.init) return;
+    if (!was) nfAdd('invoice', 'New invoice ' + label + ': ' + money(+v.amount || 0) + (v.dueDate ? ', due ' + fmtD(v.dueDate) : ''), 'invoices');
+    else if (!was.p && now.p) nfAdd('done', 'Payment received for ' + label + '. Thank you!', 'invoices');
+  });
+  nfSubs();
   nfSave();
 }
 const nfAgo = t => { const s = Math.max(0, (Date.now() - t) / 1000); return s < 60 ? 'Just now' : s < 3600 ? Math.floor(s / 60) + ' min ago' : s < 86400 ? Math.floor(s / 3600) + ' h ago' : fmtD(t); };
@@ -596,22 +828,22 @@ function watchPortal() {
   offPortal = onValue(ref(db, `portal/${U.uid}`), snap => {
     PORTAL = snap.val() || { revoked: true };
     nfPortal();
-    watchChat();
+    watchChat(); watchMaint();
     const want = PORTAL.revoked ? [] : Object.keys(PORTAL.projects || {});
     Object.keys(PW).forEach(id => { if (!want.includes(id)) { PW[id](); delete PW[id]; delete PP[id]; delete lastSnap[id]; } });
     want.forEach(id => {
       if (PW[id]) return;
       PW[id] = onValue(ref(db, `users/${PORTAL.admin}/projects/${id}`), s => {
         const v = s.val();
-        PP[id] = v ? { id, name: v.name || 'Untitled project', start: v.startDate, due: v.endDate, items: arr(v.inclusions).map(x => typeof x === 'string' ? { t: x, d: false } : { t: x.t, d: x.d === true }), archived: v.archived === true } : null;
-        if (PP[id]) nfProject(PP[id]);
+        PP[id] = v ? { id, name: v.name || 'Untitled project', start: v.startDate, due: v.endDate, items: arr(v.inclusions).map(x => typeof x === 'string' ? { t: x, d: false } : { t: x.t, d: x.d === true }), archived: v.archived === true, arAt: +v.archivedAt || 0, hasM: !!v.maintenance, mw: v.maintenance ? Math.max(0, +v.maintenance.weeks || 0) : 0, mf: v.maintenance ? Math.max(0, +v.maintenance.fee || 0) : 0 } : null;
+        if (PP[id]) { nfProject(PP[id]); nfMaint(); }
         repaint();
       }, () => { PP[id] = null; repaint(); });
     });
     repaint();
   }, () => { PORTAL = { revoked: true }; repaint(); });
 }
-const stopAll = () => { offChatM(); offChatT(); offPortal(); Object.values(PW).forEach(f => f()); PW = {}; };
+const stopAll = () => { offMT(); offChatM(); offChatT(); offPortal(); Object.values(PW).forEach(f => f()); PW = {}; };
 
 // ---------- theme, nav, auth ----------
 const root = document.documentElement, themeBtn = $('#themeBtn');
