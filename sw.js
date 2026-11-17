@@ -101,7 +101,7 @@ async function networkFirst(event, req) {
     if (fresh && fresh.ok) clean(fresh.clone()).then(r => cache.put(path, r)).catch(() => {});
     return fresh;
   } catch (err) {
-    const page = (await findPage(cache, path)) || (await findPage(cache, '/offline.html'));
+    const page = (await findPage(cache, path)) || (await findPage(cache, './offline.html'));
     return page || new Response('You are offline.', { status: 503, headers: { 'Content-Type': 'text/plain' } });
   }
 }
