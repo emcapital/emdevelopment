@@ -661,7 +661,7 @@
 
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut, updateProfile, sendPasswordResetEmail, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signOut, updateProfile, sendPasswordResetEmail, createUserWithEmailAndPassword, signInWithEmailAndPassword, deleteUser } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
     import { getDatabase, ref, push, set, update, remove, onValue, get, serverTimestamp, increment, query, limitToLast, orderByChild } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
     const FB = {
@@ -675,9 +675,7 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
     const LOGIN_URL = '../auth/login.html'; // path to login.html, relative to this file
-    // the "account created" message sent to a new customer (no password reset link: it states the login and the default password)
-    const acctSite = () => new URL(LOGIN_URL, location.href).href;
-    // Automatic email via EmailJS (https://www.emailjs.com). Fill these three in; while any is empty, the "Send account email" button is used instead.
+    // Email via EmailJS (https://www.emailjs.com), used for the replies you send from Quotations.
     const EMAILJS = { serviceId: 'service_6obqxmm', templateId: 'template_9isvbcv', replyTemplateId: 'template_rzlhxdf', publicKey: 'L6uRXN8WLyoKf2KwQ' };   // templateId = new customer account email, replyTemplateId = emails you send from Quotations
     const replyReady = () => !!(EMAILJS.serviceId && EMAILJS.replyTemplateId && EMAILJS.publicKey);
     async function emailjsSend(templateId, params) {
@@ -691,18 +689,6 @@
       } catch (e) { return { ok: false, err: e && e.name === 'AbortError' ? 'This is taking too long. Check your connection and try again.' : 'Could not reach EmailJS. Check your connection and try again.' }; }
       finally { clearTimeout(t); }
     }
-    const emailReady = () => !!(EMAILJS.serviceId && EMAILJS.templateId && EMAILJS.publicKey);
-    async function sendAcctEmail(c) {
-      const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 15000);
-      try {
-        const r = await fetch('https://api.emailjs.com/api/v1.0/email/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: ctl.signal,
-          body: JSON.stringify({ service_id: EMAILJS.serviceId, template_id: EMAILJS.templateId, user_id: EMAILJS.publicKey,
-            template_params: { to_email: c.email, to_name: c.name, password: c.pw, site_url: acctSite(), subject: acctSubject, message: acctBody(c) } }) });
-        return r.ok;
-      } catch (e) { return false; } finally { clearTimeout(t); }
-    }
-    const acctSubject = 'Your EM Development account has been created';
-    const acctBody = c => 'Hi ' + c.name + ',\n\nAn account has been created for you at EM Development so you can track the progress of your website development.\n\nEmail: ' + c.email + '\nPassword: ' + c.pw + ' (default)\n\nYou can change your password after you sign in, in the website: ' + acctSite() + '\n\nThank you,\nEM Development';
 
     // ---------- helpers ----------
     const $ = s => document.querySelector(s);
@@ -738,7 +724,7 @@
 
     // ---------- data (stored per user in this browser) ----------
     let SUB = [], sflt = 'all', subOpen = false, subEdit = null, subError = '';
-    let U, S, C = [], Q = [], I = [], K = [], PORTAL = null, PP = {}, kOpen = false, kCreds = null, kBusy = false, kError = '', kOpenSet = new Set(), kDraft = {}, qError = '', iError = '', view = 'overview', flt = 'all', qflt = 'all', iflt = 'all', invOpen = false, invEdit = null;   // C = projects saved in Firebase Realtime Database
+    let U, S, C = [], Q = [], I = [], K = [], PORTAL = null, PP = {}, kOpen = false, kBusy = false, kError = '', kOpenSet = new Set(), kDraft = {}, qError = '', iError = '', view = 'overview', flt = 'all', qflt = 'all', iflt = 'all', invOpen = false, invEdit = null;   // C = projects saved in Firebase Realtime Database
     const projs = () => [...C, ...S.projects];
     const key = () => 'emdev:' + U.uid;
     const save = () => { try { localStorage.setItem(key(), JSON.stringify(S)); } catch (e) {} };
@@ -1037,7 +1023,12 @@
       const d = sDays(s); return d === null ? 'active' : d < 0 ? 'overdue' : d <= 30 ? 'soon' : 'active';
     };
     const sLive = s => ['active', 'soon', 'overdue'].includes(sstat(s));
-    const sMo = s => (+s.amt || 0) / SCYCLE[s.cycle].m;
+    // a subscription counts in "To collect" only in the month its renewal date falls in (Nov 25 counts in November; Jan 4 2027 waits until January)
+    const sBilled = s => {
+      if (!/^\d{4}-\d\d/.test(s.next || '')) return true;   // no renewal date (an active maintenance plan) is billed monthly
+      return s.next.slice(0, 7) === dstr(new Date()).slice(0, 7);
+    };
+    const sMo = s => sBilled(s) ? (+s.amt || 0) : 0;
     // Maintenance lives here too: customer requests (approve or decline them below) and each project's free maintenance period.
     const sAuto = () => { const out = [];
       C.forEach(p => {
@@ -1087,14 +1078,14 @@
     const sGridHtml = () => sList().map(sCard).join('') || `<p class="text-slate-400">${subError ? '' : sAll().length ? 'Nothing in this list.' : 'No subscriptions yet. Add your first one with the button above.'}</p>`;
     const drawS = all => { const g = $('#sgrid'); if (g) redrawList(g, sGridHtml(), sList().map(s => s.id), 'data-sid', all); };
     const sCounts = () => { const a = sAll(), c = { all: 'All (' + a.length + ')' }; Object.keys(STYPE).forEach(k => { c[k] = STYPE[k].l + ' (' + a.filter(s => s.type === k).length + ')'; }); return c; };
-    const sStats = () => { const a = sAll(); return { active: a.filter(sLive).length, mrr: Math.round(a.filter(sLive).reduce((n, s) => n + sMo(s), 0)), due: a.filter(s => ['soon', 'overdue'].includes(sstat(s))).length, req: a.filter(s => s.status === 'requested').length }; };
+    const sStats = () => { const a = sAll(); return { active: a.filter(sLive).length, mrr: Math.round(a.filter(sLive).reduce((n, s) => n + sMo(s), 0)), paid: Math.round(SUB.reduce((n, s) => n + (s.pays || []).reduce((x, p) => x + p.amt, 0), 0) * 100) / 100, req: a.filter(s => s.status === 'requested').length }; };
     // update the list, counts and totals in place, so an open form is not disturbed
     function updateSView() {
       const grid = $('#sgrid'); if (!grid) return paint(false);
       const c = sCounts(), st = sStats();
       document.querySelectorAll('[data-spill]').forEach(b => { const t = c[b.dataset.spill]; if (b.textContent !== t) b.textContent = t; });
-      const a = document.querySelector('[data-sstat="active"]'), m = document.querySelector('[data-sstat="mrr"]'), d = document.querySelector('[data-sstat="due"]'), q = document.querySelector('[data-sstat="req"]');
-      if (a) a.textContent = st.active; if (m) tweenMoney(m, st.mrr); if (d) d.textContent = st.due; if (q) q.textContent = st.req;
+      const a = document.querySelector('[data-sstat="active"]'), m = document.querySelector('[data-sstat="mrr"]'), d = document.querySelector('[data-sstat="paid"]'), q = document.querySelector('[data-sstat="req"]');
+      if (a) a.textContent = st.active; if (m) tweenMoney(m, st.mrr); if (d) tweenMoney(d, st.paid); if (q) q.textContent = st.req;
       drawS(false);
     }
     function subView() {
@@ -1103,7 +1094,7 @@
       const pill = k => `<button data-spill="${k}" data-act="sflt" data-v="${k}" class="${pillCls(sflt === k)}">${c[k]}</button>`;
       const stat = (k, l, v, g, raw) => `<div data-f class="${card} !p-4 sm:!p-5"><div class="text-xs text-slate-400">${l}</div><div data-sstat="${k}" ${raw != null ? `data-v="${raw}"` : ''} class="stat-v mt-1 text-lg min-[420px]:text-xl sm:text-2xl font-extrabold ${g ? 'gradient-text' : ''}">${v}</div></div>`;
       const opts = o => Object.keys(o).map(k => `<option value="${k}">${esc(o[k].l)}</option>`).join('');
-      return `<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">${stat('active', 'Active subscriptions', st.active)}${stat('mrr', 'Monthly recurring', money(st.mrr), true, st.mrr)}${stat('due', 'Renewals due (30 days)', st.due)}${stat('req', 'Maintenance to review', st.req)}</div>
+      return `<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">${stat('active', 'Active subscriptions', st.active)}${stat('mrr', 'To collect (' + new Date().toLocaleDateString('en', { month: 'long' }) + ')', money(st.mrr), true, st.mrr)}${stat('paid', 'Total collected payments', money(st.paid), true, st.paid)}${stat('req', 'Maintenance to review', st.req)}</div>
         <div data-f class="flex flex-wrap items-center justify-between gap-3 mb-5"><div class="flex flex-wrap gap-2">${['all', ...Object.keys(STYPE)].map(pill).join('')}</div>
           <button id="newSubBtn" data-act="newsub" class="btn-shine w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white text-sm shadow-lg shadow-brand-500/30">+ New subscription</button></div>
         <div id="sPanel" class="i-panel" inert><div><form data-form="newsub" data-edit="" class="${card} space-y-4"><div id="sTitle" class="font-bold">New subscription</div>
@@ -1212,10 +1203,11 @@
         } else {
           if (sflt !== 'all') { sflt = 'all'; document.querySelectorAll('[data-spill]').forEach(x => x.className = pillCls(x.dataset.v === 'all')); }
           if (!subKey) subKey = push(ref(db, base)).key;   // reused on retry, so a retry never creates a duplicate
-          const up = { [`${base}/${subKey}`]: Object.assign({ createdAt: serverTimestamp() }, rec) };
+          const first = status === 'active' ? { paid: { first: { date: dstr(new Date()), amount: amt, at: serverTimestamp() } } } : {};   // already paid before it was entered, so its fee counts in Accounting right away (fixed key: a retry never doubles it)
+          const up = { [`${base}/${subKey}`]: Object.assign({ createdAt: serverTimestamp() }, rec, first) };
           if (mirror) up[`portal/${cuid}/subscriptions/${subKey}`] = Object.assign({ createdAt: serverTimestamp() }, pub);
           await withTimeout(update(ref(db), up), 12000);
-          subKey = null; hideSubPanel(); toast(STYPE[type].l + ' subscription added');
+          subKey = null; hideSubPanel(); toast(STYPE[type].l + ' subscription added' + (status === 'active' ? ' \u00b7 ' + money(amt) + ' added to Accounting' : ''));
         }
       } catch (e2) {
         const m = String((e2 && (e2.code || e2.message)) || '');
@@ -1228,9 +1220,10 @@
       const dt = new Date(s.next + 'T00:00:00'), day = dt.getDate(); dt.setMonth(dt.getMonth() + SCYCLE[s.cycle].m); if (dt.getDate() !== day) dt.setDate(0);
       const nx = dstr(dt); btn.disabled = true;
       try {
-        const up = { [`users/${U.uid}/subscriptions/${id}/nextDue`]: nx };
+        const pk = push(ref(db, `users/${U.uid}/subscriptions/${id}/paid`)).key;   // the fee collected is kept with the subscription so Accounting can count it
+        const up = { [`users/${U.uid}/subscriptions/${id}/nextDue`]: nx, [`users/${U.uid}/subscriptions/${id}/paid/${pk}`]: { date: dstr(new Date()), due: s.next, amount: s.amt, at: serverTimestamp() } };
         if (s.cuid && K.some(c => c.id === s.cid && c.uid === s.cuid)) up[`portal/${s.cuid}/subscriptions/${id}/nextDue`] = nx;
-        await withTimeout(update(ref(db), up), 12000); toast(s.name + ' renewed until ' + fmtD(nx));
+        await withTimeout(update(ref(db), up), 12000); toast(s.name + ' renewed until ' + fmtD(nx) + ' \u00b7 ' + money(s.amt) + ' added to Accounting');
       }
       catch (e2) { toast(subErr(e2, 'renew the subscription')); }
       btn.disabled = false;
@@ -1242,13 +1235,14 @@
         const list = [];
         snap.forEach(ch => {
           const v = ch.val() || {};
-          list.push({ id: ch.key, type: STYPE[v.type] ? v.type : 'other', name: String(v.label || ''), to: String(v.billedTo || ''), cid: String(v.customerId || ''), cuid: String(v.customerUid || ''), amt: +v.amount || 0, cycle: SCYCLE[v.cycle] ? v.cycle : 'monthly', next: String(v.nextDue || ''), status: ['active', 'paused', 'cancelled'].includes(v.status) ? v.status : 'active', notes: String(v.notes || ''), at: +v.createdAt || 0 });
+          list.push({ id: ch.key, type: STYPE[v.type] ? v.type : 'other', name: String(v.label || ''), to: String(v.billedTo || ''), cid: String(v.customerId || ''), cuid: String(v.customerUid || ''), amt: +v.amount || 0, cycle: SCYCLE[v.cycle] ? v.cycle : 'monthly', next: String(v.nextDue || ''), status: ['active', 'paused', 'cancelled'].includes(v.status) ? v.status : 'active', notes: String(v.notes || ''), at: +v.createdAt || 0, pays: Object.entries(v.paid && typeof v.paid === 'object' ? v.paid : {}).map(([k, p]) => ({ id: k, d: String((p && p.date) || ''), due: String((p && p.due) || ''), amt: +(p && p.amount) || 0 })).filter(p => /^\d{4}-\d\d-\d\d$/.test(p.d)) });
         });
         list.sort((a, b) => b.at - a.at);
         const sig = JSON.stringify(list), wasFirst = first; first = false; subError = '';
         if (sig === sSig) return;
         SUB = list; sSig = sig; drawNotif();
         if (document.body.classList.contains('ready') && view === 'subscriptions') { if (wasFirst) paint(true); else updateSView(); }
+        else if (document.body.classList.contains('ready') && view === 'accounting') paint(false);
       }, err => { subError = subErr(err, 'load your subscriptions'); if (document.body.classList.contains('ready') && view === 'subscriptions') paint(false); });
     }
 
@@ -1291,6 +1285,90 @@
         doc.text('Thank you for your business.', 105, 266, { align: 'center' });
         doc.text('emdevelopmentph@gmail.com  |  (+63) 920 501 8789  |  Cebu City, Cebu, Philippines', 105, 272, { align: 'center' });
         doc.save(i.num + '.pdf');
+      } catch (err) { console.error('pdf', err); toast('Could not create the PDF. Check your connection and try again.'); }
+      btn.disabled = false; btn.classList.remove('opacity-50');
+    }
+    // Accounting report as a PDF: summary, profit & loss, last 6 months, receivables aging, every payment in and every expense paid
+    async function accountingPdf(btn) {
+      btn.disabled = true; btn.classList.add('opacity-50');
+      try {
+        const JsPDF = await loadPdf(), doc = new JsPDF({ unit: 'mm', format: 'a4' }), today = dstr(new Date());
+        const r2 = n => Math.round(n * 100) / 100, ex = exBooks(today), sb = subBooks(today), pm = n => (n < 0 ? '- ' : '') + pdfMoney(Math.abs(n));
+        const paidL = I.filter(i => i.paid), recv = sumAmt(paidL), open = I.filter(i => !i.paid), owed = sumAmt(open), late = sumAmt(open.filter(i => i.due && i.due < today)), total = sumAmt(I);
+        const income = r2(recv + sb.total), net = r2(income - ex.total), rate = total ? Math.round(recv / total * 100) : 0;
+        const ym = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'), n0 = new Date();
+        const months = Array.from({ length: 6 }, (_, k) => { const d = new Date(n0.getFullYear(), n0.getMonth() - 5 + k, 1); return { k: ym(d), l: d.toLocaleDateString('en', { month: 'long', year: 'numeric' }), inc: 0, exp: 0 }; });
+        paidL.forEach(i => { const m = i.paidAt && months.find(x => x.k === ym(new Date(i.paidAt))); if (m) m.inc += i.amt; });
+        sb.pays.forEach(p => { const m = months.find(x => x.k === p.d.slice(0, 7)); if (m) m.inc += p.amt; });
+        ex.pays.forEach(p => { const m = months.find(x => x.k === p.d.slice(0, 7)); if (m) m.exp += p.amt; });
+        const aging = [0, 0, 0, 0], AL = ['Not yet due', '1-30 days late', '31-60 days late', 'Over 60 days late'];
+        open.forEach(i => { const d = i.due && i.due < today ? Math.floor((new Date(today + 'T00:00:00') - new Date(i.due + 'T00:00:00')) / 864e5) : 0; aging[!d ? 0 : d <= 30 ? 1 : d <= 60 ? 2 : 3] += i.amt; });
+        const moneyIn = [...paidL.map(i => ({ t: +i.paidAt || 0, d: i.paidAt ? fmtD(i.paidAt) : '-', n: i.num + ' - ' + i.to, a: i.amt })), ...sb.pays.map(p => ({ t: new Date(p.d + 'T00:00:00').getTime(), d: fmtD(p.d), n: 'Subscription - ' + p.s.name + (p.s.to ? ' - ' + p.s.to : ''), a: p.amt }))].sort((a, b) => b.t - a.t);
+        const catRows = Object.entries(ex.cat).sort((a, b) => b[1] - a[1]);
+        const L = 18, R = 192, GREEN = [5, 150, 105], RED = [220, 38, 38]; let y = 0, pg = 1;
+        const ink = () => doc.setTextColor(15, 21, 53);
+        const foot = () => { doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(120, 128, 160); doc.text('EM Development  |  Accounting report  |  ' + fmtD(today), L, 288); doc.text('Page ' + pg, R, 288, { align: 'right' }); };
+        const need = h => { if (y + h > 278) { foot(); doc.addPage(); pg++; y = 20; } };
+        const head = t => { need(24); y += 5; doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(67, 81, 232); doc.text(t, L, y); y += 2.5; doc.setDrawColor(220, 224, 245); doc.line(L, y, R, y); y += 6; };
+        const row = (a, b, o = {}) => {
+          doc.setFont('helvetica', o.bold ? 'bold' : 'normal'); doc.setFontSize(9.5);
+          const t = doc.splitTextToSize(String(a), o.w || 120); need(t.length * 5 + 2); ink(); doc.text(t, L, y);
+          if (o.c) doc.setTextColor(...o.c); doc.text(String(b), R, y, { align: 'right' }); y += t.length * 5 + 1.5;
+        };
+        const cols = (c, o = {}) => {   // a table row: first column left, the rest right-aligned at fixed positions
+          const xs = o.xs || [R - 100, R - 50, R]; need(8);
+          if (o.head) { doc.setFillColor(240, 242, 255); doc.rect(L, y - 4.5, R - L, 7, 'F'); doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(67, 81, 232); }
+          else { doc.setFont('helvetica', o.bold ? 'bold' : 'normal'); doc.setFontSize(9.5); ink(); }
+          doc.text(String(c[0]), L + (o.head ? 3 : 0), y);
+          c.slice(1).forEach((v, k) => { if (o.cc && o.cc[k]) doc.setTextColor(...o.cc[k]); doc.text(String(v), xs[k + (xs.length - c.length + 1)], y, { align: 'right' }); });
+          y += o.head ? 7 : 6;
+        };
+        doc.setProperties({ title: 'Accounting report | EM Development' });
+        doc.setFillColor(67, 81, 232); doc.rect(0, 0, 210, 40, 'F');
+        doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.text('EM Development', L, 19);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.text('Website & Mobile App Development', L, 26);
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(18); doc.text('ACCOUNTING REPORT', R, 19, { align: 'right' });
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.text('As of ' + fmtD(today), R, 26, { align: 'right' }); y = 46;
+
+        head('Summary');
+        row('Net profit', pm(net), { bold: true, c: net < 0 ? RED : GREEN });
+        row('Total income (invoices + subscriptions)', pm(income));
+        row('Total expenses', pm(-ex.total));
+        row('Expenses this month', pm(ex.thisMonth));
+        row('Monthly running cost', pm(ex.run));
+
+        head('Invoices');
+        row('Total invoiced', pm(total));
+        row('Payments received (' + rate + '% collected, ' + paidL.length + ' of ' + I.length + ' invoices paid)', pm(recv), { c: GREEN });
+        row('Outstanding', pm(owed));
+        row('Overdue', pm(late), late ? { c: RED } : {});
+
+        head('Subscriptions');
+        row('Total collected payments', pm(sb.total), { c: GREEN });
+        row('Collected this month', pm(sb.thisMonth));
+        row('To collect in ' + new Date().toLocaleDateString('en', { month: 'long' }), pm(sb.due));
+        row('Monthly recurring', pm(sb.run));
+
+        head('Profit & loss');
+        row('Invoice payments received', pm(recv), { c: GREEN });
+        row('Subscription fees received', pm(sb.total), { c: GREEN });
+        row('Total income', pm(income), { bold: true, c: GREEN });
+        catRows.forEach(([k, v]) => row(EXCAT[k], pm(-v)));
+        row('Total expenses', pm(-ex.total), { bold: true });
+        row('Net profit', pm(net), { bold: true, c: net < 0 ? RED : GREEN });
+
+        head('Last 6 months');
+        cols(['MONTH', 'INCOME', 'EXPENSES', 'NET'], { head: 1, xs: [R - 100, R - 60, R - 25, R - 3].slice(1) });
+        months.forEach(m => cols([m.l, pdfMoney(m.inc), pdfMoney(m.exp), pm(r2(m.inc - m.exp))], { xs: [R - 100, R - 60, R - 25, R - 3].slice(1), cc: [null, null, m.inc - m.exp < 0 ? RED : GREEN] }));
+
+        if (owed) { head('Receivables aging'); AL.forEach((l, k) => row(l, pm(aging[k]), k && aging[k] ? { c: RED } : {})); }
+
+        head('Money in - every payment (' + moneyIn.length + ')');
+        if (moneyIn.length) moneyIn.forEach(m => row(m.d + '   ' + m.n, pm(m.a), { c: GREEN, w: 135 })); else row('No payments received yet.', '');
+
+        head('Expenses paid (' + ex.pays.length + ')');
+        if (ex.pays.length) ex.pays.forEach(p => row(fmtD(p.d) + '   ' + p.e.name + ' (' + EXCAT[p.e.cat] + ')', pm(-p.amt), { w: 135 })); else row('No expenses recorded yet.', '');
+        foot(); doc.save('accounting-' + today + '.pdf');
       } catch (err) { console.error('pdf', err); toast('Could not create the PDF. Check your connection and try again.'); }
       btn.disabled = false; btn.classList.remove('opacity-50');
     }
@@ -1379,7 +1457,6 @@
         const links = K.reduce((n, c) => n + lk(c).length, 0), avg = K.length ? Math.round(K.reduce((n, c) => n + prog(lk(c)), 0) / K.length) : 0;
         const stat = (l, v, g) => `<div data-f class="${card} !p-4 sm:!p-5"><div class="text-xs text-slate-400">${l}</div><div class="stat-v mt-1 text-lg min-[420px]:text-xl sm:text-2xl font-extrabold ${g ? 'gradient-text' : ''}">${v}</div></div>`;
         const lbl = 'block text-sm font-medium text-slate-300';
-        const creds = kCreds ? `<div data-f class="${card} mb-4 !border-emerald-400/30"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="font-bold">Account created for ${esc(kCreds.name)}</div><p class="mt-1 text-sm text-slate-400">${kCreds.mailed ? 'An email was sent to ' + esc(kCreds.email) + ' with their login, the default password and the website link.' : (emailReady() ? 'The email could not be sent automatically. ' : '') + 'Use Send account email to email ' + esc(kCreds.email) + ' their login and default password.'}</p></div><button data-act="kdismiss" aria-label="Dismiss" class="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition">${svg('M6 6l12 12M18 6L6 18', 'w-4 h-4')}</button></div><div class="mt-3 grid sm:grid-cols-2 gap-3 text-sm"><div class="min-w-0"><span class="text-slate-400">Email</span><div class="font-semibold break-all">${esc(kCreds.email)}</div></div><div class="min-w-0"><span class="text-slate-400">Default password</span><div class="font-mono font-semibold break-all">${esc(kCreds.pw)}</div></div></div><div class="mt-4 flex flex-wrap gap-3"><button data-act="kmail" class="btn-shine px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white text-sm shadow-lg shadow-brand-500/30">${kCreds.mailed ? 'Send again' : 'Send account email'}</button><button data-act="kcopy" class="px-5 py-2.5 rounded-xl glass text-sm font-semibold text-brand-400 hover:text-white transition">Copy message</button></div></div>` : '';
         const kCard = c => {
           const ps = lk(c), v = prog(ps);
           return `<div data-f data-kid="${esc(c.id)}" class="${card} flex flex-col${c.disabled ? ' !border-red-400/40' : ''}">
@@ -1395,7 +1472,7 @@
               <div class="mt-4 flex flex-wrap gap-x-5 gap-y-2"><button data-act="kreset" data-k="${esc(c.id)}" class="text-sm font-semibold text-brand-400 hover:text-white">Send password reset</button><button data-act="ktoggle" data-k="${esc(c.id)}" class="text-sm font-semibold ${c.disabled ? 'text-emerald-300' : 'text-red-400'} hover:text-white">${c.disabled ? 'Enable account' : 'Disable account'}</button><button data-act="kdel" data-k="${esc(c.id)}" class="text-sm font-semibold text-red-400">Delete customer</button></div>
             </details></div>`;
         };
-        return `${kError ? `<p class="mb-4 text-sm text-red-400" role="alert">${esc(kError)}</p>` : ''}${creds}
+        return `${kError ? `<p class="mb-4 text-sm text-red-400" role="alert">${esc(kError)}</p>` : ''}
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">${stat('Customers', K.length, 1)}${stat('Projects shared', links)}${stat('Average progress', avg + '%')}</div>
         <div data-f class="flex flex-wrap items-center justify-between gap-3 mb-5"><p class="text-sm text-slate-400 max-w-xl">Create a login for each customer so they can follow their website's progress.</p>
           <button data-act="newk" class="btn-shine w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white text-sm shadow-lg shadow-brand-500/30">+ New customer</button></div>
@@ -1405,7 +1482,7 @@
             <label class="${lbl}">Company or website<input name="company" maxlength="80" autocomplete="off" class="field mt-1.5" placeholder="e.g. Cebu Bakery"/></label>
             <label class="${lbl}">Email (their login)<input name="email" type="email" required maxlength="120" autocomplete="off" class="field mt-1.5" placeholder="name@company.com"/></label>
             <label class="${lbl}">Phone (optional)<input name="phone" maxlength="30" autocomplete="off" class="field mt-1.5" placeholder="+63 900 000 0000"/></label>
-            <div class="sm:col-span-2 rounded-xl bg-white/10 p-3 text-sm text-slate-300">Their default password will be <span class="font-mono font-bold">123456</span>. They get an email with their login, this default password and the website link, where they can change it.</div>
+            <div class="sm:col-span-2 rounded-xl bg-white/10 p-3 text-sm text-slate-300">Their default password will be <span class="font-mono font-bold">123456</span>. They can change it after signing in.</div>
           </div>
           <div><div class="${lbl}">Projects to share</div><div class="mt-2 grid sm:grid-cols-2 gap-2">${C.map(p => `<label class="flex items-center gap-3 text-sm text-slate-300 cursor-pointer select-none"><input type="checkbox" class="chk" name="proj" value="${esc(p.id)}"/><span class="min-w-0 break-words">${esc(p.name)}</span></label>`).join('') || '<p class="text-sm text-slate-400">No projects yet. You can share one later.</p>'}</div></div>
           <p id="kErrMsg" class="text-sm text-red-400 min-h-[1.25rem]" role="alert"></p>
@@ -1427,23 +1504,25 @@
         <div class="mt-4 pgrid">${ps.map(p => `<div data-f class="${card}"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="font-bold truncate">${esc(p.name)}</div><div class="text-xs text-slate-400 mt-0.5">${p.start ? fmtD(p.start) + ' \u2013 ' + fmtD(p.due) : 'Target ' + fmtD(p.due)}</div></div><span class="${badgeCls(status(p))}">${status(p)}</span></div><div class="mt-4 flex items-center gap-3"><div class="bar flex-1 h-2 rounded-full bg-white/10"><i style="width:${pct(p)}%"></i></div><span class="text-sm font-bold w-10 text-right">${pct(p)}%</span></div><div class="mt-4 space-y-2">${p.items.map(m => `<label class="flex items-center gap-3 text-sm text-slate-300 py-0.5"><input type="checkbox" class="chk" disabled ${m.d ? 'checked' : ''}/><span class="${spanCls(m)}">${esc(m.t)}</span></label>`).join('')}</div></div>`).join('') || `<p class="text-slate-400">${ids.length ? 'Loading your project...' : 'Your project has not been shared yet.'}</p>`}</div>`;
       },
       accounting() {
-        const today = dstr(new Date()), total = sumAmt(I), paidL = I.filter(i => i.paid), recv = sumAmt(paidL);
+        const today = dstr(new Date()), sb = subBooks(today), total = sumAmt(I), paidL = I.filter(i => i.paid), recv = sumAmt(paidL);
         const open = I.filter(i => !i.paid), owed = sumAmt(open), lateAmt = sumAmt(open.filter(i => i.due && i.due < today));
         const rate = total ? Math.round(recv / total * 100) : 0, short = n => '\u20B1' + new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(n);
         const aging = [0, 0, 0, 0], AL = ['Not yet due', '1\u201330 days late', '31\u201360 days late', 'Over 60 days late'];
         open.forEach(i => { const d = i.due && i.due < today ? Math.floor((new Date(today + 'T00:00:00') - new Date(i.due + 'T00:00:00')) / 864e5) : 0; aging[!d ? 0 : d <= 30 ? 1 : d <= 60 ? 2 : 3] += i.amt; });
         const ym = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'), n0 = new Date();
-        const months = Array.from({ length: 6 }, (_, k) => { const d = new Date(n0.getFullYear(), n0.getMonth() - 5 + k, 1); return { k: ym(d), l: d.toLocaleDateString('en', { month: 'short' }), v: 0 }; });
+        const months = Array.from({ length: 6 }, (_, k) => { const d = new Date(n0.getFullYear(), n0.getMonth() - 5 + k, 1); return { k: ym(d), l: d.toLocaleDateString('en', { month: 'short' }), v: 0, s: 0 }; });
         paidL.forEach(i => { const m = i.paidAt && months.find(x => x.k === ym(new Date(i.paidAt))); if (m) m.v += i.amt; });
-        const mx = Math.max(1, ...months.map(m => m.v));
+        sb.pays.forEach(p => { const m = months.find(x => x.k === p.d.slice(0, 7)); if (m) m.s += p.amt; });
+        const mx = Math.max(1, ...months.map(m => m.v + (m.s || 0)));
         const cl = Object.create(null); I.forEach(i => { const n = i.to || 'Unknown', c = cl[n] || (cl[n] = { b: 0, p: 0 }); c.b += i.amt; if (i.paid) c.p += i.amt; });
+        SUB.forEach(s => (s.pays || []).forEach(p => { const n = s.to || 'Unknown', c = cl[n] || (cl[n] = { b: 0, p: 0 }); c.b += p.amt; c.p += p.amt; }));
         const top = Object.entries(cl).sort((a, b) => b[1].b - a[1].b).slice(0, 5);
-        const ledger = paidL.slice().sort((a, b) => b.paidAt - a.paidAt).slice(0, 8);
+        const ledger = [...paidL.map(i => ({ t: +i.paidAt || 0, d: i.paidAt ? fmtD(i.paidAt) : '-', n: i.num + ' \u00b7 ' + i.to, a: i.amt })), ...sb.pays.map(p => ({ t: new Date(p.d + 'T00:00:00').getTime(), d: fmtD(p.d), n: 'Subscription \u00b7 ' + p.s.name + (p.s.to ? ' \u00b7 ' + p.s.to : ''), a: p.amt }))].sort((a, b) => b.t - a.t).slice(0, 8);
         // expenses: salaries, domain, hosting and the rest, counted on every payment date up to today
-        const ex = exBooks(today), net = Math.round((recv - ex.total) * 100) / 100, pl = (n, w) => n + ' ' + w + (n === 1 ? '' : 's'), shortS = n => (n < 0 ? '-' : '') + short(Math.abs(n));
+        const ex = exBooks(today), net = Math.round((recv + sb.total - ex.total) * 100) / 100, pl = (n, w) => n + ' ' + w + (n === 1 ? '' : 's'), shortS = n => (n < 0 ? '-' : '') + short(Math.abs(n));
         months.forEach(m => { m.x = 0; });
         ex.pays.forEach(p => { const m = months.find(x => x.k === p.d.slice(0, 7)); if (m) m.x += p.amt; });
-        const mx2 = Math.max(1, ...months.map(m => Math.max(m.v, m.x)));
+        const mx2 = Math.max(1, ...months.map(m => Math.max(m.v + m.s, m.x)));
         const catRows = Object.entries(ex.cat).sort((a, b) => b[1] - a[1]), catSum = Math.round(catRows.reduce((a, c) => a + c[1], 0) * 100) / 100;
         const exList = EX.map(x => {
           const n = exDates(x, today).length, paid = Math.round(n * x.amt * 100) / 100, later = x.date > today;
@@ -1454,32 +1533,35 @@
         const row = (a, b) => `<div class="flex items-center justify-between gap-3 py-2 border-t border-white/10 first:border-0 text-sm">${a}${b}</div>`;
         const none = t => `<p class="text-sm text-slate-400">${t}</p>`;
         return `${iError ? `<p class="mb-4 text-sm text-red-400" role="alert">${esc(iError)}</p>` : ''}
-        <div class="flex flex-wrap items-center justify-between gap-3 mb-5"><p data-f class="text-slate-400">Money in, money out, money owed and what needs chasing, taken from your invoices and expenses.</p>
-          <div data-f class="flex flex-wrap items-center gap-2 w-full sm:w-auto"><button data-act="acsv" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl glass text-sm font-semibold text-brand-400 hover:text-white transition">Export CSV</button><button id="newExBtn" data-act="newex" class="btn-shine flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white text-sm shadow-lg shadow-brand-500/30">+ Add expense</button></div></div>
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-5"><p data-f class="text-slate-400">Money in, money out, money owed and what needs chasing, taken from your invoices, subscriptions and expenses.</p>
+          <div data-f class="flex flex-wrap items-center gap-2 w-full sm:w-auto"><button data-act="apdf" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl glass text-sm font-semibold text-brand-400 hover:text-white transition">Download PDF</button><button data-act="acsv" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl glass text-sm font-semibold text-brand-400 hover:text-white transition">Export CSV</button><button id="newExBtn" data-act="newex" class="btn-shine flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white text-sm shadow-lg shadow-brand-500/30">+ Add expense</button></div></div>
         <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-4">${stat('Total invoiced', money(total))}${stat('Payments received', money(recv), 'gradient-text')}${stat('Outstanding', money(owed))}${stat('Overdue', money(lateAmt), lateAmt ? 'text-red-300' : '')}</div>
         <div data-f class="${card} mt-4"><div class="flex items-center justify-between gap-3"><div class="font-bold">Collection rate</div><div class="font-extrabold">${rate}%</div></div><div class="bar mt-3 h-2 rounded-full bg-white/10"><i style="width:${rate}%"></i></div><p class="mt-2 text-xs text-slate-400">${money(recv)} collected of ${money(total)} invoiced &middot; ${paidL.length} of ${I.length} invoices paid</p></div>
+        <div class="mt-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-4">${stat('Subscription income', money(sb.total), 'gradient-text')}${stat('Subscriptions collected this month', money(sb.thisMonth))}${stat('Subscriptions to collect (' + new Date().toLocaleDateString('en', { month: 'long' }) + ')', money(sb.due))}${stat('Monthly recurring', money(sb.run))}</div>
         <div class="mt-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-4">${stat('Expenses to date', money(ex.total))}${stat('Net profit', money(net), net < 0 ? 'text-red-300' : 'gradient-text')}${stat('Expenses this month', money(ex.thisMonth))}${stat('Monthly running cost', money(ex.run))}</div>
         <div class="mt-4 grid xl:grid-cols-2 gap-4">
           <div data-f class="${card}"><div class="font-bold mb-3">Profit &amp; loss</div>
-            ${row('<span>Payments received</span>', `<span class="font-semibold text-emerald-300">${money2(recv)}</span>`)}
+            ${row('<span>Invoice payments received</span>', `<span class="font-semibold text-emerald-300">${money2(recv)}</span>`)}
+            ${row('<span>Subscription fees received</span>', `<span class="font-semibold text-emerald-300">${money2(sb.total)}</span>`)}
+            ${row('<span class="font-semibold">Total income</span>', `<span class="shrink-0 font-semibold text-emerald-300">${money2(recv + sb.total)}</span>`)}
             ${catRows.map(([k, v]) => row(`<span class="truncate text-slate-300">${esc(EXCAT[k])}</span>`, `<span class="shrink-0 font-semibold">&minus; ${money2(v)}</span>`)).join('') || row('<span class="text-slate-400">No expenses recorded yet</span>', '<span class="text-slate-400">&minus; ' + money2(0) + '</span>')}
             ${row('<span class="font-semibold">Total expenses</span>', `<span class="shrink-0 font-semibold">&minus; ${money2(ex.total)}</span>`)}
             ${row('<span class="font-extrabold">Net profit</span>', `<span class="shrink-0 font-extrabold ${net < 0 ? 'text-red-300' : 'text-emerald-300'}">${money2(net)}</span>`)}
-            <p class="mt-3 text-xs ${Math.abs(catSum - ex.total) < 0.005 ? 'text-slate-400' : 'text-red-300'}">${Math.abs(catSum - ex.total) < 0.005 ? '&#10003; Categories add up to the total.' : 'The categories do not add up to the total. Please review your expenses.'} Income counts when an invoice is marked paid. Expenses count on every payment date up to today.</p></div>
+            <p class="mt-3 text-xs ${Math.abs(catSum - ex.total) < 0.005 ? 'text-slate-400' : 'text-red-300'}">${Math.abs(catSum - ex.total) < 0.005 ? '&#10003; Categories add up to the total.' : 'The categories do not add up to the total. Please review your expenses.'} Income counts when an invoice is marked paid or a subscription is marked renewed. Expenses count on every payment date up to today.</p></div>
           <div data-f class="${card}"><div class="flex items-center justify-between gap-3 mb-3"><div class="font-bold">Income vs expenses &middot; last 6 months</div><div class="flex items-center gap-3 text-[11px] text-slate-400"><span class="inline-flex items-center gap-1.5"><i class="w-2.5 h-2.5 rounded-sm bg-brand-500"></i>Income</span><span class="inline-flex items-center gap-1.5"><i class="w-2.5 h-2.5 rounded-sm bg-pink"></i>Expenses</span></div></div>
-            <div class="h-32 flex items-end gap-2">${months.map(m => `<div class="flex-1 min-w-0 h-full flex items-end justify-center gap-1"><div class="w-full max-w-[1.25rem] rounded-t-md bg-gradient-to-t from-brand-500 to-aqua" style="height:${m.v ? Math.max(4, Math.round(m.v / mx2 * 100)) : 2}%;opacity:${m.v ? 1 : .25}"></div><div class="w-full max-w-[1.25rem] rounded-t-md bg-pink" style="height:${m.x ? Math.max(4, Math.round(m.x / mx2 * 100)) : 2}%;opacity:${m.x ? 1 : .25}"></div></div>`).join('')}</div>
-            <div class="mt-2 flex gap-2">${months.map(m => `<div class="flex-1 min-w-0 text-center"><div class="text-xs text-slate-400">${m.l}</div><div class="text-[10px] truncate ${m.v - m.x < 0 ? 'text-red-300' : 'text-slate-500'}">${m.v || m.x ? shortS(m.v - m.x) : '-'}</div></div>`).join('')}</div>
+            <div class="h-32 flex items-end gap-2">${months.map(m => `<div class="flex-1 min-w-0 h-full flex items-end justify-center gap-1"><div class="w-full max-w-[1.25rem] rounded-t-md bg-gradient-to-t from-brand-500 to-aqua" style="height:${m.v + m.s ? Math.max(4, Math.round((m.v + m.s) / mx2 * 100)) : 2}%;opacity:${m.v + m.s ? 1 : .25}"></div><div class="w-full max-w-[1.25rem] rounded-t-md bg-pink" style="height:${m.x ? Math.max(4, Math.round(m.x / mx2 * 100)) : 2}%;opacity:${m.x ? 1 : .25}"></div></div>`).join('')}</div>
+            <div class="mt-2 flex gap-2">${months.map(m => `<div class="flex-1 min-w-0 text-center"><div class="text-xs text-slate-400">${m.l}</div><div class="text-[10px] truncate ${m.v + m.s - m.x < 0 ? 'text-red-300' : 'text-slate-500'}">${m.v || m.s || m.x ? shortS(m.v + m.s - m.x) : '-'}</div></div>`).join('')}</div>
             <p class="mt-2 text-[11px] text-slate-500">Figures under each month show income minus expenses.</p></div>
         </div>
         <div class="mt-4 grid xl:grid-cols-2 gap-4">
-          <div data-f class="${card}"><div class="font-bold mb-3">Payments received &middot; last 6 months</div>
-            <div class="h-32 flex items-end gap-2">${months.map(m => `<div class="flex-1 min-w-0 h-full flex items-end justify-center"><div class="w-full max-w-[2.5rem] rounded-t-lg bg-gradient-to-t from-brand-500 to-aqua" style="height:${m.v ? Math.max(4, Math.round(m.v / mx * 100)) : 2}%;opacity:${m.v ? 1 : .25}"></div></div>`).join('')}</div>
-            <div class="mt-2 flex gap-2">${months.map(m => `<div class="flex-1 min-w-0 text-center"><div class="text-xs text-slate-400">${m.l}</div><div class="text-[10px] text-slate-500 truncate">${m.v ? short(m.v) : '-'}</div></div>`).join('')}</div></div>
+          <div data-f class="${card}"><div class="font-bold mb-3">Money in &middot; last 6 months <span class="text-xs font-normal text-slate-400">(invoices + subscriptions)</span></div>
+            <div class="h-32 flex items-end gap-2">${months.map(m => `<div class="flex-1 min-w-0 h-full flex items-end justify-center"><div class="w-full max-w-[2.5rem] rounded-t-lg bg-gradient-to-t from-brand-500 to-aqua" style="height:${m.v + m.s ? Math.max(4, Math.round((m.v + m.s) / mx * 100)) : 2}%;opacity:${m.v + m.s ? 1 : .25}"></div></div>`).join('')}</div>
+            <div class="mt-2 flex gap-2">${months.map(m => `<div class="flex-1 min-w-0 text-center"><div class="text-xs text-slate-400">${m.l}</div><div class="text-[10px] text-slate-500 truncate">${m.v + m.s ? short(m.v + m.s) : '-'}</div></div>`).join('')}</div></div>
           <div data-f class="${card}"><div class="font-bold mb-3">Receivables aging</div>${owed ? AL.map((l, k) => `<div class="py-1.5"><div class="flex items-center justify-between gap-3 text-sm"><span class="${k ? 'text-slate-300' : ''}">${l}</span><span class="font-semibold ${k && aging[k] ? 'text-red-300' : ''}">${money(aging[k])}</span></div><div class="bar mt-1.5 h-1.5 rounded-full bg-white/10"><i style="width:${Math.round(aging[k] / owed * 100)}%"></i></div></div>`).join('') : none('Nothing outstanding. Everything is paid.')}</div>
         </div>
         <div class="mt-4 grid xl:grid-cols-2 gap-4">
           <div data-f class="${card}"><div class="font-bold mb-3">Top clients</div>${top.map(([n, c]) => row(`<span class="truncate">${esc(n)}</span>`, `<span class="shrink-0 text-right flex flex-col min-[420px]:block"><span class="font-semibold text-emerald-300">${money(c.p)}</span> <span class="text-slate-400">of ${money(c.b)}</span></span>`)).join('') || none('No invoices yet.')}</div>
-          <div data-f class="${card}"><div class="font-bold mb-3">Payment ledger</div>${ledger.map(i => row(`<span class="truncate"><span class="text-slate-400">${i.paidAt ? fmtD(i.paidAt) : '-'}</span> &middot; ${esc(i.num)} &middot; ${esc(i.to)}</span>`, `<span class="shrink-0 font-semibold text-emerald-300">${money(i.amt)}</span>`)).join('') || none('No payments received yet.')}</div>
+          <div data-f class="${card}"><div class="font-bold mb-3">Payment ledger</div>${ledger.map(i => row(`<span class="truncate"><span class="text-slate-400">${esc(i.d)}</span> &middot; ${esc(i.n)}</span>`, `<span class="shrink-0 font-semibold text-emerald-300">${money(i.a)}</span>`)).join('') || none('No payments received yet.')}</div>
         </div>
         ${exError ? `<p class="mt-4 text-sm text-red-400" role="alert">${esc(exError)}</p>` : ''}
         <div data-f class="${card} mt-4"><div class="flex flex-wrap items-center justify-between gap-3 mb-4"><div><div class="font-bold">Expenses</div><p class="text-xs text-slate-400 mt-0.5">Developer salaries, domains, hosting, tools and other costs of running the business.</p></div>
@@ -1955,25 +2037,16 @@
         const dl = document.createElement('a'); dl.href = url; dl.download = 'expenses-' + dstr(new Date()) + '.csv'; document.body.appendChild(dl); dl.click(); dl.remove();
         setTimeout(() => URL.revokeObjectURL(url), 1000); toast('Expenses exported');
       }
+      else if (a === 'apdf') accountingPdf(b);
       else if (a === 'acsv') {
         const q = v => { v = String(v); if (/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; };
-        const rows = [['Invoice', 'Billed to', 'Website type', 'Payment type', 'Amount (PHP)', 'Due date', 'Status', 'Date paid']].concat(I.map(i => [i.num, i.to, i.desc, PAYT[i.pt] || '', i.amt.toFixed(2), i.due, ILABEL[istat(i)], i.paid && i.paidAt ? dstr(new Date(i.paidAt)) : '']));
+        const rows = [['Invoice', 'Billed to', 'Website type', 'Payment type', 'Amount (PHP)', 'Due date', 'Status', 'Date paid']].concat(I.map(i => [i.num, i.to, i.desc, PAYT[i.pt] || '', i.amt.toFixed(2), i.due, ILABEL[istat(i)], i.paid && i.paidAt ? dstr(new Date(i.paidAt)) : ''])).concat(subBooks(dstr(new Date())).pays.map(p => ['Subscription', p.s.to, p.s.name, STYPE[p.s.type].l + ' · ' + SCYCLE[p.s.cycle].l, p.amt.toFixed(2), p.due, 'Paid', p.d]));
         const url = URL.createObjectURL(new Blob(['\ufeff' + rows.map(r => r.map(q).join(',')).join('\r\n')], { type: 'text/csv' }));
         const dl = document.createElement('a'); dl.href = url; dl.download = 'invoices-' + dstr(new Date()) + '.csv'; document.body.appendChild(dl); dl.click(); dl.remove();
         setTimeout(() => URL.revokeObjectURL(url), 1000); toast('Invoice ledger exported');
       }
       else if (a === 'newk') { kOpen = !kOpen; const pn = $('#kPanel'); if (pn) { pn.classList.toggle('open', kOpen); pn.toggleAttribute('inert', !kOpen); } }
       else if (a === 'kcancel') { kOpen = false; const pn = $('#kPanel'); if (pn) { pn.classList.remove('open'); pn.setAttribute('inert', ''); } }
-      else if (a === 'kdismiss') { kCreds = null; paint(false); }
-      else if (a === 'kcopy') {
-        if (!kCreds) return;
-        const t = acctBody(kCreds);
-        try { await navigator.clipboard.writeText(t); toast('Login details copied'); } catch (e2) { toast('Could not copy. Select the text and copy it manually.'); }
-      }
-      else if (a === 'kmail') {
-        if (!kCreds) return;
-        location.href = 'mailto:' + encodeURIComponent(kCreds.email).replace(/%40/g, '@') + '?subject=' + encodeURIComponent(acctSubject) + '&body=' + encodeURIComponent(acctBody(kCreds));
-      }
       else if (a === 'klink') {
         const c = K.find(x => x.id === b.dataset.k); if (!c || !c.uid) return;
         const pid = b.dataset.p, on = b.checked, prev = c.projects.slice();
@@ -2430,6 +2503,14 @@
       const run = Math.round(EX.filter(e => EXREP[e.rep] && EXREP[e.rep].m && (!e.end || e.end >= today)).reduce((a, e) => a + e.amt / EXREP[e.rep].m, 0) * 100) / 100;
       return { pays, total, cat, thisMonth, run };
     }
+    // subscription fees collected (money in): one payment is recorded each time a subscription is marked renewed
+    function subBooks(today) {
+      const pays = []; SUB.forEach(s => (s.pays || []).forEach(p => pays.push({ s, d: p.d, due: p.due, amt: p.amt })));
+      pays.sort((a, b) => b.d.localeCompare(a.d));
+      const r2 = n => Math.round(n * 100) / 100, mon = today.slice(0, 7);
+      return { pays, total: r2(pays.reduce((a, p) => a + p.amt, 0)), thisMonth: r2(pays.filter(p => p.d.slice(0, 7) === mon).reduce((a, p) => a + p.amt, 0)),
+        run: r2(SUB.filter(s => sLive(s)).reduce((a, s) => a + s.amt / SCYCLE[s.cycle].m, 0)), due: r2(sStats().mrr) };
+    }
     function exDefaults(f) {
       const c = f.elements.cat.value, r = EXREP_DEF[c] || 'once';
       if (!f.dataset.edit) f.elements.rep.value = r;
@@ -2611,11 +2692,16 @@
       const t = delI; setXDeleting(true);
       try {
         if (t.kind === 'disable') await withTimeout(update(ref(db), { [`users/${U.uid}/customers/${t.id}/disabled`]: true, [`portal/${t.uid}/disabled`]: true, [`portal/${t.uid}/revoked`]: true }), 12000);
-        else if (t.kind === 'cust') await withTimeout(update(ref(db), { [`users/${U.uid}/customers/${t.id}`]: null, [`portal/${t.uid}`]: { admin: U.uid, revoked: true } }), 12000);
+        else if (t.kind === 'cust') {
+          await withTimeout(update(ref(db), { [`users/${U.uid}/customers/${t.id}`]: null, [`portal/${t.uid}`]: { admin: U.uid, revoked: true } }), 12000);   // access is cut right away
+          // then clean up everything else saved for this customer, and delete their login from Firebase Authentication
+          await Promise.allSettled([`portal/${t.uid}`, `chats/${t.uid}`, `maintenance/${t.uid}`, `activity/${t.uid}`].map(path => withTimeout(remove(ref(db, path)), 12000)));
+          t.authGone = await delAuthAccount(t.email);
+        }
         else if (t.kind === 'sub') { const up = { [`users/${U.uid}/subscriptions/${t.id}`]: null }; if (t.cuid) up[`portal/${t.cuid}/subscriptions/${t.id}`] = null; await withTimeout(update(ref(db), up), 12000); }
         else if (t.kind === 'expense') { await withTimeout(update(ref(db), { [`users/${U.uid}/expenses/${t.id}`]: null }), 12000); if (exEdit === t.id) hideExPanel(); }
         else { const up = { [`users/${U.uid}/invoices/${t.id}`]: null }; if (t.cuid) up[`portal/${t.cuid}/invoices/${t.id}`] = null; await withTimeout(update(ref(db), up), 12000); if (invEdit === t.id) hideInvPanel(); }
-        setXDeleting(false); closeXDel(); toast(t.kind === 'disable' ? t.num + ' can no longer log in' : t.num + ' deleted');
+        setXDeleting(false); closeXDel(); toast(t.kind === 'disable' ? t.num + ' can no longer log in' : t.kind === 'cust' ? (t.authGone ? t.num + ' deleted from the dashboard and Firebase' : t.num + ' deleted. Their login could not be removed automatically (the password was changed). Delete it in Firebase Authentication.') : t.num + ' deleted');
       } catch (err) {
         setXDeleting(false); xErr.textContent = t.kind === 'disable' ? kErr(err, 'disable the account') : t.kind === 'cust' ? kErr(err, 'delete the customer') : t.kind === 'sub' ? subErr(err, 'delete the subscription') : t.kind === 'expense' ? exErr(err, 'delete the expense') : invErr(err, 'delete the invoice');
       }
@@ -2704,7 +2790,17 @@
     // Saved at users/<adminUid>/customers/<id>. Each customer also gets portal/<customerUid>, which tells their login whose projects to show.
     const TEMP_PW = '123456';   // every new customer starts with this; the email tells them to change it
     const kErr = (err, what) => { console.error(what, err); return /PERMISSION_DENIED/i.test(String((err && (err.code || err.message)) || '')) ? 'Blocked by the database rules. Add the "portal" and "customers" rules in Firebase.' : 'Could not ' + what + '. Please try again.'; };
-    const repaintK = () => { chSync(); trkSync(); if (document.body.classList.contains('ready')) { if (view === 'customers') paint(false); else if (view === 'subscriptions') updateSView(); } };
+    let kHold = false, kt = null;
+    const repaintK = () => {
+      chSync(); trkSync();
+      if (!document.body.classList.contains('ready')) return;
+      if (view === 'subscriptions') return updateSView();
+      if (view !== 'customers' || kHold) return;
+      const grid = $('#kgrid'), gone = grid ? [...grid.querySelectorAll('[data-kid]')].filter(n => !K.some(c => c.id === n.dataset.kid)) : [];
+      if (!gone.length) { if (!kt) paint(false); return; }   // an unrelated change redraws now, unless a fade-out is already running
+      gone.forEach(collapseOut);   // a removed customer fades out and the gap closes before the list is redrawn
+      clearTimeout(kt); kt = setTimeout(() => { kt = null; if (view === 'customers') paint(false); }, 650);
+    };
     let offK = () => {}, kSig = '';
     function watchCustomers() {
       offK(); K = []; kSig = ''; kError = '';
@@ -2724,7 +2820,7 @@
       const shared = d.getAll('proj').filter(id => C.some(p => p.id === id));
       if (!name) return bad("Enter the customer's name.");
       if (!/^\S+@\S+\.\S+$/.test(email)) return bad('Enter a valid email address.');
-      err.textContent = ''; kBusy = true; btn.disabled = true; btn.textContent = 'Creating...';
+      err.textContent = ''; kBusy = true; kHold = true; btn.disabled = true; btn.textContent = 'Creating...';
       try {
         const a2 = acctAuth(), cred = await withTimeout(createUserWithEmailAndPassword(a2, email, pw), 15000);
         try { await updateProfile(cred.user, { displayName: name }); } catch (e) {}
@@ -2735,14 +2831,29 @@
           [`users/${U.uid}/customers/${cid}`]: { name, email, company, phone, uid: cuid, projects, createdAt: serverTimestamp() },
           [`portal/${cuid}`]: { admin: U.uid, cid, name, email, company, projects, update: '', updatedAt: 0 }
         }), 12000);
-        let mailed = false;
-        if (emailReady()) { mailed = await sendAcctEmail({ name, email, pw }); trkLog({ type: 'email', kind: 'Account created', to: email, toName: name, status: mailed ? 'sent' : 'failed', detail: mailed ? '' : 'The account email could not be sent.' }); }
-        kCreds = { name, email, pw, mailed }; kOpen = false; kBusy = false; toast(mailed ? 'Account created and email sent' : 'Account created. Send them the account email below.'); paint(false);
+        kOpen = false; toast('Account created');
+        const pn = $('#kPanel'); if (pn) { pn.classList.remove('open'); pn.setAttribute('inert', ''); }   // the form folds away first
+        await new Promise(r => setTimeout(r, 520));
+        kBusy = false; kHold = false;
+        if (view === 'customers') {
+          paint(false);   // then the new customer card fades in
+          const nc = $('[data-kid="' + cid + '"]'); if (nc) { nc.classList.add('fade-item'); nc.style.setProperty('--i', 0); }
+        }
       } catch (e) {
-        kBusy = false; btn.disabled = false; btn.textContent = 'Create account';
+        kBusy = false; kHold = false; btn.disabled = false; btn.textContent = 'Create account';
         const c = String((e && (e.code || e.message)) || '');
         bad(/email-already-in-use/.test(c) ? 'That email already has an account.' : /invalid-email/.test(c) ? 'That email address is not valid.' : /weak-password/.test(c) ? 'Choose a stronger password (8+ characters).' : /PERMISSION_DENIED/i.test(c) ? 'The login was created, but the database rules blocked saving the customer. Add the "portal" and "customers" rules in Firebase.' : c === 'timeout' ? 'This is taking too long. Check your connection and try again.' : 'Could not create the account. Please try again.');
       }
+    }
+    // deletes the customer's login from Firebase Authentication. Only possible while they still use the default password,
+    // because a browser can only delete an account it is signed in to. Returns false when it could not be done.
+    async function delAuthAccount(email) {
+      const a2 = acctAuth();
+      try {
+        const cred = await withTimeout(signInWithEmailAndPassword(a2, email, TEMP_PW), 15000);
+        await withTimeout(deleteUser(cred.user), 15000);
+        return true;
+      } catch (e) { console.error('delete login', e); try { await signOut(a2); } catch (e2) {} return false; }
     }
     function xSetup(kind) {
       // [phrase to type, button label, modal title, button label while working]
@@ -2756,8 +2867,8 @@
     }
     function openXCust(id, trigger) {
       const c = K.find(x => x.id === id); if (!c) return;
-      xSetup('cust'); delI = { kind: 'cust', id: c.id, uid: c.uid, num: c.name }; xFocus = trigger || document.activeElement;
-      $('#xDesc').textContent = 'This removes ' + c.name + ' from your customers and disables their portal access. Their login stays in Firebase Authentication until you delete it there. This cannot be undone.';
+      xSetup('cust'); delI = { kind: 'cust', id: c.id, uid: c.uid, num: c.name, email: c.email }; xFocus = trigger || document.activeElement;
+      $('#xDesc').textContent = 'This permanently deletes ' + c.name + ' from your customers and from Firebase: their login, portal page, chat and maintenance records. This cannot be undone.';
       xIn.value = ''; xIn.disabled = false; setXDeleting(false); syncX();
       xModal.classList.add('show');
       requestAnimationFrame(() => requestAnimationFrame(() => xModal.classList.add('open')));
