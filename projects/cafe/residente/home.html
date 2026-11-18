@@ -2,12 +2,14 @@
 <html lang="en" class="scroll-smooth">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport"
+            content="width=device-width, initial-scale=1.0, viewport-fit=cover">
         <title>Residente Café | Your neighborhood coffee spot in Cebu
             City</title>
         <meta name="description"
             content="Residente Café on J. Urgello St., Sambag 1, Cebu City. Tiramisu lattes, matcha and fresh bakes. Open daily 11 AM to 10 PM.">
         <meta name="theme-color" content="#EFE2CC">
+        <link rel="icon" type="image/png" href="./logo.png">
 
         <!-- Set theme + flags before first paint so there is no flash -->
         <script>
@@ -26,7 +28,7 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link
-            href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
             rel="stylesheet">
 
         <script src="https://cdn.tailwindcss.com"></script>
@@ -53,8 +55,8 @@
             mist: '#DCC6A8'
           },
           fontFamily: {
-            display: ['"Bricolage Grotesque"', 'system-ui', 'sans-serif'],
-            sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
+            display: ['"Nunito Sans"', 'system-ui', 'sans-serif'],
+            sans: ['"Nunito Sans"', 'system-ui', 'sans-serif'],
             mono: ['"DM Mono"', 'ui-monospace', 'monospace']
           }
         }
@@ -87,6 +89,11 @@
       --map: #2E1E15; --road: #4A3324;
       color-scheme: dark;
     }
+    /* Headline font matches the logo: light, open geometric sans */
+    .font-display { font-weight: 300 !important; letter-spacing: -.015em !important; }
+    .logo-img { height: 44px; width: auto; display: block; }
+    @media (min-width: 640px) { .logo-img { height: 52px; } }
+    .dark .logo-img { filter: invert(1) sepia(.25) brightness(.95); }
     ::selection { background: rgb(var(--matcha)); color: #2B1A11; }
 
     /* ───────── Dark mode "spread" (circle grows from the toggle) ───────── */
@@ -220,8 +227,8 @@
 
     /* Chips + lifted cards */
     .chip { transition: background-color .3s, color .3s, border-color .3s, translate .3s; }
-    .chip:hover { background: rgb(var(--matcha)); color: #2B1A11; border-color: rgb(var(--matcha)); translate: 0 -3px; }
-    .lift:hover { translate: 0 -8px; box-shadow: 0 30px 50px -28px rgba(0,0,0,.45); }
+    @media (hover: hover) { .chip:hover { background: rgb(var(--matcha)); color: #2B1A11; border-color: rgb(var(--matcha)); translate: 0 -3px; } }
+    @media (hover: hover) { .lift:hover { translate: 0 -8px; box-shadow: 0 30px 50px -28px rgba(0,0,0,.45); } }
 
     /* ───────── Header ───────── */
     #nav { transition: transform .5s cubic-bezier(.2,.8,.2,1), box-shadow .4s, background-color .5s; }
@@ -251,7 +258,7 @@
     .mobile-menu > div { overflow: hidden; min-height: 0; }
     .mobile-menu li { opacity: 0; translate: 0 16px; transition: opacity .4s, translate .5s cubic-bezier(.2,.8,.2,1); }
     .mobile-menu[data-open="true"] li { opacity: 1; translate: 0 0; transition-delay: calc(var(--i) * 70ms + 150ms); }
-    @media (min-width: 768px) { .mobile-menu { display: none; } }
+    @media (min-width: 1024px) { .mobile-menu { display: none; } }
 
     /* Back to top */
     .to-top { opacity: 0; translate: 0 24px; visibility: hidden; transition: opacity .4s, translate .4s cubic-bezier(.2,.8,.2,1), visibility 0s .4s, background-color .3s; }
@@ -280,21 +287,39 @@
     }
     .no-curtain #shopfront { display: none !important; }
     @keyframes shopOut { to { opacity: 0; visibility: hidden; } }
-    .shop-zoom { transform-origin: 50% 64%; animation: shopZoom 1.5s cubic-bezier(.62,0,.85,.35) 1.65s forwards; will-change: transform; }
-    @keyframes shopZoom { to { transform: scale(26); } }
-    .shop { position: relative; width: min(90vw, 540px); aspect-ratio: 1 / 1.02; opacity: 0; animation: shopIn .8s ease .1s forwards; }
-    @keyframes shopIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+    /* The zoom is one transform on one layer. JS measures the real door and sets --ox/--oy (origin),
+       --zx/--zy (shift to screen centre) and --zs (scale), so it fits every screen size.
+       Scale steps follow s^t so the zoom feels even, and the timing is linear between them. */
+    .shop-zoom {
+      transform-origin: var(--ox, 50%) var(--oy, 64%);
+      animation: shopZoom 1.5s linear 1.65s both; will-change: transform;
+    }
+    @keyframes shopZoom {
+      0%   { transform: translate3d(0, 0, 0) scale(1); }
+      25%  { transform: translate3d(calc(var(--zx, 0px) * .25), calc(var(--zy, 0px) * .25), 0) scale(var(--z1, 1.9)); }
+      50%  { transform: translate3d(calc(var(--zx, 0px) * .5),  calc(var(--zy, 0px) * .5),  0) scale(var(--z2, 3.7)); }
+      75%  { transform: translate3d(calc(var(--zx, 0px) * .75), calc(var(--zy, 0px) * .75), 0) scale(var(--z3, 7.2)); }
+      100% { transform: translate3d(var(--zx, 0px), var(--zy, 0px), 0) scale(var(--zs, 14)); }
+    }
+    .shop {
+      position: relative; aspect-ratio: 1 / 1.02; opacity: 0; animation: shopIn .8s ease .1s forwards;
+      width: min(90vw, 540px, calc(86vh / 1.02));
+      width: min(90vw, 540px, calc(86dvh / 1.02));
+      container-type: inline-size;
+    }
+    @keyframes shopIn { from { opacity: 0; } to { opacity: 1; } }
 
     .sf-sign {
       position: absolute; top: 1%; left: 50%; translate: -50% 0; width: 56%; height: 12%; z-index: 3;
       display: flex; align-items: baseline; justify-content: center; gap: .15em; padding-top: 2.2%;
       background: #2B1A11; border: 3px solid #D49A5A; border-radius: 10px; color: #FBF4E6;
-      font: 800 clamp(1.05rem, 4.8vw, 1.7rem)/1 "Bricolage Grotesque", system-ui, sans-serif; letter-spacing: -.03em;
+      font: 300 clamp(1.05rem, 4.8vw, 1.7rem)/1 "Nunito Sans", system-ui, sans-serif; letter-spacing: -.01em;
       box-shadow: 0 10px 24px rgba(0,0,0,.45);
     }
-    .sf-sign b { color: #D49A5A; font-weight: 800; }
+    .sf-sign b { color: #D49A5A; font-weight: 400; }
     .sf-sign em { margin-left: .5em; font: 500 .38em "DM Mono", ui-monospace, monospace; letter-spacing: .16em; text-transform: uppercase; font-style: normal; }
-    .sf-awning-wrap { position: absolute; top: 15%; left: -3%; right: -3%; height: 17%; z-index: 2; filter: drop-shadow(0 12px 10px rgba(0,0,0,.5)); }
+    .sf-awning-wrap { position: absolute; top: 15%; left: -3%; right: -3%; height: 17%; z-index: 2; }
+    .sf-awning-wrap::after { content: ''; position: absolute; left: 3%; right: 3%; bottom: -16%; height: 24%; z-index: -1; background: linear-gradient(rgba(0,0,0,.42), transparent); }
     .sf-awning {
       position: absolute; inset: 0;
       background: repeating-linear-gradient(90deg, #D49A5A 0 8.3333%, #FBF4E6 8.3333% 16.6666%);
@@ -315,7 +340,7 @@
     }
     .sf-window.l { left: 5%; } .sf-window.r { right: 5%; }
     .sf-window::before { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, transparent 58%, #20130C 58% 62%, transparent 62%); }
-    .sf-window span { position: absolute; left: 0; right: 0; top: 14%; text-align: center; color: #4A2D1E; font: 800 clamp(.8rem, 3.2vw, 1.2rem)/1 "Bricolage Grotesque", system-ui, sans-serif; letter-spacing: -.02em; }
+    .sf-window span { position: absolute; left: 0; right: 0; top: 14%; text-align: center; color: #4A2D1E; font: 400 clamp(.8rem, 3.2vw, 1.2rem)/1 "Nunito Sans", system-ui, sans-serif; letter-spacing: 0; }
     .sf-door-wrap { position: absolute; left: 50%; translate: -50% 0; width: 25%; top: 6%; bottom: 0; perspective: 700px; z-index: 1; }
     .sf-frame { position: absolute; inset: -5px -5px 0; background: #20130C; border-radius: 6px 6px 0 0; }
     .sf-inside { position: absolute; inset: 0; overflow: hidden; background: radial-gradient(80% 60% at 50% 35%, #FFE7B8 0%, #F2B96B 45%, #B7742F 100%); }
@@ -325,11 +350,11 @@
     .in-shelf::before { content: ''; position: absolute; left: 0; right: 0; bottom: 4px; height: 9px; background: repeating-linear-gradient(90deg, #6B4228 0 6px, transparent 6px 14px); border-radius: 2px 2px 0 0; }
     .in-counter { position: absolute; left: 0; right: 0; bottom: 0; height: 30%; background: linear-gradient(#5A3722, #2B1A11); border-top: 3px solid #D49A5A; }
     .sf-door {
-      position: absolute; inset: 0; transform-origin: 0 50%; backface-visibility: hidden;
+      position: absolute; inset: 0; transform-origin: 0 50%; backface-visibility: hidden; will-change: transform;
       background: linear-gradient(90deg, #3A2316, #4A2D1E); border: 4px solid #2B1A11; border-radius: 4px 4px 0 0;
       box-shadow: inset 0 0 0 3px #6B4228; animation: doorOpen 1.15s cubic-bezier(.5,0,.2,1) .85s forwards;
     }
-    @keyframes doorOpen { to { transform: rotateY(92deg); } }
+    @keyframes doorOpen { from { transform: rotateY(0deg); } to { transform: rotateY(92deg); } }
     .sf-glass { position: absolute; left: 14%; right: 14%; top: 9%; height: 58%; border: 3px solid #20130C; border-radius: 3px; background: linear-gradient(135deg, rgba(247,217,160,.55), rgba(120,70,30,.4)); overflow: hidden; }
     .sf-glass::after { content: ''; position: absolute; top: -20%; left: 18%; width: 22%; height: 140%; rotate: 18deg; background: rgba(255,255,255,.22); }
     .sf-panel { position: absolute; left: 14%; right: 14%; bottom: 6%; height: 20%; border: 3px solid rgba(0,0,0,.35); border-radius: 3px; }
@@ -417,6 +442,33 @@
     .map-loading { animation: glow 1.6s ease-in-out infinite; }
     body.modal-open { overflow: hidden; }
 
+    /* ───────── Responsive + performance ───────── */
+    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+    body { overflow-x: clip; }
+    a, button { touch-action: manipulation; }
+    #nav { padding-top: env(safe-area-inset-top, 0px); }
+    footer { padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+    /* While the door plays, nothing behind it is painted. The page appears the moment the curtain starts fading. */
+    .js:not(.no-curtain) body { animation: none; }
+    .js:not(.no-curtain) #nav, .js:not(.no-curtain) main, .js:not(.no-curtain) footer {
+      visibility: hidden; animation: unhide 0s linear 2.5s forwards;
+    }
+    @keyframes unhide { to { visibility: visible; } }
+    .js #shopfront { will-change: opacity; }
+
+    /* Shopfront type scales with the shopfront itself, not the viewport */
+    @supports (width: 1cqi) {
+      .sf-sign { font-size: clamp(.7rem, 5cqi, 1.7rem); }
+      .sf-window span { font-size: clamp(.6rem, 3.6cqi, 1.2rem); }
+      .sf-open { font-size: clamp(.45rem, 1.9cqi, .65rem); }
+    }
+    @media (max-height: 520px) { .shop-hint { display: none; } }
+    @media (max-width: 767px) {
+      .js [data-reveal="left"]  { --tx: -28px; }
+      .js [data-reveal="right"] { --tx: 28px; }
+    }
+
     /* ───────── Reduced motion ───────── */
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto !important; }
@@ -438,7 +490,7 @@
         <div id="shopfront" aria-hidden="true">
             <div class="shop-zoom">
                 <div class="shop">
-                    <div class="sf-sign">residente<b>.</b><em>café</em></div>
+                    <div class="sf-sign">Residente<b>.</b><em>café</em></div>
                     <div class="sf-awning-wrap"><div
                             class="sf-awning"></div></div>
                     <div class="sf-wall">
@@ -466,6 +518,24 @@
             </div>
             <p class="shop-hint">come on in</p>
         </div>
+        <script>
+    // Measure the real door and size the zoom so it fills any screen.
+    (function () {
+      var zoom = document.querySelector('.shop-zoom'), door = document.querySelector('.sf-door-wrap');
+      if (!zoom || !door) return;
+      var z = zoom.getBoundingClientRect(), d = door.getBoundingClientRect();
+      if (!d.width || !d.height) return;
+      var cx = d.left + d.width / 2, cy = d.top + d.height / 2;
+      var s = Math.max(innerWidth / d.width, innerHeight / d.height) * 1.2;
+      var st = zoom.style;
+      st.setProperty('--ox', (cx - z.left).toFixed(1) + 'px');
+      st.setProperty('--oy', (cy - z.top).toFixed(1) + 'px');
+      st.setProperty('--zx', (innerWidth / 2 - cx).toFixed(1) + 'px');
+      st.setProperty('--zy', (innerHeight / 2 - cy).toFixed(1) + 'px');
+      st.setProperty('--zs', s.toFixed(3));
+      [.25, .5, .75].forEach(function (k, i) { st.setProperty('--z' + (i + 1), Math.pow(s, k).toFixed(3)); });
+    })();
+  </script>
 
         <!-- Scroll progress -->
         <div id="progress"
@@ -475,15 +545,14 @@
         <!-- NAV -->
         <header id="nav" class="sticky top-0 z-50 bg-sage/90 backdrop-blur">
             <div
-                class="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8 lg:px-[72px]">
-                <a href="#top"
-                    class="font-display text-3xl font-extrabold tracking-tight">
-                    residente<span
-                        class="ml-1.5 font-mono text-xs font-medium uppercase tracking-[.12em]">café</span>
+                class="mx-auto flex max-w-7xl 2xl:max-w-[1440px] items-center justify-between px-5 py-4 sm:px-8 lg:px-[72px]">
+                <a href="#top" aria-label="Residente Café, home">
+                    <img src="./logo.png" alt="Residente Café"
+                        class="logo-img" width="338" height="100">
                 </a>
 
                 <div class="flex items-center gap-3 sm:gap-5">
-                    <nav class="hidden items-center gap-7 font-medium md:flex"
+                    <nav class="hidden items-center gap-7 font-medium lg:flex"
                         aria-label="Main">
                         <a href="#menu" class="nav-link ulink py-2">Menu</a>
                         <a href="#story" class="nav-link ulink py-2">Our
@@ -515,7 +584,7 @@
                     </button>
 
                     <button id="menu-btn" type="button"
-                        class="relative inline-flex h-11 w-11 items-center justify-center rounded-full border-2 border-ink md:hidden"
+                        class="relative inline-flex h-11 w-11 items-center justify-center rounded-full border-2 border-ink lg:hidden"
                         aria-label="Open menu" aria-expanded="false"
                         aria-controls="mobile-menu">
                         <svg id="icon-open" class="h-5 w-5" viewBox="0 0 24 24"
@@ -530,7 +599,7 @@
                 </div>
             </div>
 
-            <nav id="mobile-menu" class="mobile-menu md:hidden"
+            <nav id="mobile-menu" class="mobile-menu lg:hidden"
                 aria-label="Mobile" data-open="false">
                 <div class="px-5">
                     <ul
@@ -595,7 +664,7 @@
 
                 <section
                     data-scrollfade
-                    class="relative z-10 mx-auto flex max-w-7xl flex-wrap items-center gap-14 px-5 pb-16 pt-10 sm:px-8 lg:gap-12 lg:px-[72px] lg:pb-24 lg:pt-16">
+                    class="relative z-10 mx-auto flex max-w-7xl 2xl:max-w-[1440px] flex-wrap items-center gap-10 px-5 pb-16 pt-8 sm:gap-14 sm:pt-10 sm:px-8 lg:gap-12 lg:px-[72px] lg:pb-24 lg:pt-16">
                     <div
                         class="flex min-w-0 flex-1 basis-[460px] flex-col gap-7"
                         data-stagger="110" data-base="300">
@@ -603,17 +672,18 @@
                             class="font-mono text-[13px] uppercase tracking-[.14em] text-muted">Urgello
                             · Sambag 1 · Cebu City</p>
                         <h1 data-split
-                            class="font-display text-[clamp(2.75rem,6vw,5.5rem)] font-extrabold leading-[.95] tracking-[-.035em] [text-wrap:balance]">
+                            class="font-display text-[clamp(2.4rem,6vw,5.5rem)] font-extrabold leading-[.95] tracking-[-.035em] [text-wrap:balance]">
                             Your neighborhood <span class="hl">coffee</span>
                             spot.
                         </h1>
                         <p
-                            class="max-w-[480px] text-[19px] leading-relaxed text-muted">
+                            class="max-w-[480px] text-[17px] leading-relaxed sm:text-[19px] text-muted">
                             Tiramisu lattes, matcha and fresh bakes from Dough
                             J, poured every day on J. Urgello Street from 11 AM
                             to 10 PM.
                         </p>
-                        <div class="flex flex-wrap gap-3.5">
+                        <div
+                            class="flex flex-wrap gap-3.5 [&>a]:flex-1 [&>a]:justify-center sm:[&>a]:flex-none">
                             <a
                                 href="https://www.google.com/maps/search/?api=1&query=Residente+Caf%C3%A9+325G+J.+Urgello+St+Cebu+City"
                                 target="_blank" rel="noopener" data-magnetic
@@ -734,9 +804,9 @@
                             <div class="layer absolute bottom-[3%] left-0"
                                 style="--i:8">
                                 <div
-                                    class="float flex h-32 w-32 flex-col items-center justify-center rounded-full bg-matcha text-center text-deep [rotate:-9deg]">
+                                    class="float flex h-24 w-24 flex-col sm:h-32 sm:w-32 items-center justify-center rounded-full bg-matcha text-center text-deep [rotate:-9deg]">
                                     <span
-                                        class="font-display text-[40px] font-extrabold leading-none tracking-tight [font-variant-numeric:tabular-nums]"
+                                        class="font-display text-[30px] font-extrabold sm:text-[40px] leading-none tracking-tight [font-variant-numeric:tabular-nums]"
                                         data-count="4.8"
                                         data-decimals="1">4.8</span>
                                     <span
@@ -747,7 +817,7 @@
                             <div class="layer absolute right-0 top-[4%]"
                                 style="--i:9">
                                 <div
-                                    class="float-b rounded-full bg-ink px-5 py-3 text-[15px] font-bold text-inverse [rotate:5deg]">Free
+                                    class="float-b rounded-full bg-ink px-4 py-2 text-[13px] font-bold text-inverse sm:px-5 sm:py-3 sm:text-[15px] [rotate:5deg]">Free
                                     coffee tasting</div>
                             </div>
                         </div>
@@ -797,9 +867,9 @@
             </div>
 
             <!-- MENU -->
-            <section id="menu" class="scroll-mt-16 bg-surface text-fog">
+            <section id="menu" class="scroll-mt-20 bg-surface text-fog">
                 <div
-                    class="mx-auto flex max-w-7xl flex-col gap-14 px-5 py-16 sm:px-8 lg:px-[72px] lg:py-28">
+                    class="mx-auto flex max-w-7xl 2xl:max-w-[1440px] flex-col gap-14 px-5 py-16 sm:px-8 lg:px-[72px] lg:py-28">
 
                     <div
                         class="flex flex-wrap items-end justify-between gap-6 lg:gap-12"
@@ -822,7 +892,7 @@
                     <div class="flex flex-wrap gap-6" data-stagger="160"
                         data-from="zoom">
                         <article
-                            class="lift flex min-h-[340px] min-w-0 flex-[1.4_1_420px] flex-col justify-between gap-10 rounded-[28px] bg-matcha p-9 text-deep">
+                            class="lift flex min-h-[280px] sm:min-h-[340px] min-w-0 flex-[1.4_1_420px] flex-col justify-between gap-10 rounded-[28px] bg-matcha p-6 text-deep sm:p-9">
                             <span
                                 class="self-start rounded-full bg-deep px-4 py-2 font-mono text-xs uppercase tracking-[.12em] text-cream">Best
                                 seller</span>
@@ -841,7 +911,7 @@
                         </article>
 
                         <article
-                            class="lift flex min-h-[340px] min-w-0 flex-[1_1_320px] flex-col justify-between gap-10 rounded-[28px] bg-moss p-9">
+                            class="lift flex min-h-[280px] sm:min-h-[340px] min-w-0 flex-[1_1_320px] flex-col justify-between gap-10 rounded-[28px] bg-moss p-6 sm:p-9">
                             <span
                                 class="self-start rounded-full border border-fog px-4 py-2 font-mono text-xs uppercase tracking-[.12em]">Coffee
                                 &amp; matcha</span>
@@ -905,18 +975,18 @@
             </section>
 
             <!-- STORY -->
-            <section id="story" class="scroll-mt-16 bg-milk">
+            <section id="story" class="scroll-mt-20 bg-milk">
                 <div
-                    class="mx-auto flex max-w-7xl flex-wrap items-center gap-14 px-5 py-16 sm:px-8 lg:gap-[72px] lg:px-[72px] lg:py-28">
+                    class="mx-auto flex max-w-7xl 2xl:max-w-[1440px] flex-wrap items-center gap-14 px-5 py-16 sm:px-8 lg:gap-[72px] lg:px-[72px] lg:py-28">
                     <div class="min-w-0 flex-1 basis-[340px]"
                         data-reveal="left">
                         <div
-                            class="photo-ph mx-auto flex aspect-[4/5] w-full max-w-[520px] items-center justify-center rounded-[28px] p-6 text-center"
+                            class="mx-auto aspect-[4/5] w-full max-w-[520px] overflow-hidden rounded-[28px] shadow-xl"
                             data-parallax="0.05">
-                            <!-- Replace this block with: <img src="images/cafe.jpg" alt="Inside Residente Café" class="h-full w-full rounded-[28px] object-cover"> -->
-                            <span
-                                class="font-mono text-[13px] tracking-wide text-muted">[ADD
-                                PHOTO OF THE CAFÉ]</span>
+                            <img src="./cafe.jpg"
+                                alt="Inside Residente Café: white tables, olive tree, bookshelf and the coffee bar"
+                                class="h-full w-full object-cover"
+                                loading="lazy">
                         </div>
                     </div>
                     <div
@@ -929,7 +999,7 @@
                             class="font-display text-[clamp(2.25rem,5vw,4.25rem)] font-extrabold leading-none tracking-[-.03em] [text-wrap:balance]">Residente
                             means resident. Stay a while.</h2>
                         <p
-                            class="max-w-[520px] text-[19px] leading-relaxed text-muted">
+                            class="max-w-[520px] text-[17px] leading-relaxed sm:text-[19px] text-muted">
                             We are a coffee corner on J. Urgello Street in
                             Sambag 1, open every day from 11 AM to 10 PM. Come
                             in for a drink, stay for a bake, and make the place
@@ -938,7 +1008,7 @@
                         <div
                             class="flex flex-wrap items-center gap-x-7 gap-y-5 border-t border-ink/20 pt-7">
                             <span
-                                class="font-display text-[88px] font-extrabold leading-[.9] tracking-[-.04em] [font-variant-numeric:tabular-nums]"
+                                class="font-display text-[64px] sm:text-[88px] font-extrabold leading-[.9] tracking-[-.04em] [font-variant-numeric:tabular-nums]"
                                 data-count="4.8" data-decimals="1">4.8</span>
                             <p
                                 class="max-w-[220px] text-[17px] leading-snug text-muted">Google
@@ -950,9 +1020,9 @@
             </section>
 
             <!-- TASTING + EVENTS -->
-            <section id="events" class="scroll-mt-16 bg-sage">
+            <section id="events" class="scroll-mt-20 bg-sage">
                 <div
-                    class="mx-auto flex max-w-7xl flex-wrap gap-6 px-5 py-16 sm:px-8 lg:px-[72px] lg:py-28"
+                    class="mx-auto flex max-w-7xl 2xl:max-w-[1440px] flex-wrap gap-6 px-5 py-16 sm:px-8 lg:px-[72px] lg:py-28"
                     data-stagger="180">
                     <article
                         class="lift flex min-w-0 flex-[1_1_400px] flex-col gap-5 rounded-[28px] bg-matcha p-7 text-deep sm:p-12">
@@ -1007,14 +1077,15 @@
             </section>
 
             <!-- VISIT -->
-            <section id="visit" class="scroll-mt-16 bg-milk">
+            <section id="visit" class="scroll-mt-20 bg-milk">
                 <div
-                    class="mx-auto flex max-w-7xl flex-wrap items-stretch gap-12 px-5 py-16 sm:px-8 lg:gap-[72px] lg:px-[72px] lg:py-28">
+                    class="mx-auto flex max-w-7xl 2xl:max-w-[1440px] flex-wrap items-stretch gap-12 px-5 py-16 sm:px-8 lg:gap-[72px] lg:px-[72px] lg:py-28">
                     <div
                         class="flex min-w-0 flex-1 basis-[400px] flex-col gap-7"
                         data-stagger="120">
                         <p
-                            class="font-mono text-[13px] uppercase tracking-[.14em] text-muted">Visit us</p>
+                            class="font-mono text-[13px] uppercase tracking-[.14em] text-muted">Visit
+                            us</p>
                         <h2 data-split
                             class="font-display text-[clamp(2.25rem,5vw,4.25rem)] font-extrabold leading-none tracking-[-.03em] [text-wrap:balance]">At
                             Urgello.</h2>
@@ -1053,7 +1124,8 @@
                             </div>
                         </dl>
 
-                        <div class="flex flex-wrap gap-3.5">
+                        <div
+                            class="flex flex-wrap gap-3.5 [&>a]:flex-1 [&>a]:justify-center sm:[&>a]:flex-none">
                             <a
                                 href="https://www.google.com/maps/search/?api=1&query=Residente+Caf%C3%A9+325G+J.+Urgello+St+Cebu+City"
                                 target="_blank" rel="noopener" data-magnetic
@@ -1080,7 +1152,7 @@
                         data-reveal="right">
                         <!-- Illustrated map. Swap for a real embed or screenshot if you prefer. -->
                         <div
-                            class="map-bg relative min-h-[420px] w-full flex-1 overflow-hidden rounded-[28px]"
+                            class="map-bg relative min-h-[320px] sm:min-h-[420px] w-full flex-1 overflow-hidden rounded-[28px]"
                             role="img"
                             aria-label="Illustrated map showing Residente Café on J. Urgello Street">
                             <div
@@ -1091,7 +1163,7 @@
                                 class="street-label absolute left-[6%] top-[62%] origin-left -rotate-[14deg] font-mono text-[11px] uppercase tracking-[.1em] text-muted">J.
                                 Urgello St.</span>
                             <div
-                                class="pin absolute left-[44%] top-[30%] flex flex-col items-center gap-2.5">
+                                class="pin absolute left-[34%] top-[30%] sm:left-[44%] flex flex-col items-center gap-2.5">
                                 <span
                                     class="float whitespace-nowrap rounded-full bg-ink px-[18px] py-2.5 text-[15px] font-bold text-inverse">Residente
                                     Café</span>
@@ -1115,12 +1187,11 @@
         <!-- FOOTER -->
         <footer class="bg-surface text-fog">
             <div
-                class="mx-auto flex max-w-7xl flex-col gap-12 px-5 pb-10 pt-14 sm:px-8 lg:px-[72px] lg:pt-24">
+                class="mx-auto flex max-w-7xl 2xl:max-w-[1440px] flex-col gap-12 px-5 pb-10 pt-14 sm:px-8 lg:px-[72px] lg:pt-24">
                 <div
                     class="flex flex-wrap items-end justify-between gap-8 lg:gap-12">
                     <p data-split
-                        class="min-w-0 flex-1 basis-[420px] font-display text-[clamp(3.5rem,11vw,10.5rem)] font-extrabold leading-[.85] tracking-[-.045em]">residente<span
-                            class="text-matcha">.</span></p>
+                        class="min-w-0 flex-1 basis-[420px] font-display text-[clamp(2.75rem,14vw,4rem)] sm:text-[clamp(4rem,11vw,10.5rem)] font-extrabold leading-[.85] tracking-[-.045em]">Residente</p>
                     <div
                         class="flex flex-[0_1_320px] flex-col gap-3.5 text-[17px]"
                         data-stagger="110" data-from="right">
@@ -1152,7 +1223,7 @@
             aria-labelledby="map-title" aria-hidden="true">
             <div class="modal-backdrop" data-close-map></div>
             <div
-                class="modal-panel flex max-h-[94vh] w-full max-w-3xl flex-col overflow-hidden rounded-[28px] bg-milk text-ink shadow-2xl">
+                class="modal-panel flex max-h-[94vh] max-h-[94dvh] w-full max-w-3xl flex-col overflow-y-auto overscroll-contain rounded-[28px] bg-milk text-ink shadow-2xl">
                 <div
                     class="modal-item flex items-start justify-between gap-4 p-5 sm:p-7"
                     style="--k:0">
@@ -1195,7 +1266,7 @@
                     <a
                         href="https://www.google.com/maps/dir/?api=1&destination=Residente+Caf%C3%A9+325G+J.+Urgello+St+Cebu+City"
                         target="_blank" rel="noopener"
-                        class="btn btn-solid inline-flex h-[52px] items-center gap-2.5 rounded-full bg-ink px-6 font-bold text-inverse">
+                        class="btn btn-solid inline-flex min-h-[52px] w-full justify-center py-2 text-center sm:w-auto items-center gap-2.5 rounded-full bg-ink px-6 font-bold text-inverse">
                         Directions from my location
                         <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24"
                             fill="none" stroke="currentColor" stroke-width="2"
@@ -1206,7 +1277,7 @@
                     <a
                         href="https://www.google.com/maps/search/?api=1&query=Residente+Caf%C3%A9+325G+J.+Urgello+St+Cebu+City"
                         target="_blank" rel="noopener"
-                        class="btn btn-outline inline-flex h-[52px] items-center rounded-full border-2 border-ink px-6 font-bold">
+                        class="btn btn-outline inline-flex min-h-[52px] w-full justify-center py-2 text-center sm:w-auto items-center rounded-full border-2 border-ink px-6 font-bold">
                         Open in Google Maps
                     </a>
                 </div>
@@ -1297,7 +1368,7 @@
       menuBtn.addEventListener('click', () => setMenu(menuBtn.getAttribute('aria-expanded') !== 'true'));
       $$('a', mobileMenu).forEach((link) => link.addEventListener('click', () => setMenu(false)));
       document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
-      window.matchMedia('(min-width: 768px)').addEventListener('change', (e) => { if (e.matches) setMenu(false); });
+      window.matchMedia('(min-width: 1024px)').addEventListener('change', (e) => { if (e.matches) setMenu(false); });
 
       /* ───────── Split headings into words ───────── */
       function splitWords(node, counter) {
