@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>SakayNa Cebu — Track Your Jeepney & Bus in Real Time</title>
+        <meta name="description"
+            content="Never miss your ride again. Track jeepneys and buses live across Cebu City, see accurate arrival times, and plan your commute." />
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+            rel="stylesheet" />
+        <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'] },
+          colors: {
+            brand: { 50:'#eef6ff', 100:'#d9eaff', 200:'#bcd9ff', 400:'#4d94f5', 500:'#1f6feb', 600:'#1558c9', 700:'#1246a3', 900:'#0b2447' },
+            sun: { 400:'#ffc83d', 500:'#ffb400' }
+          },
+          keyframes: {
+            floaty: { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+            ping2: { '0%': { transform: 'scale(1)', opacity: .6 }, '100%': { transform: 'scale(2.6)', opacity: 0 } }
+          },
+          animation: { floaty: 'floaty 5s ease-in-out infinite', ping2: 'ping2 2s cubic-bezier(0,0,.2,1) infinite' }
+        }
+      }
+    }
+  </script>
+        <style>
+    .reveal { opacity: 0; transform: translateY(24px); transition: all .7s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+    .hero-bg {
+      background:
+        radial-gradient(900px 500px at 85% -10%, rgba(255,200,61,.25), transparent 60%),
+        radial-gradient(700px 500px at -10% 10%, rgba(77,148,245,.30), transparent 60%),
+        linear-gradient(180deg, #f6faff 0%, #ffffff 100%);
+    }
+    .draw { stroke-dasharray: 40; stroke-dashoffset: 40; animation: draw .6s .15s ease forwards; }
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+    .road { stroke-dasharray: 6 8; animation: dash 1.2s linear infinite; }
+    @keyframes dash { to { stroke-dashoffset: -28; } }
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+
+    /* ===== Motion system ===== */
+    body { animation: pageIn .7s ease both; }
+    body.leaving { animation: none; opacity: 0; transition: opacity .35s ease; }
+    @keyframes pageIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes navDown { from { opacity: 0; transform: translateY(-100%); } to { opacity: 1; transform: none; } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+    @keyframes popIn { 0% { opacity: 0; transform: scale(.6); } 100% { opacity: 1; transform: none; } }
+    @keyframes bumpA { 0% { transform: scale(.82); opacity: .35; } 100% { transform: none; opacity: 1; } }
+    .pop { animation: popIn .6s cubic-bezier(.34,1.56,.64,1) both; }
+    .pop-in { animation: popIn .35s cubic-bezier(.34,1.56,.64,1) both; }
+    .bump { animation: bumpA .45s cubic-bezier(.34,1.56,.64,1); }
+    .btn-shine { position: relative; overflow: hidden; isolation: isolate; }
+    .btn-shine::after { content: ''; position: absolute; top: 0; left: -75%; width: 50%; height: 100%; background: linear-gradient(120deg, transparent, rgba(255,255,255,.55), transparent); transform: skewX(-20deg); transition: left .7s ease; pointer-events: none; }
+    .btn-shine:hover::after { left: 130%; }
+    button:not(:disabled):active, a[class*="rounded-full"]:active { transform: scale(.97); }
+    @media (prefers-reduced-motion: reduce) {
+      body.leaving { opacity: 1; }
+      .draw { stroke-dashoffset: 0 !important; }
+    }
+
+    #nav { animation: navDown .8s .1s cubic-bezier(.22,1,.36,1) both; }
+    #nav nav a { position: relative; }
+    #nav nav a::after { content: ''; position: absolute; left: 0; right: 0; bottom: -4px; height: 2px; border-radius: 2px; background: #1f6feb; transform: scaleX(0); transform-origin: left; transition: transform .3s ease; }
+    #nav nav a:hover::after { transform: scaleX(1); }
+    #mobileMenu:not(.hidden) { animation: fadeUp .3s ease both; }
+    #scrollBar { transition: width .1s linear; }
+
+    .reveal { transition-delay: var(--d, 0ms); }
+    .reveal[data-anim="left"]:not(.visible) { transform: translateX(-48px); }
+    .reveal[data-anim="right"]:not(.visible) { transform: translateX(48px); }
+    .reveal[data-anim="zoom"]:not(.visible) { transform: scale(.88); }
+    .reveal-line { transform: scaleX(0); transform-origin: left; transition: transform 1.4s ease .2s; }
+    .reveal-line.visible { transform: none; }
+
+    .blob { position: absolute; border-radius: 50%; filter: blur(70px); pointer-events: none; opacity: .55; }
+    .blob1 { width: 420px; height: 420px; background: #bcd9ff; top: -120px; left: -120px; animation: blobMove 16s ease-in-out infinite; }
+    .blob2 { width: 360px; height: 360px; background: #ffe39a; top: 60px; right: -100px; animation: blobMove 19s ease-in-out infinite reverse; }
+    .blob3 { width: 300px; height: 300px; background: #c7f0dc; bottom: -120px; left: 35%; animation: blobMove 22s ease-in-out infinite; }
+    @keyframes blobMove { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(50px,30px) scale(1.12); } 66% { transform: translate(-30px,50px) scale(.94); } }
+
+    .hero-bg h1 .shimmer-text { background: linear-gradient(90deg, #1f6feb, #4d94f5, #ffb400, #1f6feb); background-size: 300% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; animation: shimmer 6s linear infinite; }
+    @keyframes shimmer { to { background-position: -300% 0; } }
+    .underline-draw path { stroke-dasharray: 220; stroke-dashoffset: 220; animation: uDraw 1s .9s ease forwards; }
+    @keyframes uDraw { to { stroke-dashoffset: 0; } }
+
+    .btn-glow { animation: glow 2.6s ease-in-out infinite; }
+    @keyframes glow { 0%,100% { box-shadow: 0 10px 30px -8px rgba(31,111,235,.45); } 50% { box-shadow: 0 14px 44px -4px rgba(31,111,235,.75), 0 0 0 6px rgba(31,111,235,.12); } }
+
+    .marquee-wrap { -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); }
+    .marquee { animation: marq 30s linear infinite; }
+    .marquee-wrap:hover .marquee { animation-play-state: paused; }
+    @keyframes marq { to { transform: translateX(-50%); } }
+
+    #featureGrid > div > div:first-child { transition: transform .45s cubic-bezier(.34,1.56,.64,1); }
+    #featureGrid > div:hover > div:first-child { transform: rotate(-8deg) scale(1.18); }
+
+    #how .reveal:not(.visible) > div:first-child { transform: scale(0); }
+    #how .reveal > div:first-child { transition: transform .7s cubic-bezier(.34,1.56,.64,1) .25s; }
+    #how .reveal.visible > div:first-child { transform: none; }
+
+    .dots-drift { animation: drift 24s linear infinite; }
+    @keyframes drift { to { background-position: 28px 28px; } }
+
+    .faq-panel { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .4s ease, opacity .4s ease; }
+    .faq-panel > div { overflow: hidden; }
+    .faq-panel.open { grid-template-rows: 1fr; opacity: 1; }
+
+    #toTop { opacity: 0; transform: translateY(16px) scale(.9); pointer-events: none; transition: all .35s cubic-bezier(.34,1.56,.64,1); }
+    #toTop.show { opacity: 1; transform: none; pointer-events: auto; }
+    #toTop:hover { transform: translateY(-3px); }
+
+    #wlDone > * { animation: fadeUp .5s ease both; }
+    #wlDone > *:nth-child(2) { animation-delay: .15s; }
+    #wlDone > *:nth-child(3) { animation-delay: .25s; }
+    #wlDone > *:nth-child(4) { animation-delay: .35s; }
+    .confetti { position: absolute; width: 8px; height: 12px; border-radius: 2px; pointer-events: none; z-index: 5; animation: confetti 1.2s cubic-bezier(.2,.8,.3,1) forwards; }
+    @keyframes confetti { 0% { transform: translate(0,0) rotate(0); opacity: 1; } 100% { transform: translate(var(--x), calc(var(--y) + 120px)) rotate(var(--r)); opacity: 0; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal[data-anim]:not(.visible) { transform: none; }
+      .reveal-line { transform: none; }
+      #how .reveal:not(.visible) > div:first-child { transform: none; }
+      .underline-draw path { stroke-dashoffset: 0 !important; }
+      .hero-bg h1 .shimmer-text { -webkit-text-fill-color: currentColor; background: none; color: #1f6feb; }
+    }
+  </style>
+    </head>
+    <body class="font-sans text-slate-700 antialiased bg-white">
+        <div id="scrollBar"
+            class="fixed top-0 left-0 h-1 z-[60] bg-gradient-to-r from-brand-500 to-sun-500"
+            style="width:0%"></div>
+
+        <!-- NAV -->
+        <header id="nav" class="fixed top-0 inset-x-0 z-50 transition-all">
+            <div
+                class="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <a href="../../index.html"
+                        aria-label="Back to EM Development website"
+                        class="group inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-white/80 backdrop-blur px-3 py-2 text-xs font-bold text-brand-700 hover:bg-brand-50 hover:border-brand-400 transition">
+                        <svg
+                            class="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1"
+                            fill="none" stroke="currentColor" stroke-width="2.6"
+                            stroke-linecap="round" stroke-linejoin="round"
+                            viewBox="0 0 24 24"><path
+                                d="M19 12H5M12 19l-7-7 7-7" /></svg>
+                        <span class="hidden sm:inline">EM Development</span>
+                    </a>
+                    <span class="hidden sm:block w-px h-6 bg-slate-200"></span>
+                    <a href="#top"
+                        class="flex items-center gap-2 font-extrabold text-brand-900 text-xl">
+                        <span
+                            class="grid place-items-center w-9 h-9 rounded-xl bg-brand-500 text-white">
+                            <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none"
+                                stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"><rect x="3" y="4"
+                                    width="18" height="12" rx="3" /><path
+                                    d="M3 10h18M7 20v-4M17 20v-4" /><circle
+                                    cx="7.5" cy="13" r=".6"
+                                    fill="currentColor" /><circle cx="16.5"
+                                    cy="13" r=".6" fill="currentColor" /></svg>
+                        </span>
+                        SakayNa<span class="text-brand-500">Cebu</span>
+                    </a>
+                </div>
+                <nav
+                    class="hidden md:flex items-center gap-8 text-sm font-semibold">
+                    <a href="#features"
+                        class="hover:text-brand-500">Features</a>
+                    <a href="demo.html" class="hover:text-brand-500">Live
+                        demo</a>
+                    <a href="#how" class="hover:text-brand-500">How it works</a>
+                    <a href="#faq" class="hover:text-brand-500">FAQ</a>
+                    <button type="button" data-open-waitlist
+                        class="px-5 py-2.5 rounded-full bg-brand-500 text-white hover:bg-brand-600 shadow-lg shadow-brand-500/25 transition">Get
+                        early access</button>
+                </nav>
+                <button id="menuBtn"
+                    class="md:hidden p-2 rounded-lg hover:bg-slate-100"
+                    aria-label="Toggle menu" aria-expanded="false">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor"
+                        stroke-width="2" viewBox="0 0 24 24"><path
+                            stroke-linecap="round"
+                            d="M4 7h16M4 12h16M4 17h16" /></svg>
+                </button>
+            </div>
+            <div id="mobileMenu"
+                class="hidden md:hidden bg-white border-t border-slate-100 px-5 py-4 space-y-3 text-sm font-semibold shadow-lg">
+                <a href="../../index.html" class="block text-brand-700">← Back
+                    to EM Development</a>
+                <a href="#features" class="block">Features</a>
+                <a href="demo.html" class="block">Live demo</a>
+                <a href="#how" class="block">How it works</a>
+                <a href="#faq" class="block">FAQ</a>
+                <button type="button" data-open-waitlist
+                    class="block w-full text-center px-5 py-2.5 rounded-full bg-brand-500 text-white">Get
+                    early access</button>
+            </div>
+        </header>
+
+        <main id="top">
+            <!-- HERO -->
+            <section class="hero-bg relative pt-32 pb-20 overflow-hidden">
+                <div class="blob blob1" data-parallax="0.15"></div><div
+                    class="blob blob2" data-parallax="-0.10"></div><div
+                    class="blob blob3"></div>
+                <div
+                    class="relative z-10 max-w-7xl mx-auto px-5 grid lg:grid-cols-2 gap-14 items-center">
+                    <div class="reveal">
+                        <span
+                            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-brand-100 text-xs font-bold text-brand-600 shadow-sm">
+                            <span class="relative flex w-2 h-2"><span
+                                    class="absolute inline-flex w-full h-full rounded-full bg-emerald-400 animate-ping"></span><span
+                                    class="relative inline-flex w-2 h-2 rounded-full bg-emerald-500"></span></span>
+                            Built for Cebu City commuters
+                        </span>
+                        <h1
+                            class="mt-5 text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.05] text-brand-900 tracking-tight">
+                            Catch your <span
+                                class="relative text-brand-500">jeepney<svg
+                                    class="absolute -bottom-2 left-0 w-full"
+                                    viewBox="0 0 200 10" fill="none"><path
+                                        d="M2 7c40-6 120-6 196-1"
+                                        stroke="#ffb400" stroke-width="4"
+                                        stroke-linecap="round" /></svg></span>
+                            or bus. Every time.
+                        </h1>
+                        <p class="mt-6 text-lg text-slate-600 max-w-xl">
+                            See where your ride is right now, know exactly when
+                            it arrives, and stop wasting mornings at the
+                            roadside. From Colon to IT Park, SakayNa Cebu keeps
+                            you one step ahead of traffic.
+                        </p>
+                        <div class="mt-8 flex flex-wrap gap-3">
+                            <button type="button" data-open-waitlist
+                                class="px-7 py-3.5 rounded-full bg-brand-500 text-white font-bold hover:bg-brand-600 shadow-xl shadow-brand-500/30 transition hover:-translate-y-0.5">Join
+                                the waitlist</button>
+                            <a href="demo.html"
+                                class="px-7 py-3.5 rounded-full bg-white border border-slate-200 font-bold text-brand-900 hover:border-brand-400 transition flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="currentColor"
+                                    viewBox="0 0 20 20"><path
+                                        d="M6 4l10 6-10 6V4z" /></svg> Try the
+                                live demo
+                            </a>
+                        </div>
+                        <div class="mt-10 flex items-center gap-8 text-sm">
+                            <div><p
+                                    class="text-2xl font-extrabold text-brand-900"><span
+                                        data-count="120">0</span>+</p><p
+                                    class="text-slate-500">Routes
+                                    planned</p></div>
+                            <div class="w-px h-10 bg-slate-200"></div>
+                            <div><p
+                                    class="text-2xl font-extrabold text-brand-900"><span
+                                        data-count="1500">0</span>+</p><p
+                                    class="text-slate-500">Stops
+                                    mapped</p></div>
+                            <div class="w-px h-10 bg-slate-200"></div>
+                            <div><p
+                                    class="text-2xl font-extrabold text-brand-900"><span
+                                        data-count="30">0</span>s</p><p
+                                    class="text-slate-500">Location
+                                    refresh</p></div>
+                        </div>
+                        <p class="mt-3 text-xs text-slate-400">Launch targets
+                            shown. Replace with your real numbers.</p>
+                    </div>
+
+                    <!-- Phone mockup -->
+                    <div class="relative flex justify-center reveal">
+                        <div
+                            class="absolute -z-0 w-80 h-80 rounded-full bg-sun-400/30 blur-3xl top-10 right-10"></div>
+                        <div class="relative animate-floaty"
+                            data-parallax="-0.05">
+                            <div
+                                class="w-[290px] sm:w-[320px] rounded-[2.5rem] bg-brand-900 p-3 shadow-2xl shadow-brand-900/30">
+                                <div
+                                    class="rounded-[2rem] overflow-hidden bg-white relative">
+                                    <div
+                                        class="h-6 bg-brand-900 flex justify-center"><span
+                                            class="w-24 h-4 bg-black rounded-b-2xl"></span></div>
+                                    <!-- Map -->
+                                    <div
+                                        class="relative h-[300px] bg-[#e8f1fb]">
+                                        <svg viewBox="0 0 300 300"
+                                            class="absolute inset-0 w-full h-full">
+                                            <rect width="300" height="300"
+                                                fill="#e8f1fb" />
+                                            <path
+                                                d="M0 250 Q80 220 150 260 T300 230 V300 H0Z"
+                                                fill="#bcd9ff" opacity=".7" />
+                                            <g fill="#d5e7d0"><rect x="20"
+                                                    y="30" width="60"
+                                                    height="45" rx="8" /><rect
+                                                    x="215" y="60" width="65"
+                                                    height="50" rx="8" /><rect
+                                                    x="40" y="150" width="50"
+                                                    height="40" rx="8" /></g>
+                                            <g stroke="#fff" stroke-width="12"
+                                                fill="none"
+                                                stroke-linecap="round">
+                                                <path
+                                                    d="M-10 120 Q80 100 150 140 T310 120" />
+                                                <path
+                                                    d="M80 -10 Q100 100 130 170 T190 310" />
+                                                <path
+                                                    d="M220 -10 Q210 80 240 150 T260 310" />
+                                            </g>
+                                            <path id="routeA"
+                                                d="M-10 120 Q80 100 150 140 T310 120"
+                                                stroke="#1f6feb"
+                                                stroke-width="4" fill="none"
+                                                class="road" />
+                                            <path id="routeB"
+                                                d="M80 -10 Q100 100 130 170 T190 310"
+                                                stroke="#ffb400"
+                                                stroke-width="4" fill="none"
+                                                class="road" />
+                                            <!-- stops -->
+                                            <g fill="#fff" stroke="#0b2447"
+                                                stroke-width="3">
+                                                <circle cx="150" cy="140"
+                                                    r="7" /><circle cx="118"
+                                                    cy="130" r="5" /><circle
+                                                    cx="130" cy="170" r="5" />
+                                            </g>
+                                            <!-- vehicles -->
+                                            <g>
+                                                <g><circle r="14" fill="#1f6feb"
+                                                        opacity=".2"><animate
+                                                            attributeName="r"
+                                                            values="10;20;10"
+                                                            dur="2s"
+                                                            repeatCount="indefinite" /></circle><circle
+                                                        r="9" fill="#1f6feb"
+                                                        stroke="#fff"
+                                                        stroke-width="3" /><animatemotion
+                                                        dur="9s"
+                                                        repeatCount="indefinite"><mpath
+                                                            href="#routeA" /></animatemotion></g>
+                                                <g><circle r="9" fill="#ffb400"
+                                                        stroke="#fff"
+                                                        stroke-width="3" /><animatemotion
+                                                        dur="11s" begin="-4s"
+                                                        repeatCount="indefinite"><mpath
+                                                            href="#routeB" /></animatemotion></g>
+                                                <g><circle r="9" fill="#1f6feb"
+                                                        stroke="#fff"
+                                                        stroke-width="3" /><animatemotion
+                                                        dur="9s" begin="-5s"
+                                                        repeatCount="indefinite"><mpath
+                                                            href="#routeA" /></animatemotion></g>
+                                            </g>
+                                            <!-- You -->
+                                            <g
+                                                transform="translate(150 140)"><circle
+                                                    r="6" fill="#10b981"
+                                                    stroke="#fff"
+                                                    stroke-width="3" /></g>
+                                        </svg>
+                                        <div
+                                            class="absolute top-3 left-3 right-3 bg-white/95 backdrop-blur rounded-xl shadow px-3 py-2 flex items-center gap-2 text-xs font-semibold text-slate-600">
+                                            <svg class="w-4 h-4 text-brand-500"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="2"
+                                                viewBox="0 0 24 24"><circle
+                                                    cx="11" cy="11"
+                                                    r="7" /><path
+                                                    d="M21 21l-4-4" /></svg>
+                                            Where to? <span
+                                                class="text-slate-400 font-normal">Ayala
+                                                Center Cebu</span>
+                                        </div>
+                                    </div>
+                                    <!-- Cards -->
+                                    <div class="p-4 space-y-3">
+                                        <div
+                                            class="flex items-center justify-between rounded-2xl bg-brand-50 p-3">
+                                            <div
+                                                class="flex items-center gap-3">
+                                                <span
+                                                    class="grid place-items-center w-10 h-10 rounded-xl bg-brand-500 text-white font-extrabold text-sm">04L</span>
+                                                <div><p
+                                                        class="text-sm font-bold text-brand-900">Lahug
+                                                        → Colon</p><p
+                                                        class="text-xs text-slate-500">Jeepney
+                                                        · 3 stops away</p></div>
+                                            </div>
+                                            <div class="text-right"><p
+                                                    class="text-xl font-extrabold text-brand-600 leading-none">4</p><p
+                                                    class="text-[10px] text-slate-500 font-semibold">MIN</p></div>
+                                        </div>
+                                        <div
+                                            class="flex items-center justify-between rounded-2xl bg-sun-400/20 p-3">
+                                            <div
+                                                class="flex items-center gap-3">
+                                                <span
+                                                    class="grid place-items-center w-10 h-10 rounded-xl bg-sun-500 text-brand-900 font-extrabold text-sm">BUS</span>
+                                                <div><p
+                                                        class="text-sm font-bold text-brand-900">Mandaue
+                                                        → SM</p><p
+                                                        class="text-xs text-slate-500">Bus
+                                                        · On time</p></div>
+                                            </div>
+                                            <div class="text-right"><p
+                                                    class="text-xl font-extrabold text-amber-600 leading-none">9</p><p
+                                                    class="text-[10px] text-slate-500 font-semibold">MIN</p></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TRUST STRIP -->
+            <section class="border-y border-slate-100 bg-white">
+                <div class="marquee-wrap overflow-hidden py-6"><div
+                        class="marquee flex w-max text-sm font-semibold text-slate-400"><span
+                            class="pr-12">Colon</span><span
+                            class="pr-12 text-sun-500">•</span><span
+                            class="pr-12">Ayala Center</span><span
+                            class="pr-12 text-sun-500">•</span><span
+                            class="pr-12">IT Park</span><span
+                            class="pr-12 text-sun-500">•</span><span
+                            class="pr-12">SM City Cebu</span><span
+                            class="pr-12 text-sun-500">•</span><span
+                            class="pr-12">Carbon Market</span><span
+                            class="pr-12 text-sun-500">•</span><span
+                            class="pr-12">Fuente Osmeña</span><span
+                            class="pr-12 text-sun-500">•</span><span
+                            class="pr-12">Mandaue</span><span
+                            class="pr-12 text-sun-500">•</span><span
+                            class="pr-12">Lahug</span><span
+                            class="pr-12 text-sun-500">•</span><span
+                            class="pr-12">Mabolo</span><span
+                            class="pr-12 text-sun-500">•</span><span
+                            class="pr-12">Capitol Site</span><span
+                            class="pr-12 text-sun-500">•</span><span
+                            class="pr-12">Colon</span><span
+                            class="pr-12 text-sun-500">•</span><span
+                            class="pr-12">Ayala Center</span><span
+                            class="pr-12 text-sun-500">•</span><span
+                            class="pr-12">IT Park</span><span
+                            class="pr-12 text-sun-500">•</span><span
+                            class="pr-12">SM City Cebu</span><span
+                            class="pr-12 text-sun-500">•</span><span
+                            class="pr-12">Carbon Market</span><span
+                            class="pr-12 text-sun-500">•</span><span
+                            class="pr-12">Fuente Osmeña</span><span
+                            class="pr-12 text-sun-500">•</span><span
+                            class="pr-12">Mandaue</span><span
+                            class="pr-12 text-sun-500">•</span><span
+                            class="pr-12">Lahug</span><span
+                            class="pr-12 text-sun-500">•</span><span
+                            class="pr-12">Mabolo</span><span
+                            class="pr-12 text-sun-500">•</span><span
+                            class="pr-12">Capitol Site</span><span
+                            class="pr-12 text-sun-500">•</span></div></div>
+            </section>
+
+            <!-- FEATURES -->
+            <section id="features" class="py-24">
+                <div class="max-w-7xl mx-auto px-5">
+                    <div class="max-w-2xl mx-auto text-center reveal">
+                        <p
+                            class="text-sm font-bold text-brand-500 uppercase tracking-widest">Features</p>
+                        <h2
+                            class="mt-3 text-3xl sm:text-4xl font-extrabold text-brand-900">Everything
+                            you need to commute with confidence</h2>
+                        <p class="mt-4 text-slate-600">Designed around how
+                            Cebuanos actually travel: jeepneys, buses, and
+                            plenty of walking in between.</p>
+                    </div>
+                    <div class="mt-14 grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                        id="featureGrid"></div>
+                </div>
+            </section>
+
+            <!-- LIVE DEMO -->
+            <section id="demo"
+                class="py-24 bg-brand-900 text-white relative overflow-hidden">
+                <div class="absolute inset-0 opacity-20 dots-drift"
+                    style="background-image:radial-gradient(#4d94f5 1px,transparent 1px);background-size:28px 28px"></div>
+                <div class="relative max-w-6xl mx-auto px-5">
+                    <div class="max-w-2xl reveal">
+                        <p
+                            class="text-sm font-bold text-sun-400 uppercase tracking-widest">Live
+                            demo</p>
+                        <h2 class="mt-3 text-3xl sm:text-4xl font-extrabold">See
+                            how arrival times work</h2>
+                        <p class="mt-4 text-brand-200">Pick a route and your
+                            stop. The countdown below uses sample data to show
+                            the experience.</p>
+                        <a href="demo.html"
+                            class="mt-5 inline-flex items-center gap-2 px-6 py-3 rounded-full bg-sun-500 text-brand-900 font-bold hover:bg-sun-400 transition">Open
+                            the full map demo <span
+                                aria-hidden="true">→</span></a>
+                    </div>
+
+                    <div class="mt-10 grid lg:grid-cols-5 gap-6 reveal">
+                        <div
+                            class="lg:col-span-2 bg-white/10 backdrop-blur border border-white/15 rounded-3xl p-6 space-y-5">
+                            <div>
+                                <label for="routeSel"
+                                    class="text-xs font-bold uppercase tracking-wider text-brand-200">Route</label>
+                                <select id="routeSel"
+                                    class="mt-2 w-full rounded-xl bg-white text-brand-900 font-semibold px-4 py-3 focus:outline-none focus:ring-4 focus:ring-brand-400/50"></select>
+                            </div>
+                            <div>
+                                <label for="stopSel"
+                                    class="text-xs font-bold uppercase tracking-wider text-brand-200">Your
+                                    stop</label>
+                                <select id="stopSel"
+                                    class="mt-2 w-full rounded-xl bg-white text-brand-900 font-semibold px-4 py-3 focus:outline-none focus:ring-4 focus:ring-brand-400/50"></select>
+                            </div>
+                            <button id="refreshBtn"
+                                class="w-full py-3 rounded-xl bg-sun-500 text-brand-900 font-bold hover:bg-sun-400 transition">Refresh
+                                vehicles</button>
+                            <p class="text-xs text-brand-200">Sample data only.
+                                Real arrivals will come from live GPS.</p>
+                        </div>
+
+                        <div
+                            class="lg:col-span-3 bg-white rounded-3xl p-6 text-slate-700 shadow-2xl">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <span id="routeBadge"
+                                        class="grid place-items-center w-12 h-12 rounded-xl bg-brand-500 text-white font-extrabold">04L</span>
+                                    <div>
+                                        <p id="routeName"
+                                            class="font-extrabold text-brand-900">Lahug
+                                            → Colon</p>
+                                        <p id="routeType"
+                                            class="text-xs text-slate-500">Jeepney</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p
+                                        class="text-xs font-bold text-slate-400 uppercase">Arriving
+                                        in</p>
+                                    <p id="eta"
+                                        class="text-4xl font-extrabold text-brand-600 tabular-nums leading-none">--:--</p>
+                                </div>
+                            </div>
+
+                            <!-- progress line -->
+                            <div class="mt-8">
+                                <div
+                                    class="relative h-2 rounded-full bg-slate-100">
+                                    <div id="progress"
+                                        class="absolute left-0 top-0 h-2 rounded-full bg-brand-500 transition-all duration-1000"
+                                        style="width:0%"></div>
+                                    <div id="vehicleDot"
+                                        class="absolute -top-3 -translate-x-1/2 transition-all duration-1000"
+                                        style="left:0%">
+                                        <span
+                                            class="grid place-items-center w-8 h-8 rounded-full bg-sun-500 text-brand-900 shadow-lg ring-4 ring-white">
+                                            <svg viewBox="0 0 24 24"
+                                                class="w-4 h-4" fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="2.4"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"><rect
+                                                    x="3" y="4" width="18"
+                                                    height="12" rx="3" /><path
+                                                    d="M3 10h18" /></svg>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div id="stopsRow"
+                                    class="mt-6 flex justify-between text-[11px] font-semibold text-slate-500 gap-1"></div>
+                            </div>
+
+                            <div
+                                class="mt-8 grid grid-cols-3 gap-3 text-center">
+                                <div class="rounded-2xl bg-slate-50 p-3"><p
+                                        class="text-xs text-slate-500">Stops
+                                        away</p><p id="stopsAway"
+                                        class="text-xl font-extrabold text-brand-900">--</p></div>
+                                <div class="rounded-2xl bg-slate-50 p-3"><p
+                                        class="text-xs text-slate-500">Traffic</p><p
+                                        id="traffic"
+                                        class="text-xl font-extrabold text-brand-900">--</p></div>
+                                <div class="rounded-2xl bg-slate-50 p-3"><p
+                                        class="text-xs text-slate-500">Fare
+                                        (est.)</p><p id="fare"
+                                        class="text-xl font-extrabold text-brand-900">--</p></div>
+                            </div>
+                            <p id="advice"
+                                class="mt-5 text-sm font-semibold rounded-xl px-4 py-3 bg-emerald-50 text-emerald-700"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- HOW IT WORKS -->
+            <section id="how" class="py-24">
+                <div class="max-w-6xl mx-auto px-5">
+                    <div class="max-w-2xl mx-auto text-center reveal">
+                        <p
+                            class="text-sm font-bold text-brand-500 uppercase tracking-widest">How
+                            it works</p>
+                        <h2
+                            class="mt-3 text-3xl sm:text-4xl font-extrabold text-brand-900">From
+                            curb to seat in three taps</h2>
+                    </div>
+                    <div class="mt-14 grid md:grid-cols-3 gap-8 relative">
+                        <div
+                            class="hidden md:block absolute top-10 left-[16%] right-[16%] border-t-2 border-dashed border-brand-200 reveal-line"></div>
+                        <div class="relative text-center reveal">
+                            <div
+                                class="mx-auto w-20 h-20 rounded-3xl bg-brand-500 text-white grid place-items-center text-2xl font-extrabold shadow-xl shadow-brand-500/30">1</div>
+                            <h3
+                                class="mt-5 text-lg font-extrabold text-brand-900">Tell
+                                us where you're going</h3>
+                            <p class="mt-2 text-slate-600 text-sm">Search a
+                                landmark, mall, or street. We find the jeepney
+                                and bus routes that get you there.</p>
+                        </div>
+                        <div class="relative text-center reveal">
+                            <div
+                                class="mx-auto w-20 h-20 rounded-3xl bg-sun-500 text-brand-900 grid place-items-center text-2xl font-extrabold shadow-xl shadow-sun-500/30">2</div>
+                            <h3
+                                class="mt-5 text-lg font-extrabold text-brand-900">Watch
+                                rides approach</h3>
+                            <p class="mt-2 text-slate-600 text-sm">See vehicles
+                                move on the map with live arrival times, so you
+                                know when to leave and where to wait.</p>
+                        </div>
+                        <div class="relative text-center reveal">
+                            <div
+                                class="mx-auto w-20 h-20 rounded-3xl bg-emerald-500 text-white grid place-items-center text-2xl font-extrabold shadow-xl shadow-emerald-500/30">3</div>
+                            <h3
+                                class="mt-5 text-lg font-extrabold text-brand-900">Get
+                                alerted and hop on</h3>
+                            <p class="mt-2 text-slate-600 text-sm">Receive a
+                                nudge when your ride is a few minutes away, then
+                                board and share your trip with family.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FOR DRIVERS / OPERATORS -->
+            <section class="pb-24">
+                <div class="max-w-6xl mx-auto px-5">
+                    <div
+                        class="rounded-[2rem] bg-gradient-to-br from-brand-500 to-brand-700 text-white p-10 sm:p-14 grid md:grid-cols-2 gap-10 items-center reveal overflow-hidden relative">
+                        <div
+                            class="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-white/10"></div>
+                        <div class="relative">
+                            <p
+                                class="text-sm font-bold text-sun-400 uppercase tracking-widest">For
+                                drivers & operators</p>
+                            <h2 class="mt-3 text-3xl font-extrabold">Fill more
+                                seats. Run smarter routes.</h2>
+                            <p class="mt-4 text-brand-100">Share your vehicle's
+                                location with a lightweight driver app and let
+                                passengers find you. Operators get route
+                                insights to cut idle time and plan trips around
+                                demand.</p>
+                        </div>
+                        <ul class="relative space-y-3 text-sm font-semibold">
+                            <li class="flex gap-3 items-start"><span
+                                    class="mt-0.5 grid place-items-center w-6 h-6 rounded-full bg-sun-500 text-brand-900 shrink-0">✓</span>
+                                One-tap "on duty" GPS sharing</li>
+                            <li class="flex gap-3 items-start"><span
+                                    class="mt-0.5 grid place-items-center w-6 h-6 rounded-full bg-sun-500 text-brand-900 shrink-0">✓</span>
+                                Passenger demand heatmaps by time of day</li>
+                            <li class="flex gap-3 items-start"><span
+                                    class="mt-0.5 grid place-items-center w-6 h-6 rounded-full bg-sun-500 text-brand-900 shrink-0">✓</span>
+                                Fleet dashboard for cooperatives and bus
+                                companies</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FAQ -->
+            <section id="faq" class="py-24 bg-slate-50">
+                <div class="max-w-3xl mx-auto px-5">
+                    <div class="text-center reveal">
+                        <p
+                            class="text-sm font-bold text-brand-500 uppercase tracking-widest">FAQ</p>
+                        <h2
+                            class="mt-3 text-3xl sm:text-4xl font-extrabold text-brand-900">Questions,
+                            answered</h2>
+                    </div>
+                    <div id="faqList" class="mt-10 space-y-3"></div>
+                </div>
+            </section>
+
+            <!-- CTA / WAITLIST -->
+            <section id="join" class="py-24">
+                <div class="max-w-3xl mx-auto px-5 text-center reveal">
+                    <h2
+                        class="text-3xl sm:text-4xl font-extrabold text-brand-900">Be
+                        first on board</h2>
+                    <p class="mt-4 text-slate-600">Join the waitlist and we'll
+                        let you know when SakayNa Cebu launches in your
+                        area.</p>
+                    <button type="button" data-open-waitlist
+                        class="mt-8 rounded-full bg-brand-500 text-white font-bold px-10 py-4 hover:bg-brand-600 shadow-xl shadow-brand-500/25 transition">Join
+                        the waitlist</button>
+                    <div class="mt-8 flex justify-center gap-3 text-sm">
+                        <span
+                            class="px-4 py-2 rounded-full border border-slate-200 font-semibold text-slate-500">Android
+                            · coming soon</span>
+                        <span
+                            class="px-4 py-2 rounded-full border border-slate-200 font-semibold text-slate-500">iOS
+                            · coming soon</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="bg-brand-900 text-brand-200">
+            <div
+                class="max-w-7xl mx-auto px-5 py-12 grid sm:grid-cols-3 gap-8 text-sm">
+                <div>
+                    <p class="font-extrabold text-white text-lg">SakayNa<span
+                            class="text-brand-400">Cebu</span></p>
+                    <p class="mt-3 max-w-xs">Real-time jeepney and bus tracking
+                        for the people of Cebu City.</p>
+                </div>
+                <div class="space-y-2">
+                    <p class="font-bold text-white">Explore</p>
+                    <a href="#features"
+                        class="block hover:text-white">Features</a>
+                    <a href="demo.html" class="block hover:text-white">Live
+                        demo</a>
+                    <a href="#faq" class="block hover:text-white">FAQ</a>
+                    <a href="../../index.html" class="block hover:text-white">EM
+                        Development</a>
+                </div>
+                <div class="space-y-2">
+                    <p class="font-bold text-white">Contact</p>
+                    <p>hello@sakayna.example</p>
+                    <p>Cebu City, Philippines</p>
+                </div>
+            </div>
+            <div class="border-t border-white/10 py-5 text-center text-xs">©
+                <span id="year"></span> SakayNa Cebu. All rights reserved.</div>
+        </footer>
+
+        <!-- Back to top -->
+        <button id="toTop" type="button" aria-label="Back to top"
+            class="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full bg-brand-500 text-white shadow-xl shadow-brand-500/30 grid place-items-center hover:bg-brand-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                stroke-width="2.6" stroke-linecap="round"
+                stroke-linejoin="round" viewBox="0 0 24 24"><path
+                    d="M12 19V5M5 12l7-7 7 7" /></svg>
+        </button>
+
+        <!-- WAITLIST MODAL -->
+        <div id="wlModal"
+            class="hidden fixed inset-0 z-[100] bg-brand-900/60 backdrop-blur-sm opacity-0 transition-opacity duration-200 overflow-y-auto"
+            role="dialog" aria-modal="true" aria-labelledby="wlTitle">
+            <div id="wlBackdrop"
+                class="min-h-full flex items-center justify-center p-5">
+                <div id="wlCard"
+                    class="relative w-full max-w-md rounded-3xl bg-white p-8 shadow-2xl scale-95 transition-transform duration-200">
+                    <button id="wlClose" type="button" aria-label="Close"
+                        class="absolute top-4 right-4 p-2 rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                            stroke-width="2.2" viewBox="0 0 24 24"><path
+                                stroke-linecap="round"
+                                d="M6 6l12 12M18 6L6 18" /></svg>
+                    </button>
+
+                    <div id="wlFormView">
+                        <div
+                            class="w-14 h-14 rounded-2xl bg-brand-50 text-brand-500 grid place-items-center">
+                            <svg class="w-7 h-7" fill="none"
+                                stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round"
+                                viewBox="0 0 24 24"><rect x="3" y="5" width="18"
+                                    height="14" rx="3" /><path
+                                    d="M3 8l9 6 9-6" /></svg>
+                        </div>
+                        <h3 id="wlTitle"
+                            class="mt-5 text-2xl font-extrabold text-brand-900">Join
+                            the waitlist</h3>
+                        <p class="mt-2 text-sm text-slate-600">Enter your email
+                            and we'll let you know as soon as SakayNa Cebu
+                            launches.</p>
+                        <form id="wlForm" class="mt-6 space-y-3" novalidate>
+                            <label for="wlEmail" class="sr-only">Email
+                                address</label>
+                            <input id="wlEmail" type="email"
+                                autocomplete="email" required
+                                placeholder="you@email.com"
+                                class="w-full rounded-xl border border-slate-200 px-4 py-3.5 focus:outline-none focus:ring-4 focus:ring-brand-200 focus:border-brand-400" />
+                            <p id="wlErr"
+                                class="text-sm font-semibold text-rose-600 min-h-[1.25rem]"
+                                aria-live="polite"></p>
+                            <button id="wlSubmit" type="submit"
+                                class="w-full rounded-xl bg-brand-500 text-white font-bold py-3.5 hover:bg-brand-600 transition disabled:opacity-60">Join
+                                the waitlist</button>
+                        </form>
+                        <p class="mt-4 text-xs text-slate-400 text-center">No
+                            spam. Just a heads-up when we launch.</p>
+                    </div>
+
+                    <div id="wlDone" class="hidden text-center py-2">
+                        <div
+                            class="mx-auto w-20 h-20 rounded-full bg-emerald-100 grid place-items-center pop">
+                            <svg class="w-10 h-10 text-emerald-600"
+                                viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="3"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"><path class="draw"
+                                    d="M5 13l4 4L19 7" /></svg>
+                        </div>
+                        <h3 id="wlDoneTitle"
+                            class="mt-6 text-2xl font-extrabold text-brand-900">You're
+                            on the list!</h3>
+                        <p class="mt-2 text-sm text-slate-600">You've joined the
+                            waitlist. We'll email <span id="wlDoneEmail"
+                                class="font-bold text-brand-900"></span> when
+                            SakayNa Cebu is ready to ride.</p>
+                        <div class="mt-7 flex flex-col sm:flex-row gap-3">
+                            <a href="demo.html"
+                                class="flex-1 rounded-xl bg-brand-500 text-white font-bold py-3 hover:bg-brand-600 transition">Try
+                                the live demo</a>
+                            <button id="wlDoneClose" type="button"
+                                class="flex-1 rounded-xl border border-slate-200 font-bold py-3 text-brand-900 hover:bg-slate-50 transition">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+    // ---------- Page fade-out on navigation ----------
+    (function () {
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.addEventListener('pageshow', e => { if (e.persisted) document.body.classList.remove('leaving'); });
+      document.addEventListener('click', e => {
+        const a = e.target.closest('a[href]');
+        if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        if (a.target && a.target !== '_self') return;
+        const href = a.getAttribute('href');
+        if (!href || href.startsWith('#') || /^(mailto:|tel:|javascript:)/i.test(href)) return;
+        const url = new URL(a.href, location.href);
+        if (url.origin !== location.origin) return;
+        if (url.pathname === location.pathname && url.search === location.search) return;
+        if (reduce) return;
+        e.preventDefault();
+        document.body.classList.add('leaving');
+        setTimeout(() => { location.href = a.href; }, 350);
+      });
+    })();
+
+    function bump(el) { if (!el) return; el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
+
+    // ---------- Mobile menu ----------
+    const menuBtn = document.getElementById('menuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    menuBtn.addEventListener('click', () => {
+      const open = mobileMenu.classList.toggle('hidden') === false;
+      menuBtn.setAttribute('aria-expanded', String(open));
+    });
+    mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileMenu.classList.add('hidden')));
+
+    // ---------- Nav background on scroll ----------
+    const nav = document.getElementById('nav');
+    const onScroll = () => {
+      const s = window.scrollY > 10;
+      nav.classList.toggle('bg-white/90', s);
+      nav.classList.toggle('backdrop-blur', s);
+      nav.classList.toggle('shadow-sm', s);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+    // ---------- Features ----------
+    const features = [
+      { t: 'Live vehicle tracking', d: 'Watch jeepneys and buses move on the map in real time, updated every few seconds.', c: 'bg-brand-50 text-brand-600', i: '<circle cx="12" cy="10" r="3"/><path d="M12 21s7-6.2 7-11a7 7 0 10-14 0c0 4.8 7 11 7 11z"/>' },
+      { t: 'Accurate arrival times', d: 'ETAs that account for traffic on Osmeña Blvd, Colon, and the rest of your usual route.', c: 'bg-sun-400/25 text-amber-600', i: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>' },
+      { t: 'Smart route finder', d: 'Type where you\'re headed and get the right jeepney code or bus, including transfers.', c: 'bg-emerald-50 text-emerald-600', i: '<path d="M5 12h14M13 6l6 6-6 6"/>' },
+      { t: 'Arrival alerts', d: 'Get a push notification when your ride is a few minutes away so you never wait too long.', c: 'bg-rose-50 text-rose-500', i: '<path d="M18 8a6 6 0 10-12 0c0 7-3 8-3 8h18s-3-1-3-8M13.7 21a2 2 0 01-3.4 0"/>' },
+      { t: 'Fare estimates', d: 'Know roughly what you\'ll pay before you board, including student and senior discounts.', c: 'bg-violet-50 text-violet-600', i: '<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/>' },
+      { t: 'Works on slow data', d: 'Lightweight and offline-friendly, with saved routes that load even when the signal drops.', c: 'bg-sky-50 text-sky-600', i: '<path d="M5 13a10 10 0 0114 0M8.5 16.4a5 5 0 017 0M12 20h.01"/>' },
+    ];
+    document.getElementById('featureGrid').innerHTML = features.map((f, idx) => `
+      <div class="reveal group rounded-3xl border border-slate-100 bg-white p-7 shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300" style="transition-delay:${idx*60}ms">
+        <div class="w-12 h-12 rounded-2xl grid place-items-center ${f.c}">
+          <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${f.i}</svg>
+        </div>
+        <h3 class="mt-5 text-lg font-extrabold text-brand-900">${f.t}</h3>
+        <p class="mt-2 text-sm text-slate-600 leading-relaxed">${f.d}</p>
+      </div>`).join('');
+
+    // ---------- Demo ----------
+    const routes = {
+      '04L': { name: 'Lahug → Colon', type: 'Jeepney', color: 'bg-brand-500 text-white', fare: '₱14', stops: ['Lahug', 'IT Park', 'Ayala', 'Fuente', 'Colon'] },
+      '01K': { name: 'Mabolo → Colon', type: 'Jeepney', color: 'bg-brand-500 text-white', fare: '₱13', stops: ['Mabolo', 'Gorordo', 'Fuente', 'Osmeña', 'Colon'] },
+      'BUS': { name: 'Mandaue → SM City', type: 'Bus', color: 'bg-sun-500 text-brand-900', fare: '₱20', stops: ['Mandaue', 'Subangdaku', 'Mabolo', 'Ayala', 'SM City'] },
+    };
+    const routeSel = document.getElementById('routeSel');
+    const stopSel = document.getElementById('stopSel');
+    const $ = id => document.getElementById(id);
+    routeSel.innerHTML = Object.entries(routes).map(([k, r]) => `<option value="${k}">${k} · ${r.name}</option>`).join('');
+
+    let remaining = 0, total = 1, timer = null;
+
+    function fillStops() {
+      const r = routes[routeSel.value];
+      stopSel.innerHTML = r.stops.map((s, i) => i === 0 ? '' : `<option value="${i}">${s}</option>`).join('');
+      stopSel.value = String(r.stops.length - 2 > 0 ? r.stops.length - 2 : 1);
+      $('routeBadge').className = `grid place-items-center w-12 h-12 rounded-xl font-extrabold ${r.color}`;
+      $('routeBadge').textContent = routeSel.value;
+      $('routeName').textContent = r.name;
+      $('routeType').textContent = r.type;
+      $('fare').textContent = r.fare;
+      $('stopsRow').innerHTML = r.stops.map(s => `<span class="flex-1 text-center first:text-left last:text-right">${s}</span>`).join('');
+    }
+
+    function startTrip() {
+      const r = routes[routeSel.value];
+      const idx = Number(stopSel.value);
+      const away = 1 + Math.floor(Math.random() * idx * 1.5 + 1);
+      const trafficLevels = [['Light', 'text-emerald-600', 0.8], ['Moderate', 'text-amber-600', 1], ['Heavy', 'text-rose-600', 1.4]];
+      const tl = trafficLevels[Math.floor(Math.random() * 3)];
+      total = remaining = Math.round((away * 70) * tl[2]) + 20; // seconds (compressed for demo)
+      $('stopsAway').textContent = away;
+      ['eta', 'stopsAway', 'traffic'].forEach(id => bump($(id)));
+      $('traffic').textContent = tl[0];
+      $('traffic').className = `text-xl font-extrabold ${tl[1]}`;
+      clearInterval(timer);
+      tick();
+      timer = setInterval(tick, 1000);
+    }
+
+    function tick() {
+      if (remaining < 0) remaining = 0;
+      const m = String(Math.floor(remaining / 60)).padStart(2, '0');
+      const s = String(remaining % 60).padStart(2, '0');
+      $('eta').textContent = `${m}:${s}`;
+      const pct = Math.min(100, Math.max(0, ((total - remaining) / total) * 100));
+      const idx = Number(stopSel.value);
+      const stopPct = (idx / (routes[routeSel.value].stops.length - 1)) * 100;
+      const pos = pct * (stopPct / 100);
+      $('progress').style.width = pos + '%';
+      $('vehicleDot').style.left = pos + '%';
+      const adv = $('advice');
+      if (remaining === 0) {
+        adv.textContent = 'Your ride has arrived. Hop on!';
+        adv.className = 'mt-5 text-sm font-semibold rounded-xl px-4 py-3 bg-emerald-50 text-emerald-700';
+        clearInterval(timer);
+        return;
+      }
+      if (remaining <= 90) {
+        adv.textContent = 'Head to the stop now. Your ride is almost here.';
+        adv.className = 'mt-5 text-sm font-semibold rounded-xl px-4 py-3 bg-amber-50 text-amber-700';
+      } else {
+        adv.textContent = `You have time. Leave in about ${Math.max(1, Math.floor((remaining - 90) / 60))} min to catch it comfortably.`;
+        adv.className = 'mt-5 text-sm font-semibold rounded-xl px-4 py-3 bg-emerald-50 text-emerald-700';
+      }
+      remaining--;
+    }
+
+    routeSel.addEventListener('change', () => { fillStops(); startTrip(); });
+    stopSel.addEventListener('change', startTrip);
+    $('refreshBtn').addEventListener('click', startTrip);
+    fillStops(); startTrip();
+
+    // ---------- FAQ ----------
+    const faqs = [
+      ['Which areas does SakayNa Cebu cover?', 'We\'re starting in Cebu City and nearby Mandaue and Talisay, then expanding to more of Metro Cebu based on demand.'],
+      ['How do you get vehicle locations?', 'Drivers and operators share location through a lightweight driver app. Where live data isn\'t available yet, we show schedule-based estimates and label them clearly.'],
+      ['Is it free for commuters?', 'Yes. Tracking, route search, and arrival alerts are free for passengers.'],
+      ['Will it work with weak mobile data?', 'Yes. The app is designed to be light, and your saved routes and stops stay available even when your signal drops.'],
+      ['I\'m a driver or operator. How can I join?', 'Join the waitlist and mention you\'re a driver or operator. We\'ll reach out about onboarding.'],
+    ];
+    $('faqList').innerHTML = faqs.map(([q, a], i) => `
+      <div class="reveal rounded-2xl bg-white border border-slate-100 shadow-sm">
+        <button class="faq-btn w-full flex items-center justify-between gap-4 text-left px-6 py-5 font-bold text-brand-900" aria-expanded="false" aria-controls="faq-${i}">
+          ${q}
+          <svg class="chev w-5 h-5 shrink-0 transition-transform text-brand-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div id="faq-${i}" class="faq-panel"><div><p class="px-6 pb-5 text-sm text-slate-600 leading-relaxed">${a}</p></div></div>
+      </div>`).join('');
+    document.querySelectorAll('.faq-btn').forEach(btn => btn.addEventListener('click', () => {
+      const panel = document.getElementById(btn.getAttribute('aria-controls'));
+      const open = panel.classList.toggle('open');
+      btn.setAttribute('aria-expanded', String(open));
+      btn.querySelector('.chev').style.transform = open ? 'rotate(180deg)' : '';
+    }));
+
+    // ---------- Waitlist modal ----------
+    const wlModal = $('wlModal'), wlCard = $('wlCard'), wlEmail = $('wlEmail'), wlErr = $('wlErr');
+    let wlLastFocus = null;
+
+    function openWl() {
+      wlLastFocus = document.activeElement;
+      $('wlFormView').classList.remove('hidden');
+      $('wlDone').classList.add('hidden');
+      wlErr.textContent = '';
+      wlModal.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+      requestAnimationFrame(() => {
+        wlModal.classList.remove('opacity-0');
+        wlCard.classList.remove('scale-95');
+        wlEmail.focus();
+      });
+    }
+    function closeWl() {
+      wlModal.classList.add('opacity-0');
+      wlCard.classList.add('scale-95');
+      document.body.classList.remove('overflow-hidden');
+      setTimeout(() => wlModal.classList.add('hidden'), 200);
+      if (wlLastFocus && wlLastFocus.focus) wlLastFocus.focus();
+    }
+
+    document.querySelectorAll('[data-open-waitlist]').forEach(b => b.addEventListener('click', e => {
+      e.preventDefault();
+      mobileMenu.classList.add('hidden');
+      openWl();
+    }));
+    $('wlClose').addEventListener('click', closeWl);
+    $('wlDoneClose').addEventListener('click', closeWl);
+    $('wlBackdrop').addEventListener('click', e => { if (e.target === $('wlBackdrop')) closeWl(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !wlModal.classList.contains('hidden')) closeWl(); });
+
+    $('wlForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const email = wlEmail.value.trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        wlErr.textContent = 'Please enter a valid email address.';
+        wlEmail.focus();
+        return;
+      }
+      wlErr.textContent = '';
+      const btn = $('wlSubmit');
+      btn.disabled = true; btn.textContent = 'Joining…';
+
+      // TODO: send `email` to your backend or Firebase here, then show the success view when it resolves.
+      let already = false;
+      try {
+        const list = JSON.parse(localStorage.getItem('sakayna_waitlist') || '[]');
+        if (list.includes(email)) already = true; else { list.push(email); localStorage.setItem('sakayna_waitlist', JSON.stringify(list)); }
+      } catch (err) { /* storage unavailable: continue */ }
+
+      setTimeout(() => {
+        $('wlDoneTitle').textContent = already ? "You're already on the list!" : "You're on the list!";
+        $('wlDoneEmail').textContent = email;
+        $('wlFormView').classList.add('hidden');
+        $('wlDone').classList.remove('hidden');
+        btn.disabled = false; btn.textContent = 'Join the waitlist';
+        $('wlForm').reset();
+        confettiBurst();
+      }, 700);
+    });
+
+    if (new URLSearchParams(location.search).get('waitlist')) openWl();
+
+    // ---------- Counters ----------
+    function animateCount(el) {
+      const target = Number(el.dataset.count);
+      const start = performance.now(), dur = 1400;
+      const step = now => {
+        const p = Math.min(1, (now - start) / dur);
+        el.textContent = Math.floor(target * (1 - Math.pow(1 - p, 3))).toLocaleString();
+        if (p < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }
+    document.querySelectorAll('[data-count]').forEach(animateCount);
+
+    // ---------- Extra motion ----------
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function confettiBurst() {
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const card = document.getElementById('wlCard');
+      const colors = ['#1f6feb', '#ffb400', '#10b981', '#e11d74', '#4d94f5'];
+      for (let i = 0; i < 28; i++) {
+        const p = document.createElement('span');
+        p.className = 'confetti';
+        const a = Math.random() * Math.PI * 2, d = 90 + Math.random() * 130;
+        p.style.setProperty('--x', Math.cos(a) * d + 'px');
+        p.style.setProperty('--y', (Math.sin(a) * d - 40) + 'px');
+        p.style.setProperty('--r', (Math.random() * 720 - 360) + 'deg');
+        p.style.background = colors[i % colors.length];
+        p.style.left = '50%'; p.style.top = '110px';
+        card.appendChild(p);
+        setTimeout(() => p.remove(), 1400);
+      }
+    }
+
+    // Staggered entrances
+    const heroGrid = document.querySelector('.hero-bg .grid');
+    const heroLeft = heroGrid && heroGrid.children[0];
+    const heroRight = heroGrid && heroGrid.children[1];
+    if (heroLeft) {
+      heroLeft.classList.remove('reveal');
+      [...heroLeft.children].forEach((c, i) => { c.classList.add('reveal'); c.style.setProperty('--d', (200 + i * 120) + 'ms'); });
+    }
+    if (heroRight) { heroRight.dataset.anim = 'zoom'; heroRight.style.setProperty('--d', '350ms'); }
+    document.querySelectorAll('#how .grid > .reveal').forEach((el, i) => { el.dataset.anim = 'zoom'; el.style.setProperty('--d', (i * 160) + 'ms'); });
+    document.querySelectorAll('section.pb-24 li').forEach((el, i) => { el.classList.add('reveal'); el.dataset.anim = 'left'; el.style.setProperty('--d', (300 + i * 140) + 'ms'); });
+    document.querySelectorAll('footer .grid > div').forEach((el, i) => { el.classList.add('reveal'); el.style.setProperty('--d', (i * 120) + 'ms'); });
+    document.querySelectorAll('#faqList > .reveal').forEach((el, i) => { el.style.setProperty('--d', (i * 80) + 'ms'); });
+    const driversBubble = document.querySelector('section.pb-24 .reveal > .absolute');
+    if (driversBubble) driversBubble.classList.add('animate-floaty');
+
+    // Headline flourishes
+    const hl = document.querySelector('.hero-bg h1 span.relative');
+    if (hl) { hl.classList.add('shimmer-text'); const u = hl.querySelector('svg'); if (u) u.classList.add('underline-draw'); }
+
+    // Button effects
+    document.querySelectorAll('[data-open-waitlist], .hero-bg a[href="demo.html"], #demo a[href="demo.html"]').forEach(b => b.classList.add('btn-shine'));
+    document.querySelectorAll('.hero-bg [data-open-waitlist], #join [data-open-waitlist]').forEach(b => b.classList.add('btn-glow'));
+
+    // Scroll progress, back-to-top, parallax
+    const scrollBar = $('scrollBar'), toTop = $('toTop');
+    const parallaxEls = [...document.querySelectorAll('[data-parallax]')];
+    let fxTicking = false;
+    function onScrollFx() {
+      const y = window.scrollY, max = document.documentElement.scrollHeight - innerHeight;
+      scrollBar.style.width = (max > 0 ? (y / max) * 100 : 0) + '%';
+      toTop.classList.toggle('show', y > 600);
+      if (!reduceMotion) parallaxEls.forEach(el => { el.style.translate = '0 ' + (y * parseFloat(el.dataset.parallax)) + 'px'; });
+      fxTicking = false;
+    }
+    window.addEventListener('scroll', () => { if (!fxTicking) { fxTicking = true; requestAnimationFrame(onScrollFx); } }, { passive: true });
+    onScrollFx();
+    toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+    // 3D tilt on the phone mockup
+    const phone = document.querySelector('.hero-bg .animate-floaty > div');
+    if (phone && heroRight && !reduceMotion && matchMedia('(hover: hover)').matches) {
+      phone.style.transition = 'transform .25s ease-out';
+      heroRight.addEventListener('mousemove', e => {
+        const r = heroRight.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - 0.5, py = (e.clientY - r.top) / r.height - 0.5;
+        phone.style.transform = 'perspective(1000px) rotateY(' + (px * 14) + 'deg) rotateX(' + (-py * 10) + 'deg)';
+      });
+      heroRight.addEventListener('mouseleave', () => { phone.style.transform = ''; });
+    }
+
+    // ---------- Scroll reveal ----------
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('visible'); io.unobserve(en.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal, .reveal-line').forEach(el => io.observe(el));
+
+    $('year').textContent = new Date().getFullYear();
+  </script>
+    </body>
+</html>

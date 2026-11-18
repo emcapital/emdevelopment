@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Live Demo — SakayNa Cebu</title>
+        <meta name="description"
+            content="Try SakayNa Cebu: watch sample jeepneys and buses move on a live map of Cebu City and see arrival times at your stop." />
+        <link rel="stylesheet"
+            href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+            rel="stylesheet" />
+        <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'] },
+          colors: {
+            brand: { 50:'#eef6ff', 100:'#d9eaff', 200:'#bcd9ff', 400:'#4d94f5', 500:'#1f6feb', 600:'#1558c9', 700:'#1246a3', 900:'#0b2447' },
+            sun: { 400:'#ffc83d', 500:'#ffb400' }
+          }
+        }
+      }
+    }
+  </script>
+        <style>
+    body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+    .veh { display:flex; align-items:center; justify-content:center; height:28px; min-width:46px; padding:0 8px; border-radius:999px; background:var(--c); color:#fff; font:800 11px 'Plus Jakarta Sans',sans-serif; border:3px solid #fff; box-shadow:0 4px 12px rgba(11,36,71,.35); position:relative; }
+    .veh::after { content:''; position:absolute; inset:-8px; border-radius:999px; border:2px solid var(--c); opacity:0; animation:vpulse 2s infinite; }
+    @keyframes vpulse { 0% { transform:scale(.8); opacity:.6; } 100% { transform:scale(1.5); opacity:0; } }
+    .me { width:18px; height:18px; border-radius:50%; background:#10b981; border:3px solid #fff; box-shadow:0 0 0 6px rgba(16,185,129,.25), 0 2px 8px rgba(0,0,0,.3); cursor:grab; }
+    .stopRing { width:26px; height:26px; border-radius:50%; border:3px solid #0b2447; background:rgba(255,200,61,.55); animation:ring 1.6s ease-in-out infinite; }
+    @keyframes ring { 0%,100% { transform:scale(1); } 50% { transform:scale(1.25); } }
+    .leaflet-tooltip.stop-tip { font-weight:700; color:#0b2447; border-radius:10px; }
+    .leaflet-container { font-family:'Plus Jakarta Sans',system-ui,sans-serif; }
+    .toast-show { opacity:1 !important; transform:translate(-50%,0) !important; }
+    @media (prefers-reduced-motion: reduce) { * { animation:none !important; } }
+  </style>
+    </head>
+    <body class="bg-slate-50 text-slate-700 antialiased">
+
+        <!-- Header -->
+        <header
+            class="relative z-[1100] h-16 bg-white border-b border-slate-100">
+            <div
+                class="h-full max-w-[1600px] mx-auto px-4 sm:px-6 flex items-center justify-between gap-3">
+                <a href="home.html"
+                    class="flex items-center gap-2 font-extrabold text-brand-900 text-lg sm:text-xl">
+                    <span
+                        class="grid place-items-center w-9 h-9 rounded-xl bg-brand-500 text-white">
+                        <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none"
+                            stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round"><rect
+                                x="3" y="4" width="18" height="12"
+                                rx="3" /><path
+                                d="M3 10h18M7 20v-4M17 20v-4" /></svg>
+                    </span>
+                    SakayNa<span class="text-brand-500">Cebu</span>
+                </a>
+                <span
+                    class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 text-amber-700 text-xs font-bold border border-amber-100">
+                    <span class="relative flex w-2 h-2"><span
+                            class="absolute inline-flex w-full h-full rounded-full bg-amber-400 animate-ping"></span><span
+                            class="relative inline-flex w-2 h-2 rounded-full bg-amber-500"></span></span>
+                    Demo mode · simulated vehicles
+                </span>
+                <div
+                    class="flex items-center gap-2 sm:gap-3 text-sm font-semibold">
+                    <a href="home.html"
+                        class="px-3 py-2 rounded-full hover:bg-slate-100">←
+                        Home</a>
+                    <a href="home.html?waitlist=1"
+                        class="px-4 sm:px-5 py-2.5 rounded-full bg-brand-500 text-white hover:bg-brand-600 shadow-lg shadow-brand-500/25 transition">Join
+                        waitlist</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex flex-col lg:flex-row lg:h-[calc(100dvh-4rem)]">
+
+            <!-- Side panel -->
+            <aside
+                class="order-2 lg:order-1 lg:w-[420px] lg:shrink-0 lg:overflow-y-auto bg-white lg:border-r border-slate-100">
+                <div class="p-5 space-y-7">
+                    <div>
+                        <h1 class="text-2xl font-extrabold text-brand-900">Try
+                            SakayNa Cebu</h1>
+                        <p class="mt-1 text-sm text-slate-500">Pick a route, set
+                            where you are, and watch sample jeepneys and buses
+                            approach on a real map of Cebu City.</p>
+                    </div>
+
+                    <section>
+                        <h2
+                            class="text-xs font-bold uppercase tracking-wider text-slate-400">1
+                            · Choose a route</h2>
+                        <div id="routeCards" class="mt-3 space-y-2"></div>
+                    </section>
+
+                    <section>
+                        <h2
+                            class="text-xs font-bold uppercase tracking-wider text-slate-400">2
+                            · Where are you?</h2>
+                        <p class="mt-2 text-sm text-slate-500">Drag the <span
+                                class="inline-block w-3 h-3 rounded-full bg-emerald-500 align-middle"></span>
+                            pin on the map, or use your location. We'll pick the
+                            nearest stop.</p>
+                        <button id="locBtn" type="button"
+                            class="mt-3 w-full flex items-center justify-center gap-2 rounded-xl border border-slate-200 py-3 text-sm font-bold text-brand-900 hover:border-brand-400 hover:bg-brand-50 transition">
+                            <svg class="w-4 h-4 text-brand-500" fill="none"
+                                stroke="currentColor" stroke-width="2.2"
+                                viewBox="0 0 24 24"><circle cx="12" cy="12"
+                                    r="3" /><path
+                                    d="M12 2v3M12 19v3M2 12h3M19 12h3" /><circle
+                                    cx="12" cy="12" r="8" /></svg>
+                            Use my location
+                        </button>
+                        <p id="nearestText"
+                            class="mt-3 text-sm font-semibold text-emerald-700 bg-emerald-50 rounded-xl px-4 py-2.5"></p>
+                        <label for="stopSel"
+                            class="mt-3 block text-xs font-bold text-slate-500">Or
+                            choose your stop</label>
+                        <select id="stopSel"
+                            class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-brand-900 focus:outline-none focus:ring-4 focus:ring-brand-200 focus:border-brand-400"></select>
+                    </section>
+
+                    <section>
+                        <div class="flex items-center justify-between gap-3">
+                            <h2
+                                class="text-xs font-bold uppercase tracking-wider text-slate-400">3
+                                · Arrivals at your stop</h2>
+                            <div
+                                class="inline-flex rounded-full bg-slate-100 p-1 text-xs font-bold"
+                                role="group" aria-label="Simulation speed"
+                                id="speedGroup">
+                                <button type="button" data-speed="1"
+                                    class="px-3 py-1 rounded-full">1×</button>
+                                <button type="button" data-speed="5"
+                                    class="px-3 py-1 rounded-full">5×</button>
+                                <button type="button" data-speed="10"
+                                    class="px-3 py-1 rounded-full">10×</button>
+                            </div>
+                        </div>
+
+                        <div
+                            class="mt-3 rounded-2xl bg-brand-900 text-white p-5">
+                            <p
+                                class="text-xs font-bold uppercase tracking-wider text-brand-200">Next
+                                arrival</p>
+                            <div
+                                class="mt-1 flex items-end justify-between gap-3">
+                                <div class="min-w-0">
+                                    <p id="nextWho"
+                                        class="text-lg font-extrabold truncate">--</p>
+                                    <p id="nextWhere"
+                                        class="text-xs text-brand-200 truncate">--</p>
+                                </div>
+                                <p id="nextEta"
+                                    class="text-4xl font-extrabold tabular-nums text-sun-400 leading-none">--:--</p>
+                            </div>
+                        </div>
+
+                        <div id="rows" class="mt-3 flex flex-col gap-2"></div>
+
+                        <label
+                            class="mt-4 flex items-center gap-3 text-sm font-semibold cursor-pointer select-none">
+                            <input id="alertOn" type="checkbox" checked
+                                class="w-4 h-4 rounded accent-brand-500" />
+                            Alert me when a vehicle is under 30 seconds away
+                        </label>
+                    </section>
+
+                    <p
+                        class="text-xs text-slate-400 leading-relaxed border-t border-slate-100 pt-4">
+                        Demo data only. Routes, stops and vehicles are simulated
+                        and the roads are approximate. In the real app,
+                        positions come from driver GPS. Simulation speed makes
+                        arrivals happen faster so you can see the experience in
+                        seconds.
+                    </p>
+                </div>
+            </aside>
+
+            <!-- Map -->
+            <div
+                class="order-1 lg:order-2 relative h-[58vh] lg:h-auto lg:flex-1">
+                <div id="map" class="absolute inset-0 bg-[#e8f1fb]"></div>
+
+                <div id="loading"
+                    class="absolute inset-0 z-[1000] grid place-items-center bg-white/80 backdrop-blur-sm">
+                    <div class="text-center">
+                        <div
+                            class="mx-auto w-10 h-10 rounded-full border-4 border-brand-100 border-t-brand-500 animate-spin"></div>
+                        <p class="mt-3 text-sm font-bold text-brand-900">Loading
+                            Cebu City routes…</p>
+                    </div>
+                </div>
+
+                <div id="toast"
+                    class="absolute z-[1000] top-3 left-1/2 -translate-x-1/2 -translate-y-3 opacity-0 transition-all duration-300 max-w-[90%] rounded-2xl bg-brand-900 text-white text-sm font-semibold px-5 py-3 shadow-2xl pointer-events-none"
+                    role="status" aria-live="polite"></div>
+
+                <div id="followChip"
+                    class="hidden absolute z-[1000] top-3 left-3 items-center gap-2 rounded-full bg-white shadow-lg pl-4 pr-2 py-1.5 text-xs font-bold text-brand-900">
+                    <span>Following <span id="followName"></span></span>
+                    <button id="followStop" type="button"
+                        class="rounded-full bg-slate-100 hover:bg-slate-200 px-3 py-1">Stop</button>
+                </div>
+
+                <div
+                    class="absolute z-[1000] bottom-3 left-3 flex flex-wrap gap-x-4 gap-y-1 rounded-xl bg-white/95 backdrop-blur shadow px-3 py-2 text-[11px] font-semibold text-slate-600">
+                    <span class="flex items-center gap-1.5"><span
+                            class="w-3 h-3 rounded-full bg-emerald-500"></span>You</span>
+                    <span class="flex items-center gap-1.5"><span
+                            class="w-3 h-3 rounded-full border-2 border-brand-500 bg-white"></span>Stop</span>
+                    <span class="flex items-center gap-1.5"><span
+                            class="w-5 h-3 rounded-full bg-brand-500"></span>Vehicle</span>
+                </div>
+            </div>
+        </main>
+
+        <script>
+    const $ = id => document.getElementById(id);
+    const CENTER = [10.3157, 123.8985];
+
+    const OCC = [
+      { t: 'Seats available', c: 'text-emerald-700 bg-emerald-50' },
+      { t: 'Standing room', c: 'text-amber-700 bg-amber-50' },
+      { t: 'Almost full', c: 'text-rose-700 bg-rose-50' },
+    ];
+
+    // Sample routes. Stops are real Cebu City landmarks; the paths are snapped to roads when possible.
+    const ROUTES = [
+      { id: '04L', name: 'Lahug → Colon', type: 'Jeepney', fare: '₱14', color: '#1f6feb', speed: 6, n: 3,
+        stops: [
+          { n: 'JY Square, Lahug', c: [10.3277, 123.8997] },
+          { n: 'Cebu IT Park', c: [10.3294, 123.9064] },
+          { n: 'Ayala Center Cebu', c: [10.3181, 123.9050] },
+          { n: 'Fuente Osmeña', c: [10.3109, 123.8913] },
+          { n: 'Colon Street', c: [10.2954, 123.9014] } ] },
+      { id: '01K', name: 'Mabolo → Colon', type: 'Jeepney', fare: '₱13', color: '#e11d74', speed: 6, n: 3,
+        stops: [
+          { n: 'Mabolo', c: [10.3175, 123.9141] },
+          { n: 'Ayala Center Cebu', c: [10.3181, 123.9050] },
+          { n: 'Capitol Site', c: [10.3237, 123.8908] },
+          { n: 'Fuente Osmeña', c: [10.3109, 123.8913] },
+          { n: 'Colon Street', c: [10.2954, 123.9014] } ] },
+      { id: 'B1', name: 'Mandaue → Carbon Market', type: 'Bus', fare: '₱20', color: '#d97706', speed: 7, n: 2,
+        stops: [
+          { n: 'Parkmall, Mandaue', c: [10.3253, 123.9340] },
+          { n: 'Mabolo', c: [10.3175, 123.9141] },
+          { n: 'Ayala Center Cebu', c: [10.3181, 123.9050] },
+          { n: 'Fuente Osmeña', c: [10.3109, 123.8913] },
+          { n: 'Carbon Market', c: [10.2927, 123.8999] } ] },
+    ];
+
+    // ---------- Map ----------
+    const map = L.map('map', { zoomControl: false }).setView(CENTER, 14);
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    const sel = { route: null, stop: 0 };
+    let simMult = 5;
+    let follow = null;
+
+    const me = L.marker([10.3190, 123.9040], {
+      draggable: true, zIndexOffset: 900,
+      icon: L.divIcon({ className: 'x-icon', html: '<div class="me"></div>', iconSize: [18, 18], iconAnchor: [9, 9] })
+    }).addTo(map).bindTooltip('Drag me to set your location', { permanent: true, direction: 'bottom', offset: [0, 10] });
+    me.on('dragstart', () => me.unbindTooltip());
+    me.on('dragend', () => pickNearest());
+
+    const stopHi = L.marker(CENTER, {
+      zIndexOffset: 300, interactive: false,
+      icon: L.divIcon({ className: 'x-icon', html: '<div class="stopRing"></div>', iconSize: [26, 26], iconAnchor: [13, 13] })
+    }).addTo(map).bindTooltip('', { permanent: true, direction: 'top', offset: [0, -14], className: 'stop-tip' });
+
+    // ---------- Helpers ----------
+    function fmt(sec) {
+      if (!isFinite(sec)) return '--';
+      if (sec < 2) return 'Now';
+      const m = Math.floor(sec / 60), s = Math.floor(sec % 60);
+      return `${m}:${String(s).padStart(2, '0')}`;
+    }
+
+    let toastTimer = null;
+    function toast(msg) {
+      const t = $('toast');
+      t.textContent = msg;
+      t.classList.add('toast-show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('toast-show'), 5000);
+    }
+
+    async function snapRoute(r) {
+      const coords = r.stops.map(s => `${s.c[1]},${s.c[0]}`).join(';');
+      const url = `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`;
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 7000);
+      try {
+        const res = await fetch(url, { signal: ctrl.signal });
+        const j = await res.json();
+        if (j.code !== 'Ok') throw new Error('no route');
+        return j.routes[0].geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+      } finally { clearTimeout(timer); }
+    }
+
+    function prepare(r, pts) {
+      r.path = pts;
+      r.cum = [0];
+      for (let i = 1; i < pts.length; i++) r.cum[i] = r.cum[i - 1] + map.distance(pts[i - 1], pts[i]);
+      r.len = r.cum[r.cum.length - 1];
+      let from = 0;
+      r.stops.forEach(st => {
+        let best = Infinity, bi = from;
+        for (let i = from; i < pts.length; i++) {
+          const d = map.distance(st.c, pts[i]);
+          if (d < best) { best = d; bi = i; }
+        }
+        st.d = r.cum[bi];
+        from = bi;
+      });
+    }
+
+    function posAt(r, s) {
+      const c = r.cum;
+      let lo = 0, hi = c.length - 1;
+      while (hi - lo > 1) { const m = (lo + hi) >> 1; if (c[m] <= s) lo = m; else hi = m; }
+      const seg = (c[hi] - c[lo]) || 1;
+      const t = Math.min(1, Math.max(0, (s - c[lo]) / seg));
+      const a = r.path[lo], b = r.path[hi];
+      return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+    }
+
+    function etaFor(v, D) {
+      const sp = v.v * simMult;
+      const ahead = v.s <= D ? D - v.s : v.r.len - v.s + D;
+      return { sec: ahead / sp, dist: ahead, passing: v.s <= D };
+    }
+
+    // ---------- Build routes on the map ----------
+    function build(r, pts) {
+      prepare(r, pts);
+      r.line = L.polyline(pts, { color: r.color, weight: 5, opacity: .9, lineJoin: 'round' }).addTo(map);
+      r.stopMarkers = r.stops.map((st, i) => {
+        const m = L.circleMarker(st.c, { radius: 6, color: r.color, weight: 3, fillColor: '#fff', fillOpacity: 1 }).addTo(map);
+        m.bindTooltip(st.n, { direction: 'top' });
+        m.on('click', () => selectRoute(r, i, sel.route !== r));
+        return m;
+      });
+      r.vehicles = Array.from({ length: r.n }, (_, i) => {
+        const v = {
+          id: `${r.id}-${i + 1}`, r,
+          s: r.len * (i / r.n) + r.len * 0.04,
+          v: r.speed * (0.85 + Math.random() * 0.3),
+          occ: OCC[Math.floor(Math.random() * OCC.length)],
+          alerted: false
+        };
+        v.pos = posAt(r, v.s);
+        v.marker = L.marker(v.pos, {
+          zIndexOffset: 500,
+          icon: L.divIcon({ className: 'x-icon', html: `<div class="veh" style="--c:${r.color}">${r.id}</div>`, iconSize: [46, 28], iconAnchor: [23, 14] })
+        }).addTo(map);
+        v.marker.bindPopup(() => popupHtml(v));
+        return v;
+      });
+    }
+
+    function popupHtml(v) {
+      let h = `<b>${v.id}</b><br>${v.r.name} · ${v.r.type}<br>${v.occ.t}`;
+      if (v.r === sel.route) {
+        const st = sel.route.stops[sel.stop];
+        h += `<br>ETA to ${st.n}: <b>${fmt(etaFor(v, st.d).sec)}</b>`;
+      }
+      return h;
+    }
+
+    // ---------- Selection ----------
+    function nearest(r) {
+      const ll = me.getLatLng();
+      let best = Infinity, bi = 0;
+      r.stops.forEach((st, i) => { const d = map.distance(ll, st.c); if (d < best) { best = d; bi = i; } });
+      return { i: bi, d: best };
+    }
+
+    function updateNearestText() {
+      const n = nearest(sel.route);
+      const mins = Math.max(1, Math.round(n.d / 80));
+      $('nearestText').textContent = `Nearest ${sel.route.id} stop: ${sel.route.stops[n.i].n} · ${Math.round(n.d)} m (about ${mins} min walk)`;
+    }
+
+    function pickNearest() {
+      const n = nearest(sel.route);
+      sel.stop = n.i;
+      placeStopHighlight();
+      updateNearestText();
+    }
+
+    function renderRouteCards() {
+      $('routeCards').innerHTML = ROUTES.map(r => `
+        <button type="button" data-route="${r.id}" class="w-full text-left flex items-center gap-3 rounded-2xl border p-3 transition ${r === sel.route ? 'border-brand-500 bg-brand-50 ring-2 ring-brand-200' : 'border-slate-100 hover:border-brand-200 hover:bg-slate-50'}">
+          <span class="grid place-items-center min-w-[3rem] h-11 px-2 rounded-xl text-white font-extrabold text-sm" style="background:${r.color}">${r.id}</span>
+          <span class="flex-1 min-w-0">
+            <span class="block text-sm font-extrabold text-brand-900 truncate">${r.name}</span>
+            <span class="block text-xs text-slate-500">${r.type} · ${r.fare} · ${r.stops.length} stops</span>
+          </span>
+          <span class="text-[11px] font-bold text-emerald-600 bg-emerald-50 rounded-full px-2.5 py-1">${r.n} live</span>
+        </button>`).join('');
+      $('routeCards').querySelectorAll('[data-route]').forEach(b =>
+        b.addEventListener('click', () => selectRoute(ROUTES.find(x => x.id === b.dataset.route))));
+    }
+
+    function fillStopSelect() {
+      $('stopSel').innerHTML = sel.route.stops.map((s, i) => `<option value="${i}">${s.n}</option>`).join('');
+    }
+
+    function buildRows() {
+      const rowsEl = $('rows');
+      rowsEl.innerHTML = '';
+      sel.route.vehicles.forEach(v => {
+        const d = document.createElement('div');
+        d.className = 'rounded-2xl border border-slate-100 bg-white p-3 flex items-center gap-3 shadow-sm';
+        d.innerHTML = `
+          <span class="grid place-items-center min-w-[3.25rem] h-9 px-2 rounded-full text-white text-xs font-extrabold" style="background:${sel.route.color}">${v.id}</span>
+          <div class="flex-1 min-w-0">
+            <span class="inline-block text-[11px] font-bold px-2 py-0.5 rounded-full ${v.occ.c}">${v.occ.t}</span>
+            <p class="dist mt-1 text-[11px] text-slate-400"></p>
+          </div>
+          <p class="eta text-xl font-extrabold tabular-nums text-brand-600">--</p>
+          <button type="button" class="trk rounded-full border border-slate-200 px-3 py-1.5 text-xs font-bold text-brand-900 hover:border-brand-400 transition">Track</button>`;
+        d.querySelector('.trk').addEventListener('click', () => toggleFollow(v));
+        v.row = d;
+        rowsEl.appendChild(d);
+      });
+    }
+
+    function placeStopHighlight() {
+      const st = sel.route.stops[sel.stop];
+      stopHi.setLatLng(st.c);
+      stopHi.setTooltipContent(`Your stop: ${st.n}`);
+      $('stopSel').value = String(sel.stop);
+      sel.route.vehicles.forEach(v => v.alerted = false);
+      updateEta();
+    }
+
+    function selectRoute(r, stopIdx, fit = true) {
+      sel.route = r;
+      ROUTES.forEach(x => {
+        const on = x === r;
+        x.line.setStyle({ opacity: on ? .95 : .28, weight: on ? 6 : 4 });
+        if (on) x.line.bringToFront();
+        x.vehicles.forEach(v => { v.marker.setOpacity(on ? 1 : .4); v.marker.setZIndexOffset(on ? 800 : 200); });
+        x.stopMarkers.forEach(m => m.setStyle({ radius: on ? 7 : 4, fillOpacity: on ? 1 : .5, opacity: on ? 1 : .5 }));
+      });
+      if (follow && follow.r !== r) stopFollow();
+      renderRouteCards();
+      fillStopSelect();
+      buildRows();
+      sel.stop = stopIdx !== undefined ? stopIdx : nearest(r).i;
+      placeStopHighlight();
+      updateNearestText();
+      if (fit) map.fitBounds(r.line.getBounds().pad(0.15));
+    }
+
+    // ---------- ETA + alerts ----------
+    function updateEta() {
+      if (!sel.route) return;
+      const r = sel.route, st = r.stops[sel.stop];
+      const list = r.vehicles.map(v => ({ v, ...etaFor(v, st.d) })).sort((a, b) => a.sec - b.sec);
+      list.forEach((x, rank) => {
+        const row = x.v.row;
+        if (!row) return;
+        row.style.order = rank;
+        row.querySelector('.eta').textContent = fmt(x.sec);
+        row.querySelector('.dist').textContent = `${(x.dist / 1000).toFixed(1)} km away`;
+        row.classList.toggle('ring-2', rank === 0);
+        row.classList.toggle('ring-brand-200', rank === 0);
+        const trk = row.querySelector('.trk');
+        const on = follow === x.v;
+        trk.textContent = on ? 'Tracking' : 'Track';
+        trk.className = 'trk rounded-full px-3 py-1.5 text-xs font-bold transition ' + (on ? 'bg-brand-500 text-white' : 'border border-slate-200 text-brand-900 hover:border-brand-400');
+        if ($('alertOn').checked && x.passing && x.sec <= 30 && x.sec > 0.5 && !x.v.alerted) {
+          x.v.alerted = true;
+          toast(`🔔 ${x.v.id} is under 30 seconds from ${st.n}`);
+        }
+      });
+      const first = list[0];
+      $('nextWho').textContent = `${r.id} · ${r.name}`;
+      $('nextWhere').textContent = `${first.v.id} → ${st.n}`;
+      $('nextEta').textContent = fmt(first.sec);
+    }
+
+    // ---------- Follow ----------
+    function toggleFollow(v) {
+      if (follow === v) { stopFollow(); return; }
+      follow = v;
+      $('followName').textContent = v.id;
+      $('followChip').classList.remove('hidden');
+      $('followChip').classList.add('flex');
+      map.setView(v.pos, Math.max(map.getZoom(), 16), { animate: true });
+      updateEta();
+    }
+    function stopFollow() {
+      follow = null;
+      $('followChip').classList.add('hidden');
+      $('followChip').classList.remove('flex');
+      updateEta();
+    }
+    $('followStop').addEventListener('click', stopFollow);
+    map.on('dragstart', () => { if (follow) stopFollow(); });
+
+    // ---------- Controls ----------
+    $('stopSel').addEventListener('change', e => { sel.stop = Number(e.target.value); placeStopHighlight(); });
+
+    function paintSpeed() {
+      document.querySelectorAll('#speedGroup button').forEach(b => {
+        const on = Number(b.dataset.speed) === simMult;
+        b.className = 'px-3 py-1 rounded-full ' + (on ? 'bg-brand-500 text-white shadow' : 'text-slate-500 hover:text-brand-900');
+      });
+    }
+    document.querySelectorAll('#speedGroup button').forEach(b => b.addEventListener('click', () => { simMult = Number(b.dataset.speed); paintSpeed(); updateEta(); }));
+    paintSpeed();
+
+    $('locBtn').addEventListener('click', () => {
+      if (!navigator.geolocation) { toast('Location is not supported on this browser. Drag the green pin instead.'); return; }
+      navigator.geolocation.getCurrentPosition(pos => {
+        const ll = [pos.coords.latitude, pos.coords.longitude];
+        if (map.distance(ll, CENTER) > 25000) { toast('You seem to be outside Cebu City, so the pin stays in the city for this demo.'); return; }
+        me.setLatLng(ll); me.unbindTooltip();
+        map.panTo(ll);
+        pickNearest();
+      }, () => toast('Could not get your location. Drag the green pin instead.'), { enableHighAccuracy: true, timeout: 8000 });
+    });
+
+    // ---------- Animation loop ----------
+    let last = performance.now();
+    function frame(now) {
+      const dt = Math.min(0.25, (now - last) / 1000);
+      last = now;
+      ROUTES.forEach(r => r.vehicles.forEach(v => {
+        v.s += v.v * simMult * dt;
+        if (v.s >= r.len) { v.s -= r.len; v.alerted = false; }
+        v.pos = posAt(r, v.s);
+        v.marker.setLatLng(v.pos);
+      }));
+      if (follow) map.setView(follow.pos, map.getZoom(), { animate: false });
+      requestAnimationFrame(frame);
+    }
+
+    // ---------- Init ----------
+    (async function init() {
+      const results = await Promise.allSettled(ROUTES.map(snapRoute));
+      let failed = 0;
+      ROUTES.forEach((r, i) => {
+        const ok = results[i].status === 'fulfilled' && results[i].value.length > 1;
+        if (!ok) failed++;
+        build(r, ok ? results[i].value : r.stops.map(s => s.c));
+      });
+      $('loading').classList.add('hidden');
+      map.invalidateSize();
+      selectRoute(ROUTES[0]);
+      last = performance.now();
+      requestAnimationFrame(frame);
+      setInterval(updateEta, 500);
+      if (failed) toast('Road snapping is unavailable right now, so paths are simplified.');
+      else toast('Drag the green pin to your location, then pick a stop.');
+    })();
+    window.addEventListener('resize', () => map.invalidateSize());
+  </script>
+    </body>
+</html>
