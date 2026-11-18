@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport"
+            content="width=device-width, initial-scale=1, viewport-fit=cover">
+        <title>Dinkline – Sign in</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&display=swap"
+            rel="stylesheet">
+        <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+        <style>
+  :root{
+    --bg:#f2f6f7; --surface:#ffffff; --ink:#0e2230; --muted:#64798a; --line:#dce5ea;
+    --court:#17506f; --court-deep:#0d3349; --ball:#e4f04a; --danger:#d1493f; --ok:#1f9d6b;
+    --btn-bg:#0e2230; --btn-fg:#ffffff;
+    box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme:dark;
+      --bg:#09151d; --surface:#10212c; --ink:#eaf2f6; --muted:#8aa0ae; --line:#1f3543;
+      --btn-bg:#e4f04a; --btn-fg:#0e2230; --danger:#ff7b70;
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme:dark;
+    --bg:#09151d; --surface:#10212c; --ink:#eaf2f6; --muted:#8aa0ae; --line:#1f3543;
+    --btn-bg:#e4f04a; --btn-fg:#0e2230; --danger:#ff7b70;
+  }
+  html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+  body{min-height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:'Figtree',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  .display{font-family:'Bricolage Grotesque','Figtree',system-ui,sans-serif;letter-spacing:-.02em}
+
+  /* entrance */
+  .rise{opacity:0;transform:translateY(18px);animation:rise .8s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(var(--d,0) * 90ms + 120ms)}
+  @keyframes rise{to{opacity:1;transform:none}}
+
+  /* court + ball */
+  .line{stroke:#fff;stroke-opacity:.85;stroke-width:2.5;fill:none;stroke-dasharray:var(--len,1200);stroke-dashoffset:var(--len,1200);animation:draw 2.2s ease forwards;animation-delay:calc(var(--d,0) * 150ms + 200ms)}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  .ball-wrap{animation:bounce 1.6s cubic-bezier(.45,0,.55,1) infinite}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-150px)}}
+  .shadow-ball{animation:shade 1.6s cubic-bezier(.45,0,.55,1) infinite;transform-origin:center}
+  @keyframes shade{0%,100%{transform:scale(1);opacity:.35}50%{transform:scale(.5);opacity:.12}}
+  .drift{animation:drift 14s ease-in-out infinite alternate}
+  @keyframes drift{to{transform:translate(30px,-24px) scale(1.12)}}
+  .float{animation:float 6s ease-in-out infinite}
+  @keyframes float{50%{transform:translateY(-10px) rotate(4deg)}}
+
+  /* inputs */
+  .field{position:relative}
+  .field input{width:100%;background:var(--surface);color:var(--ink);border:1.5px solid var(--line);border-radius:14px;padding:1.45rem 2.9rem .55rem 1rem;font-size:1rem;outline:none;transition:border-color .25s,box-shadow .25s,transform .25s}
+  .field input:hover{border-color:color-mix(in srgb,var(--court) 40%,var(--line))}
+  .field input:focus{border-color:var(--court);box-shadow:0 0 0 4px color-mix(in srgb,var(--court) 18%,transparent);transform:translateY(-1px)}
+  .field label{position:absolute;left:1rem;top:1.05rem;color:var(--muted);pointer-events:none;transition:all .25s cubic-bezier(.2,.8,.2,1);transform-origin:left top}
+  .field input:focus + label,.field input:not(:placeholder-shown) + label{top:.5rem;font-size:.72rem;color:var(--court)}
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .field input:focus + label,:root:not([data-theme="light"]) .field input:not(:placeholder-shown) + label{color:var(--ball)}}
+  .field.err input{border-color:var(--danger)}
+  .shake{animation:shake .45s}
+  @keyframes shake{20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+  .msg{font-size:.8rem;color:var(--danger);max-height:0;opacity:0;overflow:hidden;transition:max-height .3s,opacity .3s,margin .3s}
+  .msg.show{max-height:40px;opacity:1;margin-top:.35rem}
+
+  /* field extras */
+  .field input:focus{animation:ring .5s ease-out}
+  @keyframes ring{from{box-shadow:0 0 0 0 color-mix(in srgb,var(--court) 45%,transparent)}}
+  .field.typing input{animation:tap .2s}
+  @keyframes tap{50%{transform:translateY(-3px)}}
+  .field input:focus + label{animation:pop .4s}
+  @keyframes pop{40%{transform:translateY(-5px)}}
+  .ok-tick{position:absolute;right:.9rem;top:1.1rem;width:20px;height:20px;border-radius:50%;background:var(--ok);display:grid;place-items:center;transform:scale(0) rotate(-90deg);opacity:0;transition:transform .45s cubic-bezier(.34,1.56,.64,1),opacity .25s;pointer-events:none}
+  .field.valid .ok-tick{transform:none;opacity:1}
+  .field.valid input{border-color:color-mix(in srgb,var(--ok) 70%,var(--line))}
+  .meter-wrap{max-height:0;opacity:0;overflow:hidden;transition:max-height .4s,opacity .3s,margin .3s}
+  .field.typed .meter-wrap{max-height:50px;opacity:1;margin-top:.6rem}
+  .meter{display:flex;gap:6px}
+  .meter i{flex:1;height:4px;border-radius:4px;background:var(--line);transition:background .35s}
+  .meter[data-s="1"] i:nth-child(-n+1){background:var(--danger)}
+  .meter[data-s="2"] i:nth-child(-n+2){background:#e8a33d}
+  .meter[data-s="3"] i:nth-child(-n+3){background:#a9c92c}
+  .meter[data-s="4"] i:nth-child(-n+4){background:var(--ok)}
+  .eye{transition:transform .3s cubic-bezier(.34,1.56,.64,1),color .25s;background:none;border:0;cursor:pointer}
+  .eye:hover{transform:scale(1.2)}
+  .eye:active{transform:scale(.85) rotate(-12deg)}
+  .panel.enter > *{animation:fieldIn .55s cubic-bezier(.2,.8,.2,1) backwards}
+  .panel.enter > *:nth-child(2){animation-delay:70ms}
+  .panel.enter > *:nth-child(3){animation-delay:140ms}
+  .panel.enter > *:nth-child(4){animation-delay:210ms}
+  .panel.enter > *:nth-child(5){animation-delay:280ms}
+  .panel.enter > *:nth-child(6){animation-delay:350ms}
+  .panel.enter > *:nth-child(7){animation-delay:420ms}
+  @keyframes fieldIn{from{opacity:0;transform:translateY(14px) scale(.98)}}
+  .cred{background:var(--surface);border:1.5px solid var(--line);transition:transform .3s cubic-bezier(.2,.8,.2,1),border-color .3s,box-shadow .3s}
+  .cred:hover{transform:translateY(-2px);border-color:var(--court);box-shadow:0 10px 22px -14px var(--court)}
+  .fill{flex:none;background:var(--btn-bg);color:var(--btn-fg);border:0;border-radius:10px;padding:.5rem .8rem;font-size:.85rem;font-weight:600;cursor:pointer;transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+  .fill:hover{transform:scale(1.08)}
+  .fill:active{transform:scale(.94)}
+
+  /* tabs */
+  .tabs{position:relative;display:grid;grid-template-columns:1fr 1fr;background:color-mix(in srgb,var(--ink) 6%,transparent);border-radius:999px;padding:4px}
+  .tab-pill{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);background:var(--surface);border-radius:999px;box-shadow:0 2px 10px rgba(14,34,48,.12);transition:transform .45s cubic-bezier(.65,0,.25,1)}
+  .tabs[data-tab="signup"] .tab-pill{transform:translateX(100%)}
+  .tab{position:relative;z-index:1;padding:.6rem 0;font-weight:600;font-size:.92rem;color:var(--muted);transition:color .3s;background:none;border:0;cursor:pointer}
+  .tab[aria-selected="true"]{color:var(--ink)}
+
+  /* panels */
+  .stack{display:grid}
+  .panel{grid-area:1/1;transition:opacity .45s ease,transform .55s cubic-bezier(.2,.8,.2,1),visibility .45s}
+  .panel.off{opacity:0;visibility:hidden;pointer-events:none}
+  .panel.off.left{transform:translateX(-28px)}
+  .panel.off.right{transform:translateX(28px)}
+
+  /* button */
+  .btn{position:relative;overflow:hidden;width:100%;border:0;cursor:pointer;border-radius:14px;padding:.95rem 1rem;font-weight:600;font-size:1rem;background:var(--btn-bg);color:var(--btn-fg);transition:transform .25s,box-shadow .25s,opacity .25s}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 12px 26px -10px color-mix(in srgb,var(--ink) 55%,transparent)}
+  .btn:active{transform:translateY(0) scale(.98)}
+  .btn::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.28) 50%,transparent 70%);transform:translateX(-120%);transition:transform .8s}
+  .btn:hover::after{transform:translateX(120%)}
+  .btn[disabled]{opacity:.85;pointer-events:none}
+  .spin{width:18px;height:18px;border-radius:50%;border:2.5px solid currentColor;border-right-color:transparent;animation:spin .7s linear infinite;display:none}
+  .btn.loading .spin{display:inline-block}
+  .btn.loading .lbl{opacity:.8}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.4);transform:scale(0);animation:ripple .6s ease-out forwards;pointer-events:none}
+  @keyframes ripple{to{transform:scale(4);opacity:0}}
+
+  /* success */
+  .ok-view{opacity:0;visibility:hidden;transform:scale(.96);transition:all .6s cubic-bezier(.2,.8,.2,1)}
+  .ok-view.show{opacity:1;visibility:visible;transform:none}
+  .ring{stroke-dasharray:166;stroke-dashoffset:166}
+  .tick{stroke-dasharray:50;stroke-dashoffset:50}
+  .ok-view.show .ring{animation:draw2 .7s .2s ease forwards}
+  .ok-view.show .tick{animation:draw2 .45s .8s ease forwards}
+  @keyframes draw2{to{stroke-dashoffset:0}}
+  .bar{height:4px;border-radius:4px;background:var(--line);overflow:hidden}
+  .bar i{display:block;height:100%;width:0;background:var(--ok)}
+  .ok-view.show .bar i{animation:fill 2.4s 1s linear forwards}
+  @keyframes fill{to{width:100%}}
+  .form-wrap{transition:opacity .45s,transform .5s cubic-bezier(.2,.8,.2,1),visibility .45s}
+  .form-wrap.gone{opacity:0;transform:translateY(-16px);visibility:hidden;position:absolute;pointer-events:none}
+
+  .chip{transition:transform .25s,background .25s}
+  .chip:hover{transform:translateY(-2px)}
+  a.link{color:var(--court);font-weight:600;transition:opacity .2s}
+  a.link:hover{opacity:.7}
+  .back-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.55rem 1rem .55rem .8rem;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font-size:.875rem;font-weight:600;text-decoration:none;transition:transform .25s cubic-bezier(.2,.8,.2,1),border-color .25s,box-shadow .25s}
+  /* page fade in / out */
+  body{animation:pageIn .7s ease backwards;transition:opacity .4s ease}
+  @keyframes pageIn{from{opacity:0}to{opacity:1}}
+  body.page-out{opacity:0;pointer-events:none}
+  .back-btn svg{transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+  .back-btn:hover{border-color:var(--court);transform:translateY(-1px);box-shadow:0 8px 20px -12px color-mix(in srgb,var(--ink) 55%,transparent)}
+  .back-btn:hover svg{transform:translateX(-3px)}
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) a.link{color:var(--ball)}}
+  :focus-visible{outline:3px solid var(--ball);outline-offset:2px}
+  @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.rise{opacity:1;transform:none}.line{stroke-dashoffset:0}}
+</style>
+    </head>
+    <body>
+        <main class="min-h-screen grid lg:grid-cols-[1.05fr_1fr]">
+
+            <!-- Brand panel -->
+            <aside
+                class="hidden lg:flex relative overflow-hidden flex-col justify-between p-12 text-white"
+                style="background:linear-gradient(160deg,var(--court),var(--court-deep))">
+                <div
+                    class="drift absolute -top-24 -right-24 w-96 h-96 rounded-full"
+                    style="background:radial-gradient(circle,rgba(228,240,74,.28),transparent 65%)"></div>
+                <div
+                    class="drift absolute -bottom-32 -left-24 w-[28rem] h-[28rem] rounded-full"
+                    style="background:radial-gradient(circle,rgba(255,255,255,.14),transparent 65%);animation-delay:-6s"></div>
+
+                <div class="rise relative flex items-center gap-3"
+                    style="--d:0">
+                    <div
+                        class="w-10 h-10 rounded-full grid place-items-center float"
+                        style="background:var(--ball)">
+                        <svg viewBox="0 0 24 24" class="w-6 h-6"
+                            fill="#0d3349"><circle cx="8" cy="8"
+                                r="1.6" /><circle cx="16" cy="8"
+                                r="1.6" /><circle cx="12" cy="12"
+                                r="1.6" /><circle cx="8" cy="16"
+                                r="1.6" /><circle cx="16" cy="16"
+                                r="1.6" /></svg>
+                    </div>
+                    <span
+                        class="display text-2xl font-extrabold">Dinkline</span>
+                </div>
+
+                <div class="relative">
+                    <svg viewBox="0 0 400 300"
+                        class="w-full max-w-md mx-auto mb-10 overflow-visible"
+                        aria-hidden="true">
+                        <g
+                            style="transform-origin:200px 150px;transform:perspective(600px) rotateX(38deg)">
+                            <rect class="line" style="--len:1400;--d:0" x="20"
+                                y="20" width="360" height="260" rx="4" />
+                            <line class="line" style="--len:360;--d:1" x1="20"
+                                y1="150" x2="380" y2="150" />
+                            <line class="line" style="--len:360;--d:2" x1="20"
+                                y1="95" x2="380" y2="95" />
+                            <line class="line" style="--len:360;--d:2" x1="20"
+                                y1="205" x2="380" y2="205" />
+                            <line class="line" style="--len:110;--d:3" x1="200"
+                                y1="20" x2="200" y2="95" />
+                            <line class="line" style="--len:110;--d:3" x1="200"
+                                y1="205" x2="200" y2="280" />
+                        </g>
+                        <ellipse class="shadow-ball" cx="200" cy="225" rx="16"
+                            ry="5" fill="#000" />
+                        <g class="ball-wrap" style="transform-box:fill-box">
+                            <circle cx="200" cy="205" r="14" fill="#e4f04a" />
+                            <g fill="#0d3349" opacity=".55"><circle cx="195"
+                                    cy="200" r="2" /><circle cx="205" cy="200"
+                                    r="2" /><circle cx="200" cy="206"
+                                    r="2" /><circle cx="195" cy="212"
+                                    r="2" /><circle cx="205" cy="212"
+                                    r="2" /></g>
+                        </g>
+                    </svg>
+                    <h1
+                        class="rise display text-5xl xl:text-6xl font-extrabold leading-[1.02] max-w-lg"
+                        style="--d:3">Your court is waiting.</h1>
+                    <p class="rise mt-5 text-lg max-w-md text-white/75"
+                        style="--d:4">Book a court, find a partner and be
+                        playing in under a minute.</p>
+                </div>
+
+                <div class="rise relative flex gap-3 flex-wrap" style="--d:5">
+                    <span
+                        class="chip px-4 py-2 rounded-full text-sm font-medium bg-white/10 backdrop-blur">6
+                        indoor courts</span>
+                    <span
+                        class="chip px-4 py-2 rounded-full text-sm font-medium bg-white/10 backdrop-blur">Open
+                        6am to 10pm</span>
+                    <span
+                        class="chip px-4 py-2 rounded-full text-sm font-medium bg-white/10 backdrop-blur">Free
+                        cancellation</span>
+                </div>
+            </aside>
+
+            <!-- Form panel -->
+            <section
+                class="relative flex items-center justify-center px-5 py-10 sm:px-10 overflow-hidden">
+                <div
+                    class="drift lg:hidden absolute -top-28 -right-24 w-72 h-72 rounded-full pointer-events-none"
+                    style="background:radial-gradient(circle,rgba(228,240,74,.5),transparent 65%)"></div>
+                <div
+                    class="drift lg:hidden absolute -bottom-32 -left-20 w-80 h-80 rounded-full pointer-events-none"
+                    style="background:radial-gradient(circle,color-mix(in srgb,var(--court) 35%,transparent),transparent 65%);animation-delay:-5s"></div>
+
+                <div class="relative w-full max-w-md">
+                    <a href="../../index.html" class="back-btn rise mb-6"
+                        style="--d:0">
+                        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none"
+                            stroke="currentColor" stroke-width="2.5"
+                            stroke-linecap="round" stroke-linejoin="round"
+                            aria-hidden="true"><path
+                                d="M19 12H5M11 6l-6 6 6 6" /></svg>
+                        Back to EM Development Website
+                    </a>
+                    <div class="lg:hidden rise flex items-center gap-3 mb-8"
+                        style="--d:0">
+                        <div
+                            class="w-10 h-10 rounded-full grid place-items-center float"
+                            style="background:var(--ball)">
+                            <svg viewBox="0 0 24 24" class="w-6 h-6"
+                                fill="#0d3349"><circle cx="8" cy="8"
+                                    r="1.6" /><circle cx="16" cy="8"
+                                    r="1.6" /><circle cx="12" cy="12"
+                                    r="1.6" /><circle cx="8" cy="16"
+                                    r="1.6" /><circle cx="16" cy="16"
+                                    r="1.6" /></svg>
+                        </div>
+                        <span
+                            class="display text-2xl font-extrabold">Dinkline</span>
+                    </div>
+
+                    <!-- Stage: form + success view share this box, the back button stays above it -->
+                    <div id="stage" class="relative">
+                        <div id="formWrap" class="form-wrap">
+                            <h2 id="title"
+                                class="rise display text-3xl sm:text-4xl font-extrabold"
+                                style="--d:1">Welcome back</h2>
+                            <p id="sub" class="rise mt-2 mb-7"
+                                style="--d:2;color:var(--muted)">Sign in to book
+                                your next game.</p>
+
+                            <div id="tabs" class="rise tabs mb-7"
+                                data-tab="login"
+                                role="tablist" style="--d:3">
+                                <span class="tab-pill"></span>
+                                <button class="tab" role="tab"
+                                    aria-selected="true"
+                                    data-go="login" type="button">Sign
+                                    in</button>
+                                <button class="tab" role="tab"
+                                    aria-selected="false"
+                                    data-go="signup" type="button">Create
+                                    account</button>
+                            </div>
+
+                            <div class="stack rise" style="--d:4">
+                                <!-- Login -->
+                                <form id="loginForm" class="panel space-y-4"
+                                    novalidate>
+                                    <div class="field" id="f-email">
+                                        <input id="email" type="email"
+                                            placeholder=" " autocomplete="email"
+                                            required>
+                                        <label for="email">Email</label>
+                                        <span class="ok-tick"><svg
+                                                viewBox="0 0 24 24"
+                                                class="w-3 h-3"
+                                                fill="none" stroke="#fff"
+                                                stroke-width="3.5"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"><path
+                                                    d="M5 12l5 5 9-10" /></svg></span>
+                                        <div class="msg" data-msg></div>
+                                    </div>
+                                    <div class="field" id="f-pass">
+                                        <input id="password" type="password"
+                                            placeholder=" "
+                                            autocomplete="current-password"
+                                            required>
+                                        <label for="password">Password</label>
+                                        <button type="button"
+                                            class="eye absolute right-3 top-[1.05rem]"
+                                            style="color:var(--muted)"
+                                            aria-label="Show password">
+                                            <svg class="w-5 h-5"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="1.8"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"><path
+                                                    d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" /><circle
+                                                    cx="12" cy="12"
+                                                    r="3" /></svg>
+                                        </button>
+                                        <div class="msg" data-msg></div>
+                                    </div>
+                                    <div
+                                        class="flex items-center justify-between text-sm">
+                                        <label
+                                            class="flex items-center gap-2 cursor-pointer select-none"
+                                            style="color:var(--muted)"><input
+                                                type="checkbox"
+                                                class="w-4 h-4 rounded accent-[#17506f]">
+                                            Keep me signed in</label>
+                                        <a href="#" class="link"
+                                            data-soon>Forgot
+                                            password?</a>
+                                    </div>
+                                    <div id="loginErr" class="msg"
+                                        role="alert"></div>
+                                    <button class="btn" type="submit"><span
+                                            class="inline-flex items-center justify-center gap-2"><span
+                                                class="spin"></span><span
+                                                class="lbl">Sign
+                                                in</span></span></button>
+                                    <div
+                                        class="rounded-2xl border border-dashed p-4"
+                                        style="border-color:var(--line);background:color-mix(in srgb,var(--ball) 14%,transparent)">
+                                        <p
+                                            class="text-sm font-semibold mb-3">Demo
+                                            accounts for testing</p>
+                                        <div class="space-y-2.5">
+                                            <div
+                                                class="cred rounded-xl p-3 flex items-center justify-between gap-3">
+                                                <div class="min-w-0 text-sm">
+                                                    <p
+                                                        class="font-semibold">Admin</p>
+                                                    <p class="text-xs mb-1.5"
+                                                        style="color:var(--muted)">Opens
+                                                        ./admin/dashboard.html</p>
+                                                    <p><span
+                                                            style="color:var(--muted)">Email
+                                                        </span><span
+                                                            class="font-semibold select-all break-all">admin@email.com</span></p>
+                                                    <p><span
+                                                            style="color:var(--muted)">Password
+                                                        </span><span
+                                                            class="font-semibold select-all">password</span></p>
+                                                </div>
+                                                <button type="button"
+                                                    class="fill"
+                                                    data-demo
+                                                    data-email="admin@email.com">Fill
+                                                    in</button>
+                                            </div>
+                                            <div
+                                                class="cred rounded-xl p-3 flex items-center justify-between gap-3">
+                                                <div class="min-w-0 text-sm">
+                                                    <p
+                                                        class="font-semibold">Customer</p>
+                                                    <p class="text-xs mb-1.5"
+                                                        style="color:var(--muted)">Opens
+                                                        ./customer/dashboard.html</p>
+                                                    <p><span
+                                                            style="color:var(--muted)">Email
+                                                        </span><span
+                                                            class="font-semibold select-all break-all">user@email.com</span></p>
+                                                    <p><span
+                                                            style="color:var(--muted)">Password
+                                                        </span><span
+                                                            class="font-semibold select-all">password</span></p>
+                                                </div>
+                                                <button type="button"
+                                                    class="fill"
+                                                    data-demo
+                                                    data-email="user@email.com">Fill
+                                                    in</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+
+                                <!-- Signup -->
+                                <form id="signupForm"
+                                    class="panel off right space-y-4"
+                                    novalidate>
+                                    <div class="field" id="f-name">
+                                        <input id="sname" type="text"
+                                            placeholder=" " autocomplete="name"
+                                            required>
+                                        <label for="sname">Full name</label>
+                                        <span class="ok-tick"><svg
+                                                viewBox="0 0 24 24"
+                                                class="w-3 h-3"
+                                                fill="none" stroke="#fff"
+                                                stroke-width="3.5"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"><path
+                                                    d="M5 12l5 5 9-10" /></svg></span>
+                                        <div class="msg" data-msg></div>
+                                    </div>
+                                    <div class="field" id="f-semail">
+                                        <input id="semail" type="email"
+                                            placeholder=" " autocomplete="email"
+                                            required>
+                                        <label for="semail">Email</label>
+                                        <span class="ok-tick"><svg
+                                                viewBox="0 0 24 24"
+                                                class="w-3 h-3"
+                                                fill="none" stroke="#fff"
+                                                stroke-width="3.5"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"><path
+                                                    d="M5 12l5 5 9-10" /></svg></span>
+                                        <div class="msg" data-msg></div>
+                                    </div>
+                                    <div class="field" id="f-spass">
+                                        <input id="spass" type="password"
+                                            placeholder=" "
+                                            autocomplete="new-password"
+                                            required>
+                                        <label for="spass">Password (6+
+                                            characters)</label>
+                                        <span class="ok-tick"><svg
+                                                viewBox="0 0 24 24"
+                                                class="w-3 h-3"
+                                                fill="none" stroke="#fff"
+                                                stroke-width="3.5"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"><path
+                                                    d="M5 12l5 5 9-10" /></svg></span>
+                                        <div class="meter-wrap"><div
+                                                class="meter"
+                                                id="meter"
+                                                data-s="0"><i></i><i></i><i></i><i></i></div><p
+                                                id="meterTxt"
+                                                class="text-xs mt-1"
+                                                style="color:var(--muted)"></p></div>
+                                        <div class="msg" data-msg></div>
+                                    </div>
+                                    <div id="signupErr" class="msg"
+                                        role="alert"></div>
+                                    <button class="btn" type="submit"><span
+                                            class="inline-flex items-center justify-center gap-2"><span
+                                                class="spin"></span><span
+                                                class="lbl">Create
+                                                account</span></span></button>
+                                </form>
+                            </div>
+
+                            <p class="rise mt-7 text-sm text-center"
+                                style="--d:6;color:var(--muted)">New to
+                                pickleball?
+                                <a href="#" class="link" data-soon>See how it
+                                    works</a></p>
+                        </div>
+
+                        <!-- Success -->
+                        <div id="okView"
+                            class="ok-view absolute inset-0 flex flex-col items-center justify-center text-center"
+                            aria-live="polite">
+                            <svg viewBox="0 0 56 56" class="w-24 h-24 mb-6"
+                                fill="none" stroke-width="3"
+                                stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <circle class="ring" cx="28" cy="28" r="26.5"
+                                    stroke="var(--ok)" />
+                                <path class="tick" d="M17 29l8 8 14-16"
+                                    stroke="var(--ok)" />
+                            </svg>
+                            <h2 id="okTitle"
+                                class="display text-3xl font-extrabold">You’re
+                                in</h2>
+                            <p id="okSub" class="mt-2 mb-7"
+                                style="color:var(--muted)">Taking you to your
+                                dashboard…</p>
+                            <div class="bar w-56"><i></i></div>
+                            <button id="logout" class="mt-8 text-sm link"
+                                style="background:none;border:0;cursor:pointer">Sign
+                                out</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <script>
+(() => {
+  const users = [
+    { name: 'Admin', email: 'admin@email.com', password: 'password', role: 'admin', redirect: './admin/dashboard.html' },
+    { name: 'Customer', email: 'user@email.com', password: 'password', role: 'customer', redirect: './customer/dashboard.html' }
+  ];
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const tabs = $('#tabs'), login = $('#loginForm'), signup = $('#signupForm');
+  const copy = {
+    login: ['Welcome back', 'Sign in to book your next game.'],
+    signup: ['Join the club', 'Create an account and grab a court.']
+  };
+
+  // Tabs
+  function go(which) {
+    tabs.dataset.tab = which;
+    $$('.tab').forEach(t => t.setAttribute('aria-selected', t.dataset.go === which));
+    const isLogin = which === 'login';
+    login.classList.toggle('off', !isLogin); login.classList.toggle('left', !isLogin);
+    signup.classList.toggle('off', isLogin); signup.classList.toggle('right', isLogin);
+    signup.classList.remove('left'); login.classList.remove('right');
+    const p = isLogin ? login : signup;
+    p.classList.remove('enter'); void p.offsetWidth; p.classList.add('enter');
+    setTimeout(() => p.classList.remove('enter'), 1000);
+    ['title', 'sub'].forEach((id, i) => {
+      const el = $('#' + id);
+      el.style.transition = 'opacity .2s, transform .2s';
+      el.style.opacity = 0; el.style.transform = 'translateY(-6px)';
+      setTimeout(() => { el.textContent = copy[which][i]; el.style.opacity = 1; el.style.transform = 'none'; }, 200);
+    });
+    clearErrors();
+  }
+  $$('.tab').forEach(t => t.addEventListener('click', () => go(t.dataset.go)));
+
+  // Helpers
+  const setErr = (fieldId, text) => {
+    const f = $('#' + fieldId); f.classList.add('err');
+    const m = $('[data-msg]', f); m.textContent = text; m.classList.add('show');
+    f.classList.remove('shake'); void f.offsetWidth; f.classList.add('shake');
+  };
+  const formErr = (id, text) => {
+    const m = $('#' + id); m.textContent = text; m.classList.add('show');
+    const b = $('.btn', m.closest('form')); b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake');
+  };
+  function clearErrors() {
+    $$('.field').forEach(f => { f.classList.remove('err', 'shake'); $('[data-msg]', f).classList.remove('show'); });
+    $$('#loginErr,#signupErr').forEach(m => m.classList.remove('show'));
+  }
+  $$('input').forEach(i => i.addEventListener('input', clearErrors));
+  const validEmail = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+
+  // Password eye
+  $('.eye').addEventListener('click', e => {
+    const p = $('#password'), show = p.type === 'password';
+    p.type = show ? 'text' : 'password';
+    e.currentTarget.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+    e.currentTarget.style.color = show ? 'var(--court)' : 'var(--muted)';
+  });
+
+  // Ripple
+  $$('.btn').forEach(b => b.addEventListener('pointerdown', e => {
+    const r = b.getBoundingClientRect(), s = Math.max(r.width, r.height) / 4;
+    const el = document.createElement('span'); el.className = 'ripple';
+    el.style.cssText = `width:${s}px;height:${s}px;left:${e.clientX - r.left - s / 2}px;top:${e.clientY - r.top - s / 2}px`;
+    b.appendChild(el); setTimeout(() => el.remove(), 650);
+  }));
+
+  // Demo fill (types it in)
+  let typing = false;
+  $$('[data-demo]').forEach(b => b.addEventListener('click', async () => {
+    if (typing) return; typing = true;
+    const type = async (el, text) => {
+      el.value = '';
+      for (const c of text) { el.value += c; el.dispatchEvent(new Event('input', { bubbles: true })); await new Promise(r => setTimeout(r, 40)); }
+    };
+    clearErrors();
+    await type($('#email'), b.dataset.email);
+    await type($('#password'), 'password');
+    typing = false;
+  }));
+
+  // Field feedback: tick, tap, strength meter
+  const rules = { email: validEmail, sname: v => v.length >= 2, semail: validEmail, spass: v => v.length >= 6 };
+  function strength(v) {
+    let s = 0;
+    if (v.length >= 6) s++; if (v.length >= 9) s++;
+    if (/[A-Z]/.test(v) && /[a-z]/.test(v)) s++;
+    if (/\d/.test(v) && /[^A-Za-z0-9]/.test(v)) s++;
+    $('#meter').dataset.s = v ? (v.length < 6 ? 1 : s) : 0;
+    $('#meterTxt').textContent = v ? ['Too short', 'Weak', 'Okay', 'Good', 'Strong'][v.length < 6 ? 0 : s] : '';
+  }
+  $$('.field input').forEach(inp => {
+    const f = inp.closest('.field');
+    inp.addEventListener('input', () => {
+      const r = rules[inp.id];
+      if (r) f.classList.toggle('valid', r(inp.value.trim()));
+      f.classList.toggle('typed', inp.value.length > 0);
+      f.classList.remove('typing'); void f.offsetWidth; f.classList.add('typing');
+      if (inp.id === 'spass') strength(inp.value);
+    });
+    inp.addEventListener('animationend', () => f.classList.remove('typing'));
+  });
+
+  // Page load: fields glide in
+  setTimeout(() => { login.classList.add('enter'); setTimeout(() => login.classList.remove('enter'), 1000); }, 500);
+
+  // Submit
+  function submit(form, work) {
+    form.addEventListener('submit', e => {
+      e.preventDefault(); clearErrors();
+      const btn = $('.btn', form), ok = work();
+      if (!ok) return;
+      btn.classList.add('loading'); btn.disabled = true;
+      setTimeout(() => { btn.classList.remove('loading'); btn.disabled = false; success(ok); }, 1300);
+    });
+  }
+
+  submit(login, () => {
+    const email = $('#email').value.trim().toLowerCase(), pass = $('#password').value;
+    let bad = false;
+    if (!validEmail(email)) { setErr('f-email', 'Enter a valid email address.'); bad = true; }
+    if (!pass) { setErr('f-pass', 'Enter your password.'); bad = true; }
+    if (bad) return false;
+    const u = users.find(u => u.email === email && u.password === pass);
+    if (!u) { formErr('loginErr', 'Email or password is incorrect. Try again or use the demo account.'); return false; }
+    return u;
+  });
+
+  submit(signup, () => {
+    const name = $('#sname').value.trim(), email = $('#semail').value.trim().toLowerCase(), pass = $('#spass').value;
+    let bad = false;
+    if (name.length < 2) { setErr('f-name', 'Enter your full name.'); bad = true; }
+    if (!validEmail(email)) { setErr('f-semail', 'Enter a valid email address.'); bad = true; }
+    if (pass.length < 6) { setErr('f-spass', 'Use at least 6 characters.'); bad = true; }
+    if (bad) return false;
+    if (users.some(u => u.email === email)) { formErr('signupErr', 'That email already has an account. Sign in instead.'); return false; }
+    const u = { name, email, password: pass, role: 'customer', redirect: './customer/dashboard.html' }; users.push(u); return u;
+  });
+
+  // Page fade out before navigating
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function leave(url) {
+    document.body.classList.add('page-out');
+    setTimeout(() => { window.location.href = url; }, reduceMotion ? 0 : 400);
+  }
+  $$('a.back-btn').forEach(a => a.addEventListener('click', e => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
+    e.preventDefault(); leave(a.getAttribute('href'));
+  }));
+  // Restore the page if it is shown again from the back/forward cache
+  addEventListener('pageshow', e => { if (e.persisted) document.body.classList.remove('page-out'); });
+
+  // Success
+  const wrap = $('#formWrap'), okView = $('#okView'), stage = $('#stage');
+  let timer;
+  function success(u) {
+    $('#okTitle').textContent = `You’re in, ${u.name.split(' ')[0]}`;
+    stage.style.minHeight = wrap.offsetHeight + 'px';
+    wrap.classList.add('gone');
+    setTimeout(() => okView.classList.add('show'), 250);
+    $('#okSub').textContent = u.role === 'admin' ? 'Opening the admin dashboard…' : 'Opening your customer dashboard…';
+    timer = setTimeout(() => leave(u.redirect), 3500);
+  }
+  $('#logout').addEventListener('click', () => {
+    clearTimeout(timer);
+    okView.classList.remove('show');
+    setTimeout(() => { wrap.classList.remove('gone'); stage.style.minHeight = ''; login.reset(); signup.reset(); $$('.field').forEach(f => f.classList.remove('valid', 'typed')); strength(''); go('login'); }, 350);
+  });
+
+  $$('[data-soon]').forEach(a => a.addEventListener('click', e => e.preventDefault()));
+})();
+</script>
+    </body>
+</html>

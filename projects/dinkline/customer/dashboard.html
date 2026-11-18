@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="color-scheme" content="light dark">
+        <meta name="viewport"
+            content="width=device-width, initial-scale=1, viewport-fit=cover">
+        <title>Dinkline – My account</title>
+        <script>try{var t=localStorage.getItem('dinkline-theme');if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t}catch(e){}</script>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&display=swap"
+            rel="stylesheet">
+        <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+        <style>
+  :root{
+    --bg:#eaf1f4; --surface:#ffffff; --ink:#0e2230; --muted:#64798a; --line:#dbe5ea;
+    --court:#17506f; --court-deep:#0d3349; --ball:#e4f04a; --danger:#d1493f; --ok:#1f9d6b; --warn:#d98a1c;
+    --btn-bg:#0e2230; --btn-fg:#ffffff; --accent:#17506f;
+    box-sizing:border-box; padding-top:env(safe-area-inset-top,0px);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){color-scheme:dark;--bg:#07121a;--surface:#0f202b;--ink:#eaf2f6;--muted:#8aa0ae;--line:#1d3341;--btn-bg:#e4f04a;--btn-fg:#0e2230;--danger:#ff7b70;--accent:#e4f04a;--warn:#f0b34a}
+  }
+  :root[data-theme="dark"]{color-scheme:dark;--bg:#07121a;--surface:#0f202b;--ink:#eaf2f6;--muted:#8aa0ae;--line:#1d3341;--btn-bg:#e4f04a;--btn-fg:#0e2230;--danger:#ff7b70;--accent:#e4f04a;--warn:#f0b34a}
+  html{scroll-behavior:smooth;scroll-padding-top:1.5rem}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Figtree',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  /* page fade in / out */
+  body{animation:pageIn .7s ease backwards;transition:opacity .4s ease}
+  @keyframes pageIn{from{opacity:0}to{opacity:1}}
+  body.page-out{opacity:0;pointer-events:none}
+  .display{font-family:'Bricolage Grotesque','Figtree',system-ui,sans-serif;letter-spacing:-.02em}
+  .muted{color:var(--muted)}
+
+  /* theme spread */
+  ::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
+  ::view-transition-old(root){z-index:1}
+  ::view-transition-new(root){z-index:2147483646}
+
+  .card{background:var(--surface);border:1.5px solid var(--line);border-radius:24px;transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s,border-color .35s}
+  .lift:hover{transform:translateY(-4px);box-shadow:0 22px 38px -24px var(--court);border-color:color-mix(in srgb,var(--court) 45%,var(--line))}
+  .rise{opacity:0;transform:translateY(18px);animation:rise .8s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(var(--d,0) * 80ms + 100ms)}
+  @keyframes rise{to{opacity:1;transform:none}}
+  .drift{animation:drift 16s ease-in-out infinite alternate}
+  @keyframes drift{to{transform:translate(40px,-30px) scale(1.15)}}
+  .float{animation:float 6s ease-in-out infinite}
+  @keyframes float{50%{transform:translateY(-6px) rotate(4deg)}}
+
+  /* floating sidebar + mobile dock */
+  .side,.dock{background:color-mix(in srgb,var(--surface) 78%,transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1.5px solid var(--line);box-shadow:0 30px 60px -28px rgba(13,51,73,.45)}
+  .nav{position:relative}
+  .nav a{position:relative;z-index:1;display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border-radius:16px;color:var(--muted);font-weight:600;transition:color .3s,transform .3s cubic-bezier(.2,.8,.2,1)}
+  .nav a:hover{color:var(--ink);transform:translateX(4px)}
+  .nav a.active{color:var(--ink);background:color-mix(in srgb,var(--ink) 8%,transparent)}
+  .nav.ready a.active{color:var(--btn-fg);background:transparent}
+  .ind{position:absolute;left:0;right:0;top:0;border-radius:16px;background:var(--btn-bg);transition:transform .5s cubic-bezier(.65,0,.25,1),height .3s;z-index:0;box-shadow:0 10px 22px -10px var(--btn-bg)}
+  .dock{position:fixed;left:.75rem;right:.75rem;bottom:calc(.75rem + env(safe-area-inset-bottom,0px));z-index:40;border-radius:999px;display:flex;padding:.35rem}
+  .dock a{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.68rem;font-weight:600;color:var(--muted);padding:.45rem 0;border-radius:999px;transition:all .3s cubic-bezier(.34,1.56,.64,1)}
+  .dock a.active{color:var(--btn-fg);background:var(--btn-bg);transform:scale(1.05)}
+
+  .iconbtn{height:42px;min-width:42px;padding:0 .85rem;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;background:var(--surface);border:1.5px solid var(--line);color:var(--ink);font-weight:600;font-size:.9rem;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.56,.64,1),border-color .25s}
+  .iconbtn:hover{transform:translateY(-2px) scale(1.05);border-color:var(--court)}
+  .iconbtn:active{transform:scale(.92)}
+  .theme{position:relative;width:42px;padding:0;overflow:hidden}
+  .theme svg{position:absolute;transition:transform .6s cubic-bezier(.34,1.56,.64,1),opacity .35s}
+  :root[data-theme="dark"] .i-moon{transform:rotate(90deg) scale(.3);opacity:0}
+  :root:not([data-theme="dark"]) .i-sun{transform:rotate(-90deg) scale(.3);opacity:0}
+
+  .chip{padding:.45rem .95rem;border-radius:999px;font-size:.85rem;font-weight:600;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .3s cubic-bezier(.34,1.56,.64,1)}
+  .chip:hover{transform:translateY(-2px);color:var(--ink)}
+  .chip.on{background:var(--btn-bg);color:var(--btn-fg);border-color:transparent;transform:scale(1.05)}
+  .search{width:100%;background:var(--surface);color:var(--ink);border:1.5px solid var(--line);border-radius:999px;padding:.6rem 1rem .6rem 2.6rem;outline:none;transition:border-color .25s,box-shadow .25s}
+  .search:focus{border-color:var(--court);box-shadow:0 0 0 4px color-mix(in srgb,var(--court) 18%,transparent)}
+
+  .row{animation:rowIn .5s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--i) * 40ms);transition:background .25s}
+  .row:hover{background:color-mix(in srgb,var(--ink) 4%,transparent)}
+  @keyframes rowIn{from{opacity:0;transform:translateX(-16px)}}
+  .flash{animation:flash .9s}
+  @keyframes flash{0%{background:color-mix(in srgb,var(--ball) 55%,transparent)}}
+  .badge{display:inline-flex;align-items:center;gap:6px;padding:.25rem .65rem;border-radius:999px;font-size:.78rem;font-weight:600}
+  .badge i{width:7px;height:7px;border-radius:50%;background:currentColor}
+  .b-confirmed,.p-Gold{color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,transparent)}
+  .b-pending{color:var(--warn);background:color-mix(in srgb,var(--warn) 16%,transparent)}
+  .b-pending i{animation:pulse 1.4s infinite}
+  .b-cancelled{color:var(--danger);background:color-mix(in srgb,var(--danger) 13%,transparent)}
+  .p-Silver{color:var(--court);background:color-mix(in srgb,var(--court) 14%,transparent)}
+  :root[data-theme="dark"] .p-Silver{color:#8fd3f4}
+  .p-PAYG{color:var(--muted);background:color-mix(in srgb,var(--muted) 16%,transparent)}
+  @keyframes pulse{50%{transform:scale(1.7);opacity:.4}}
+  .act{border:1.5px solid var(--line);background:transparent;color:var(--ink);border-radius:10px;padding:.3rem .65rem;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .25s cubic-bezier(.34,1.56,.64,1)}
+  .act:hover{transform:scale(1.07);border-color:var(--court)}
+  .act:active{transform:scale(.93)}
+  .act.pri{background:var(--btn-bg);color:var(--btn-fg);border-color:transparent}
+
+  .bar{transform-origin:bottom;transform:scaleY(0);animation:grow .9s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(var(--i) * 90ms + 500ms);background:linear-gradient(to top,var(--court),color-mix(in srgb,var(--court) 40%,var(--ball)));transition:filter .25s}
+  .bar.today{background:var(--ball)}
+  .bar:hover{filter:brightness(1.2)}
+  @keyframes grow{to{transform:scaleY(1)}}
+  .bar-wrap .tip{opacity:0;transform:translateY(6px);transition:all .25s;pointer-events:none}
+  .bar-wrap:hover .tip{opacity:1;transform:none}
+  .ringfg{transition:stroke-dashoffset 1.3s cubic-bezier(.2,.8,.2,1)}
+
+  .slot{height:30px;border-radius:9px;animation:pop .5s cubic-bezier(.34,1.56,.64,1) backwards;animation-delay:calc(var(--i) * 10ms + 300ms);transition:transform .2s,background .4s}
+  .nofx .slot{animation:none}
+  .slot:hover{transform:scale(1.18)}
+  .slot.free{background:color-mix(in srgb,var(--ok) 16%,transparent)}
+  .slot.confirmed{background:var(--court)}
+  .slot.pending{background:repeating-linear-gradient(45deg,var(--warn),var(--warn) 5px,color-mix(in srgb,var(--warn) 60%,transparent) 5px,color-mix(in srgb,var(--warn) 60%,transparent) 10px)}
+  @keyframes pop{from{opacity:0;transform:scale(.3)}}
+  .member{animation:pop .55s cubic-bezier(.34,1.56,.64,1) backwards;animation-delay:calc(var(--i) * 60ms)}
+
+  .toast{position:fixed;left:50%;bottom:calc(6rem + env(safe-area-inset-bottom,0px));transform:translate(-50%,30px);opacity:0;background:var(--btn-bg);color:var(--btn-fg);padding:.7rem 1.1rem;border-radius:999px;font-weight:600;font-size:.9rem;transition:all .45s cubic-bezier(.34,1.56,.64,1);pointer-events:none;z-index:90;max-width:90vw;text-align:center}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  @media (min-width:1024px){.toast{bottom:2rem}}
+
+  /* tour */
+  .veil{position:fixed;inset:0;z-index:70;display:none}
+  .veil.on{display:block}
+  .spot{position:fixed;z-index:71;border-radius:22px;box-shadow:0 0 0 9999px rgba(4,12,18,.72),0 0 0 3px var(--ball);transition:left .55s cubic-bezier(.65,0,.25,1),top .55s cubic-bezier(.65,0,.25,1),width .55s cubic-bezier(.65,0,.25,1),height .55s cubic-bezier(.65,0,.25,1);pointer-events:none}
+  .pop{position:fixed;z-index:72;width:min(340px,calc(100vw - 24px));padding:1.25rem;border-radius:22px;background:var(--surface);border:1.5px solid var(--line);box-shadow:0 30px 60px -20px rgba(0,0,0,.55);transition:left .55s cubic-bezier(.65,0,.25,1),top .55s cubic-bezier(.65,0,.25,1),opacity .3s,transform .4s cubic-bezier(.34,1.56,.64,1);opacity:0;transform:scale(.92)}
+  .pop.in{opacity:1;transform:none}
+  .pop .swap{animation:swap .45s cubic-bezier(.2,.8,.2,1)}
+  @keyframes swap{from{opacity:0;transform:translateY(8px)}}
+  .dots i{display:inline-block;width:7px;height:7px;border-radius:99px;background:var(--line);margin-right:5px;transition:all .4s cubic-bezier(.34,1.56,.64,1)}
+  .dots i.on{width:22px;background:var(--accent)}
+
+  :focus-visible{outline:3px solid var(--ball);outline-offset:2px}
+  @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.rise{opacity:1;transform:none}.bar{transform:none}}
+
+  /* customer extras */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.85rem 1.5rem;border-radius:999px;border:0;background:var(--btn-bg);color:var(--btn-fg);font-weight:600;font-size:.95rem;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .3s,box-shadow .3s}
+  .btn:hover:not(:disabled){transform:translateY(-2px) scale(1.04);box-shadow:0 14px 26px -12px var(--btn-bg)}
+  .btn:active:not(:disabled){transform:scale(.95)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .chip{text-align:center}
+  .chip[disabled]{opacity:.35;text-decoration:line-through;pointer-events:none}
+  .court{text-align:left;padding:1rem;border-radius:18px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;transition:transform .35s cubic-bezier(.34,1.56,.64,1),border-color .25s,box-shadow .3s}
+  .court:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--court) 50%,var(--line))}
+  .court.on{border-color:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 20%,transparent);transform:scale(1.02)}
+  .b-completed{color:var(--muted);background:color-mix(in srgb,var(--muted) 16%,transparent)}
+  .gone{animation:gone .4s ease forwards}
+  @keyframes gone{to{opacity:0;transform:translateX(30px)}}
+
+  .num{width:28px;height:28px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--btn-bg);color:var(--btn-fg);font-size:.8rem;font-weight:700}
+  .daybtn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:.8rem .25rem;border-radius:18px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;transition:transform .35s cubic-bezier(.34,1.56,.64,1),background .25s,border-color .25s,box-shadow .3s}
+  .daybtn .wk,.daybtn .mo{font-size:.72rem;font-weight:600;color:var(--muted)}
+  .daybtn .dn{font-family:'Bricolage Grotesque','Figtree',sans-serif;font-size:1.55rem;font-weight:800;line-height:1.15}
+  .daybtn:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--court) 50%,var(--line))}
+  .daybtn.on{background:var(--btn-bg);color:var(--btn-fg);border-color:transparent;transform:scale(1.05);box-shadow:0 14px 24px -14px var(--btn-bg)}
+  .daybtn.on .wk,.daybtn.on .mo{color:inherit;opacity:.75}
+  #times .chip{width:100%;border-radius:14px;padding:.75rem .4rem}
+  .court{position:relative}
+  .chk{width:18px;height:18px;border-radius:50%;background:var(--ok);display:grid;place-items:center;transform:scale(0);transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+  .court.on .chk{transform:scale(1)}
+  .plan{padding:1.25rem;border-radius:22px;border:1.5px solid var(--line);background:var(--surface);transition:transform .35s cubic-bezier(.2,.8,.2,1),border-color .3s,box-shadow .3s}
+  .plan:hover{transform:translateY(-4px)}
+  .plan.cur{border-color:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 16%,transparent)}
+</style>
+    </head>
+    <body>
+        <div
+            class="drift fixed -top-40 -right-32 w-[34rem] h-[34rem] rounded-full pointer-events-none"
+            style="background:radial-gradient(circle,color-mix(in srgb,var(--ball) 28%,transparent),transparent 65%)"></div>
+        <div
+            class="drift fixed -bottom-48 left-1/3 w-[36rem] h-[36rem] rounded-full pointer-events-none"
+            style="background:radial-gradient(circle,color-mix(in srgb,var(--court) 22%,transparent),transparent 65%);animation-delay:-7s"></div>
+
+        <!-- Floating sidebar -->
+        <aside
+            class="side hidden lg:flex fixed left-4 top-4 bottom-4 w-60 rounded-[28px] flex-col justify-between p-5 z-30 rise"
+            style="--d:0">
+            <div>
+                <div class="flex items-center gap-3 mb-9 px-1">
+                    <div
+                        class="w-10 h-10 rounded-full grid place-items-center float"
+                        style="background:var(--ball)"><svg viewBox="0 0 24 24"
+                            class="w-6 h-6" fill="#0d3349"><circle cx="8" cy="8"
+                                r="1.6" /><circle cx="16" cy="8"
+                                r="1.6" /><circle cx="12" cy="12"
+                                r="1.6" /><circle cx="8" cy="16"
+                                r="1.6" /><circle cx="16" cy="16"
+                                r="1.6" /></svg></div>
+                    <span
+                        class="display text-2xl font-extrabold">Dinkline</span>
+                </div>
+                <nav class="nav space-y-1" data-tour="nav">
+                    <span class="ind"></span>
+                    <a href="#overview" class="active" data-nav><svg
+                            class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round"><path
+                                d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10" /></svg>Home</a>
+                    <a href="#book" data-nav><svg class="w-5 h-5"
+                            viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round"><rect
+                                x="3" y="4" width="18" height="17"
+                                rx="2" /><path
+                                d="M3 9h18M8 2v4M16 2v4M12 13v5M9.5 15.5h5" /></svg>Book
+                        a court</a>
+                    <a href="#bookings" data-nav><svg class="w-5 h-5"
+                            viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round"><path
+                                d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01" /></svg>My
+                        bookings</a>
+                    <a href="#plan" data-nav><svg class="w-5 h-5"
+                            viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round"><rect
+                                x="2.5" y="5" width="19" height="14"
+                                rx="2.5" /><path
+                                d="M2.5 10h19M6 15h4" /></svg>Membership</a>
+                </nav>
+            </div>
+            <div>
+                <div class="flex items-center gap-3 p-3 rounded-2xl mb-3"
+                    style="background:color-mix(in srgb,var(--ink) 5%,transparent)">
+                    <div
+                        class="w-10 h-10 rounded-full grid place-items-center font-bold"
+                        style="background:var(--btn-bg);color:var(--btn-fg)">C</div>
+                    <div class="min-w-0"><p
+                            class="font-semibold leading-tight">Customer</p><p
+                            class="text-xs truncate muted">user@email.com</p></div>
+                </div>
+                <a href="../auth.html"
+                    class="act block text-center w-full py-2.5">Sign out</a>
+            </div>
+        </aside>
+
+        <main
+            class="relative lg:pl-[17.5rem] px-5 sm:px-8 lg:pr-10 pt-6 pb-32 lg:pb-12">
+            <div class="max-w-6xl mx-auto">
+                <!-- Top bar -->
+                <div class="rise flex items-center justify-between mb-6"
+                    style="--d:0">
+                    <div class="lg:hidden flex items-center gap-3">
+                        <div
+                            class="w-9 h-9 rounded-full grid place-items-center float"
+                            style="background:var(--ball)"><svg
+                                viewBox="0 0 24 24" class="w-5 h-5"
+                                fill="#0d3349"><circle cx="8" cy="8"
+                                    r="1.6" /><circle cx="16" cy="8"
+                                    r="1.6" /><circle cx="12" cy="12"
+                                    r="1.6" /><circle cx="8" cy="16"
+                                    r="1.6" /><circle cx="16" cy="16"
+                                    r="1.6" /></svg></div>
+                        <span
+                            class="display text-xl font-extrabold">Dinkline</span>
+                    </div>
+                    <p id="date"
+                        class="hidden lg:block text-sm font-medium muted"></p>
+                    <div class="flex items-center gap-2">
+                        <a href="../auth.html" class="iconbtn lg:hidden"
+                            aria-label="Sign out"><svg class="w-5 h-5"
+                                viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"><path
+                                    d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" /></svg></a>
+                        <button id="tourBtn" class="iconbtn"
+                            aria-label="Take the tour"><svg class="w-5 h-5"
+                                viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"><circle cx="12" cy="12"
+                                    r="9" /><path
+                                    d="M9.5 9.5a2.5 2.5 0 114 2c-.9.6-1.5 1.1-1.5 2.2M12 17h.01" /></svg><span
+                                class="hidden sm:inline">Take the
+                                tour</span></button>
+                        <button id="themeBtn" class="iconbtn theme"
+                            data-tour="theme"
+                            aria-label="Switch light or dark mode">
+                            <svg class="i-sun w-5 h-5" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round"><circle
+                                    cx="12" cy="12" r="4" /><path
+                                    d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
+                            <svg class="i-moon w-5 h-5" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round"><path
+                                    d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z" /></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Home -->
+                <section id="overview">
+                    <div data-tour="hero"
+                        class="relative overflow-hidden rounded-[28px] p-6 sm:p-9 text-white rise"
+                        style="--d:1;background:linear-gradient(135deg,var(--court),var(--court-deep))">
+                        <svg
+                            class="absolute right-0 top-0 h-full w-1/2 hidden sm:block opacity-90"
+                            viewBox="0 0 300 200"
+                            preserveAspectRatio="xMaxYMid slice"
+                            aria-hidden="true">
+                            <g fill="none" stroke="#fff" stroke-opacity=".28"
+                                stroke-width="2"><rect x="40" y="20" width="240"
+                                    height="160" rx="4" /><path
+                                    d="M40 100h240M40 60h240M40 140h240M160 20v40M160 140v40" /></g>
+                            <ellipse cx="160" cy="150" rx="12" ry="4"
+                                fill="#000" opacity=".25" />
+                            <g
+                                style="animation:hop 1.6s cubic-bezier(.45,0,.55,1) infinite"><circle
+                                    cx="160" cy="120" r="11"
+                                    fill="#e4f04a" /></g>
+                        </svg>
+                        <style>@keyframes hop{50%{transform:translateY(-70px)}}</style>
+                        <div class="relative max-w-md">
+                            <h1 id="hello"
+                                class="display text-3xl sm:text-4xl font-extrabold">Hello</h1>
+                            <p id="heroLine" class="mt-2 text-white/80"></p>
+                            <button id="bookBtn"
+                                class="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold transition hover:scale-105 active:scale-95"
+                                style="background:var(--ball);color:#0d3349">Book
+                                a court</button>
+                        </div>
+                    </div>
+                    <div data-tour="stats"
+                        class="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 mt-4">
+                        <div class="card lift p-4 sm:p-5 rise"
+                            style="--d:3"><div
+                                class="flex justify-between items-start"><span
+                                    class="w-9 h-9 rounded-xl grid place-items-center"
+                                    style="background:color-mix(in srgb,var(--court) 16%,transparent);color:var(--accent)"><svg
+                                        class="w-5 h-5" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round"><path
+                                            d="M12 3a9 9 0 100 18 9 9 0 000-18zM3.5 9.5c4 .5 7-1 8.5-6M20.5 14.5c-4-.5-7 1-8.5 6" /></svg></span><span
+                                    class="text-xs font-semibold muted">all
+                                    time</span></div><p
+                                class="text-sm mt-3 muted">Games played</p><p
+                                id="s-games"
+                                class="display text-3xl sm:text-4xl font-extrabold">0</p></div>
+                        <div class="card lift p-4 sm:p-5 rise"
+                            style="--d:4"><div
+                                class="flex justify-between items-start"><span
+                                    class="w-9 h-9 rounded-xl grid place-items-center"
+                                    style="background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)"><svg
+                                        class="w-5 h-5" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round"><circle cx="12"
+                                            cy="12" r="9" /><path
+                                            d="M12 7v5l3 2" /></svg></span><span
+                                    class="text-xs font-semibold muted">of 12
+                                    included</span></div><p
+                                class="text-sm mt-3 muted">Hours this
+                                month</p><p id="s-hours"
+                                class="display text-3xl sm:text-4xl font-extrabold">0</p></div>
+                        <div class="card lift p-4 sm:p-5 rise"
+                            style="--d:5"><div
+                                class="flex justify-between items-start"><span
+                                    class="w-9 h-9 rounded-xl grid place-items-center"
+                                    style="background:color-mix(in srgb,var(--warn) 16%,transparent);color:var(--warn)"><svg
+                                        class="w-5 h-5" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round"><rect x="3"
+                                            y="4" width="18" height="17"
+                                            rx="2" /><path
+                                            d="M3 9h18M8 2v4M16 2v4" /></svg></span><span
+                                    class="text-xs font-semibold muted">booked</span></div><p
+                                class="text-sm mt-3 muted">Upcoming games</p><p
+                                id="s-up"
+                                class="display text-3xl sm:text-4xl font-extrabold">0</p></div>
+                        <div class="card lift p-4 sm:p-5 rise"
+                            style="--d:6"><div
+                                class="flex justify-between items-start"><span
+                                    class="w-9 h-9 rounded-xl grid place-items-center"
+                                    style="background:color-mix(in srgb,var(--danger) 16%,transparent);color:var(--danger)"><svg
+                                        class="w-5 h-5" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round"><path
+                                            d="M12 3v18M16 7.5c0-1.7-1.8-3-4-3s-4 1.3-4 3 1.8 2.8 4 3 4 1.3 4 3-1.8 3-4 3-4-1.3-4-3" /></svg></span><span
+                                    class="text-xs font-semibold muted">Gold
+                                    rates</span></div><p
+                                class="text-sm mt-3 muted">Spent this
+                                month</p><p id="s-spent"
+                                class="display text-3xl sm:text-4xl font-extrabold">0</p></div>
+                    </div>
+                </section>
+
+                <!-- Book -->
+                <section id="book" class="mt-12">
+                    <h2 class="display text-2xl font-extrabold mb-4">Book a
+                        court</h2>
+                    <div data-tour="book" class="card p-5 sm:p-8 space-y-8">
+                        <div>
+                            <div class="flex items-center gap-3 mb-4"><span
+                                    class="num">1</span><div><h3
+                                        class="font-semibold leading-tight">Pick
+                                        a day</h3><p class="text-xs muted">Book
+                                        up to 7 days ahead</p></div></div>
+                            <div id="days"
+                                class="grid grid-cols-4 sm:grid-cols-7 gap-2.5 sm:gap-3"></div>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-3 mb-4"><span
+                                    class="num">2</span><div><h3
+                                        class="font-semibold leading-tight">Choose
+                                        your courts</h3><p
+                                        class="text-xs muted">Select as many as
+                                        you like</p></div></div>
+                            <div id="courts"
+                                class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4"></div>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-3 mb-4"><span
+                                    class="num">3</span><div><h3
+                                        class="font-semibold leading-tight">Select
+                                        your times</h3><p
+                                        class="text-xs muted">Every time you
+                                        pick is booked on every court you
+                                        chose</p></div></div>
+                            <div id="times"
+                                class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2.5"></div>
+                        </div>
+                        <div
+                            class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl"
+                            style="background:color-mix(in srgb,var(--ball) 16%,transparent)">
+                            <p id="summary" class="text-sm"></p>
+                            <button id="confirm" class="btn shrink-0"
+                                disabled>Confirm booking</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- My bookings -->
+                <section id="bookings" class="mt-12">
+                    <h2 class="display text-2xl font-extrabold mb-4">My
+                        bookings</h2>
+                    <div id="tabs" class="flex gap-2 mb-3"><button
+                            class="chip on"
+                            data-tab="upcoming">Upcoming</button><button
+                            class="chip" data-tab="past">Past</button><button
+                            class="chip"
+                            data-tab="cancelled">Cancelled</button></div>
+                    <div data-tour="mine" class="card overflow-hidden"><div
+                            id="mineList"></div></div>
+                </section>
+
+                <!-- Membership -->
+                <section id="plan" class="mt-12">
+                    <h2
+                        class="display text-2xl font-extrabold mb-4">Membership</h2>
+                    <div data-tour="plan" class="grid lg:grid-cols-3 gap-4">
+                        <div
+                            class="lg:col-span-2 relative overflow-hidden rounded-[28px] p-5 sm:p-8 text-white"
+                            style="background:linear-gradient(135deg,#1f9d6b,#0d3349)">
+                            <div
+                                class="absolute -right-12 -top-12 w-52 h-52 rounded-full pointer-events-none"
+                                style="background:rgba(228,240,74,.18)"></div>
+                            <div class="relative">
+                                <div
+                                    class="flex flex-wrap items-start justify-between gap-3">
+                                    <div><p class="text-sm text-white/70">Your
+                                            plan</p><h3
+                                            class="display text-2xl sm:text-3xl font-extrabold">Gold
+                                            membership</h3><p
+                                            class="text-sm text-white/70 mt-1">10%
+                                            off every booking</p></div>
+                                    <span
+                                        class="px-3 py-1 rounded-full text-xs font-bold"
+                                        style="background:var(--ball);color:#0d3349">Active</span>
+                                </div>
+                                <div
+                                    class="mt-8 flex items-baseline justify-between gap-3"><p
+                                        class="text-sm text-white/70">Court
+                                        hours this month</p><p id="useTxt"
+                                        class="text-sm font-semibold text-right"></p></div>
+                                <div
+                                    class="h-3 rounded-full mt-2 overflow-hidden"
+                                    style="background:rgba(255,255,255,.2)"><i
+                                        id="useBar"
+                                        class="block h-full rounded-full"
+                                        style="width:0;background:var(--ball);transition:width 1.2s cubic-bezier(.2,.8,.2,1)"></i></div>
+                                <div
+                                    class="grid grid-cols-3 gap-2 sm:gap-3 mt-6"><div
+                                        class="rounded-2xl p-3 sm:p-4"
+                                        style="background:rgba(255,255,255,.12)"><p
+                                            class="text-[.7rem] sm:text-xs text-white/60">Member
+                                            since</p><p id="since"
+                                            class="font-semibold text-sm sm:text-base mt-0.5"></p></div><div
+                                        class="rounded-2xl p-3 sm:p-4"
+                                        style="background:rgba(255,255,255,.12)"><p
+                                            class="text-[.7rem] sm:text-xs text-white/60">Next
+                                            billing</p><p id="billing"
+                                            class="font-semibold text-sm sm:text-base mt-0.5"></p></div><div
+                                        class="rounded-2xl p-3 sm:p-4"
+                                        style="background:rgba(255,255,255,.12)"><p
+                                            class="text-[.7rem] sm:text-xs text-white/60">Guest
+                                            passes</p><p id="guests"
+                                            class="font-semibold text-sm sm:text-base mt-0.5"></p></div></div>
+                            </div>
+                        </div>
+                        <div class="card p-5 sm:p-6"><h3
+                                class="display text-xl font-extrabold mb-4">Gold
+                                perks</h3>
+                            <ul id="perks"
+                                class="grid sm:grid-cols-2 lg:grid-cols-1 gap-3 text-sm"></ul></div>
+                    </div>
+                    <h3 class="display text-xl font-extrabold mt-8 mb-4">Compare
+                        plans</h3>
+                    <div id="plans"
+                        class="grid sm:grid-cols-3 gap-3 sm:gap-4"></div>
+                </section>
+            </div>
+        </main>
+        <nav class="dock lg:hidden" data-tour="nav">
+            <a href="#overview" class="active" data-nav><svg class="w-5 h-5"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round"><path
+                        d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10" /></svg>Home</a>
+            <a href="#book" data-nav><svg class="w-5 h-5" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round"><rect x="3"
+                        y="4" width="18" height="17" rx="2" /><path
+                        d="M3 9h18M8 2v4M16 2v4M12 13v5M9.5 15.5h5" /></svg>Book</a>
+            <a href="#bookings" data-nav><svg class="w-5 h-5"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round"><path
+                        d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01" /></svg>Games</a>
+            <a href="#plan" data-nav><svg class="w-5 h-5" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round"><rect x="2.5"
+                        y="5" width="19" height="14" rx="2.5" /><path
+                        d="M2.5 10h19M6 15h4" /></svg>Plan</a>
+        </nav>
+
+        <!-- Tour -->
+        <div id="veil" class="veil"></div>
+        <div id="spot" class="spot" style="display:none"></div>
+        <div id="pop" class="pop" role="dialog" aria-live="polite"
+            style="display:none">
+            <p id="tCount" class="text-xs font-semibold muted"></p>
+            <div id="tBody" class="mt-1"><h3 id="tTitle"
+                    class="display text-xl font-extrabold"></h3><p id="tText"
+                    class="mt-1.5 text-[.93rem] leading-relaxed muted"></p></div>
+            <div class="flex items-center justify-between mt-5">
+                <div id="dots" class="dots"></div>
+                <div class="flex gap-2"><button id="tSkip"
+                        class="act">Skip</button><button id="tBack"
+                        class="act">Back</button><button id="tNext"
+                        class="act pri">Next</button></div>
+            </div>
+        </div>
+        <div id="toast" class="toast" role="status"></div>
+
+        <!-- Dummy data (injected). Replace with real API data later. -->
+        <script id="dummy-data">
+window.DINKLINE = {
+  profile: { name: 'Customer', email: 'user@email.com', plan: 'Gold', since: 'Jan 2025', games: 48, hoursBase: 6, hoursIncluded: 12, spentBase: 132, discount: 0.1, guestPasses: 2, nextBilling: 'Dec 1' },
+  courts: [
+    { id: 1, name: 'Court 1', type: 'Indoor', surface: 'Cushioned', rate: 24 },
+    { id: 2, name: 'Court 2', type: 'Indoor', surface: 'Cushioned', rate: 24 },
+    { id: 3, name: 'Court 3', type: 'Indoor', surface: 'Hard court', rate: 22 },
+    { id: 4, name: 'Court 4', type: 'Outdoor', surface: 'Hard court', rate: 16 },
+    { id: 5, name: 'Court 5', type: 'Outdoor', surface: 'Hard court', rate: 16 },
+    { id: 6, name: 'Court 6', type: 'Outdoor', surface: 'Clay', rate: 18 }
+  ],
+  hours: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+  plans: [
+    { name: 'Pay as you go', price: '$0', features: ['Standard court rates', 'Book up to 3 days ahead'] },
+    { name: 'Silver', price: '$19', features: ['5% off every court', 'Book up to 5 days ahead', '1 guest pass a month'] },
+    { name: 'Gold', price: '$39', features: ['10% off every court', 'Book up to 7 days ahead', '2 guest passes a month'] }
+  ],
+  fmt: h => (h > 12 ? h - 12 : h) + ':00 ' + (h >= 12 ? 'PM' : 'AM'),
+  // day: offset from today (negative = past)
+  myBookings: [
+    { id: 'BK-3001', day: 0, hour: 17, courtId: 2, status: 'confirmed' },
+    { id: 'BK-3002', day: 1, hour: 8, courtId: 1, status: 'confirmed' },
+    { id: 'BK-3003', day: 3, hour: 18, courtId: 4, status: 'pending' },
+    { id: 'BK-3004', day: 5, hour: 10, courtId: 3, status: 'cancelled' },
+    { id: 'BK-2990', day: -2, hour: 18, courtId: 2, status: 'completed' },
+    { id: 'BK-2981', day: -3, hour: 12, courtId: 4, status: 'cancelled' },
+    { id: 'BK-2975', day: -4, hour: 8, courtId: 1, status: 'completed' },
+    { id: 'BK-2962', day: -6, hour: 17, courtId: 2, status: 'completed' },
+    { id: 'BK-2950', day: -9, hour: 19, courtId: 3, status: 'completed' },
+    { id: 'BK-2941', day: -11, hour: 9, courtId: 1, status: 'completed' },
+    { id: 'BK-2930', day: -14, hour: 18, courtId: 2, status: 'completed' },
+    { id: 'BK-2917', day: -17, hour: 10, courtId: 5, status: 'completed' }
+  ]
+};
+</script>
+        <script>
+(() => {
+  'use strict';
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const D = window.DINKLINE, P = D.profile, root = document.documentElement;
+  const mine = D.myBookings;
+  const store = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
+  const toast = msg => { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2600); };
+
+  // ---------- Theme (spreads from the button) ----------
+  function setTheme(next, x, y) {
+    const apply = () => { root.dataset.theme = next; store.set('dinkline-theme', next); };
+    if (!document.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) return apply();
+    const r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+    document.startViewTransition(apply).ready.then(() => root.animate(
+      { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${r}px at ${x}px ${y}px)`] },
+      { duration: 750, easing: 'cubic-bezier(.65,0,.25,1)', pseudoElement: '::view-transition-new(root)' }
+    ));
+  }
+  $('#themeBtn').addEventListener('click', e => {
+    const b = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX || b.left + b.width / 2, y = e.clientY || b.top + b.height / 2;
+    setTheme(root.dataset.theme === 'dark' ? 'light' : 'dark', x, y);
+  });
+
+  
+
+  // ---------- Helpers ----------
+  const label = { confirmed: 'Confirmed', pending: 'Pending', cancelled: 'Cancelled', completed: 'Completed' };
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const dateOf = d => { const x = new Date(today); x.setDate(x.getDate() + d); return x; };
+  const fmtDate = (d, o) => dateOf(d).toLocaleDateString(undefined, o);
+  const dayName = d => d === 0 ? 'Today' : d === 1 ? 'Tomorrow' : fmtDate(d, { weekday: 'long' });
+  const court = id => D.courts.find(c => c.id === id);
+  const price = c => Math.round(c.rate * (1 - P.discount));
+  const isLive = b => b.status === 'confirmed' || b.status === 'pending';
+  const upcoming = () => mine.filter(b => b.day >= 0 && isLive(b)).sort((a, b) => a.day - b.day || a.hour - b.hour);
+  const taken = (day, cid, h) => mine.some(b => isLive(b) && b.day === day && b.courtId === cid && b.hour === h) || ((day * 7 + cid * 5 + h * 3 + cid * h) % 10) < 4;
+  const sel = { day: 0, courts: new Set(), hours: new Set() };
+  let tab = 'upcoming', seq = 3100;
+
+  // ---------- Greeting ----------
+  const hr = new Date().getHours();
+  $('#hello').textContent = `Good ${hr < 12 ? 'morning' : hr < 18 ? 'afternoon' : 'evening'}, ${P.name}`;
+  $('#date').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+  $('#since').textContent = P.since; $('#billing').textContent = P.nextBilling; $('#guests').textContent = P.guestPasses + ' left';
+  $('#perks').innerHTML = ['10% off every court booking', 'Book up to 7 days ahead', 'Free cancellation up to 2 hours before', 'Two guest passes each month']
+    .map(t => `<li class="flex gap-3 items-start"><span class="w-5 h-5 mt-0.5 rounded-full grid place-items-center shrink-0" style="background:var(--ok)"><svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span>${t}</li>`).join('');
+
+  // ---------- Stats ----------
+  const shown = new Map();
+  function count(el, to, fmt = v => v) {
+    const from = shown.get(el) ?? 0, t0 = performance.now(); shown.set(el, to);
+    const tick = now => { const p = Math.min((now - t0) / 900, 1), e = 1 - Math.pow(1 - p, 3); el.textContent = fmt(Math.round(from + (to - from) * e)); if (p < 1) requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+  }
+  function stats() {
+    const up = upcoming(), used = P.hoursBase + up.length;
+    count($('#s-games'), P.games); count($('#s-hours'), used); count($('#s-up'), up.length);
+    count($('#s-spent'), P.spentBase + up.reduce((a, b) => a + price(court(b.courtId)), 0), v => '$' + v);
+    $('#useBar').style.width = Math.min(used / P.hoursIncluded, 1) * 100 + '%';
+    $('#useTxt').textContent = `${used} of ${P.hoursIncluded} hours used`;
+    const n = up[0];
+    $('#heroLine').textContent = n ? `Your next game is ${court(n.courtId).name} ${dayName(n.day).toLowerCase()} at ${D.fmt(n.hour)}.` : 'No games booked yet. Pick a court and a time below.';
+  }
+
+  // ---------- Booking flow (many courts x many times) ----------
+  const check = '<svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>';
+  const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+  const openHour = h => [...sel.courts].some(cid => !taken(sel.day, cid, h));
+  const prune = () => [...sel.hours].forEach(h => { if (!openHour(h)) sel.hours.delete(h); });
+  function combos() {
+    const out = [];
+    [...sel.courts].sort((a, b) => a - b).forEach(cid => [...sel.hours].sort((a, b) => a - b).forEach(h => { if (!taken(sel.day, cid, h)) out.push({ courtId: cid, hour: h }); }));
+    return out;
+  }
+  function renderDays() {
+    $('#days').innerHTML = [0, 1, 2, 3, 4, 5, 6].map(d => `<button class="daybtn ${sel.day === d ? 'on' : ''}" data-day="${d}" aria-pressed="${sel.day === d}"><span class="wk">${d === 0 ? 'Today' : fmtDate(d, { weekday: 'short' })}</span><span class="dn">${dateOf(d).getDate()}</span><span class="mo">${fmtDate(d, { month: 'short' })}</span></button>`).join('');
+  }
+  function renderCourts() {
+    $('#courts').innerHTML = D.courts.map(c => { const on = sel.courts.has(c.id); return `<button class="court ${on ? 'on' : ''}" data-court="${c.id}" aria-pressed="${on}">
+      <div class="flex justify-between items-center gap-2"><span class="font-semibold flex items-center gap-2">${c.name}<span class="chk">${check}</span></span><span class="badge ${c.type === 'Indoor' ? 'p-Silver' : 'p-Gold'}">${c.type}</span></div>
+      <p class="text-xs muted mt-1">${c.surface} surface</p>
+      <p class="mt-3"><span class="display text-xl font-extrabold">$${price(c)}</span><span class="text-xs muted"> per hour</span><s class="text-xs muted ml-2">$${c.rate}</s></p></button>`; }).join('');
+  }
+  function renderTimes() {
+    $('#times').innerHTML = !sel.courts.size ? '<p class="text-sm muted col-span-full">Choose at least one court to see open times.</p>'
+      : D.hours.map(h => `<button class="chip ${sel.hours.has(h) ? 'on' : ''}" data-hour="${h}" aria-pressed="${sel.hours.has(h)}" ${openHour(h) ? '' : 'disabled'}>${D.fmt(h)}</button>`).join('');
+  }
+  function renderSummary() {
+    const list = combos(), total = list.reduce((a, x) => a + price(court(x.courtId)), 0);
+    const skipped = sel.courts.size * sel.hours.size - list.length;
+    $('#summary').innerHTML = list.length
+      ? `<span class="font-semibold">${plural(list.length, 'booking')}</span> for ${dayName(sel.day).toLowerCase()} on ${plural(sel.courts.size, 'court')}. Total <span class="font-semibold">$${total}</span>.${skipped ? `<span class="block muted">${plural(skipped, 'slot')} already taken will be skipped.</span>` : ''}`
+      : '<span class="muted">Select a day, at least one court and at least one time.</span>';
+    const btn = $('#confirm'); btn.disabled = !list.length; btn.textContent = list.length ? `Confirm ${plural(list.length, 'booking')}` : 'Confirm booking';
+  }
+  const refreshFlow = () => { prune(); renderDays(); renderCourts(); renderTimes(); renderSummary(); };
+  const toggle = (set, v) => set.has(v) ? set.delete(v) : set.add(v);
+  $('#days').addEventListener('click', e => { const b = e.target.closest('[data-day]'); if (!b) return; sel.day = +b.dataset.day; refreshFlow(); });
+  $('#courts').addEventListener('click', e => { const b = e.target.closest('[data-court]'); if (!b) return; toggle(sel.courts, +b.dataset.court); refreshFlow(); });
+  $('#times').addEventListener('click', e => { const b = e.target.closest('[data-hour]'); if (!b) return; toggle(sel.hours, +b.dataset.hour); renderTimes(); renderSummary(); });
+  $('#confirm').addEventListener('click', () => {
+    const list = combos(); if (!list.length) return;
+    const ids = new Set();
+    list.forEach(x => { const b = { id: 'BK-' + (++seq), day: sel.day, hour: x.hour, courtId: x.courtId, status: 'confirmed' }; mine.push(b); ids.add(b.id); });
+    toast(`Booked ${plural(list.length, 'slot')} for ${dayName(sel.day).toLowerCase()}`);
+    sel.hours.clear(); tab = 'upcoming'; syncTabs(); refreshFlow(); renderMine(ids); stats();
+  });
+  $('#bookBtn').addEventListener('click', () => $('#book').scrollIntoView({ behavior: 'smooth' }));
+
+  // ---------- Plans ----------
+  $('#plans').innerHTML = D.plans.map(p => { const cur = p.name === P.plan || (p.name === 'Pay as you go' && P.plan === 'PAYG');
+    return `<div class="plan ${cur ? 'cur' : ''} flex flex-col">
+      <div class="flex items-center justify-between gap-2"><h4 class="font-semibold">${p.name}</h4>${cur ? '<span class="badge p-Gold">Current plan</span>' : ''}</div>
+      <p class="mt-3"><span class="display text-3xl font-extrabold">${p.price}</span><span class="text-sm muted"> per month</span></p>
+      <ul class="mt-4 space-y-2 text-sm muted flex-1">${p.features.map(f => `<li class="flex gap-2 items-start"><span class="w-4 h-4 mt-0.5 rounded-full grid place-items-center shrink-0" style="background:var(--ok)">${check.replace('w-3 h-3', 'w-2.5 h-2.5')}</span>${f}</li>`).join('')}</ul>
+      <button class="act mt-5 w-full py-2.5 ${cur ? '' : 'pri'}" data-plan="${p.name}" ${cur ? 'disabled style="opacity:.5;cursor:default"' : ''}>${cur ? 'You are on this plan' : 'Switch plan'}</button></div>`; }).join('');
+  $('#plans').addEventListener('click', e => { const b = e.target.closest('[data-plan]'); if (b && !b.disabled) toast('Plan changes are turned off in this demo'); });
+
+  // ---------- My bookings ----------
+  const syncTabs = () => $$('#tabs .chip').forEach(c => c.classList.toggle('on', c.dataset.tab === tab));
+  function renderMine(flash) {
+    const list = tab === 'upcoming' ? upcoming()
+      : tab === 'past' ? mine.filter(b => b.status === 'completed').sort((a, b) => b.day - a.day)
+      : mine.filter(b => b.status === 'cancelled').sort((a, b) => a.day - b.day);
+    $('#mineList').innerHTML = list.length ? list.map((b, i) => {
+      const c = court(b.courtId);
+      return `<div class="row flex items-center gap-4 p-4 ${flash && flash.has(b.id) ? 'flash' : ''}" data-row="${b.id}" style="--i:${i};border-bottom:1px solid var(--line)">
+        <div class="w-14 shrink-0 text-center rounded-2xl py-2" style="background:color-mix(in srgb,var(--court) 12%,transparent)"><p class="text-xs font-semibold muted">${fmtDate(b.day, { weekday: 'short' })}</p><p class="display text-xl font-extrabold leading-none">${dateOf(b.day).getDate()}</p><p class="text-[.68rem] muted">${fmtDate(b.day, { month: 'short' })}</p></div>
+        <div class="min-w-0 flex-1"><p class="font-semibold">${c.name}, ${D.fmt(b.hour)}</p><p class="text-xs muted">${c.type}, ${c.surface.toLowerCase()} · $${price(c)} · ${b.id}</p></div>
+        <span class="badge b-${b.status} hidden sm:inline-flex"><i></i>${label[b.status]}</span>
+        ${tab === 'upcoming' ? `<button class="act" data-cancel="${b.id}">Cancel</button>` : ''}</div>`;
+    }).join('') : `<p class="p-8 text-center muted">${tab === 'upcoming' ? 'No upcoming games. Book your next court above.' : tab === 'past' ? 'No past games yet.' : 'No cancelled bookings.'}</p>`;
+  }
+  $('#tabs').addEventListener('click', e => { const c = e.target.closest('[data-tab]'); if (!c) return; tab = c.dataset.tab; syncTabs(); renderMine(); });
+  $('#mineList').addEventListener('click', e => {
+    const btn = e.target.closest('[data-cancel]'); if (!btn) return;
+    const b = mine.find(x => x.id === btn.dataset.cancel), row = btn.closest('[data-row]');
+    row.classList.add('gone');
+    setTimeout(() => { b.status = 'cancelled'; renderMine(); renderTimes(); stats(); toast(`Cancelled ${court(b.courtId).name}, ${dayName(b.day).toLowerCase()} at ${D.fmt(b.hour)}`); }, 380);
+  });
+
+  // ---------- Nav indicator + scroll spy ----------
+  const links = $$('[data-nav]');
+  function moveInd() {
+    const a = $('.side [data-nav].active'), ind = $('.ind');
+    if (!a || !a.offsetHeight) return;
+    ind.style.transform = `translateY(${a.offsetTop}px)`; ind.style.height = a.offsetHeight + 'px';
+    $('.side .nav').classList.add('ready');
+  }
+  function setActive(id) { links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + id)); moveInd(); }
+  links.forEach(l => l.addEventListener('click', () => setActive(l.getAttribute('href').slice(1))));
+  const spy = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) setActive(en.target.id); }), { rootMargin: '-40% 0px -55% 0px' });
+  $$('main section').forEach(sec => spy.observe(sec));
+  addEventListener('resize', moveInd);
+
+  
+  // ---------- Tour ----------
+  const steps = [
+    { title: 'Welcome to Dinkline', text: 'Take a quick look at how to book a court and manage your games. You can leave at any time.' },
+    { t: 'nav', title: 'Find your way', text: 'Home, Book, My bookings and Membership are always one tap away.' },
+    { t: 'stats', title: 'Your game at a glance', text: 'Games played, hours, upcoming bookings and spending update when you book or cancel.' },
+    { t: 'book', title: 'Book in three steps', text: 'Pick a day, choose one or more courts and select as many times as you like. Gold members get 10% off every court.' },
+    { t: 'mine', title: 'Your bookings', text: 'See upcoming games, past games and cancellations. Cancel an upcoming booking in one click.' },
+    { t: 'plan', title: 'Your membership', text: 'Track your monthly court hours and see your Gold perks.' },
+    { t: 'theme', title: 'Light or dark', text: 'Switch the theme here. It spreads across the whole dashboard and is remembered next time.' }
+  ];
+  let i = 0, moving = false, open = false;
+  const spot = $('#spot'), pop = $('#pop'), veil = $('#veil');
+  const find = k => $$(`[data-tour="${k}"]`).find(e => e.getBoundingClientRect().width > 0);
+  function place() {
+    const s = steps[i], el = s.t && find(s.t), vw = innerWidth, vh = innerHeight, pw = pop.offsetWidth, ph = pop.offsetHeight;
+    let left, top;
+    if (!el) { Object.assign(spot.style, { left: vw / 2 + 'px', top: vh / 2 + 'px', width: '0px', height: '0px' }); left = (vw - pw) / 2; top = (vh - ph) / 2; }
+    else {
+      const r = el.getBoundingClientRect(), p = 10;
+      Object.assign(spot.style, { left: r.left - p + 'px', top: r.top - p + 'px', width: r.width + 2 * p + 'px', height: r.height + 2 * p + 'px' });
+      left = Math.min(Math.max(12, r.left + r.width / 2 - pw / 2), vw - pw - 12);
+      if (vw >= 1024 && r.width < 300 && r.right + pw + 40 < vw && r.left < 300) { left = r.right + p + 16; top = Math.min(Math.max(12, r.top), vh - ph - 12); }
+      else if (r.bottom + p + 16 + ph < vh - 12) top = r.bottom + p + 16;
+      else if (r.top - p - 16 - ph > 12) top = r.top - p - 16 - ph;
+      else top = Math.max(12, vh - ph - 12);
+    }
+    pop.style.left = left + 'px'; pop.style.top = top + 'px';
+  }
+  function show(swap = true) {
+    const s = steps[i];
+    $('#tCount').textContent = `Step ${i + 1} of ${steps.length}`;
+    $('#tTitle').textContent = s.title; $('#tText').textContent = s.text;
+    $('#dots').innerHTML = steps.map((_, k) => `<i class="${k === i ? 'on' : ''}"></i>`).join('');
+    $('#tBack').style.visibility = i === 0 ? 'hidden' : 'visible';
+    $('#tNext').textContent = i === steps.length - 1 ? 'Finish' : 'Next';
+    if (swap) { const b = $('#tBody'); b.classList.remove('swap'); void b.offsetWidth; b.classList.add('swap'); }
+    spot.style.transition = '';
+    const el = s.t && find(s.t);
+    moving = true;
+    if (el) { const h = el.getBoundingClientRect().height; el.scrollIntoView({ block: h > innerHeight * .7 ? 'start' : 'center', behavior: 'smooth' }); }
+    setTimeout(() => { place(); moving = false; }, el ? 500 : 0);
+  }
+  function start() { i = 0; open = true; veil.classList.add('on'); spot.style.display = 'block'; pop.style.display = 'block'; show(false); requestAnimationFrame(() => pop.classList.add('in')); }
+  function end(done = true) {
+    open = false; pop.classList.remove('in'); store.set('dinkline-tour-customer', '1');
+    setTimeout(() => { veil.classList.remove('on'); spot.style.display = pop.style.display = 'none'; }, 300);
+    scrollTo({ top: 0, behavior: 'smooth' });
+    if (done) toast('Tour complete. Enjoy Dinkline!');
+  }
+  $('#tNext').addEventListener('click', () => i < steps.length - 1 ? (i++, show()) : end());
+  $('#tBack').addEventListener('click', () => { if (i > 0) { i--; show(); } });
+  $('#tSkip').addEventListener('click', () => end(false));
+  $('#tourBtn').addEventListener('click', start);
+  addEventListener('keydown', e => { if (!open) return; if (e.key === 'Escape') end(false); if (e.key === 'ArrowRight') $('#tNext').click(); if (e.key === 'ArrowLeft') $('#tBack').click(); });
+  const follow = () => { if (open && !moving) { spot.style.transition = 'none'; place(); } };
+  addEventListener('scroll', follow, { passive: true }); addEventListener('resize', follow);
+
+  
+
+  // ---------- Init ----------
+  refreshFlow(); renderMine(); setTimeout(() => { stats(); moveInd(); }, 500);
+  if (!store.get('dinkline-tour-customer')) setTimeout(start, 1800);
+})();
+</script>
+        <script>
+(() => {
+  // Fade the page out before following a link to another page
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[href]');
+    if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
+    const href = a.getAttribute('href');
+    if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:')) return;
+    if ((a.target && a.target !== '_self') || a.hasAttribute('download')) return;
+    e.preventDefault();
+    document.body.classList.add('page-out');
+    setTimeout(() => { window.location.href = a.href; }, reduceMotion ? 0 : 400);
+  });
+  // Restore the page if it is shown again from the back/forward cache
+  addEventListener('pageshow', e => { if (e.persisted) document.body.classList.remove('page-out'); });
+})();
+</script>
+    </body>
+</html>
