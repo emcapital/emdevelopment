@@ -94,6 +94,28 @@
     .logo-img { height: 44px; width: auto; display: block; }
     @media (min-width: 640px) { .logo-img { height: 52px; } }
     .dark .logo-img { filter: invert(1) sepia(.25) brightness(.95); }
+    /* ───────── Pop-up event announcement ───────── */
+    #popup-event { position: fixed; inset: 0; z-index: 90; display: none; align-items: center; justify-content: center; padding: 20px; }
+    #popup-event.open { display: flex; }
+    #popup-event .pe-backdrop { position: absolute; inset: 0; background: rgba(24,15,10,.6); backdrop-filter: blur(4px); animation: peFade .35s ease both; }
+    #popup-event .pe-panel { position: relative; width: 100%; max-width: 640px; border-radius: 28px; overflow: hidden; background: rgb(var(--milk)); color: rgb(var(--ink)); box-shadow: 0 30px 80px rgba(0,0,0,.4); animation: pePop .5s cubic-bezier(.2,.9,.3,1.2) both; }
+    #popup-event .pe-head { background: #2B1A11; color: #FBF4E6; padding: 36px 44px 32px; }
+    @media (max-width: 520px) { #popup-event .pe-head { padding: 28px 24px 24px; } #popup-event .pe-body { padding: 22px 24px 26px; } }
+    #popup-event .pe-tag { display: inline-block; font: 500 12px "DM Mono", ui-monospace, monospace; letter-spacing: .14em; text-transform: uppercase; color: #D49A5A; }
+    #popup-event .pe-close { position: absolute; top: 14px; right: 14px; width: 40px; height: 40px; border-radius: 9999px; border: 1.5px solid rgba(251,244,230,.5); color: #FBF4E6; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: transform .25s ease, background .25s ease; }
+    #popup-event .pe-close:hover { transform: rotate(90deg); background: rgba(251,244,230,.12); }
+    #popup-event .pe-body { padding: 32px 44px 40px; display: flex; flex-direction: column; gap: 18px; }
+    #popup-event.closing .pe-backdrop { animation: peFadeOut .4s ease both; }
+    #popup-event.closing .pe-panel { animation: pePopOut .4s cubic-bezier(.4,0,.6,1) both; }
+    @keyframes peFadeOut { from { opacity: 1; } to { opacity: 0; } }
+    @keyframes pePopOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(16px) scale(.96); } }
+    @keyframes peFade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes pePop { from { opacity: 0; transform: translateY(24px) scale(.94); } to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) { #popup-event .pe-backdrop, #popup-event .pe-panel { animation: none; } }
+
+    /* Buttons always stay on one line */
+    .btn { white-space: nowrap; }
+    @media (max-width: 420px) { .btn { padding-left: 1.1rem !important; padding-right: 1.1rem !important; } }
     ::selection { background: rgb(var(--matcha)); color: #2B1A11; }
 
     /* ───────── Dark mode "spread" (circle grows from the toggle) ───────── */
@@ -1130,7 +1152,7 @@
                                 href="https://www.google.com/maps/search/?api=1&query=Residente+Caf%C3%A9+325G+J.+Urgello+St+Cebu+City"
                                 target="_blank" rel="noopener" data-magnetic
                                 class="btn btn-solid inline-flex h-[52px] items-center gap-2.5 rounded-full bg-ink px-6 font-bold text-inverse">
-                                Open in Google Maps
+                                Google Maps
                                 <svg class="h-[18px] w-[18px]"
                                     viewBox="0 0 24 24" fill="none"
                                     stroke="currentColor" stroke-width="2"
@@ -1218,6 +1240,40 @@
             </div>
         </footer>
 
+        <!-- Pop-up event announcement -->
+        <div id="popup-event" role="dialog" aria-modal="true"
+            aria-labelledby="pe-title" aria-hidden="true">
+            <div class="pe-backdrop" data-close-popup></div>
+            <div class="pe-panel">
+                <button type="button" class="pe-close"
+                    aria-label="Close announcement" data-close-popup>
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" aria-hidden="true"><path
+                            d="M6 6l12 12M18 6L6 18" /></svg>
+                </button>
+                <div class="pe-head">
+                    <span class="pe-tag">Pop-up event</span>
+                    <h2 id="pe-title"
+                        class="font-display mt-3 max-w-[480px] text-[34px] leading-[1.08] sm:text-[44px]">Residente
+                        Café is popping up at SM J Mall</h2>
+                </div>
+                <div class="pe-body">
+                    <p
+                        class="font-display text-[26px] leading-tight sm:text-[30px]">November
+                        21 – December 13, 2026</p>
+                    <p class="text-[16px] leading-relaxed text-muted">Come say
+                        hi outside our corner. Our drinks and bakes are making a
+                        visit to SM J Mall for a few weeks only.</p>
+                    <div class="flex flex-wrap gap-3 pt-1">
+                        <button type="button" data-close-popup
+                            class="btn btn-solid inline-flex h-11 items-center rounded-full bg-ink px-6 font-bold text-inverse">Got
+                            it</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Directions modal -->
         <div id="map-modal" role="dialog" aria-modal="true"
             aria-labelledby="map-title" aria-hidden="true">
@@ -1267,7 +1323,7 @@
                         href="https://www.google.com/maps/dir/?api=1&destination=Residente+Caf%C3%A9+325G+J.+Urgello+St+Cebu+City"
                         target="_blank" rel="noopener"
                         class="btn btn-solid inline-flex min-h-[52px] w-full justify-center py-2 text-center sm:w-auto items-center gap-2.5 rounded-full bg-ink px-6 font-bold text-inverse">
-                        Directions from my location
+                        Get directions
                         <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24"
                             fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round"
@@ -1278,7 +1334,7 @@
                         href="https://www.google.com/maps/search/?api=1&query=Residente+Caf%C3%A9+325G+J.+Urgello+St+Cebu+City"
                         target="_blank" rel="noopener"
                         class="btn btn-outline inline-flex min-h-[52px] w-full justify-center py-2 text-center sm:w-auto items-center rounded-full border-2 border-ink px-6 font-bold">
-                        Open in Google Maps
+                        Google Maps
                     </a>
                 </div>
             </div>
@@ -1603,6 +1659,48 @@
       /* ───────── Footer year ───────── */
       const year = $('#year');
       if (year) year.textContent = new Date().getFullYear();
+    })();
+  </script>
+        <script>
+    (function () {
+      var pop = document.getElementById('popup-event');
+      if (!pop) return;
+      var opener = null;
+      function open() {
+        opener = document.activeElement;
+        pop.classList.add('open'); pop.setAttribute('aria-hidden', 'false');
+        var b = pop.querySelector('.pe-close'); if (b) setTimeout(function () { b.focus(); }, 60);
+      }
+      var closing = false;
+      function close() {
+        if (closing) return;
+        closing = true;
+        try { sessionStorage.setItem('popup-seen', '1'); } catch (e) {}
+        var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        function done() {
+          pop.classList.remove('open', 'closing'); pop.setAttribute('aria-hidden', 'true');
+          closing = false;
+          if (opener && opener.focus) opener.focus();
+        }
+        pop.classList.add('closing');
+        if (reduce) done(); else setTimeout(done, 400);
+      }
+      pop.querySelectorAll('[data-close-popup]').forEach(function (el) { el.addEventListener('click', close); });
+      document.addEventListener('keydown', function (e) {
+        if (!pop.classList.contains('open')) return;
+        if (e.key === 'Escape') close();
+        if (e.key === 'Tab') {
+          var f = pop.querySelectorAll('button'); var first = f[0], last = f[f.length - 1];
+          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
+      });
+      var seen = false;
+      try { seen = !!sessionStorage.getItem('popup-seen'); } catch (e) {}
+      if (!seen) {
+        var curtain = !document.documentElement.classList.contains('no-curtain');
+        setTimeout(open, curtain ? 4200 : 900);
+      }
     })();
   </script>
     </body>
