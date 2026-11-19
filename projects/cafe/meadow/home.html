@@ -355,6 +355,10 @@ html.theming .theme svg{transition:transform .8s var(--ease),opacity .5s!importa
   .hero{padding:5rem 0 2rem}
   .links{gap:.8rem;font-size:1.4rem}
 }
+
+/* mobile menu fix: transform/backdrop-filter on nav trap the fixed overlay */
+nav.open,nav.open.solid,nav.open.hide{transform:none;backdrop-filter:none;-webkit-backdrop-filter:none;background:transparent}
+@media (max-width:860px){.brand,.tools{position:relative;z-index:3}body.open .totop{opacity:0;pointer-events:none}}
 </style>
     </head>
     <body>
@@ -475,7 +479,8 @@ html.theming .theme svg{transition:transform .8s var(--ease),opacity .5s!importa
 
         <section id="menu">
             <div class="wrap">
-                <div class="head rv"><h2>Slow sips, made one at a time</h2></div>
+                <div class="head rv"><h2>Slow sips, made one at a
+                        time</h2></div>
                 <div class="menu-grid">
                     <div class="rv">
                         <div class="tabs" role="tablist"
