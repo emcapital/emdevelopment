@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport"
+            content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <title>Ukay Ta Bai! — Cebu's first community thrift culture</title>
+        <meta name="description"
+            content="Puros good finds ug good vibes! Cebu's first community thrift culture. Join the bazaar as a merchant." />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Anton&family=Bowlby+One&family=DM+Sans:wght@400;500;700&family=Yellowtail&display=swap"
+            rel="stylesheet" />
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          display: ['"Bowlby One"', 'sans-serif'],
+          cond: ['Anton', 'sans-serif'],
+          script: ['Yellowtail', 'cursive'],
+          sans: ['"DM Sans"', 'sans-serif']
+        },
+        colors: {
+          cream: '#F7E4B7', paper: '#FFF3D3', sand: '#F0CF86',
+          ink: '#3B2012', mustard: '#E8982C', tomato: '#D6382B', leaf: '#3E8E5C', navy: '#26409A'
+        }
+      }
+    }
+  }
+</script>
+        <style>
+  /* Every animation below uses transform / opacity only, so it runs on the GPU compositor at 60fps. */
+  html { -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  html { overflow-x: hidden; overflow-x: clip; width: 100%; max-width: 100%; overscroll-behavior-x: none; }
+  body { background: #F7E4B7; color: #3B2012; overflow-x: hidden; overflow-x: clip; width: 100%; max-width: 100%; position: relative; overscroll-behavior-x: none; touch-action: pan-y pinch-zoom; }
+  main, footer { overflow-x: clip; max-width: 100%; }
+  section[id] { scroll-margin-top: 64px; }
+  ::selection { background: #D6382B; color: #FFF3D3; }
+
+  /* Halftone dots, fixed on their own layer so scrolling never repaints them */
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background-image: radial-gradient(rgba(150, 92, 40, .22) 1.3px, transparent 1.5px);
+    background-size: 8px 8px;
+  }
+  .halftone-dark { position: relative; }
+  .halftone-dark::after { content: ""; position: absolute; inset: 0; pointer-events: none; background-image: radial-gradient(rgba(255, 243, 211, .14) 1.3px, transparent 1.5px); background-size: 8px 8px; }
+
+  /* Retro lettering */
+  .t-outline { color: #E8982C; -webkit-text-stroke: .075em #3B2012; paint-order: stroke fill; text-shadow: .06em .06em 0 #3B2012; letter-spacing: -.01em; }
+  .t-outline-sm { color: #E8982C; -webkit-text-stroke: .06em #3B2012; paint-order: stroke fill; text-shadow: .05em .05em 0 #26409A; }
+  .h2x { font-size: clamp(2.4rem, 8.5vw + .4rem, 4.5rem); line-height: .95; }
+  .h2x-sm { font-size: clamp(2.2rem, 7.5vw + .4rem, 3.75rem); line-height: .95; }
+
+  /* Sticker system: static hard-shadow layer + a body that moves (transform only) */
+  .stk { position: relative; isolation: isolate; display: inline-block; }
+  .stk.blk { display: block; }
+  .stk::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--sh, #3B2012); transform: translate3d(var(--o, 6px), var(--o, 6px), 0); z-index: -1; }
+  :where(.stk > .stk-b) { display: block; } /* zero specificity so flex/grid utilities can override */
+  .stk > .stk-b { border: 3px solid #3B2012; border-radius: inherit; transition: transform .35s cubic-bezier(.22, 1, .36, 1); }
+  .stk:active > .stk-b { transform: translate3d(var(--o, 6px), var(--o, 6px), 0); transition-duration: .08s; }
+  .tile-art { transition: transform .6s cubic-bezier(.34, 1.56, .64, 1); }
+  .nav-link { position: relative; }
+  .nav-link::after { content: ""; position: absolute; left: 0; right: 0; bottom: -5px; height: 3px; background: #D6382B; transform: scaleX(0); transform-origin: right; transition: transform .45s cubic-bezier(.22, 1, .36, 1); }
+  /* Hover effects only on devices that really hover (no sticky hover on phones) */
+  @media (hover: hover) {
+    .stk:hover > .stk-b { transform: translate3d(-3px, -3px, 0); }
+    .stk.nohover:hover > .stk-b { transform: none; }
+    .stk:hover .tile-art { transform: scale(1.1) rotate(-5deg); }
+    .nav-link:hover::after { transform: scaleX(1); transform-origin: left; }
+  }
+  .stk.nohover:active > .stk-b { transform: none; }
+  [data-magnetic] { transition: transform .25s cubic-bezier(.22, 1, .36, 1); }
+
+  /* Preloader */
+  #preloader { transition: transform .9s cubic-bezier(.76, 0, .24, 1); will-change: transform; background-color: #F7E4B7; background-image: radial-gradient(rgba(150, 92, 40, .22) 1.3px, transparent 1.5px); background-size: 8px 8px; }
+  #preloader.done { transform: translate3d(0, -100%, 0); }
+  .pl-bar { transform-origin: left; transform: scaleX(0); animation: plbar 1.3s cubic-bezier(.65, 0, .35, 1) forwards; }
+  @keyframes plbar { to { transform: scaleX(1); } }
+
+  /* Sticker pop-in */
+  @keyframes pop { 0% { opacity: 0; transform: scale(.3) rotate(-18deg); } 100% { opacity: 1; transform: var(--t, none); } }
+  .pop { opacity: 0; }
+  .pop.go, body.ready .pop-hero { animation: pop .8s cubic-bezier(.34, 1.56, .64, 1) both; animation-delay: var(--d, 0s); }
+
+  /* Page fade-in */
+  main, header, footer { opacity: 0; transition: opacity .8s ease .2s; }
+  body.ready main, body.ready header, body.ready footer { opacity: 1; }
+
+  /* Scroll reveal */
+  .reveal { opacity: 0; transform: translate3d(0, 36px, 0); transition: opacity .9s cubic-bezier(.22, 1, .36, 1), transform .9s cubic-bezier(.22, 1, .36, 1); will-change: transform, opacity; }
+  .reveal.left { transform: translate3d(-48px, 0, 0) rotate(-1deg); }
+  .reveal.right { transform: translate3d(48px, 0, 0) rotate(1deg); }
+  .reveal.zoom { transform: scale(.92) rotate(-1deg); }
+  .reveal.in { opacity: 1; transform: none; will-change: auto; }
+
+  /* Floating / spinning */
+  @keyframes floaty { 0%, 100% { transform: translate3d(0, 0, 0) rotate(var(--r, 0deg)); } 50% { transform: translate3d(0, -14px, 0) rotate(calc(var(--r, 0deg) + 2.5deg)); } }
+  .floaty { animation: floaty 6s ease-in-out infinite; will-change: transform; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spin-slow { animation: spin 22s linear infinite; will-change: transform; }
+  .spin-med { animation: spin 9s linear infinite; will-change: transform; }
+  @keyframes wiggle { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+  .wiggle { animation: wiggle 2.8s ease-in-out infinite; will-change: transform; }
+
+  /* Marquee */
+  @keyframes marquee { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-50%, 0, 0); } }
+  .marquee-track { animation: marquee 30s linear infinite; will-change: transform; }
+  .marquee:hover .marquee-track { animation-play-state: paused; }
+
+  /* Cards */
+  @keyframes cardIn { from { opacity: 0; transform: translate3d(0, 28px, 0) scale(.94) rotate(-1.5deg); } to { opacity: 1; transform: none; } }
+  .card-in { animation: cardIn .6s cubic-bezier(.22, 1, .36, 1) both; }
+
+  /* Header: shrinks on scroll using transforms only (no layout work) */
+  #nav { height: 80px; }
+  .nav-bg { position: absolute; inset: 0; background: rgba(247, 228, 183, .94); border-bottom: 3px solid #3B2012; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); opacity: 0; transform-origin: top; transition: opacity .4s ease, transform .5s cubic-bezier(.22, 1, .36, 1); will-change: transform, opacity; }
+  #nav.solid .nav-bg { opacity: 1; }
+  #nav.shrink .nav-bg { transform: scaleY(.88); }
+  .nav-in { transition: transform .5s cubic-bezier(.22, 1, .36, 1); will-change: transform; }
+  #nav.shrink .nav-in { transform: translate3d(0, -4.5px, 0); }
+  .nav-logo { transform-origin: left center; transition: transform .5s cubic-bezier(.22, 1, .36, 1); }
+  #nav.shrink .nav-logo { transform: scale(.93); }
+  .nav-right { transform-origin: right center; transition: transform .5s cubic-bezier(.22, 1, .36, 1); }
+  #nav.shrink .nav-right { transform: scale(.96); }
+
+  #progress { transform-origin: left; transform: scaleX(0); will-change: transform; }
+
+  /* Back to top */
+  .totop { opacity: 0; transform: translate3d(0, 28px, 0) scale(.7); pointer-events: none; transition: opacity .35s ease, transform .55s cubic-bezier(.34, 1.56, .64, 1); will-change: transform, opacity; }
+  .totop.show { opacity: 1; transform: none; pointer-events: auto; }
+  .totop svg { transition: transform .4s cubic-bezier(.34, 1.56, .64, 1); }
+  @media (hover: hover) { .totop:hover svg { transform: translate3d(0, -3px, 0); } }
+
+  /* Mobile menu */
+  #mobileMenu { transform: translate3d(0, -100%, 0); transition: transform .7s cubic-bezier(.76, 0, .24, 1); will-change: transform; }
+  #mobileMenu.open { transform: none; }
+  #mobileMenu a, #mobileMenu button.mm-item { opacity: 0; transform: translate3d(0, 24px, 0); transition: opacity .6s ease, transform .7s cubic-bezier(.22, 1, .36, 1); }
+  #mobileMenu.open a, #mobileMenu.open button.mm-item { opacity: 1; transform: none; }
+
+  /* Calendar menu */
+  .cal-menu { opacity: 0; transform: translate3d(0, 12px, 0) scale(.94); transform-origin: bottom right; pointer-events: none; transition: opacity .25s ease, transform .4s cubic-bezier(.34, 1.4, .64, 1); }
+  .cal-menu.open { opacity: 1; transform: none; pointer-events: auto; }
+
+  /* Merchant inquiry modal */
+  .modal-root { visibility: hidden; transition: visibility 0s linear .55s; }
+  .modal-root.open { visibility: visible; transition-delay: 0s; }
+  .modal-overlay { opacity: 0; transition: opacity .45s ease; }
+  .modal-root.open .modal-overlay { opacity: 1; }
+  .modal-card { opacity: 0; transform: translate3d(0, 48px, 0) scale(.92) rotate(-1.5deg); transition: opacity .4s ease, transform .6s cubic-bezier(.34, 1.4, .64, 1); will-change: transform, opacity; }
+  .modal-root.open .modal-card { opacity: 1; transform: none; }
+  .modal-done { display: none; }
+  .modal-card.sent .modal-form { display: none; }
+  .modal-card.sent .modal-done { display: block; }
+
+  .lbl > span { display: block; font-family: Anton, sans-serif; text-transform: uppercase; letter-spacing: .12em; font-size: 13px; }
+  .inp { width: 100%; margin-top: .25rem; border-radius: .75rem; border: 3px solid #3B2012; background-color: #F7E4B7; padding: .6rem 1rem; font-size: 16px; line-height: 1.35; color: #3B2012; outline: none; transition: background-color .25s, box-shadow .25s; }
+  .inp:focus { background-color: #fff; box-shadow: 0 0 0 4px rgba(232, 152, 44, .5); }
+  .inp::placeholder { color: rgba(59, 32, 18, .4); }
+  select.inp { appearance: none; -webkit-appearance: none; padding-right: 2.4rem; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233B2012' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right .85rem center; background-size: 14px; }
+  textarea.inp { resize: none; }
+
+  /* Form layout: two steps on phones, everything at once from 768px up */
+  .fields { display: block; }
+  .fg { display: none; grid-template-columns: 1fr 1fr; gap: .75rem; }
+  #merchantForm[data-step="1"] .fg[data-step="1"], #merchantForm[data-step="2"] .fg[data-step="2"] { display: grid; animation: stepIn .45s cubic-bezier(.22, 1, .36, 1) both; }
+  @keyframes stepIn { from { opacity: 0; transform: translate3d(24px, 0, 0); } to { opacity: 1; transform: none; } }
+  #merchantForm[data-step="1"] .act-back, #merchantForm[data-step="1"] .act-send, #merchantForm[data-step="2"] .act-next { display: none; }
+  .dotp { display: block; width: 12px; height: 12px; border-radius: 9999px; border: 2px solid #3B2012; background: #F7E4B7; transition: transform .35s cubic-bezier(.34, 1.56, .64, 1), background-color .3s; }
+  .dotp.on { background: #D6382B; transform: scale(1.25); }
+  @media (min-width: 768px) {
+    .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .fg { display: contents !important; animation: none !important; }
+    .act-back, .act-next { display: none !important; }
+    .act-send { display: block !important; }
+    .inp { padding: .7rem 1rem; }
+  }
+
+
+  /* Modal: spread evenly, no inner scrolling; shrink spacing on short screens instead */
+  .modal-card .stk-b { scrollbar-width: none; }
+  .modal-card .stk-b::-webkit-scrollbar { display: none; }
+  @media (min-width: 768px) {
+    .fields { gap: 1.25rem 1.5rem; }
+    .inp { padding: .8rem 1.1rem; }
+    textarea.inp { min-height: 6.5rem; }
+  }
+  @media (max-height: 760px) and (min-width: 768px) {
+    .modal-fcol { padding-top: 1.5rem !important; padding-bottom: 1.5rem !important; gap: .9rem !important; }
+    .fields { gap: .8rem 1.25rem; }
+    .inp { padding: .55rem 1rem; }
+    textarea.inp { min-height: 4.5rem; }
+  }
+  @media (max-height: 640px) and (max-width: 767px) {
+    .inp { padding: .5rem .9rem; }
+    .modal-fcol { gap: .5rem !important; }
+  }
+  @media (max-height: 520px) and (min-width: 768px) {
+    .modal-card aside ul, .modal-card aside > div:last-child { display: none !important; }
+  }
+
+
+  /* Responsive polish */
+  #nav { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+  footer { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+  #mobileMenu { overflow-y: auto; justify-content: safe center; padding: 4.5rem 1rem 2rem; }
+  @media (max-height: 560px) { #mobileMenu { gap: .4rem; font-size: 1.5rem; padding-top: 3.5rem; } #mobileMenu button.mm-item { font-size: 1.15rem; padding: .5rem 1.5rem; margin-top: .5rem; } }
+  #evDate, #evMap { max-width: 100%; line-height: 1.35; }
+  h1, h2, h3, p, figcaption, blockquote { overflow-wrap: break-word; }
+  @media (max-width: 359px) {
+    .h2x, .h2x-sm { font-size: 2.1rem; }
+    .stk > .stk-b { border-width: 2.5px; }
+  }
+  @media (min-width: 640px) and (max-width: 1023px) { .hero-collage { max-width: 34rem; margin-inline: auto; width: 100%; } }
+  @media (max-height: 480px) and (orientation: landscape) { section[id="home"] { padding-top: 6rem; } }
+
+
+  /* Fit-to-screen safety */
+  .stk, .stk-b { min-width: 0; max-width: 100%; }
+  #drop .stk-b { min-width: 0; }
+  #drop [class*="grid"] > * { min-width: 0; }
+  #countdown > * { min-width: 0; }
+  img, svg, video { max-width: 100%; }
+
+
+  /* Side-slide reveals would create sideways overflow before they play: use a vertical rise instead on phones/tablets */
+  @media (max-width: 1023px) {
+    .reveal.left, .reveal.right { transform: translate3d(0, 36px, 0); }
+    .reveal.in { transform: none; }
+  }
+  /* Preloader always covers the real viewport and centers its content */
+  #preloader { width: 100%; height: 100vh; height: 100dvh; padding: 0 1rem; text-align: center; }
+
+  @keyframes tick { from { opacity: 0; transform: scale(.2) rotate(-40deg); } to { opacity: 1; transform: none; } }
+  .tick { animation: tick .7s cubic-bezier(.34, 1.56, .64, 1) .1s both; }
+
+  #toast { transform: translate3d(-50%, 160%, 0); opacity: 0; transition: transform .6s cubic-bezier(.34, 1.56, .64, 1), opacity .4s; }
+  #toast.show { transform: translate3d(-50%, 0, 0); opacity: 1; }
+
+  /* FAQ */
+  .faq-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .5s cubic-bezier(.22, 1, .36, 1); }
+  .faq-item.open .faq-body { grid-template-rows: 1fr; }
+  .faq-body > div { overflow: hidden; }
+  .faq-icon { transition: transform .5s cubic-bezier(.34, 1.56, .64, 1); }
+  .faq-item.open .faq-icon { transform: rotate(135deg); }
+
+  /* Testimonials: slides stack in one grid cell so the height always fits the tallest */
+  #slides { display: grid; }
+  .slide { grid-area: 1 / 1; opacity: 0; transform: translate3d(40px, 0, 0); transition: opacity .7s ease, transform .9s cubic-bezier(.22, 1, .36, 1); pointer-events: none; }
+  .slide.active { opacity: 1; transform: none; pointer-events: auto; }
+  .slide.prev { transform: translate3d(-40px, 0, 0); }
+
+  /* Cursor */
+  #cursor { position: fixed; top: 0; left: 0; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 9999px; background: #D6382B; border: 2px solid #3B2012; pointer-events: none; z-index: 220; opacity: 0; transition: opacity .3s; will-change: transform; }
+  #cursor-ring { position: fixed; top: 0; left: 0; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 9999px; border: 2px dashed #3B2012; pointer-events: none; z-index: 219; opacity: 0; transition: opacity .3s, width .3s, height .3s, margin .3s, background-color .3s; will-change: transform; }
+  #cursor-ring.hover { width: 62px; height: 62px; margin: -31px 0 0 -31px; background: rgba(232, 152, 44, .25); }
+  @media (hover: none), (pointer: coarse) { #cursor, #cursor-ring { display: none; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    .reveal, .pop { opacity: 1; transform: none; }
+  }
+</style>
+    </head>
+    <body class="font-sans antialiased">
+
+        <!-- Preloader -->
+        <div id="preloader"
+            class="fixed inset-0 z-[300] text-ink flex flex-col items-center justify-center gap-7">
+            <div
+                class="relative w-56 h-56 sm:w-72 sm:h-72 grid place-items-center">
+                <div data-burst="14" data-fill="#D6382B"
+                    class="spin-med absolute inset-0"></div>
+                <div class="pop go relative text-center leading-none"
+                    style="--d:.1s">
+                    <div class="font-display text-4xl sm:text-5xl text-paper"
+                        style="-webkit-text-stroke:.07em #3B2012;paint-order:stroke fill">Ukay</div>
+                    <div class="font-script text-3xl text-mustard -my-1"
+                        style="-webkit-text-stroke:.05em #3B2012;paint-order:stroke fill">Ta</div>
+                    <div class="font-display text-4xl sm:text-5xl text-paper"
+                        style="-webkit-text-stroke:.07em #3B2012;paint-order:stroke fill">BAI!</div>
+                </div>
+            </div>
+            <div
+                class="w-52 h-3 border-[3px] border-ink rounded-full overflow-hidden bg-paper"><div
+                    class="pl-bar h-full bg-tomato"></div></div>
+            <p class="font-cond tracking-[.3em] uppercase text-sm">Dayun
+                kamo!</p>
+        </div>
+
+        <div id="progress"
+            class="fixed top-0 left-0 right-0 h-1.5 bg-tomato z-[110]"></div>
+        <div id="cursor"></div><div id="cursor-ring"></div>
+
+        <!-- NAV (shrinks on scroll) -->
+        <header id="nav" class="fixed top-0 inset-x-0 z-[90]">
+            <div class="nav-bg"></div>
+            <div
+                class="nav-in relative max-w-7xl mx-auto px-4 sm:px-8 h-20 flex items-center justify-between">
+                <a href="#home"
+                    class="nav-logo flex items-center gap-1.5 sm:gap-2 leading-none"
+                    aria-label="Ukay Ta Bai home">
+                    <span
+                        class="font-display text-xl sm:text-2xl t-outline-sm">Ukay</span>
+                    <span
+                        class="font-script text-xl sm:text-2xl text-tomato -mx-1 -rotate-6">Ta</span>
+                    <span
+                        class="font-display text-base sm:text-xl bg-leaf text-paper px-2 py-1 border-[3px] border-ink rounded-md -rotate-2">BAI!</span>
+                </a>
+                <nav
+                    class="hidden lg:flex items-center gap-6 xl:gap-9 font-cond uppercase tracking-[.12em] text-[17px]">
+                    <a class="nav-link" href="#merchants">Merchants</a>
+                    <a class="nav-link" href="#drop">Next Bazaar</a>
+                    <a class="nav-link" href="#how">How to join</a>
+                    <a class="nav-link" href="#visit">Contact</a>
+                </nav>
+                <div class="nav-right flex items-center gap-2.5 sm:gap-3">
+                    <button data-open-modal data-magnetic
+                        class="stk rounded-full" style="--o:4px"
+                        aria-haspopup="dialog">
+                        <span
+                            class="stk-b bg-tomato text-paper font-cond uppercase tracking-[.1em] text-sm sm:text-base px-4 sm:px-5 py-2.5 rounded-full min-h-[44px] inline-flex items-center">
+                            <span class="sm:hidden">Join</span><span
+                                class="hidden sm:inline">Be a merchant</span>
+                        </span>
+                    </button>
+                    <button id="menuBtn" aria-label="Menu"
+                        class="lg:hidden stk rounded-full" style="--o:4px">
+                        <span
+                            class="stk-b w-11 h-11 rounded-full bg-paper grid place-items-center">
+                            <svg class="w-5 h-5" fill="none"
+                                stroke="currentColor" stroke-width="2.5"
+                                viewBox="0 0 24 24"><path stroke-linecap="round"
+                                    d="M4 8h16M4 16h16" /></svg>
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Mobile menu -->
+        <div id="mobileMenu"
+            class="fixed inset-0 z-[95] bg-tomato text-paper flex flex-col items-center justify-center gap-5 font-display text-3xl sm:text-4xl halftone-dark"
+            style="height:100dvh">
+            <button id="menuClose" aria-label="Close menu"
+                class="absolute top-5 right-5 w-11 h-11 rounded-full border-[3px] border-paper grid place-items-center text-2xl leading-none z-10">×</button>
+            <a class="relative z-10 py-1" href="#merchants"
+                style="transition-delay:.15s">Merchants</a>
+            <a class="relative z-10 py-1" href="#drop"
+                style="transition-delay:.22s">Next Bazaar</a>
+            <a class="relative z-10 py-1" href="#how"
+                style="transition-delay:.29s">How to join</a>
+            <a class="relative z-10 py-1" href="#visit"
+                style="transition-delay:.36s">Contact</a>
+            <button data-open-modal
+                class="mm-item relative z-10 mt-3 bg-mustard text-ink border-[3px] border-ink rounded-full px-8 py-3 text-2xl"
+                style="transition-delay:.43s">Be a merchant</button>
+        </div>
+
+        <main>
+            <!-- HERO -->
+            <section id="home"
+                class="relative pt-28 sm:pt-40 pb-16 sm:pb-24 overflow-hidden">
+                <div
+                    class="absolute top-28 left-[4%] w-9 h-9 sm:w-12 sm:h-12 spin-slow opacity-90"
+                    data-burst="8" data-fill="#E8982C"></div>
+                <div
+                    class="absolute bottom-16 left-[46%] w-8 h-8 spin-med opacity-90 hidden sm:block"
+                    data-burst="10" data-fill="#3E8E5C"></div>
+
+                <div
+                    class="relative max-w-7xl mx-auto px-5 sm:px-8 grid grid-cols-[minmax(0,1fr)] lg:grid-cols-2 gap-12 lg:gap-14 items-center">
+                    <div>
+                        <div
+                            class="reveal font-script text-3xl sm:text-4xl text-tomato -rotate-2 origin-left">Puros
+                            good finds ug good vibes!</div>
+
+                        <!-- Logo lockup -->
+                        <h1 aria-label="Ukay Ta Bai!" class="mt-4 select-none">
+                            <span class="flex flex-wrap items-center"
+                                aria-hidden="true">
+                                <span
+                                    class="pop-hero pop font-display t-outline text-[3.7rem] min-[400px]:text-[4.6rem] sm:text-[7rem] xl:text-[8.5rem] leading-[.95]"
+                                    style="--d:1s">Ukay</span>
+                                <span
+                                    class="pop-hero pop relative w-[4.5rem] h-[4.5rem] min-[400px]:w-24 min-[400px]:h-24 sm:w-32 sm:h-32 -mx-2 sm:-mx-5 z-10 grid place-items-center"
+                                    style="--d:1.15s">
+                                    <span data-burst="12" data-fill="#D6382B"
+                                        class="spin-slow absolute inset-0"></span>
+                                    <span
+                                        class="relative font-script text-paper text-3xl min-[400px]:text-4xl sm:text-5xl -rotate-12"
+                                        style="-webkit-text-stroke:.05em #3B2012;paint-order:stroke fill">Ta</span>
+                                </span>
+                                <span class="pop-hero pop stk rounded-lg"
+                                    style="--d:1.3s; --t: rotate(-3deg); --sh:#26409A; --o:8px">
+                                    <span
+                                        class="stk-b bg-leaf text-paper font-display text-[3.2rem] min-[400px]:text-[3.8rem] sm:text-[5.8rem] xl:text-[7rem] leading-none px-4 sm:px-6 py-1 sm:py-2 rounded-lg">BAI!</span>
+                                </span>
+                            </span>
+                        </h1>
+
+                        <div
+                            class="reveal mt-6 font-cond uppercase tracking-[.14em] text-lg sm:text-2xl flex flex-wrap gap-x-3 gap-y-1"
+                            style="transition-delay:.3s">
+                            <span>Cebu's first</span><span
+                                class="text-tomato">community</span><span>thrift
+                                culture</span>
+                        </div>
+                        <p
+                            class="reveal mt-4 text-base sm:text-lg max-w-md text-ink/80"
+                            style="transition-delay:.4s">A bazaar where Cebu's
+                            best thrift merchants gather. Come hunt
+                            one-of-a-kind finds, or grab your own booth and sell
+                            to the whole community.</p>
+
+                        <div
+                            class="reveal mt-8 sm:mt-9 flex flex-wrap items-center gap-x-6 gap-y-5"
+                            style="transition-delay:.5s">
+                            <button data-open-modal data-magnetic
+                                class="stk rounded-full" style="--sh:#26409A"
+                                aria-haspopup="dialog">
+                                <span
+                                    class="stk-b bg-tomato text-paper font-display text-base sm:text-lg px-7 sm:px-8 py-3.5 sm:py-4 rounded-full inline-flex items-center gap-2">Be
+                                    a merchant
+                                    <svg class="w-4 h-4" fill="none"
+                                        stroke="currentColor" stroke-width="3"
+                                        viewBox="0 0 24 24"><path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M5 12h14m-6-6l6 6-6 6" /></svg>
+                                </span>
+                            </button>
+                            <a href="#merchants" data-magnetic
+                                class="stk rounded-full">
+                                <span
+                                    class="stk-b bg-paper font-display text-base sm:text-lg px-7 sm:px-8 py-3.5 sm:py-4 rounded-full">Meet
+                                    the merchants</span>
+                            </a>
+                        </div>
+
+                        <div
+                            class="reveal mt-10 sm:mt-12 grid grid-cols-3 max-w-md gap-3 sm:gap-4"
+                            style="transition-delay:.6s">
+                            <div class="font-cond"><div
+                                    class="text-4xl sm:text-5xl text-navy"><span
+                                        data-count="35">0</span>K+</div><div
+                                    class="uppercase tracking-[.12em] text-xs sm:text-sm">Community</div></div>
+                            <div class="font-cond"><div
+                                    class="text-4xl sm:text-5xl text-tomato"><span
+                                        data-count="120">0</span>+</div><div
+                                    class="uppercase tracking-[.12em] text-xs sm:text-sm">Merchants</div></div>
+                            <div class="font-cond"><div
+                                    class="text-4xl sm:text-5xl text-leaf"><span
+                                        data-count="25">0</span>+</div><div
+                                    class="uppercase tracking-[.12em] text-xs sm:text-sm">Bazaars</div></div>
+                        </div>
+                    </div>
+
+                    <!-- Hero sticker collage -->
+                    <div
+                        class="hero-collage relative h-[440px] min-[400px]:h-[480px] sm:h-[580px] reveal zoom"
+                        style="transition-delay:.4s">
+                        <div
+                            class="absolute top-2 left-0 sm:left-8 w-40 min-[400px]:w-44 sm:w-56"
+                            data-parallax="0.05">
+                            <div class="floaty" style="--r:-6deg">
+                                <div class="stk blk rounded-2xl"
+                                    style="--o:8px"><div
+                                        class="stk-b bg-mustard aspect-[4/5] rounded-2xl grid place-items-center relative">
+                                        <div data-art="tee" data-color="#F7E4B7"
+                                            class="w-3/4"></div>
+                                        <span
+                                            class="absolute bottom-3 left-3 bg-paper border-2 border-ink rounded-full font-cond tracking-wide text-sm px-3 py-0.5">Booth
+                                            A1</span>
+                                    </div></div>
+                            </div>
+                        </div>
+                        <div
+                            class="absolute top-24 right-0 sm:right-4 w-40 min-[400px]:w-44 sm:w-56"
+                            data-parallax="-0.06">
+                            <div class="floaty"
+                                style="--r:5deg; animation-delay:-2s">
+                                <div class="stk blk rounded-2xl"
+                                    style="--o:8px"><div
+                                        class="stk-b bg-leaf aspect-[4/5] rounded-2xl grid place-items-center relative">
+                                        <div data-art="jacket"
+                                            data-color="#E8982C"
+                                            class="w-3/4"></div>
+                                        <span
+                                            class="absolute bottom-3 left-3 bg-paper border-2 border-ink rounded-full font-cond tracking-wide text-sm px-3 py-0.5">Booth
+                                            A4</span>
+                                    </div></div>
+                            </div>
+                        </div>
+                        <div
+                            class="absolute bottom-4 left-8 sm:left-24 w-40 min-[400px]:w-44 sm:w-56"
+                            data-parallax="0.08">
+                            <div class="floaty"
+                                style="--r:-3deg; animation-delay:-4s">
+                                <div class="stk blk rounded-2xl"
+                                    style="--o:8px"><div
+                                        class="stk-b bg-tomato aspect-[4/5] rounded-2xl grid place-items-center relative">
+                                        <div data-art="jeans"
+                                            data-color="#26409A"
+                                            class="w-3/4"></div>
+                                        <span
+                                            class="absolute bottom-3 left-3 bg-paper border-2 border-ink rounded-full font-cond tracking-wide text-sm px-3 py-0.5">Booth
+                                            B2</span>
+                                    </div></div>
+                            </div>
+                        </div>
+
+                        <div
+                            class="absolute top-0 right-4 sm:right-24 w-20 sm:w-28 wiggle"
+                            style="transform-origin:50% 60%">
+                            <svg viewBox="0 0 100 90"
+                                class="w-full drop-shadow-[3px_3px_0_#3B2012]">
+                                <polygon points="50,6 96,84 4,84" fill="#D6382B"
+                                    stroke="#3B2012" stroke-width="4"
+                                    stroke-linejoin="round" />
+                                <text x="50" y="52" text-anchor="middle"
+                                    font-family="Anton" font-size="11"
+                                    fill="#FFF3D3"
+                                    letter-spacing="1">ONE-OF-A-</text>
+                                <text x="50" y="66" text-anchor="middle"
+                                    font-family="Anton" font-size="11"
+                                    fill="#FFF3D3" letter-spacing="1">KIND
+                                    FIND</text>
+                            </svg>
+                        </div>
+                        <div
+                            class="absolute bottom-24 left-0 w-14 h-14 sm:w-20 sm:h-20 wiggle"
+                            style="animation-delay:-1.4s">
+                            <div data-burst="9" data-fill="#E8982C"
+                                class="absolute inset-0"></div>
+                            <span
+                                class="absolute inset-0 grid place-items-center font-display text-2xl sm:text-4xl text-tomato"
+                                style="-webkit-text-stroke:.06em #3B2012;paint-order:stroke fill">U</span>
+                        </div>
+                        <div
+                            class="absolute bottom-4 right-0 sm:right-6 w-24 h-24 sm:w-36 sm:h-36 grid place-items-center">
+                            <svg
+                                class="spin-slow absolute inset-0 w-full h-full"
+                                viewBox="0 0 120 120">
+                                <defs><path id="circ"
+                                        d="M60,60 m-45,0 a45,45 0 1,1 90,0 a45,45 0 1,1 -90,0" /></defs>
+                                <circle cx="60" cy="60" r="57" fill="#26409A"
+                                    stroke="#3B2012" stroke-width="4" />
+                                <text font-size="12" fill="#FFF3D3"
+                                    letter-spacing="2.6"
+                                    font-family="Anton"><textpath
+                                        href="#circ">MERCHANTS WANTED! • TARA
+                                        NA, UKAY TA BAI! • </textpath></text>
+                            </svg>
+                            <span
+                                class="relative text-2xl sm:text-3xl">♻️</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MARQUEE -->
+            <section
+                class="bg-tomato text-paper py-3.5 sm:py-4 -rotate-1 scale-[1.03] marquee overflow-hidden border-y-4 border-ink">
+                <div
+                    class="marquee-track flex w-max whitespace-nowrap font-cond uppercase tracking-[.1em] text-xl sm:text-3xl">
+                    <div class="flex items-center gap-6 sm:gap-8 pr-6 sm:pr-8"
+                        data-marquee></div>
+                    <div class="flex items-center gap-6 sm:gap-8 pr-6 sm:pr-8"
+                        data-marquee aria-hidden="true"></div>
+                </div>
+            </section>
+
+            <!-- WHAT'S AT THE BAZAAR -->
+            <section id="categories" class="py-16 sm:py-24 lg:py-32">
+                <div class="max-w-7xl mx-auto px-5 sm:px-8">
+                    <div
+                        class="flex flex-wrap items-end justify-between gap-5 mb-10 sm:mb-14">
+                        <div class="reveal">
+                            <p
+                                class="font-script text-3xl text-tomato -rotate-2 origin-left">Unsa'y
+                                naa sa bazaar?</p>
+                            <h2 class="font-display t-outline h2x mt-2">Pick
+                                your<br />vibe.</h2>
+                        </div>
+                        <p
+                            class="reveal max-w-sm text-ink/80 text-base sm:text-lg"
+                            style="transition-delay:.15s">Merchants set up in
+                            zones, so shoppers can dig straight into what they
+                            love. Tap a category to see who's selling.</p>
+                    </div>
+                    <div id="catGrid"
+                        class="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8"></div>
+                </div>
+            </section>
+
+            <!-- MERCHANTS -->
+            <section id="merchants"
+                class="py-16 sm:py-24 lg:py-32 bg-sand border-y-4 border-ink relative">
+                <div class="max-w-7xl mx-auto px-5 sm:px-8">
+                    <div class="text-center max-w-2xl mx-auto reveal">
+                        <p
+                            class="font-script text-3xl text-tomato -rotate-2">Ang
+                            atong mga merchants</p>
+                        <h2 class="font-display t-outline h2x mt-2">Meet the
+                            merchants</h2>
+                        <p
+                            class="mt-4 text-ink/80 text-base sm:text-lg">Hand-picked
+                            thrift sellers from all over Cebu, gathered in one
+                            bazaar. Puros good finds, one booth at a time.</p>
+                    </div>
+                    <div id="filters"
+                        class="reveal flex flex-wrap justify-center gap-2.5 sm:gap-3 mt-8 sm:mt-10"
+                        style="transition-delay:.15s"></div>
+                    <div id="merchantGrid"
+                        class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 xl:gap-7 mt-10 sm:mt-12"></div>
+                </div>
+            </section>
+
+            <!-- NEXT BAZAAR COUNTDOWN -->
+            <section id="drop" class="py-16 sm:py-24 lg:py-32">
+                <div class="max-w-6xl mx-auto px-4 sm:px-8">
+                    <div
+                        class="reveal zoom stk blk rounded-[1.75rem] sm:rounded-[2rem]"
+                        style="--o:10px; --sh:#D6382B">
+                        <div
+                            class="stk-b bg-navy text-paper rounded-[1.75rem] sm:rounded-[2rem] p-5 sm:p-10 lg:p-14 relative overflow-hidden halftone-dark">
+                            <div
+                                class="absolute -right-10 -top-10 w-44 h-44 sm:w-56 sm:h-56 spin-slow opacity-90"
+                                data-burst="14" data-fill="#E8982C"></div>
+                            <div
+                                class="relative grid grid-cols-[minmax(0,1fr)] lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center">
+                                <div>
+                                    <p
+                                        class="font-script text-3xl text-mustard -rotate-2 origin-left">Dayun
+                                        kamo!</p>
+                                    <h2 class="font-display h2x mt-2"
+                                        style="text-shadow:.05em .05em 0 #3B2012">Next<br />Bazaar
+                                        In</h2>
+                                    <p
+                                        class="mt-5 text-paper/80 text-base sm:text-lg max-w-sm">Booths
+                                        are filling up. Reserve your spot before
+                                        the next bazaar opens.</p>
+
+                                    <div
+                                        class="mt-5 flex flex-col items-start gap-2 font-cond uppercase tracking-widest text-sm sm:text-base">
+                                        <span id="evDate"
+                                            class="inline-flex items-center gap-2 bg-paper/15 border-2 border-paper/40 rounded-2xl px-3.5 py-1.5"><svg
+                                                class="w-4 h-4 shrink-0"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="2.8"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                viewBox="0 0 24 24"><rect x="3"
+                                                    y="5" width="18" height="16"
+                                                    rx="3" /><path
+                                                    d="M8 3v4M16 3v4M3 10h18" /></svg><span>—</span></span>
+                                        <a id="evMap" href="#" target="_blank"
+                                            rel="noopener"
+                                            class="inline-flex items-center gap-2 bg-paper/15 border-2 border-paper/40 rounded-2xl px-3.5 py-1.5 transition-colors hover:bg-paper/25"><svg
+                                                class="w-4 h-4 shrink-0"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="2.8"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                viewBox="0 0 24 24"><path
+                                                    d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z" /><circle
+                                                    cx="12" cy="9.5"
+                                                    r="2.5" /></svg><span>—</span></a>
+                                    </div>
+
+                                    <div
+                                        class="mt-7 flex flex-nowrap items-start gap-3 sm:gap-5">
+                                        <button data-open-modal data-magnetic
+                                            class="stk blk flex-1 min-w-0 sm:flex-none sm:inline-block rounded-full"
+                                            style="--sh:#3B2012"
+                                            aria-haspopup="dialog">
+                                            <span
+                                                class="stk-b bg-mustard text-ink font-display text-sm min-[400px]:text-base sm:text-lg px-2 sm:px-8 py-3.5 sm:py-4 whitespace-nowrap rounded-full text-center">Reserve<span
+                                                    class="hidden min-[430px]:inline">&nbsp;a
+                                                    booth</span></span>
+                                        </button>
+                                        <div
+                                            class="relative flex-1 min-w-0 sm:flex-none"
+                                            id="calWrap">
+                                            <button id="calBtn" type="button"
+                                                aria-haspopup="menu"
+                                                aria-expanded="false"
+                                                aria-controls="calMenu"
+                                                class="stk blk w-full sm:w-auto sm:inline-block rounded-full"
+                                                style="--sh:#3B2012">
+                                                <span
+                                                    class="stk-b bg-paper text-ink font-display text-sm min-[400px]:text-base sm:text-lg px-2 sm:px-8 py-3.5 sm:py-4 rounded-full inline-flex items-center justify-center gap-1.5 sm:gap-2 w-full whitespace-nowrap"><svg
+                                                        class="w-5 h-5 shrink-0"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        stroke-width="2.8"
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        viewBox="0 0 24 24"><rect
+                                                            x="3" y="5"
+                                                            width="18"
+                                                            height="16"
+                                                            rx="3" /><path
+                                                            d="M8 3v4M16 3v4M3 10h18" /></svg><span
+                                                        class="min-[430px]:hidden">Calendar</span><span
+                                                        class="hidden min-[430px]:inline">Add
+                                                        to
+                                                        calendar</span></span>
+                                            </button>
+                                            <div id="calMenu" role="menu"
+                                                class="cal-menu absolute right-0 sm:left-0 sm:right-auto bottom-full mb-4 w-64 sm:w-72 z-20">
+                                                <div class="stk blk rounded-2xl"
+                                                    style="--o:5px; --sh:#E8982C">
+                                                    <div
+                                                        class="stk-b bg-paper text-ink rounded-2xl p-2 grid gap-1">
+                                                        <a id="calGoogle"
+                                                            role="menuitem"
+                                                            target="_blank"
+                                                            rel="noopener"
+                                                            href="#"
+                                                            class="flex items-center gap-3 px-3 py-3 rounded-xl font-cond uppercase tracking-[.1em] text-base transition-colors hover:bg-mustard/40 active:bg-mustard/40"><svg
+                                                                class="w-5 h-5 shrink-0"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                stroke-width="2.8"
+                                                                stroke-linecap="round"
+                                                                stroke-linejoin="round"
+                                                                viewBox="0 0 24 24"><rect
+                                                                    x="3" y="5"
+                                                                    width="18"
+                                                                    height="16"
+                                                                    rx="3" /><path
+                                                                    d="M8 3v4M16 3v4M3 10h18" /></svg>Google
+                                                            Calendar</a>
+                                                        <a id="calIcs"
+                                                            role="menuitem"
+                                                            href="#"
+                                                            download="ukay-ta-bai-bazaar.ics"
+                                                            class="flex items-center gap-3 px-3 py-3 rounded-xl font-cond uppercase tracking-[.1em] text-base transition-colors hover:bg-mustard/40 active:bg-mustard/40"><svg
+                                                                class="w-5 h-5 shrink-0"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                stroke-width="2.8"
+                                                                stroke-linecap="round"
+                                                                stroke-linejoin="round"
+                                                                viewBox="0 0 24 24"><path
+                                                                    d="M12 4v11m-5-5l5 5 5-5M5 20h14" /></svg>Apple
+                                                            / Outlook (.ics)</a>
+                                                        <a id="calOutlook"
+                                                            role="menuitem"
+                                                            target="_blank"
+                                                            rel="noopener"
+                                                            href="#"
+                                                            class="flex items-center gap-3 px-3 py-3 rounded-xl font-cond uppercase tracking-[.1em] text-base transition-colors hover:bg-mustard/40 active:bg-mustard/40"><svg
+                                                                class="w-5 h-5 shrink-0"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                stroke-width="2.8"
+                                                                stroke-linecap="round"
+                                                                stroke-linejoin="round"
+                                                                viewBox="0 0 24 24"><rect
+                                                                    x="3" y="5"
+                                                                    width="18"
+                                                                    height="14"
+                                                                    rx="3" /><path
+                                                                    d="M3 8l9 6 9-6" /></svg>Outlook.com</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div
+                                    class="grid grid-cols-4 gap-2.5 sm:gap-4 text-center"
+                                    id="countdown">
+                                    <div
+                                        class="stk blk rounded-xl sm:rounded-2xl"
+                                        style="--o:5px"><div
+                                            class="stk-b bg-paper text-ink rounded-xl sm:rounded-2xl py-4 sm:py-5"><div
+                                                class="font-display text-[1.6rem] min-[400px]:text-4xl sm:text-6xl tabular-nums"
+                                                data-cd="d">00</div><div
+                                                class="font-cond uppercase tracking-widest text-[11px] sm:text-sm mt-1">Days</div></div></div>
+                                    <div
+                                        class="stk blk rounded-xl sm:rounded-2xl"
+                                        style="--o:5px"><div
+                                            class="stk-b bg-paper text-ink rounded-xl sm:rounded-2xl py-4 sm:py-5"><div
+                                                class="font-display text-[1.6rem] min-[400px]:text-4xl sm:text-6xl tabular-nums"
+                                                data-cd="h">00</div><div
+                                                class="font-cond uppercase tracking-widest text-[11px] sm:text-sm mt-1">Hours</div></div></div>
+                                    <div
+                                        class="stk blk rounded-xl sm:rounded-2xl"
+                                        style="--o:5px"><div
+                                            class="stk-b bg-paper text-ink rounded-xl sm:rounded-2xl py-4 sm:py-5"><div
+                                                class="font-display text-[1.6rem] min-[400px]:text-4xl sm:text-6xl tabular-nums"
+                                                data-cd="m">00</div><div
+                                                class="font-cond uppercase tracking-widest text-[11px] sm:text-sm mt-1">Mins</div></div></div>
+                                    <div
+                                        class="stk blk rounded-xl sm:rounded-2xl"
+                                        style="--o:5px"><div
+                                            class="stk-b bg-mustard text-ink rounded-xl sm:rounded-2xl py-4 sm:py-5"><div
+                                                class="font-display text-[1.6rem] min-[400px]:text-4xl sm:text-6xl tabular-nums"
+                                                data-cd="s">00</div><div
+                                                class="font-cond uppercase tracking-widest text-[11px] sm:text-sm mt-1">Secs</div></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- HOW TO JOIN -->
+            <section id="how" class="py-12 sm:py-24">
+                <div class="max-w-7xl mx-auto px-5 sm:px-8">
+                    <div class="reveal text-center max-w-2xl mx-auto">
+                        <p
+                            class="font-script text-3xl text-tomato -rotate-2">Gusto
+                            ka mo-booth?</p>
+                        <h2 class="font-display t-outline h2x mt-2">How to
+                            join</h2>
+                    </div>
+                    <div
+                        class="grid grid-cols-[minmax(0,1fr)] md:grid-cols-3 gap-14 md:gap-6 lg:gap-8 mt-16">
+                        <div class="reveal stk blk rounded-3xl"
+                            style="--o:8px"><div
+                                class="stk-b bg-paper rounded-3xl p-7 sm:p-8 h-full">
+                                <div
+                                    class="relative w-20 h-20 -mt-14 -ml-2"><div
+                                        data-burst="10" data-fill="#E8982C"
+                                        class="absolute inset-0"></div><span
+                                        class="absolute inset-0 grid place-items-center font-display text-3xl">1</span></div>
+                                <h3 class="font-display text-2xl mt-4">Send an
+                                    inquiry</h3>
+                                <p class="mt-3 text-ink/80">Fill out our quick
+                                    merchant form. Tell us about your shop and
+                                    what you sell.</p>
+                            </div></div>
+                        <div class="reveal stk blk rounded-3xl"
+                            style="--o:8px; transition-delay:.12s"><div
+                                class="stk-b bg-paper rounded-3xl p-7 sm:p-8 h-full">
+                                <div
+                                    class="relative w-20 h-20 -mt-14 -ml-2"><div
+                                        data-burst="10" data-fill="#3E8E5C"
+                                        class="absolute inset-0"></div><span
+                                        class="absolute inset-0 grid place-items-center font-display text-3xl text-paper"
+                                        style="-webkit-text-stroke:.05em #3B2012;paint-order:stroke fill">2</span></div>
+                                <h3 class="font-display text-2xl mt-4">Get
+                                    confirmed</h3>
+                                <p class="mt-3 text-ink/80">Our team reviews
+                                    your inquiry and reaches out with booth
+                                    options, rates and the next bazaar
+                                    details.</p>
+                            </div></div>
+                        <div class="reveal stk blk rounded-3xl"
+                            style="--o:8px; transition-delay:.24s"><div
+                                class="stk-b bg-paper rounded-3xl p-7 sm:p-8 h-full">
+                                <div
+                                    class="relative w-20 h-20 -mt-14 -ml-2"><div
+                                        data-burst="10" data-fill="#D6382B"
+                                        class="absolute inset-0"></div><span
+                                        class="absolute inset-0 grid place-items-center font-display text-3xl text-paper"
+                                        style="-webkit-text-stroke:.05em #3B2012;paint-order:stroke fill">3</span></div>
+                                <h3 class="font-display text-2xl mt-4">Set up &
+                                    sell</h3>
+                                <p class="mt-3 text-ink/80">Bring your best
+                                    finds, set up your booth, and sell to a
+                                    crowd that already loves thrift. ♻️</p>
+                            </div></div>
+                    </div>
+                    <div
+                        class="reveal mt-14 flex flex-wrap justify-center gap-3 sm:gap-4 font-cond uppercase tracking-[.12em] text-base sm:text-lg"
+                        style="transition-delay:.1s">
+                        <span class="stk rounded-full" style="--o:4px"><span
+                                class="stk-b bg-mustard px-4 sm:px-5 py-2 rounded-full">✺
+                                Built-in community crowd</span></span>
+                        <span class="stk rounded-full" style="--o:4px"><span
+                                class="stk-b bg-leaf text-paper px-4 sm:px-5 py-2 rounded-full">✺
+                                Promoted on our socials</span></span>
+                        <span class="stk rounded-full" style="--o:4px"><span
+                                class="stk-b bg-tomato text-paper px-4 sm:px-5 py-2 rounded-full">✺
+                                Easy booth setup</span></span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TESTIMONIALS -->
+            <section class="py-16 sm:py-24 lg:py-32">
+                <div class="max-w-4xl mx-auto px-4 sm:px-8 text-center">
+                    <p
+                        class="reveal font-script text-3xl text-tomato -rotate-2">Giingon
+                        sa among mga merchants</p>
+                    <div
+                        class="reveal stk blk rounded-[1.75rem] sm:rounded-[2rem] mt-8"
+                        style="--o:10px; --sh:#26409A; transition-delay:.1s">
+                        <div
+                            class="stk-b bg-paper rounded-[1.75rem] sm:rounded-[2rem] px-5 sm:px-14 py-8 sm:py-10">
+                            <div id="slides"></div>
+                            <div id="dots"
+                                class="flex justify-center gap-2 mt-5"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FAQ -->
+            <section class="py-8 sm:py-16">
+                <div class="max-w-3xl mx-auto px-4 sm:px-8">
+                    <h2
+                        class="reveal font-display t-outline h2x text-center">Pangutana?</h2>
+                    <div id="faq" class="mt-10 sm:mt-12 space-y-5"></div>
+                </div>
+            </section>
+
+            <!-- CONTACT / CTA -->
+            <section id="visit" class="py-16 sm:py-24 lg:py-32">
+                <div
+                    class="max-w-7xl mx-auto px-4 sm:px-8 grid grid-cols-[minmax(0,1fr)] lg:grid-cols-2 gap-10">
+                    <div
+                        class="reveal left stk blk rounded-[1.75rem] sm:rounded-[2rem]"
+                        style="--o:10px">
+                        <div
+                            class="stk-b bg-leaf text-paper rounded-[1.75rem] sm:rounded-[2rem] p-7 sm:p-14 relative overflow-hidden halftone-dark h-full">
+                            <div
+                                class="absolute -bottom-12 -right-12 w-44 h-44 sm:w-52 sm:h-52 spin-slow opacity-90"
+                                data-burst="12" data-fill="#E8982C"></div>
+                            <p
+                                class="font-script text-3xl text-mustard -rotate-2 origin-left">Tara
+                                na!</p>
+                            <h2 class="font-display h2x-sm mt-2"
+                                style="text-shadow:.05em .05em 0 #3B2012">Join
+                                the<br />community</h2>
+                            <ul class="mt-8 sm:mt-10 space-y-6 relative">
+                                <li class="flex gap-4"><span
+                                        class="text-2xl">📍</span><div><div
+                                            class="font-cond uppercase tracking-widest text-lg">Where</div><div
+                                            class="text-paper/90">Cebu City —
+                                            venue for the next bazaar is posted
+                                            on our page</div></div></li>
+                                <li class="flex gap-4"><span
+                                        class="text-2xl">📸</span><div><div
+                                            class="font-cond uppercase tracking-widest text-lg">Instagram</div><div
+                                            class="text-paper/90 break-all">@ukaytabai.official</div></div></li>
+                                <li class="flex gap-4"><span
+                                        class="text-2xl">💬</span><div><div
+                                            class="font-cond uppercase tracking-widest text-lg">Facebook</div><div
+                                            class="text-paper/90">Ukay Ta Bai —
+                                            message us anytime</div></div></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div
+                        class="reveal right stk blk rounded-[1.75rem] sm:rounded-[2rem]"
+                        style="--o:10px; --sh:#D6382B; transition-delay:.1s">
+                        <div
+                            class="stk-b bg-paper rounded-[1.75rem] sm:rounded-[2rem] p-7 sm:p-14 h-full flex flex-col justify-center text-center items-center relative overflow-hidden">
+                            <div
+                                class="relative w-24 h-24 sm:w-28 sm:h-28 wiggle">
+                                <div data-burst="12" data-fill="#E8982C"
+                                    class="absolute inset-0"></div>
+                                <span
+                                    class="absolute inset-0 grid place-items-center text-4xl sm:text-5xl">🏷️</span>
+                            </div>
+                            <h3
+                                class="font-display text-3xl sm:text-4xl mt-6 leading-tight">Ready
+                                to get<br />your booth?</h3>
+                            <p class="text-ink/70 mt-3 max-w-xs">It only takes a
+                                couple of minutes. Tell us about your shop and
+                                we'll take it from there.</p>
+                            <button data-open-modal data-magnetic
+                                class="stk rounded-full mt-8"
+                                style="--sh:#26409A" aria-haspopup="dialog">
+                                <span
+                                    class="stk-b bg-tomato text-paper font-display text-base sm:text-lg px-7 sm:px-9 py-3.5 sm:py-4 rounded-full">Inquire
+                                    as a merchant</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer
+            class="bg-ink text-paper border-t-4 border-ink pt-14 sm:pt-16 pb-8 overflow-hidden relative halftone-dark">
+            <div class="relative max-w-7xl mx-auto px-5 sm:px-8 z-10">
+                <div
+                    class="font-display leading-none text-[15vw] sm:text-[11vw] text-mustard select-none"
+                    style="-webkit-text-stroke:.03em #3B2012">Ukay Ta <span
+                        class="text-leaf">BAI!</span></div>
+                <p
+                    class="font-script text-3xl sm:text-4xl text-paper/90 -rotate-1 mt-2">Puros
+                    good finds ug good vibes!</p>
+                <div
+                    class="flex flex-wrap justify-between items-center gap-x-6 gap-y-4 mt-10 pt-8 border-t-2 border-paper/20 font-cond uppercase tracking-[.12em] text-paper/70 text-sm sm:text-base">
+                    <p class="w-full sm:w-auto">© <span id="yr"></span> Ukay Ta
+                        Bai. Cebu's first community thrift culture.</p>
+                    <div class="flex flex-wrap gap-x-6 gap-y-2"><a
+                            class="hover:text-mustard transition-colors py-1"
+                            href="#">Facebook</a><a
+                            class="hover:text-mustard transition-colors py-1"
+                            href="#">Instagram</a><button data-open-modal
+                            class="hover:text-mustard transition-colors uppercase tracking-[.12em] py-1">Be
+                            a merchant</button></div>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Back to top -->
+        <div id="toTop" class="totop fixed z-[85] right-4 sm:right-6"
+            style="bottom:calc(1rem + env(safe-area-inset-bottom))">
+            <button type="button" aria-label="Back to top"
+                class="stk rounded-full" style="--o:4px">
+                <span
+                    class="stk-b w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-mustard grid place-items-center">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor"
+                        stroke-width="3.5" viewBox="0 0 24 24"><path
+                            stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 19V5m-6 6l6-6 6 6" /></svg>
+                </span>
+            </button>
+        </div>
+
+        <!-- MERCHANT INQUIRY MODAL -->
+        <div id="modal" class="modal-root fixed inset-0 z-[200]"
+            aria-hidden="true">
+            <div id="modalOverlay"
+                class="modal-overlay fixed inset-0 bg-ink/70"></div>
+            <div id="modalWrap"
+                class="fixed inset-0 grid place-items-center p-3 sm:p-6 pointer-events-none">
+                <div id="modalCard"
+                    class="modal-card stk blk nohover rounded-[1.5rem] sm:rounded-[2rem] w-full max-w-5xl pointer-events-auto"
+                    style="--o:8px; --sh:#D6382B" role="dialog"
+                    aria-modal="true" aria-labelledby="modalTitle">
+                    <div
+                        class="stk-b bg-paper rounded-[1.5rem] sm:rounded-[2rem] overflow-y-auto max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-3rem)]">
+
+                        <!-- Form view -->
+                        <div
+                            class="modal-form relative md:grid md:grid-cols-[4fr_7fr]">
+                            <button id="modalClose" type="button"
+                                aria-label="Close"
+                                class="absolute top-3 right-3 w-10 h-10 rounded-full border-[3px] border-ink bg-paper grid place-items-center text-xl leading-none z-20 transition-transform duration-300 active:scale-90 md:hover:rotate-90">×</button>
+
+                            <!-- Left / top panel -->
+                            <aside
+                                class="relative bg-mustard border-b-[3px] md:border-b-0 md:border-r-[3px] border-ink px-5 py-4 md:p-9 overflow-hidden md:flex md:flex-col md:justify-between">
+                                <div
+                                    class="absolute -right-8 -top-10 w-24 h-24 md:w-40 md:h-40 spin-slow opacity-90"
+                                    data-burst="10" data-fill="#D6382B"></div>
+                                <div class="relative pr-12 md:pr-0">
+                                    <p
+                                        class="font-script text-xl md:text-3xl text-tomato -rotate-2 origin-left leading-none">Tara
+                                        na, bai!</p>
+                                    <h3 id="modalTitle"
+                                        class="font-display text-[1.7rem] md:text-5xl leading-none mt-1 md:mt-2">Be
+                                        a merchant</h3>
+                                    <p
+                                        class="hidden md:block text-ink/80 mt-4 text-base">Tell
+                                        us about your shop and we'll get back to
+                                        you with booth options and the next
+                                        bazaar details.</p>
+                                </div>
+                                <ul
+                                    class="hidden md:grid gap-2.5 mt-8 relative font-cond uppercase tracking-[.12em] text-base">
+                                    <li class="flex items-center gap-3"><span
+                                            class="grid place-items-center w-7 h-7 rounded-full bg-paper border-2 border-ink text-sm">✺</span>Built-in
+                                        community crowd</li>
+                                    <li class="flex items-center gap-3"><span
+                                            class="grid place-items-center w-7 h-7 rounded-full bg-paper border-2 border-ink text-sm">✺</span>Promoted
+                                        on our socials</li>
+                                    <li class="flex items-center gap-3"><span
+                                            class="grid place-items-center w-7 h-7 rounded-full bg-paper border-2 border-ink text-sm">✺</span>Easy
+                                        booth setup</li>
+                                </ul>
+                                <div
+                                    class="hidden md:block relative w-24 h-24 mt-8 wiggle"><div
+                                        data-burst="12" data-fill="#F7E4B7"
+                                        class="absolute inset-0"></div><span
+                                        class="absolute inset-0 grid place-items-center text-4xl">🏷️</span></div>
+                            </aside>
+
+                            <!-- Form -->
+                            <form id="merchantForm" data-step="1"
+                                class="modal-fcol p-5 pt-4 md:px-12 md:py-10 flex flex-col justify-evenly gap-3 md:gap-5">
+                                <div
+                                    class="md:hidden flex items-center justify-between font-cond uppercase tracking-[.14em] text-sm">
+                                    <span id="stepLabel">Step 1 of 2 · About
+                                        you</span>
+                                    <span class="flex gap-2"><i class="dotp on"
+                                            data-dot-step="1"></i><i
+                                            class="dotp"
+                                            data-dot-step="2"></i></span>
+                                </div>
+
+                                <div class="fields">
+                                    <div class="fg" data-step="1">
+                                        <label
+                                            class="lbl col-span-2 md:col-span-1"><span>Full
+                                                name *</span><input required
+                                                name="name" autocomplete="name"
+                                                class="inp"
+                                                placeholder="Juan Dela Cruz" /></label>
+                                        <label
+                                            class="lbl col-span-2 md:col-span-1"><span>Shop
+                                                / brand name *</span><input
+                                                required name="shop" class="inp"
+                                                placeholder="Your shop name" /></label>
+                                        <label
+                                            class="lbl col-span-2 md:col-span-1"><span>Mobile
+                                                number *</span><input required
+                                                type="tel" inputmode="tel"
+                                                name="phone" autocomplete="tel"
+                                                class="inp"
+                                                placeholder="09XX XXX XXXX" /></label>
+                                        <label
+                                            class="lbl col-span-2 md:col-span-1"><span>Email
+                                                *</span><input required
+                                                type="email" name="email"
+                                                autocomplete="email" class="inp"
+                                                placeholder="you@email.com" /></label>
+                                    </div>
+                                    <div class="fg" data-step="2">
+                                        <label
+                                            class="lbl col-span-2"><span>Facebook
+                                                / Instagram page</span><input
+                                                name="social" class="inp"
+                                                placeholder="Link or @handle (optional)" /></label>
+                                        <label class="lbl col-span-1"><span>What
+                                                do you sell?</span><select
+                                                name="category" id="catSelect"
+                                                class="inp"></select></label>
+                                        <label
+                                            class="lbl col-span-1"><span>Booth
+                                                type</span>
+                                            <select name="booth"
+                                                class="inp"><option>Regular
+                                                    booth</option><option>Rack /
+                                                    half
+                                                    booth</option><option>Not
+                                                    sure
+                                                    yet</option></select></label>
+                                        <label class="lbl col-span-2"><span>Tell
+                                                us about your
+                                                shop</span><textarea
+                                                name="message" rows="2"
+                                                class="inp"
+                                                placeholder="What kind of pieces do you sell? Any questions?"></textarea></label>
+                                    </div>
+                                </div>
+
+                                <div
+                                    class="grid grid-cols-[auto_1fr] gap-3 md:block mt-1">
+                                    <button type="button" id="backBtn"
+                                        class="act-back stk blk rounded-xl"
+                                        style="--o:5px"><span
+                                            class="stk-b bg-paper font-display text-base px-5 py-3 rounded-xl text-center">←
+                                            Back</span></button>
+                                    <button type="button" id="nextBtn"
+                                        class="act-next stk blk rounded-xl col-span-2"
+                                        style="--o:5px; --sh:#26409A"
+                                        data-magnetic><span
+                                            class="stk-b bg-tomato text-paper font-display text-base py-3 rounded-xl text-center">Next
+                                            →</span></button>
+                                    <button type="submit"
+                                        class="act-send stk blk rounded-xl w-full"
+                                        style="--o:5px; --sh:#26409A"
+                                        data-magnetic><span
+                                            class="stk-b bg-tomato text-paper font-display text-base md:text-lg px-6 py-3.5 md:py-4 rounded-xl text-center">Send
+                                            inquiry</span></button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Success view -->
+                        <div class="modal-done p-8 sm:p-14 text-center">
+                            <div
+                                class="tick relative w-28 h-28 sm:w-32 sm:h-32 mx-auto">
+                                <div data-burst="12" data-fill="#3E8E5C"
+                                    class="absolute inset-0 spin-slow"></div>
+                                <svg
+                                    class="absolute inset-0 m-auto w-12 h-12 sm:w-14 sm:h-14 text-paper"
+                                    fill="none" stroke="currentColor"
+                                    stroke-width="5" viewBox="0 0 24 24"><path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M5 13l4 4L19 7" /></svg>
+                            </div>
+                            <p
+                                class="font-script text-3xl text-tomato -rotate-2 mt-6">Salamat,
+                                bai!</p>
+                            <h3
+                                class="font-display text-3xl sm:text-4xl leading-tight mt-1">Inquiry
+                                received</h3>
+                            <p class="text-ink/75 mt-3 max-w-sm mx-auto">We'll
+                                reach out through the contact details you gave
+                                us with booth options and the next bazaar
+                                details.</p>
+                            <button id="doneClose" type="button" data-magnetic
+                                class="stk rounded-full mt-8"
+                                style="--sh:#D6382B"><span
+                                    class="stk-b bg-mustard font-display text-lg px-9 py-3.5 rounded-full">Sige,
+                                    salamat!</span></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="toast"
+            class="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] sm:bottom-6 left-1/2 z-[250] w-max max-w-[88vw] text-center bg-ink text-paper border-[3px] border-mustard px-5 sm:px-6 py-3 rounded-full font-cond uppercase tracking-[.1em] text-sm sm:text-base shadow-2xl"></div>
+
+        <script>
+(() => {
+  const $ = (s, c = document) => c.querySelector(s);
+  const $$ = (s, c = document) => [...c.querySelectorAll(s)];
+  const INK = '#3B2012';
+
+  /* =====================================================================
+     NEXT BAZAAR — edit this block with the real details.
+     start: ISO date with the Philippine offset, e.g. '2026-12-05T10:00:00+08:00'
+            (leave null to auto-use the next Saturday 10:00 AM as a placeholder)
+     ===================================================================== */
+  const BAZAAR = {
+    title: 'Ukay Ta Bai Bazaar',
+    start: null,
+    durationHours: 8,
+    location: 'Cebu City, Philippines',
+    description: "Cebu's first community thrift culture! Puros good finds ug good vibes. Follow @ukaytabai.official on Instagram and Ukay Ta Bai on Facebook for venue updates."
+  };
+
+  /* ---------- Starburst stickers ---------- */
+  const burstSVG = (n, fill) => {
+    const pts = [];
+    for (let i = 0; i < n * 2; i++) {
+      const a = Math.PI * i / n - Math.PI / 2, r = i % 2 ? 33 : 48;
+      pts.push((50 + r * Math.cos(a)).toFixed(1) + ',' + (50 + r * Math.sin(a)).toFixed(1));
+    }
+    return `<svg viewBox="0 0 100 100" class="w-full h-full"><polygon points="${pts.join(' ')}" fill="${fill}" stroke="${INK}" stroke-width="3.5" stroke-linejoin="round"/></svg>`;
+  };
+  const paintBursts = (root = document) => $$('[data-burst]', root).forEach(el => { el.innerHTML = burstSVG(+el.dataset.burst, el.dataset.fill); });
+  paintBursts();
+
+  /* ---------- Clothing art (inline SVG) ---------- */
+  const ART = {
+    tee: 'M20 22 L36 12 Q50 24 64 12 L80 22 L72 38 L66 34 V84 H34 V34 L28 38 Z',
+    jacket: 'M18 28 L36 12 Q50 22 64 12 L82 28 L78 70 L70 70 L68 84 H32 L30 70 L22 70 Z M50 22 V84',
+    dress: 'M38 10 H62 L58 34 L76 90 H24 L42 34 Z',
+    jeans: 'M30 12 H70 L75 90 H54 L50 42 L46 90 H25 Z M30 22 H70',
+    bag: 'M22 38 H78 L84 88 H16 Z M36 38 V28 Q50 8 64 28 V38',
+    shoes: 'M8 64 Q8 50 24 48 L38 34 L52 44 Q72 46 92 60 V72 H8 Z M8 62 H92'
+  };
+  const art = (type, color) =>
+    `<svg viewBox="0 0 100 100" fill="${color}" stroke="${INK}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" class="w-full h-full"><path d="${ART[type]}" fill-rule="evenodd"/></svg>`;
+  $$('[data-art]').forEach(el => el.innerHTML = art(el.dataset.art, el.dataset.color));
+
+  /* ---------- Data (placeholder content) ---------- */
+  const CATS = [
+    { id: 'tops', name: 'Tees & Tops', n: '20+ merchants', icon: 'tee', bg: '#E8982C', fg: '#F7E4B7' },
+    { id: 'denim', name: 'Denim', n: '15+ merchants', icon: 'jeans', bg: '#3E8E5C', fg: '#26409A' },
+    { id: 'outer', name: 'Jackets', n: '12+ merchants', icon: 'jacket', bg: '#D6382B', fg: '#E8982C' },
+    { id: 'dress', name: 'Dresses', n: '14+ merchants', icon: 'dress', bg: '#26409A', fg: '#F7E4B7' },
+    { id: 'bags', name: 'Bags', n: '10+ merchants', icon: 'bag', bg: '#F7E4B7', fg: '#D6382B' },
+    { id: 'shoes', name: 'Shoes', n: '10+ merchants', icon: 'shoes', bg: '#FFF3D3', fg: '#3E8E5C' }
+  ];
+  const MERCHANTS = [
+    { name: 'Retro Rack Cebu', cat: 'tops', booth: 'A1', what: 'Vintage band tees & graphic tees', icon: 'tee', bg: '#E8982C', fg: '#F7E4B7' },
+    { name: 'Denim Den', cat: 'denim', booth: 'B2', what: 'Wide-leg, mom jeans & Japan denim', icon: 'jeans', bg: '#3E8E5C', fg: '#26409A' },
+    { name: 'Bomber Bros', cat: 'outer', booth: 'A4', what: 'Bomber & windbreaker jackets', icon: 'jacket', bg: '#D6382B', fg: '#E8982C' },
+    { name: 'Flora & Co.', cat: 'dress', booth: 'C1', what: 'Floral midis & summer dresses', icon: 'dress', bg: '#F7E4B7', fg: '#D6382B' },
+    { name: 'Bag Lady Cebu', cat: 'bags', booth: 'C3', what: 'Leather crossbodies & shoulder bags', icon: 'bag', bg: '#26409A', fg: '#E8982C' },
+    { name: 'Sole Searchers', cat: 'shoes', booth: 'D2', what: 'Retro sneakers & trainers', icon: 'shoes', bg: '#FFF3D3', fg: '#3E8E5C' },
+    { name: 'Y2K Corner', cat: 'tops', booth: 'A6', what: 'Crop tops & Y2K throwbacks', icon: 'tee', bg: '#3E8E5C', fg: '#E8982C' },
+    { name: "Mom's Jeans Club", cat: 'denim', booth: 'B5', what: 'Straight-cut & baggy jeans', icon: 'jeans', bg: '#E8982C', fg: '#26409A' },
+    { name: 'Varsity Vault', cat: 'outer', booth: 'A8', what: 'Letterman & varsity jackets', icon: 'jacket', bg: '#26409A', fg: '#D6382B' },
+    { name: 'Silk & Satin', cat: 'dress', booth: 'C5', what: 'Slip dresses & party fits', icon: 'dress', bg: '#D6382B', fg: '#F7E4B7' },
+    { name: 'Tote Tales', cat: 'bags', booth: 'D1', what: 'Canvas totes & mini bags', icon: 'bag', bg: '#3E8E5C', fg: '#F7E4B7' },
+    { name: 'Boot Camp Cebu', cat: 'shoes', booth: 'D4', what: 'Chunky boots & loafers', icon: 'shoes', bg: '#E8982C', fg: '#7A4A2A' }
+  ];
+  const REVIEWS = [
+    { q: 'Una nakong booth, na-sold out dayon akong denim sa tunga-tunga sa adlaw. Mobalik gyud ko!', n: 'Jam R.', r: 'Denim merchant' },
+    { q: 'Ang community na mismo ang moabot. Dili na ko mangita og customers, naa nay ready crowd.', n: 'Mika T.', r: 'Vintage tee merchant' },
+    { q: 'Smooth ang setup ug friendly kaayo ang team. Mao ni ang bazaar nga gusto nakong i-part.', n: 'Carlo D.', r: 'Bags & shoes merchant' }
+  ];
+  const FAQS = [
+    ['Unsaon pag-apply isip merchant?', "Click 'Be a merchant', fill out the inquiry form, and our team will message you with the next steps."],
+    ['Pila ang booth fee?', "Rates depend on the bazaar and booth size. Send an inquiry and we'll share the latest rate card."],
+    ["Unsa'y pwede nako ibaligya?", 'Ukay-ukay, vintage, preloved and thrifted finds like clothes, bags, shoes and accessories. Just tell us what you sell in your inquiry.'],
+    ['Kinahanglan ba ko mag-dala og kaugalingong rack?', "Setup details depend on the booth type you choose. We'll confirm what's provided once your inquiry is reviewed."],
+    ['Kanus-a mo-reply?', "We'll get back to you through the contact details you provide in the form."]
+  ];
+
+  /* ---------- Marquee ---------- */
+  const words = ['Puros good finds ug good vibes', '✺', 'Merchants wanted!', '✺', 'Dayun kamo!', '✺', 'One-of-a-kind find', '✺', 'Tara na, Ukay ta Bai!', '✺', "Cebu's first community thrift culture", '✺'];
+  $$('[data-marquee]').forEach(el => el.innerHTML = words.map(w => `<span class="${w === '✺' ? 'text-mustard' : ''}">${w}</span>`).join(''));
+
+  /* ---------- Categories ---------- */
+  $('#catGrid').innerHTML = CATS.map((c, i) => `
+    <button data-cat="${c.id}" class="reveal stk blk rounded-3xl text-left" style="--o:8px; transition-delay:${(i % 3) * 0.1}s">
+      <span class="stk-b rounded-3xl p-4 sm:p-8 aspect-[4/5] sm:aspect-square relative overflow-hidden" style="background:${c.bg}; color:${['#26409A', '#D6382B', '#3E8E5C'].includes(c.bg) ? '#FFF3D3' : '#3B2012'}">
+        <span class="tile-art absolute right-2 bottom-2 sm:right-3 sm:bottom-3 w-3/5 block">${art(c.icon, c.fg)}</span>
+        <span class="relative block">
+          <span class="block font-display text-xl sm:text-3xl leading-tight">${c.name}</span>
+          <span class="block font-cond uppercase tracking-[.12em] text-xs sm:text-sm mt-1 opacity-80">${c.n}</span>
+        </span>
+      </span>
+    </button>`).join('');
+
+  /* ---------- Merchants + filters ---------- */
+  let active = 'all';
+  const FILTERS = [['all', 'All merchants'], ...CATS.map(c => [c.id, c.name])];
+  const filtersEl = $('#filters');
+  filtersEl.innerHTML = FILTERS.map(([id, label]) => `<button data-filter="${id}" class="chip font-cond uppercase tracking-[.1em] text-sm sm:text-base px-4 sm:px-5 min-h-[44px] rounded-full border-[3px] border-ink transition-[transform,background-color,color] duration-300 active:scale-95">${label}</button>`).join('');
+  const paintChips = () => $$('.chip').forEach(b => {
+    const on = b.dataset.filter === active;
+    b.classList.toggle('bg-tomato', on); b.classList.toggle('text-paper', on);
+    b.classList.toggle('bg-paper', !on);
+  });
+
+  const renderMerchants = () => {
+    const list = MERCHANTS.filter(m => active === 'all' || m.cat === active);
+    const cards = list.map((m, i) => `
+      <article class="card-in stk blk rounded-2xl" style="--o:7px; animation-delay:${i * 0.06}s">
+        <div class="stk-b bg-paper rounded-2xl overflow-hidden">
+          <div class="relative aspect-[4/5] border-b-[3px] border-ink grid place-items-center" style="background:${m.bg}">
+            <div class="tile-art w-3/5">${art(m.icon, m.fg)}</div>
+            <span class="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 bg-paper border-2 border-ink font-cond uppercase tracking-wider text-[11px] sm:text-xs px-2 sm:px-2.5 py-0.5 rounded-full">Booth ${m.booth}</span>
+          </div>
+          <div class="p-3.5 sm:p-5">
+            <h3 class="font-display text-base sm:text-lg leading-tight">${m.name}</h3>
+            <p class="text-[13px] sm:text-sm text-ink/70 mt-1.5">${m.what}</p>
+          </div>
+        </div>
+      </article>`).join('');
+    const cta = `
+      <button data-open-modal class="card-in stk blk rounded-2xl text-left" style="--o:7px; animation-delay:${list.length * 0.06}s" aria-haspopup="dialog">
+        <span class="stk-b bg-mustard rounded-2xl h-full min-h-[240px] sm:min-h-[280px] p-5 sm:p-6 flex flex-col items-center justify-center text-center gap-2.5 sm:gap-3" style="border-style:dashed">
+          <span class="relative block w-16 h-16 sm:w-20 sm:h-20 wiggle">${burstSVG(10, '#D6382B')}<span class="absolute inset-0 grid place-items-center font-display text-3xl sm:text-4xl text-paper" style="-webkit-text-stroke:.05em #3B2012;paint-order:stroke fill">+</span></span>
+          <span class="font-script text-2xl sm:text-3xl text-tomato leading-none">Your booth here!</span>
+          <span class="font-display text-lg sm:text-xl leading-tight">Be our next merchant</span>
+          <span class="font-cond uppercase tracking-[.12em] text-sm underline underline-offset-4">Inquire now →</span>
+        </span>
+      </button>`;
+    $('#merchantGrid').innerHTML = cards + cta;
+  };
+  paintChips(); renderMerchants();
+
+  const setFilter = id => { active = id; paintChips(); renderMerchants(); };
+  filtersEl.addEventListener('click', e => { const b = e.target.closest('[data-filter]'); if (b) setFilter(b.dataset.filter); });
+  $('#catGrid').addEventListener('click', e => {
+    const b = e.target.closest('[data-cat]'); if (!b) return;
+    setFilter(b.dataset.cat);
+    $('#merchants').scrollIntoView({ behavior: 'smooth' });
+  });
+
+  /* ---------- Toast ---------- */
+  const toast = msg => {
+    const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2600);
+  };
+
+  /* ---------- Mobile menu ---------- */
+  const mm = $('#mobileMenu'), modal = $('#modal');
+  $('#menuBtn').onclick = () => { mm.classList.add('open'); document.body.style.overflow = 'hidden'; };
+  const closeMenu = () => { mm.classList.remove('open'); if (!modal.classList.contains('open')) document.body.style.overflow = ''; };
+  $('#menuClose').onclick = closeMenu;
+  $$('#mobileMenu a').forEach(a => a.addEventListener('click', closeMenu));
+
+  /* ---------- Merchant inquiry modal ---------- */
+  const card = $('#modalCard'), form = $('#merchantForm');
+  const mobileMQ = matchMedia('(max-width: 767px)');
+  $('#catSelect').innerHTML = CATS.map(c => `<option value="${c.id}">${c.name}</option>`).join('') + '<option value="mixed">Mixed / other</option>';
+  let lastFocus = null;
+
+  const setStep = (n, focus) => {
+    form.dataset.step = n;
+    $('#stepLabel').textContent = n === 1 ? 'Step 1 of 2 · About you' : 'Step 2 of 2 · Your shop';
+    $$('[data-dot-step]').forEach(d => d.classList.toggle('on', +d.dataset.dotStep === n));
+    if (focus) setTimeout(() => { const f = $(`.fg[data-step="${n}"] input, .fg[data-step="${n}"] select`, form); if (f) f.focus({ preventScroll: true }); }, 60);
+  };
+  const focusables = () => $$('button, a[href], input, select, textarea', card).filter(el => el.offsetParent !== null && !el.disabled);
+
+  const openModal = () => {
+    lastFocus = document.activeElement;
+    if (mm.classList.contains('open')) mm.classList.remove('open');
+    card.classList.remove('sent'); setStep(1);
+    modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => { const f = $('input', form); if (f && !mobileMQ.matches) f.focus({ preventScroll: true }); }, 450);
+  };
+  const closeModal = () => {
+    modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    setTimeout(() => { if (!modal.classList.contains('open')) { form.reset(); card.classList.remove('sent'); setStep(1); } }, 600);
+    if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
+  };
+  document.addEventListener('click', e => { if (e.target.closest('[data-open-modal]')) { e.preventDefault(); openModal(); } });
+  $('#modalClose').onclick = closeModal;
+  $('#doneClose').onclick = closeModal;
+  $('#modalOverlay').onclick = closeModal;
+  $('#modalWrap').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+  document.addEventListener('keydown', e => {
+    if (!modal.classList.contains('open')) return;
+    if (e.key === 'Escape') return closeModal();
+    if (e.key === 'Tab') {
+      const f = focusables(); if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
+
+  // Two steps on phones, one screen from tablet up
+  $('#nextBtn').onclick = () => {
+    const required = $$('.fg[data-step="1"] [required]', form);
+    for (const el of required) if (!el.reportValidity()) return;
+    setStep(2, true);
+  };
+  $('#backBtn').onclick = () => setStep(1, true);
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    if (mobileMQ.matches && form.dataset.step === '1') return $('#nextBtn').click();
+    // Demo only: no backend yet. Hook this up to email / Firebase / a form service.
+    card.classList.add('sent');
+    paintBursts(card);
+    card.querySelector('.stk-b').scrollTo({ top: 0 });
+    toast('Inquiry sent. Salamat, bai!');
+  });
+
+  /* ---------- Next bazaar: dates, countdown, add to calendar ---------- */
+  const PH = 8 * 3600e3;
+  const nextSaturdayPH = () => {
+    const nowPH = new Date(Date.now() + PH);
+    const d = new Date(Date.UTC(nowPH.getUTCFullYear(), nowPH.getUTCMonth(), nowPH.getUTCDate(), 10, 0, 0));
+    d.setUTCDate(d.getUTCDate() + ((6 - d.getUTCDay() + 7) % 7));
+    let t = d.getTime() - PH;
+    if (t <= Date.now()) t += 7 * 864e5;
+    return new Date(t);
+  };
+  const dfDate = new Intl.DateTimeFormat('en-PH', { timeZone: 'Asia/Manila', weekday: 'short', month: 'short', day: 'numeric' });
+  const dfTime = new Intl.DateTimeFormat('en-PH', { timeZone: 'Asia/Manila', hour: 'numeric', minute: '2-digit' });
+  const fmtUTC = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+  const icsEsc = s => String(s).replace(/\\/g, '\\\\').replace(/\r?\n/g, '\\n').replace(/,/g, '\\,').replace(/;/g, '\\;');
+
+  const buildICS = (start, end) => [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Ukay Ta Bai//Bazaar//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    `UID:bazaar-${start.getTime()}@ukaytabai`,
+    `DTSTAMP:${fmtUTC(new Date())}`,
+    `DTSTART:${fmtUTC(start)}`,
+    `DTEND:${fmtUTC(end)}`,
+    `SUMMARY:${icsEsc(BAZAAR.title)}`,
+    `DESCRIPTION:${icsEsc(BAZAAR.description)}`,
+    `LOCATION:${icsEsc(BAZAAR.location)}`,
+    'BEGIN:VALARM', 'TRIGGER:-P1D', 'ACTION:DISPLAY', `DESCRIPTION:${icsEsc(BAZAAR.title + ' is tomorrow!')}`, 'END:VALARM',
+    'END:VEVENT', 'END:VCALENDAR'
+  ].join('\r\n');
+
+  let startDate, endDate, icsUrl = null;
+  const refreshEvent = () => {
+    startDate = BAZAAR.start ? new Date(BAZAAR.start) : nextSaturdayPH();
+    endDate = new Date(startDate.getTime() + BAZAAR.durationHours * 3600e3);
+
+    $('#evDate span').textContent = `${dfDate.format(startDate)} · ${dfTime.format(startDate)} – ${dfTime.format(endDate)}`;
+    const map = $('#evMap');
+    $('span', map).textContent = BAZAAR.location;
+    map.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(BAZAAR.location);
+
+    $('#calGoogle').href = 'https://calendar.google.com/calendar/render?' + new URLSearchParams({
+      action: 'TEMPLATE', text: BAZAAR.title, dates: `${fmtUTC(startDate)}/${fmtUTC(endDate)}`,
+      details: BAZAAR.description, location: BAZAAR.location, ctz: 'Asia/Manila'
+    });
+    $('#calOutlook').href = 'https://outlook.live.com/calendar/0/deeplink/compose?' + new URLSearchParams({
+      path: '/calendar/action/compose', rru: 'addevent', subject: BAZAAR.title,
+      startdt: startDate.toISOString(), enddt: endDate.toISOString(), body: BAZAAR.description, location: BAZAAR.location
+    });
+    if (icsUrl) URL.revokeObjectURL(icsUrl);
+    icsUrl = URL.createObjectURL(new Blob([buildICS(startDate, endDate)], { type: 'text/calendar;charset=utf-8' }));
+    $('#calIcs').href = icsUrl;
+  };
+  refreshEvent();
+
+  const calBtn = $('#calBtn'), calMenu = $('#calMenu');
+  const setCal = open => { calMenu.classList.toggle('open', open); calBtn.setAttribute('aria-expanded', open); };
+  calBtn.addEventListener('click', e => { e.stopPropagation(); setCal(!calMenu.classList.contains('open')); });
+  calMenu.addEventListener('click', e => { if (e.target.closest('a')) setTimeout(() => { setCal(false); toast('Added! See you at the bazaar'); }, 150); });
+  document.addEventListener('click', e => { if (!e.target.closest('#calWrap')) setCal(false); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') setCal(false); });
+
+  const cd = k => $(`[data-cd="${k}"]`);
+  const tick = () => {
+    let s = Math.floor((startDate - new Date()) / 1000);
+    if (s <= 0 && !BAZAAR.start) { refreshEvent(); s = Math.floor((startDate - new Date()) / 1000); }
+    s = Math.max(0, s);
+    const v = { d: Math.floor(s / 86400), h: Math.floor(s % 86400 / 3600), m: Math.floor(s % 3600 / 60), s: s % 60 };
+    for (const k in v) { const el = cd(k), t = String(v[k]).padStart(2, '0'); if (el.textContent !== t) el.textContent = t; }
+  };
+  tick(); setInterval(tick, 1000);
+
+  /* ---------- Testimonials ---------- */
+  const slidesEl = $('#slides'), dotsEl = $('#dots');
+  slidesEl.innerHTML = REVIEWS.map((r, i) => `
+    <figure class="slide ${i === 0 ? 'active' : ''}">
+      <div class="text-mustard text-2xl sm:text-3xl tracking-widest" style="-webkit-text-stroke:1px #3B2012">★★★★★</div>
+      <blockquote class="font-display text-lg sm:text-3xl leading-snug mt-4">“${r.q}”</blockquote>
+      <figcaption class="mt-5 font-cond uppercase tracking-[.12em] text-base sm:text-lg"><span class="text-tomato">${r.n}</span> · ${r.r}</figcaption>
+    </figure>`).join('');
+  dotsEl.innerHTML = REVIEWS.map((_, i) => `<button data-dot="${i}" aria-label="Review ${i + 1}" class="h-3.5 rounded-full border-2 border-ink transition-[width,background-color] duration-500 ${i === 0 ? 'w-9 bg-tomato' : 'w-3.5 bg-cream'}"></button>`).join('');
+  let cur = 0, timer;
+  const paintDot = (i, on) => {
+    const d = $$('[data-dot]')[i];
+    d.classList.toggle('w-9', on); d.classList.toggle('bg-tomato', on);
+    d.classList.toggle('w-3.5', !on); d.classList.toggle('bg-cream', !on);
+  };
+  const go = n => {
+    const s = $$('.slide'), old = cur;
+    s[old].classList.remove('active'); s[old].classList.add('prev'); paintDot(old, false);
+    setTimeout(() => s[old].classList.remove('prev'), 900);
+    cur = (n + REVIEWS.length) % REVIEWS.length;
+    s[cur].classList.add('active'); paintDot(cur, true);
+  };
+  const auto = () => { clearInterval(timer); timer = setInterval(() => go(cur + 1), 5500); };
+  dotsEl.addEventListener('click', e => { const b = e.target.closest('[data-dot]'); if (b) { go(+b.dataset.dot); auto(); } });
+  auto();
+
+  /* ---------- FAQ ---------- */
+  $('#faq').innerHTML = FAQS.map(([q, a], i) => `
+    <div class="faq-item reveal stk blk rounded-2xl" style="--o:6px; transition-delay:${i * 0.08}s">
+      <div class="stk-b bg-paper rounded-2xl">
+        <button class="w-full flex items-center justify-between gap-4 text-left p-4 sm:p-6 font-display text-base sm:text-lg" aria-expanded="false">${q}<span class="faq-icon shrink-0 w-9 h-9 rounded-full bg-mustard border-[3px] border-ink grid place-items-center text-xl leading-none">+</span></button>
+        <div class="faq-body"><div><p class="px-4 sm:px-6 pb-5 sm:pb-6 text-ink/80">${a}</p></div></div>
+      </div>
+    </div>`).join('');
+  $('#faq').addEventListener('click', e => {
+    const btn = e.target.closest('button'); if (!btn) return;
+    const item = btn.closest('.faq-item'), was = item.classList.contains('open');
+    $$('.faq-item').forEach(i => { i.classList.remove('open'); $('button', i).setAttribute('aria-expanded', 'false'); });
+    if (!was) { item.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
+  });
+
+  /* ---------- Scroll reveal ---------- */
+  const io = new IntersectionObserver(entries => entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }), { threshold: .1, rootMargin: '0px 0px -5% 0px' });
+  $$('.reveal').forEach(el => io.observe(el));
+
+  /* ---------- Count-up ---------- */
+  const countIO = new IntersectionObserver(entries => entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    countIO.unobserve(e.target);
+    const el = e.target, end = +el.dataset.count, dur = 1800, t0 = performance.now();
+    const step = now => {
+      const p = Math.min(1, (now - t0) / dur), eased = 1 - Math.pow(1 - p, 4);
+      el.textContent = Math.round(end * eased).toLocaleString();
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }), { threshold: .6 });
+  $$('[data-count]').forEach(el => countIO.observe(el));
+
+  /* ---------- Scroll: progress bar, shrinking header, back-to-top, parallax ---------- */
+  const nav = $('#nav'), prog = $('#progress'), toTop = $('#toTop'), par = $$('[data-parallax]');
+  let ticking = false;
+  const onScroll = () => {
+    const y = window.scrollY, max = document.documentElement.scrollHeight - innerHeight;
+    prog.style.transform = `scaleX(${max > 0 ? y / max : 0})`;
+    const scrolled = y > 30;
+    nav.classList.toggle('solid', scrolled);
+    nav.classList.toggle('shrink', scrolled);
+    toTop.classList.toggle('show', y > 600);
+    if (y < innerHeight * 1.5) par.forEach(el => { el.style.transform = `translate3d(0, ${y * parseFloat(el.dataset.parallax)}px, 0)`; });
+    ticking = false;
+  };
+  addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
+  onScroll();
+  $('button', toTop).addEventListener('click', () => scrollTo({ top: 0, behavior: 'smooth' }));
+
+  /* ---------- Cursor + magnetic buttons (fine pointers only) ---------- */
+  if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    const dot = $('#cursor'), ring = $('#cursor-ring');
+    let mx = 0, my = 0, rx = 0, ry = 0, shown = false;
+    addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      if (!shown) { shown = true; dot.style.opacity = ring.style.opacity = 1; rx = mx; ry = my; }
+    }, { passive: true });
+    const loop = () => {
+      rx += (mx - rx) * .18; ry += (my - ry) * .18;
+      dot.style.transform = `translate3d(${mx}px, ${my}px, 0)`;
+      ring.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
+      requestAnimationFrame(loop);
+    };
+    loop();
+    document.addEventListener('mouseover', e => ring.classList.toggle('hover', !!e.target.closest('a, button, input, select, textarea')));
+    document.addEventListener('mousemove', e => {
+      const el = e.target.closest('[data-magnetic]'); if (!el) return;
+      const r = el.getBoundingClientRect();
+      el.style.transform = `translate3d(${(e.clientX - r.left - r.width / 2) * .22}px, ${(e.clientY - r.top - r.height / 2) * .3}px, 0)`;
+    }, { passive: true });
+    document.addEventListener('mouseout', e => {
+      const el = e.target.closest('[data-magnetic]');
+      if (el && !el.contains(e.relatedTarget)) el.style.transform = '';
+    });
+  }
+
+  $('#yr').textContent = new Date().getFullYear();
+
+  /* ---------- Preloader → ready ---------- */
+  const start = () => {
+    setTimeout(() => {
+      $('#preloader').classList.add('done');
+      document.body.classList.add('ready');
+      setTimeout(() => $('#preloader').remove(), 1000);
+    }, 1500);
+  };
+  document.readyState === 'complete' ? start() : addEventListener('load', start);
+})();
+</script>
+    </body>
+</html>
