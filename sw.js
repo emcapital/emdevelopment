@@ -3,7 +3,7 @@
  * - Every other page (home, projects, 404...): always the network. They are never cached,
  *   but if the device has no connection, the visitor sees /offline.html instead of the browser's error page.
  * Bump VERSION whenever you change this file or want everyone to refresh cached pages. */
-const VERSION = 'v3';
+const VERSION = 'v4';
 const PAGES = `em-pages-${VERSION}`;
 const ASSETS = `em-assets-${VERSION}`;
 
@@ -33,7 +33,12 @@ self.addEventListener('install', event => {
     // Fetch one by one so a missing page (404) does not break the whole install, and keep a clean copy of each.
     // A response that followed a redirect (for example /offline.html -> /offline when Vercel "cleanUrls" is on) cannot be used
     // to answer a page load, so the browser shows "site can't be reached" when offline. clean() removes that problem.
-    await Promise.all(PRECACHE.map(async url => {
+    // offline.html is required: if it cannot be saved, the install fails and the browser retries later,
+    // so a worker that is active ALWAYS has the offline page ready.
+    const off = await fetch(new Request('/offline.html', { cache: 'reload' }));
+    if (!off.ok) throw new Error('offline.html not available');
+    await cache.put('/offline.html', await clean(off));
+    await Promise.all(PRECACHE.filter(u => u !== '/offline.html').map(async url => {
       try { const res = await fetch(new Request(url, { cache: 'reload' })); if (res.ok) await cache.put(url, await clean(res)); } catch (e) { }
     }));
     await self.skipWaiting();
@@ -93,26 +98,46 @@ async function findPage(cache, pathname) {
   return null;
 }
 
-// Public pages (home, projects, 404...): never cached. Only a failed network request falls back to offline.html.
+// Fetch that gives up after `ms` (a Wi-Fi with no internet can hang for a long time instead of failing)
+function timed(promise, ms) {
+  return new Promise((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error('timeout')), ms);
+    promise.then(v => { clearTimeout(t); resolve(v); }, e => { clearTimeout(t); reject(e); });
+  });
+}
+const NET_TIMEOUT = 8000;
+function load(event, req) {
+  if (!self.navigator.onLine) return Promise.reject(new Error('offline'));
+  return timed(Promise.resolve(event.preloadResponse).then(r => r || fetch(req)), NET_TIMEOUT);
+}
+
+// The offline page. Never lets the browser's own "You're offline" screen appear.
+async function offlinePage() {
+  const hit = await caches.match('/offline.html');
+  if (hit) return clean(hit);
+  return new Response(
+    '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Offline | EM Development</title>' +
+    '<body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#070a16;color:#e8ebff;font-family:system-ui,sans-serif;text-align:center;padding:24px">' +
+    '<div><h1 style="font-size:34px;margin:0 0 10px">You\u2019re offline</h1><p style="color:#a9b2e6">Check your connection and try again.</p>' +
+    '<button onclick="location.reload()" style="margin-top:18px;padding:14px 26px;border:0;border-radius:14px;background:#5b6cff;color:#fff;font:700 15px system-ui">Try again</button></div>',
+    { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+}
+
+// Public pages (home, projects, 404...): never cached. Only a failed / hanging request falls back to the offline page.
 // A 404 from the server is a normal response here, so it still shows 404.html.
 async function networkOrOffline(event, req) {
-  try {
-    return (await event.preloadResponse) || (await fetch(req));
-  } catch (err) {
-    const cache = await caches.open(PAGES);
-    return (await findPage(cache, '/offline.html')) || new Response('You are offline.', { status: 503, headers: { 'Content-Type': 'text/plain' } });
-  }
+  try { return await load(event, req); }
+  catch (err) { return offlinePage(); }
 }
 
 async function networkFirst(event, req) {
   const cache = await caches.open(PAGES), path = new URL(req.url).pathname;
   try {
-    const fresh = (await event.preloadResponse) || (await fetch(req));
+    const fresh = await load(event, req);
     if (fresh && fresh.ok) clean(fresh.clone()).then(r => cache.put(path, r)).catch(() => { });
     return fresh;
   } catch (err) {
-    const page = (await findPage(cache, path)) || (await findPage(cache, './offline.html'));
-    return page || new Response('You are offline.', { status: 503, headers: { 'Content-Type': 'text/plain' } });
+    return (await findPage(cache, path)) || offlinePage();
   }
 }
 
