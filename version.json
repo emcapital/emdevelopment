@@ -1,0 +1,10 @@
+{
+  "version": "1.1.0",
+  "date": "2026-11-20",
+  "title": "What's new",
+  "notes": [
+    "New 404 page for missing links, with suggestions for the page you meant",
+    "Offline page now shows whenever your device has no connection",
+    "The app now tells you when an update is ready and reloads itself"
+  ]
+}

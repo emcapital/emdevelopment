@@ -40,6 +40,164 @@
         });
     }
 
+
+    // ================= Updates: pop-up with what's new + auto reload =================
+    // How it works:
+    //  - version.json (site root) holds the current version and a list of notes. Edit it on every release.
+    //  - The app checks it when opened, every minute, when you come back to it and when the connection returns.
+    //  - New version found while the app is open -> pop-up with the notes, then the app reloads itself.
+    //  - App was closed during the update -> it opens on the new version and shows the pop-up once.
+    var VERSION_KEY = 'emSeenVersion';
+    var CHECK_EVERY = 60 * 1000;     // how often to look for an update while the app is open
+    var RELOAD_AFTER = 10;           // seconds the pop-up waits before reloading
+    var loadedVersion = null;        // the version this page was loaded with
+    var updating = false;
+
+    function getJSON(url) {
+        return fetch(url + '?t=' + Date.now(), { cache: 'no-store' }).then(function (r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+        });
+    }
+    function seen(v) { try { if (v === undefined) return localStorage.getItem(VERSION_KEY); localStorage.setItem(VERSION_KEY, v); } catch (e) { } return null; }
+
+    function updStyles() {
+        if (document.getElementById('pwaUpdCss')) return;
+        var s = document.createElement('style');
+        s.id = 'pwaUpdCss';
+        s.textContent = [
+            '#pwaUpd{position:fixed;z-index:10001;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));width:min(380px,calc(100vw - 32px));font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;opacity:0;transform:translateY(24px) scale(.97);transition:opacity .4s ease,transform .5s cubic-bezier(.2,.7,.2,1)}',
+            '#pwaUpd.in{opacity:1;transform:none}',
+            '#pwaUpd .pu-card{position:relative;overflow:hidden;padding:18px 18px 16px;border-radius:20px;background:#0d1226;color:#e5e9ff;border:1px solid rgba(255,255,255,.12);box-shadow:0 24px 60px rgba(0,0,0,.5),0 0 0 1px rgba(124,140,255,.14)}',
+            '#pwaUpd .pu-head{display:flex;align-items:center;gap:12px}',
+            '#pwaUpd .pu-ic{flex:none;width:42px;height:42px;border-radius:13px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#5b6cff,#22d3ee);box-shadow:0 8px 20px rgba(91,108,255,.4)}',
+            '#pwaUpd .pu-ic svg{width:22px;height:22px}',
+            '#pwaUpd.spin .pu-ic svg{animation:puSpin 1s linear infinite}',
+            '@keyframes puSpin{to{transform:rotate(360deg)}}',
+            '#pwaUpd h2{margin:0;font-size:15.5px;font-weight:800;letter-spacing:-.01em}',
+            '#pwaUpd .pu-ver{margin:2px 0 0;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#22d3ee}',
+            '#pwaUpd ul{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px;max-height:30vh;overflow:auto}',
+            '#pwaUpd li{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;line-height:1.45;color:#c9d0f5}',
+            '#pwaUpd li::before{content:"";flex:none;width:7px;height:7px;margin-top:7px;border-radius:50%;background:linear-gradient(135deg,#5b6cff,#22d3ee)}',
+            '#pwaUpd .pu-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px}',
+            '#pwaUpd .pu-count{font-size:12.5px;color:#8b95c9}',
+            '#pwaUpd .pu-count b{color:#c9d0f5;font-variant-numeric:tabular-nums}',
+            '#pwaUpd button{padding:10px 16px;border:0;border-radius:12px;cursor:pointer;font:700 13.5px/1 inherit;color:#fff;background:linear-gradient(90deg,#5b6cff,#4351e8);box-shadow:0 8px 20px rgba(91,108,255,.35);transition:transform .2s ease}',
+            '#pwaUpd button:hover{transform:translateY(-1px)}',
+            '#pwaUpd button.pu-ghost{color:#c9d0f5;background:rgba(255,255,255,.08);box-shadow:none}',
+            '#pwaUpd button:focus-visible{outline:3px solid rgba(124,140,255,.6);outline-offset:2px}',
+            '#pwaUpd .pu-bar{position:absolute;left:0;bottom:0;height:3px;width:0;background:linear-gradient(90deg,#5b6cff,#22d3ee)}',
+            'html.light #pwaUpd .pu-card{background:#fff;color:#0f1535;border-color:rgba(15,21,53,.1);box-shadow:0 24px 60px rgba(67,81,232,.22)}',
+            'html.light #pwaUpd li{color:#374068}',
+            'html.light #pwaUpd .pu-ver{color:#0891b2}',
+            'html.light #pwaUpd .pu-count{color:#6b7599} html.light #pwaUpd .pu-count b{color:#374068}',
+            'html.light #pwaUpd button.pu-ghost{color:#374068;background:rgba(15,21,53,.07)}',
+            '@media (prefers-reduced-motion:reduce){#pwaUpd{transition-duration:.01ms!important}#pwaUpd.spin .pu-ic svg{animation:none}}'
+        ].join('\n');
+        document.head.appendChild(s);
+    }
+
+    var ICON_REFRESH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>';
+    var ICON_SPARK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 17l.8 2.2L22 20l-2.2.8L19 23l-.8-2.2L16 20l2.2-.8z"/></svg>';
+
+    // mode "reload": new version found while open (counts down, then reloads)
+    // mode "info":   app opened on a version it has not shown yet (what's new, no reload)
+    function showUpdate(info, mode) {
+        var old = document.getElementById('pwaUpd'); if (old) old.remove();
+        updStyles();
+        var box = document.createElement('div');
+        box.id = 'pwaUpd';
+        box.setAttribute('role', 'status');
+        box.setAttribute('aria-live', 'polite');
+        var reload = mode === 'reload';
+        box.innerHTML =
+            '<div class="pu-card">' +
+            '<div class="pu-head"><span class="pu-ic">' + (reload ? ICON_REFRESH : ICON_SPARK) + '</span><div><h2></h2><p class="pu-ver"></p></div></div>' +
+            '<ul></ul>' +
+            '<div class="pu-foot"><span class="pu-count"></span><button type="button" class="pu-go"></button></div>' +
+            (reload ? '<i class="pu-bar"></i>' : '') +
+            '</div>';
+        box.querySelector('h2').textContent = reload ? 'Update available' : 'Updated: ' + (info.title || 'What’s new');
+        box.querySelector('.pu-ver').textContent = 'Version ' + info.version + (info.date ? ' · ' + info.date : '');
+        var ul = box.querySelector('ul');
+        (info.notes || []).slice(0, 6).forEach(function (n) { var li = document.createElement('li'); li.textContent = n; ul.appendChild(li); });
+        if (!ul.children.length) ul.remove();
+        var go = box.querySelector('.pu-go'), count = box.querySelector('.pu-count'), bar = box.querySelector('.pu-bar');
+        document.body.appendChild(box);
+        requestAnimationFrame(function () { box.classList.add('in'); });
+
+        function close() { box.classList.remove('in'); setTimeout(function () { box.remove(); }, 450); }
+
+        if (!reload) {
+            go.textContent = 'Got it'; go.className = 'pu-go pu-ghost';
+            count.textContent = 'You’re up to date';
+            go.addEventListener('click', close);
+            setTimeout(close, 15000);
+            return;
+        }
+
+        go.textContent = 'Reload now';
+        var left = RELOAD_AFTER, done = false;
+        function typing() {
+            var a = document.activeElement;
+            return !!a && (/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) || a.isContentEditable) && a.type !== 'checkbox' && a.type !== 'radio' && a.type !== 'button' && a.type !== 'submit';
+        }
+        function go_() {
+            if (done) return; done = true;
+            box.classList.add('spin'); count.textContent = 'Updating…'; go.disabled = true;
+            navigator.serviceWorker && navigator.serviceWorker.getRegistration().then(function (r) {
+                if (r && r.waiting) r.waiting.postMessage('SKIP_WAITING');
+            }).catch(function () { });
+            setTimeout(function () { location.reload(); }, 450);
+        }
+        function tick() {
+            if (done) return;
+            if (typing()) { count.innerHTML = 'Reloading after you finish typing…'; setTimeout(tick, 1000); return; }
+            count.innerHTML = 'Reloading in <b>' + left + 's</b>';
+            bar.style.transition = 'none'; bar.style.width = ((RELOAD_AFTER - left) / RELOAD_AFTER * 100) + '%';
+            if (left <= 0) { go_(); return; }
+            requestAnimationFrame(function () { requestAnimationFrame(function () { bar.style.transition = 'width 1s linear'; bar.style.width = ((RELOAD_AFTER - left + 1) / RELOAD_AFTER * 100) + '%'; }); });
+            left--; setTimeout(tick, 1000);
+        }
+        go.addEventListener('click', go_);
+        tick();
+    }
+
+    function checkForUpdate() {
+        if (updating || !navigator.onLine) return Promise.resolve();
+        // also let the browser look for a new service worker
+        if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistration().then(function (r) { if (r) r.update().catch(function () { }); }).catch(function () { });
+        return getJSON('/version.json').then(function (info) {
+            if (!info || !info.version) return;
+            if (loadedVersion === null) {                         // first check after opening the app
+                loadedVersion = info.version;
+                var last = seen();
+                if (last && last !== info.version) showUpdate(info, 'info');   // updated while the app was closed
+                seen(info.version);
+                return;
+            }
+            if (info.version !== loadedVersion) {                 // updated while the app is open
+                updating = true;
+                seen(info.version);                               // so the reloaded page does not show it twice
+                showUpdate(info, 'reload');
+            }
+        }).catch(function () { });
+    }
+    window.emCheckForUpdate = checkForUpdate;
+
+    function startUpdates() {
+        checkForUpdate();
+        setInterval(function () { if (!document.hidden) checkForUpdate(); }, CHECK_EVERY);
+        document.addEventListener('visibilitychange', function () { if (!document.hidden) checkForUpdate(); });
+        window.addEventListener('focus', checkForUpdate);
+        window.addEventListener('online', checkForUpdate);
+        // a new service worker took over while the app was open -> check right away
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.addEventListener('controllerchange', checkForUpdate);
+        }
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startUpdates); else startUpdates();
+
     // ================= Install modal (login page only) =================
     var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     var onLogin = /\/auth\/login(\.html)?$/.test(location.pathname);
