@@ -125,7 +125,6 @@
       background: linear-gradient(140deg, rgba(124,140,255,.7), transparent 35%, transparent 65%, rgba(34,211,238,.55));
       -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
     .stage svg { display: block; width: 100%; height: auto; overflow: visible; }
-    .num { font: 800 74px/1 "Plus Jakarta Sans", system-ui, sans-serif; letter-spacing: -.04em; }
     .float { animation: float 4.5s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
     @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
     .scan { transform-box: fill-box; transform-origin: center; animation: scan 5s ease-in-out infinite; }
@@ -148,6 +147,41 @@
     .tips h2 { margin: 1px 0 4px; font-size: 14.5px; font-weight: 700; }
     .tips p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
 
+
+    /* ---------- Stage (redesign) ---------- */
+    .stage { overflow: hidden; }
+    .stage svg { overflow: visible; position: relative; }
+    .layer { transition: transform .25s ease-out; will-change: transform; }
+    .num { font: 800 150px/1 "Plus Jakarta Sans", system-ui, sans-serif; letter-spacing: -.05em; }
+    .q { font: 800 56px/1 "Plus Jakarta Sans", system-ui, sans-serif; animation: bob 2.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+    @keyframes bob { 0%,100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-5px) rotate(6deg); } }
+    .sat { offset-path: path("M 142 108 A 78 17 0 1 1 142 108.01"); animation: none; }
+    .sat { transform-box: view-box; animation: around 6s linear infinite; }
+    @keyframes around { from { transform: translate(220px,128px) rotate(0) translate(78px,0) scale(1,.22); } to { transform: translate(220px,128px) rotate(360deg) translate(78px,0) scale(1,.22); } }
+    .shadow { transform-box: fill-box; transform-origin: center; animation: shad 4.5s ease-in-out infinite; }
+    @keyframes shad { 0%,100% { transform: scaleX(1); opacity: .18; } 50% { transform: scaleX(.85); opacity: .1; } }
+    .chip { transform-box: fill-box; transform-origin: center; animation: float 5s ease-in-out infinite; }
+    .c2 { animation-delay: -1.6s; animation-duration: 6s; } .c3 { animation-delay: -3s; animation-duration: 5.5s; }
+    .code { font: 700 13px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .stars i { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: var(--aqua); opacity: .2; animation: sig 3s ease-in-out infinite; }
+    .stars i:nth-child(1){ top:12%; left:46%; } .stars i:nth-child(2){ top:22%; left:80%; animation-delay:.4s; } .stars i:nth-child(3){ top:70%; left:12%; animation-delay:.9s; }
+    .stars i:nth-child(4){ top:84%; left:58%; animation-delay:1.3s; } .stars i:nth-child(5){ top:40%; left:6%; animation-delay:1.8s; } .stars i:nth-child(6){ top:55%; left:92%; animation-delay:.2s; }
+    .stars i:nth-child(7){ top:8%; left:20%; animation-delay:2.2s; } .stars i:nth-child(8){ top:90%; left:30%; animation-delay:1s; }
+
+    /* ---------- Did you mean ---------- */
+    .suggest { margin-top: 22px; max-width: 460px; animation: up .8s .25s both; }
+    .suggest[hidden] { display: none; }
+    .suggest p { margin: 0 0 9px; font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); }
+    .suggest ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+    .suggest a { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); font: 600 13px/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--text); transition: transform .25s, border-color .25s, background .25s; }
+    .suggest a span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+    .suggest a em { flex: none; font-style: normal; color: var(--aqua); font-family: inherit; transition: transform .25s; }
+    html.light .suggest a em { color: #0891b2; }
+    .suggest a:hover { transform: translateX(4px); border-color: rgba(124,140,255,.55); background: rgba(124,140,255,.08); }
+    .suggest a:hover em { transform: translateX(3px); }
+    .suggest a:focus-visible { outline: 3px solid rgba(124,140,255,.55); outline-offset: 3px; }
+    .caret { display: inline-block; width: 7px; height: 14px; margin-left: 2px; background: var(--pink); vertical-align: -2px; animation: blink 1s steps(1) infinite; }
+
     .foot { text-align: center; font-size: 12.5px; color: var(--faint); animation: up .9s .4s both; }
     .foot strong { color: var(--muted); }
 
@@ -155,7 +189,9 @@
 
     @media (max-width: 380px) { .brand span { font-size: 14px; } .status { padding: 6px 10px; font-size: 10.5px; } }
     @media (max-height: 520px) and (orientation: landscape) { :root { --space-y: 20px; } }
+    @media (max-width: 480px) { .num { font-size: 150px; } }
     @media (prefers-reduced-motion: reduce) {
+      .layer { transition: none; }
       *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; animation-delay: 0s !important; }
     }
   </style>
@@ -182,7 +218,12 @@
         <h1>This page <span>doesn’t exist</span></h1>
         <p class="lead">The page you’re looking for may have been moved, renamed or never existed. Check the address for typos, or head back to somewhere that does.</p>
 
-        <div class="path" id="pathBox" hidden><b>GET</b><code id="path"></code></div>
+        <div class="path" id="pathBox" hidden><b>GET</b><code id="path"></code><span class="caret" aria-hidden="true"></span></div>
+
+        <nav class="suggest" id="suggest" hidden aria-label="Suggested pages">
+          <p>Did you mean</p>
+          <ul id="suggestList"></ul>
+        </nav>
 
         <div class="actions">
           <a class="btn" href="/" id="home">
@@ -193,34 +234,48 @@
         </div>
       </section>
 
-      <aside class="stage" aria-hidden="true">
-        <svg viewBox="0 0 440 250">
+      <aside class="stage" id="stage" aria-hidden="true">
+        <div class="stars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <svg viewBox="0 0 440 260">
           <defs>
-            <linearGradient id="lg" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#5b6cff"/><stop offset="1" stop-color="#22d3ee"/></linearGradient>
             <linearGradient id="dv" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#5b6cff"/><stop offset="1" stop-color="#22d3ee"/></linearGradient>
+            <linearGradient id="pk" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f472b6"/><stop offset="1" stop-color="#7c8cff"/></linearGradient>
+            <radialGradient id="pl" cx=".35" cy=".3" r=".8"><stop stop-color="#7c8cff" stop-opacity=".55"/><stop offset="1" stop-color="#22d3ee" stop-opacity=".05"/></radialGradient>
           </defs>
-          <!-- browser window -->
-          <g class="float">
-            <rect x="50" y="28" width="340" height="190" rx="18" fill="none" stroke="url(#dv)" stroke-width="3"/>
-            <path d="M50 66h340" stroke="var(--line)" stroke-width="2.5"/>
-            <circle cx="74" cy="47" r="5" fill="#f472b6"/><circle cx="92" cy="47" r="5" fill="#22d3ee" opacity=".7"/><circle cx="110" cy="47" r="5" fill="#5b6cff" opacity=".7"/>
-            <rect x="132" y="39" width="236" height="16" rx="8" fill="none" stroke="var(--line)" stroke-width="2"/>
-            <rect x="142" y="45" width="70" height="4" rx="2" fill="var(--line)"/>
-            <text class="num" x="220" y="168" text-anchor="middle" fill="url(#dv)">404</text>
-            <path class="dashline" d="M96 196h248"/>
+
+          <g class="layer" data-depth="6">
+            <ellipse cx="220" cy="226" rx="150" ry="9" fill="url(#dv)" opacity=".18" class="shadow"/>
           </g>
-          <!-- magnifier searching -->
-          <g class="scan">
-            <circle cx="316" cy="132" r="30" fill="var(--stage)" fill-opacity=".55" stroke="#f472b6" stroke-width="5"/>
-            <path d="M307 123l18 18M325 123l-18 18" stroke="#f472b6" stroke-width="4" stroke-linecap="round"/>
-            <path d="M338 154l26 26" stroke="#f472b6" stroke-width="7" stroke-linecap="round"/>
+
+          <g class="layer" data-depth="10">
+            <g class="float">
+              <text class="num" x="104" y="172" text-anchor="middle" fill="url(#dv)">4</text>
+              <text class="num" x="336" y="172" text-anchor="middle" fill="url(#dv)">4</text>
+              <!-- the "0": a lost little planet -->
+              <circle cx="220" cy="128" r="52" fill="url(#pl)" stroke="url(#dv)" stroke-width="9"/>
+              <g class="orbit"><ellipse cx="220" cy="128" rx="78" ry="17" fill="none" stroke="var(--line)" stroke-width="2.5" stroke-dasharray="3 7" transform="rotate(-18 220 128)"/></g>
+              <g class="sat"><circle cx="0" cy="0" r="7" fill="#22d3ee"/><circle cx="0" cy="0" r="12" fill="#22d3ee" opacity=".2"/></g>
+              <text class="q" x="220" y="148" text-anchor="middle" fill="url(#pk)">?</text>
+            </g>
           </g>
-          <!-- signal -->
-          <g fill="none" stroke="url(#dv)" stroke-width="4" stroke-linecap="round">
-            <path class="sig" d="M400 22a22 22 0 0 1 24 0"/><path class="sig s2" d="M392 12a34 34 0 0 1 40 0"/>
+
+          <!-- floating code bits -->
+          <g class="layer" data-depth="18">
+            <g class="chip c1"><rect x="26" y="34" width="62" height="28" rx="9" fill="var(--card)" stroke="var(--line)"/><text x="57" y="53" text-anchor="middle" class="code" fill="#22d3ee">&lt;/&gt;</text></g>
+            <g class="chip c2"><rect x="356" y="30" width="58" height="28" rx="9" fill="var(--card)" stroke="var(--line)"/><text x="385" y="49" text-anchor="middle" class="code" fill="#f472b6">{ }</text></g>
+            <g class="chip c3"><rect x="340" y="206" width="76" height="28" rx="9" fill="var(--card)" stroke="var(--line)"/><text x="378" y="225" text-anchor="middle" class="code" fill="#7c8cff">404.js</text></g>
+          </g>
+
+          <!-- magnifier that follows the pointer -->
+          <g class="layer" data-depth="34" id="lens">
+            <g class="scan">
+              <circle cx="150" cy="196" r="26" fill="var(--stage)" fill-opacity=".5" stroke="#f472b6" stroke-width="5"/>
+              <path d="M141 187l18 18M159 187l-18 18" stroke="#f472b6" stroke-width="4" stroke-linecap="round"/>
+              <path d="M170 216l24 24" stroke="#f472b6" stroke-width="7" stroke-linecap="round"/>
+            </g>
           </g>
         </svg>
-        <div class="cap"><span>Requested page</span><span>Not found</span></div>
+        <div class="cap"><span>Requested page</span><span>Lost in space</span></div>
       </aside>
     </main>
 
@@ -251,6 +306,81 @@
         document.getElementById('path').textContent = p;
         document.getElementById('pathBox').hidden = false;
       } catch (e) {}
+
+
+      // ---- "Did you mean": closest known pages by edit distance ----
+      var ROUTES = [
+        ['/', 'Home'],
+        ['/auth/login', 'Log in'],
+        ['/components/dashboard', 'Admin dashboard'],
+        ['/customers/dashboard', 'Customer portal'],
+        ['/projects/shineon/home', 'Shine On'],
+        ['/projects/KpiHarbor/dashboard', 'KPI Harbor'],
+        ['/projects/dinkline/auth', 'Dinkline login'],
+        ['/projects/dinkline/customer/dashboard', 'Dinkline customer'],
+        ['/projects/dinkline/admin/dashboard', 'Dinkline admin'],
+        ['/projects/commute/home', 'Commute'],
+        ['/projects/commute/demo', 'Commute demo'],
+        ['/projects/inventory/auth', 'Inventory login'],
+        ['/projects/inventory/dashboard', 'Inventory dashboard'],
+        ['/projects/cafe/meadow/home', 'Meadow Café'],
+        ['/projects/cafe/residente/home', 'Residente Café'],
+        ['/projects/utb/home', 'Ukay Ta Bai'],
+        ['/projects/architecture/home', 'Architecture'],
+        ['/projects/architecture/about', 'Architecture: About'],
+        ['/projects/architecture/contact', 'Architecture: Contact'],
+        ['/projects/architecture/services', 'Architecture: Services']
+      ];
+      function lev(a, b) {
+        var m = a.length, n = b.length, d = [], i, j;
+        for (j = 0; j <= n; j++) d[j] = j;
+        for (i = 1; i <= m; i++) {
+          var prev = d[0]; d[0] = i;
+          for (j = 1; j <= n; j++) {
+            var t = d[j];
+            d[j] = Math.min(d[j] + 1, d[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1));
+            prev = t;
+          }
+        }
+        return d[n];
+      }
+      try {
+        var want = location.pathname.toLowerCase().replace(/\.html$/, '').replace(/\/+$/, '') || '/';
+        var scored = ROUTES.map(function (r) {
+          var route = r[0].toLowerCase(), tail = route.split('/').pop(), wantTail = want.split('/').pop();
+          var score = lev(want, route) / Math.max(want.length, route.length);
+          if (wantTail && tail && (tail.indexOf(wantTail) > -1 || wantTail.indexOf(tail) > -1)) score -= .25;
+          if (want.indexOf(route.split('/')[2] || '\u0000') > -1 && route.split('/')[2]) score -= .15;
+          return { href: r[0], name: r[1], score: score };
+        }).filter(function (r) { return r.href !== '/' && r.score < .62; })
+          .sort(function (a, b) { return a.score - b.score; }).slice(0, 3);
+        if (scored.length) {
+          var ul = document.getElementById('suggestList');
+          scored.forEach(function (r) {
+            var li = document.createElement('li'), a = document.createElement('a'), s = document.createElement('span'), e = document.createElement('em');
+            a.href = r.href; s.textContent = r.href + '  ·  ' + r.name; e.textContent = '→'; e.setAttribute('aria-hidden', 'true');
+            a.appendChild(s); a.appendChild(e); li.appendChild(a); ul.appendChild(li);
+          });
+          document.getElementById('suggest').hidden = false;
+        }
+      } catch (e) {}
+
+      // ---- Parallax: stage layers follow the pointer (and tilt with the device) ----
+      var stage = document.getElementById('stage');
+      var layers = stage ? stage.querySelectorAll('.layer') : [];
+      var calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      function shift(nx, ny) {
+        layers.forEach(function (l) {
+          var d = +l.getAttribute('data-depth') || 0;
+          l.style.transform = 'translate(' + (nx * d).toFixed(1) + 'px,' + (ny * d).toFixed(1) + 'px)';
+        });
+      }
+      if (!calm && layers.length) {
+        addEventListener('pointermove', function (e) {
+          shift((e.clientX / innerWidth - .5) * 2, (e.clientY / innerHeight - .5) * 2);
+        }, { passive: true });
+        addEventListener('pointerleave', function () { shift(0, 0); });
+      }
 
       // Fade the whole page out, then navigate
       function leave(fn) {

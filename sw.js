@@ -1,8 +1,9 @@
-/* EM Development portal service worker.
- * Serves only the PWA pages (login, admin dashboard, customer dashboard).
- * The public home page (index.html) is never touched: it always goes to the network.
+/* EM Development service worker.
+ * - PWA pages (login, admin dashboard, customer dashboard): network first, saved copy when offline.
+ * - Every other page (home, projects, 404...): always the network. They are never cached,
+ *   but if the device has no connection, the visitor sees /offline.html instead of the browser's error page.
  * Bump VERSION whenever you change this file or want everyone to refresh cached pages. */
-const VERSION = 'v2';
+const VERSION = 'v3';
 const PAGES = `em-pages-${VERSION}`;
 const ASSETS = `em-assets-${VERSION}`;
 
@@ -33,7 +34,7 @@ self.addEventListener('install', event => {
     // A response that followed a redirect (for example /offline.html -> /offline when Vercel "cleanUrls" is on) cannot be used
     // to answer a page load, so the browser shows "site can't be reached" when offline. clean() removes that problem.
     await Promise.all(PRECACHE.map(async url => {
-      try { const res = await fetch(new Request(url, { cache: 'reload' })); if (res.ok) await cache.put(url, await clean(res)); } catch (e) {}
+      try { const res = await fetch(new Request(url, { cache: 'reload' })); if (res.ok) await cache.put(url, await clean(res)); } catch (e) { }
     }));
     await self.skipWaiting();
   })());
@@ -44,7 +45,7 @@ self.addEventListener('activate', event => {
     const keep = [PAGES, ASSETS];
     const names = await caches.keys();
     await Promise.all(names.filter(n => n.startsWith('em-') && !keep.includes(n)).map(n => caches.delete(n)));
-    if (self.registration.navigationPreload) await self.registration.navigationPreload.enable().catch(() => {});
+    if (self.registration.navigationPreload) await self.registration.navigationPreload.enable().catch(() => { });
     await self.clients.claim();
   })());
 });
@@ -65,14 +66,12 @@ self.addEventListener('fetch', event => {
   // ----- Same origin -----
   const path = url.pathname;
 
-  // The public home page is not part of the PWA: never intercept it
-  if (path === '/' || path === '/index.html' || path === '/index') return;
-
-  // App pages: network first, fall back to cache, then the offline page
+  // Page loads
   if (req.mode === 'navigate') {
     const inApp = APP_PAGES.some(p => path === p || path === p.replace(/\.html$/, ''));
-    if (!inApp) return;
-    event.respondWith(networkFirst(event, req));
+    // App pages: network first, fall back to the saved copy, then the offline page
+    // Everything else: network only, but show the offline page when there is no connection
+    event.respondWith(inApp ? networkFirst(event, req) : networkOrOffline(event, req));
     return;
   }
 
@@ -94,11 +93,22 @@ async function findPage(cache, pathname) {
   return null;
 }
 
+// Public pages (home, projects, 404...): never cached. Only a failed network request falls back to offline.html.
+// A 404 from the server is a normal response here, so it still shows 404.html.
+async function networkOrOffline(event, req) {
+  try {
+    return (await event.preloadResponse) || (await fetch(req));
+  } catch (err) {
+    const cache = await caches.open(PAGES);
+    return (await findPage(cache, '/offline.html')) || new Response('You are offline.', { status: 503, headers: { 'Content-Type': 'text/plain' } });
+  }
+}
+
 async function networkFirst(event, req) {
   const cache = await caches.open(PAGES), path = new URL(req.url).pathname;
   try {
     const fresh = (await event.preloadResponse) || (await fetch(req));
-    if (fresh && fresh.ok) clean(fresh.clone()).then(r => cache.put(path, r)).catch(() => {});
+    if (fresh && fresh.ok) clean(fresh.clone()).then(r => cache.put(path, r)).catch(() => { });
     return fresh;
   } catch (err) {
     const page = (await findPage(cache, path)) || (await findPage(cache, './offline.html'));
