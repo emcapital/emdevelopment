@@ -1411,7 +1411,7 @@ async function ctFontLoad(doc) {   // returns { normal, bold } = jsPDF family na
   return out;
 }
 const ctToday = () => dstr(new Date());
-const ctBlank = () => ({ cust: '', name: '', company: '', email: '', phone: '', addr: '', type: 'business website', scope: '', deliver: '', price: '', build: 'code', days: 20, revs: 3, support: 4, city: 'Cebu City', extra: '', date: ctToday() });
+const ctBlank = () => ({ cust: '', name: '', company: '', email: '', gender: '', addr: '', type: 'business website', scope: '', deliver: '', price: '', build: 'code', days: 20, revs: 3, support: 4, city: 'Cebu City', extra: '', date: ctToday() });
 let CT = ctBlank(), ctEl = null;
 const ctLines = t => String(t || '').split(/\r?\n/).map(x => x.replace(/^\s*[-*\u2022]\s*/, '').trim()).filter(Boolean);
 // the contract as data, so the preview and the PDF always say exactly the same thing
@@ -1492,7 +1492,7 @@ function ctBuild(c) {
   const pre = [
     { t: 'KNOW ALL MEN BY THESE PRESENTS:' },
     { t: 'This CONTRACT FOR A PIECE OF WORK (the "Agreement") is executed and entered into by and between:' },
-    { t: '**' + nb(client || blank) + (co ? ' of ' + nb(co) : '') + ',** of legal age, Filipino, and a resident of ' + nb((c.addr || '').trim() || blank) + ' and with email address ' + nb(cEmail || blank) + ', hereinafter collectively referred to as the "**CLIENT**".' },
+    { t: '**' + nb(client || blank) + (co ? ' of ' + nb(co) : '') + ',** of legal age, ' + (c.gender === 'Female' ? 'Filipina' : 'Filipino') + ', and a resident of ' + nb((c.addr || '').trim() || blank) + ' and with email address ' + nb(cEmail || blank) + ', hereinafter collectively referred to as the "**CLIENT**".' },
     { t: '-and-', c: 1 },
     { t: '**' + CT_DEV.name + ',** of legal age, Filipino, Single and a resident of ' + CT_DEV.home + ' and with email address ' + CT_DEV.pemail + ', hereinafter collectively referred to as the "**THE DEVELOPER**".' },
     { t: 'WITNESSETH:', c: 1 },
@@ -1582,36 +1582,36 @@ function ctUI() {
     ctEl = document.createElement('div'); ctEl.className = 'grid lg:grid-cols-2 gap-4 items-start';
     ctEl.innerHTML = `
       <form id="ctForm" novalidate class="${card} space-y-5" data-f>
-        <div><h2 class="text-lg font-extrabold tracking-tight">Contract details</h2><p class="mt-1 text-sm text-slate-400">Fill these in and the contract is written for you in the preview. Leave a field empty to use a blank line in the contract.</p></div>
+        <div><h2 class="text-lg font-extrabold tracking-tight">Contract details</h2><p class="mt-1 text-sm text-slate-400">Fill these in and the contract is written for you in the preview. Fields marked * are required before you can download the PDF.</p></div>
         <fieldset class="space-y-3.5"><legend class="text-xs font-bold uppercase tracking-wider text-brand-400 mb-1">Client</legend>
           <label class="${lbl}">Pick an existing customer<select name="cust" class="${fld}"></select></label>
           <div class="grid sm:grid-cols-2 gap-3.5">
-            <label class="${lbl}">Client name<input name="name" maxlength="80" autocomplete="off" class="${fld}"/></label>
+            <label class="${lbl}">Client name *<input name="name" maxlength="80" autocomplete="off" class="${fld}"/></label>
             <label class="${lbl}">Company (optional)<input name="company" maxlength="80" autocomplete="off" class="${fld}"/></label>
-            <label class="${lbl}">Email<input name="email" type="email" maxlength="120" autocomplete="off" class="${fld}"/></label>
-            <label class="${lbl}">Phone<input name="phone" maxlength="40" autocomplete="off" class="${fld}"/></label>
+            <label class="${lbl}">Email *<input name="email" type="email" maxlength="120" autocomplete="off" class="${fld}"/></label>
+            <label class="${lbl}">Gender *<select name="gender" class="${fld}"><option value="">Select...</option><option value="Male">Male</option><option value="Female">Female</option></select></label>
           </div>
-          <label class="${lbl}">Address (optional)<input name="addr" maxlength="160" autocomplete="off" class="${fld}"/></label>
+          <label class="${lbl}">Address *<input name="addr" maxlength="160" autocomplete="off" class="${fld}"/></label>
         </fieldset>
         <fieldset class="space-y-3.5"><legend class="text-xs font-bold uppercase tracking-wider text-brand-400 mb-1">Project</legend>
-          <label class="${lbl}">What are you building?<input name="type" maxlength="80" placeholder="e.g. business website, online store" class="${fld}"/></label>
-          <label class="${lbl}">Scope of work<textarea name="scope" rows="4" maxlength="1500" placeholder="Describe what the website will do and which pages it has." class="${fld} resize-y"></textarea></label>
-          <label class="${lbl}">Deliverables (one per line)<textarea name="deliver" rows="4" maxlength="1000" placeholder="Home, About and Contact pages&#10;Mobile-friendly design&#10;Contact form" class="${fld} resize-y"></textarea></label>
+          <label class="${lbl}">What are you building? *<input name="type" maxlength="80" placeholder="e.g. business website, online store" class="${fld}"/></label>
+          <label class="${lbl}">Scope of work *<textarea name="scope" rows="4" maxlength="1500" placeholder="Describe what the website will do and which pages it has." class="${fld} resize-y"></textarea></label>
+          <label class="${lbl}">Deliverables (one per line) *<textarea name="deliver" rows="4" maxlength="1000" placeholder="Home, About and Contact pages&#10;Mobile-friendly design&#10;Contact form" class="${fld} resize-y"></textarea></label>
         </fieldset>
         <fieldset class="space-y-3.5"><legend class="text-xs font-bold uppercase tracking-wider text-brand-400 mb-1">Price and schedule</legend>
           <div class="grid grid-cols-2 gap-3.5">
-            <label class="${lbl}">Total price (PHP)<input name="price" type="number" inputmode="decimal" min="0" step="0.01" class="${fld}"/></label>
+            <label class="${lbl}">Total price (PHP) *<input name="price" type="number" inputmode="decimal" min="0" step="0.01" class="${fld}"/></label>
             <label class="${lbl}">How is it built?<select name="build" class="${fld}"><option value="code">Hard-coded (custom code)</option><option value="builder">Website builder / CMS</option></select></label>
             <p class="col-span-2 -mt-1 text-xs text-slate-400">Payments are fixed at 40% down, 30% when all inclusions are done (before revisions) and 30% on final approval. Hard-coded sites also get the source code unlock clause.</p>
-            <label class="${lbl}">Business days to finish<input name="days" type="number" inputmode="numeric" min="1" step="1" class="${fld}"/></label>
-            <label class="${lbl}">Revision rounds<input name="revs" type="number" inputmode="numeric" min="0" step="1" class="${fld}"/></label>
-            <label class="${lbl}">Free support (weeks)<input name="support" type="number" inputmode="numeric" min="0" step="1" class="${fld}"/></label>
+            <label class="${lbl}">Business days to finish *<input name="days" type="number" inputmode="numeric" min="1" step="1" class="${fld}"/></label>
+            <label class="${lbl}">Revision rounds *<input name="revs" type="number" inputmode="numeric" min="0" step="1" class="${fld}"/></label>
+            <label class="${lbl} col-span-2">Free support (weeks) *<input name="support" type="number" inputmode="numeric" min="0" step="1" class="${fld}"/></label>
           </div>
         </fieldset>
         <fieldset class="space-y-3.5"><legend class="text-xs font-bold uppercase tracking-wider text-brand-400 mb-1">Other</legend>
           <div class="grid sm:grid-cols-2 gap-3.5">
-            <label class="${lbl}">Contract date<input name="date" type="date" class="${fld}"/></label>
-            <label class="${lbl}">City for legal matters<input name="city" maxlength="60" class="${fld}"/></label>
+            <label class="${lbl}">Contract date *<input name="date" type="date" class="${fld}"/></label>
+            <label class="${lbl}">City for legal matters *<input name="city" maxlength="60" class="${fld}"/></label>
           </div>
           <label class="${lbl}">Additional terms (one per line, optional)<textarea name="extra" rows="3" maxlength="1000" class="${fld} resize-y"></textarea></label>
         </fieldset>
@@ -1623,8 +1623,8 @@ function ctUI() {
         <div data-ctprev class="lg:max-h-[calc(100dvh-11rem)] lg:overflow-y-auto rounded-xl"></div>
       </div>`;
     const f = ctEl.querySelector('#ctForm'), prev = ctEl.querySelector('[data-ctprev]'), msg = ctEl.querySelector('[data-ctmsg]'), btn = ctEl.querySelector('[data-ctpdf]');
-    const write = () => { ['name', 'company', 'email', 'phone', 'addr', 'type', 'scope', 'deliver', 'price', 'build', 'days', 'revs', 'support', 'date', 'city', 'extra'].forEach(k => { f.elements[k].value = CT[k]; }); f.elements.cust.value = CT.cust; };
-    const read = () => { ['name', 'company', 'email', 'phone', 'addr', 'type', 'scope', 'deliver', 'price', 'build', 'days', 'revs', 'support', 'date', 'city', 'extra'].forEach(k => { CT[k] = f.elements[k].value; }); CT.cust = f.elements.cust.value; };
+    const write = () => { ['name', 'company', 'email', 'gender', 'addr', 'type', 'scope', 'deliver', 'price', 'build', 'days', 'revs', 'support', 'date', 'city', 'extra'].forEach(k => { f.elements[k].value = CT[k]; }); f.elements.cust.value = CT.cust; };
+    const read = () => { ['name', 'company', 'email', 'gender', 'addr', 'type', 'scope', 'deliver', 'price', 'build', 'days', 'revs', 'support', 'date', 'city', 'extra'].forEach(k => { CT[k] = f.elements[k].value; }); CT.cust = f.elements.cust.value; };
     ctEl._draw = () => { prev.innerHTML = ctHtml(ctBuild(CT)); };
     ctEl._sync = () => {   // keep the customer list current without touching what has been typed
       const s = f.elements.cust, v = s.value;
@@ -1635,14 +1635,17 @@ function ctUI() {
     f.addEventListener('change', e => {
       if (e.target.name !== 'cust') return;
       const k = K.find(x => x.id === e.target.value);
-      if (k) { CT.name = k.name; CT.company = k.company; CT.email = k.email; CT.phone = k.phone; write(); }
+      if (k) { CT.name = k.name; CT.company = k.company; CT.email = k.email; write(); }
       read(); ctEl._draw();
     });
     ctEl.querySelector('[data-ctreset]').addEventListener('click', () => { CT = ctBlank(); write(); ctEl._sync(); ctEl._draw(); msg.textContent = 'Form cleared.'; });
     btn.addEventListener('click', async () => {
       read();
-      if (!CT.name.trim()) { msg.textContent = 'Enter the client name first.'; f.elements.name.focus(); return; }
-      if (!(+CT.price > 0)) { msg.textContent = 'Enter the total price first.'; f.elements.price.focus(); return; }
+      const REQ = [['name', 'the client name'], ['email', 'the client email'], ['gender', 'the client gender'], ['addr', 'the client address'], ['type', 'what you are building'], ['scope', 'the scope of work'], ['deliver', 'the deliverables'], ['price', 'the total price'], ['days', 'the business days to finish'], ['revs', 'the revision rounds'], ['support', 'the free support weeks'], ['date', 'the contract date'], ['city', 'the city for legal matters']];
+      for (const [k, n] of REQ) { if (!String(CT[k] == null ? '' : CT[k]).trim()) { msg.textContent = 'Enter ' + n + ' first.'; f.elements[k].focus(); return; } }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(CT.email.trim())) { msg.textContent = 'Enter a valid client email.'; f.elements.email.focus(); return; }
+      if (!(+CT.price > 0)) { msg.textContent = 'Enter a total price above zero.'; f.elements.price.focus(); return; }
+      if (!(+CT.days >= 1)) { msg.textContent = 'Business days to finish must be at least 1.'; f.elements.days.focus(); return; }
       btn.disabled = true; const old = btn.textContent; btn.textContent = 'Preparing...'; msg.textContent = 'Creating your PDF...';
       try { await ctPdf(CT); msg.textContent = 'Contract downloaded.'; toast('Contract downloaded'); }
       catch (err) { console.error('contract pdf', err); msg.textContent = 'Could not create the PDF. Check your connection and try again.'; }
