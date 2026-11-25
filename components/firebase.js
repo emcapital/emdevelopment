@@ -45,6 +45,7 @@ const ICON = {
   invoices: 'M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6',
   subscriptions: 'M21 12a9 9 0 0 1-15.5 6.2L3 16M3 12a9 9 0 0 1 15.5-6.2L21 8M21 3v5h-5M3 21v-5h5',
   messages: 'M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM3 7l9 6 9-6',
+  contracts: 'M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 13h6M9 17h4',
   accounting: 'M4 20V11M10 20V5M16 20v-6M22 20H2',
   customers: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8',
   portal: 'M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0zM3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18',
@@ -55,7 +56,7 @@ const ICON = {
   tracker: 'M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',
   trash: 'M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M10 11v6M14 11v6'
 };
-const TITLES = { overview: 'Overview', projects: 'Projects', invoices: 'Invoices', subscriptions: 'Subscriptions', accounting: 'Accounting', source: 'Source Code', customers: 'Customers', portal: 'My Website', messages: 'Quotations', chat: 'Chat', tracker: 'Tracker', backup: 'Backup', settings: 'Account' };
+const TITLES = { overview: 'Overview', projects: 'Projects', invoices: 'Invoices', subscriptions: 'Subscriptions', accounting: 'Accounting', source: 'Source Code', customers: 'Customers', portal: 'My Website', messages: 'Quotations', contracts: 'Contracts', chat: 'Chat', tracker: 'Tracker', backup: 'Backup', settings: 'Account' };
 const svg = (d, c = 'w-5 h-5') => `<svg class="${c}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="${d}"/></svg>`;
 let toastT;
 function toast(t) { const el = $('#toast'); el.textContent = t; el.className = 'fixed left-1/2 z-50 glass rounded-2xl px-5 py-2.5 text-sm font-medium text-center max-w-[calc(100vw-2rem)]'; el.style.bottom = 'calc(1.5rem + env(safe-area-inset-bottom, 0px))'; el.style.animation = 'toastIn .4s ease both'; clearTimeout(toastT); toastT = setTimeout(() => { el.style.animation = 'toastOut .35s ease forwards'; toastT = setTimeout(() => el.classList.add('hidden'), 350); }, 2600); }
@@ -1284,6 +1285,7 @@ const views = {
     <div id="trlist" class="space-y-2.5">${trListHtml()}</div>`;
   },
   chat() { return '<div id="chatHost"></div>'; },
+  contracts() { return '<div id="ctHost"></div>'; },
   backup() {
     const last = bkLast(), sm = bk.sum;
     const stat = (n, l) => `<div class="rounded-xl bg-white/5 px-3 py-2.5"><div class="text-lg font-extrabold">${n}</div><div class="text-xs text-slate-400">${l}</div></div>`;
@@ -1317,6 +1319,7 @@ const views = {
 function paint(anim) {
   const v = $('#view'), top = v.scrollTop;
   v.innerHTML = views[view]();
+  const cth = v.querySelector('#ctHost'); if (cth) cth.replaceWith(ctUI());   // the contract form is built once, so nothing typed is lost on a redraw
   const chh = v.querySelector('#chatHost'); if (chh) { chh.replaceWith(chUI()); chMount(); }   // the chat is built once, so a half-typed reply survives redraws
   if (anim) { v.scrollTop = 0; v.querySelectorAll('[data-f]').forEach((el, i) => { el.classList.add('fade-item'); el.style.setProperty('--i', i); }); } else v.scrollTop = top;
   $('#title').textContent = TITLES[view];
@@ -1378,6 +1381,277 @@ function go(v) {
   const el = $('#view'); clearTimeout(goT);
   el.style.transition = 'opacity .16s ease'; el.style.opacity = '0';
   goT = setTimeout(() => { paint(true); el.style.opacity = '1'; }, 170);
+}
+
+// ---------- contract maker ----------
+// Fill in the details on the left; the contract is written on the right and can be downloaded as a PDF.
+// Nothing is stored in the database: the form lives in this page until it is reset or the dashboard is closed.
+const CT_DEV = { name: 'Ethan Montera', biz: 'EM Development', addr: 'Cebu City, Philippines, 6000', email: 'emdevelopmentph@gmail.com', home: 'Clavano Street, Escario, Cebu City, Cebu, Philippines', pemail: 'emdevelopmentph@gmail.com', phone: '(+63) 920 501 8789', bank: 'Bank of the Philippine Islands (BPI)', acct: 'Ethan Montera', num: '1019235676' };
+// Contract font. Put the font files in a "fonts" folder next to this file (fonts/Braveold-Regular.ttf and, if you have it, fonts/Braveold-Bold.ttf).
+// If a file is missing the contract falls back to the normal font, so nothing breaks.
+const CT_FONT = { family: 'Braveold', regular: 'fonts/Braveold-Regular.ttf', bold: 'fonts/Braveold-Bold.ttf' };
+const ctFontUrl = f => new URL(f, import.meta.url).href;
+let ctFontCss = null;
+function ctFontPreview() {   // makes the on-screen preview use the same font
+  if (ctFontCss) return; ctFontCss = document.createElement('style');
+  ctFontCss.textContent = `@font-face{font-family:'${CT_FONT.family}';src:url('${ctFontUrl(CT_FONT.regular)}');font-weight:400;font-display:swap}@font-face{font-family:'${CT_FONT.family}';src:url('${ctFontUrl(CT_FONT.bold)}');font-weight:700;font-display:swap}`;
+  document.head.appendChild(ctFontCss);
+}
+const ctB64 = buf => { const u = new Uint8Array(buf); let b = ''; for (let i = 0; i < u.length; i += 0x8000) b += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(b); };
+async function ctFontLoad(doc) {   // returns { normal, bold } = jsPDF family names to use
+  const out = { normal: 'helvetica', bold: 'helvetica', ok: false };
+  const add = async (file, style, vfs) => {
+    try {
+      const r = await fetch(ctFontUrl(file)); if (!r.ok) return false;
+      doc.addFileToVFS(vfs, ctB64(await r.arrayBuffer())); doc.addFont(vfs, CT_FONT.family, style); return true;
+    } catch (e) { return false; }
+  };
+  const reg = await add(CT_FONT.regular, 'normal', 'ct-regular.ttf');
+  if (reg) { out.normal = CT_FONT.family; out.ok = true; out.bold = CT_FONT.family; if (await add(CT_FONT.bold, 'bold', 'ct-bold.ttf')) out.boldOk = true; }
+  return out;
+}
+const ctToday = () => dstr(new Date());
+const ctBlank = () => ({ cust: '', name: '', company: '', email: '', phone: '', addr: '', type: 'business website', scope: '', deliver: '', price: '', build: 'code', days: 20, revs: 3, support: 4, city: 'Cebu City', extra: '', date: ctToday() });
+let CT = ctBlank(), ctEl = null;
+const ctLines = t => String(t || '').split(/\r?\n/).map(x => x.replace(/^\s*[-*\u2022]\s*/, '').trim()).filter(Boolean);
+// the contract as data, so the preview and the PDF always say exactly the same thing
+function ctBuild(c) {
+  // fixed schedule: 40% down, 30% when every inclusion is done (before revisions), 30% on final approval
+  const price = Math.max(0, +c.price || 0), cents = Math.round(price * 100), p1 = Math.round(cents * 0.4), p2 = Math.round(cents * 0.3), p3 = cents - p1 - p2;
+  const hard = c.build !== 'builder', amt = n => price > 0 ? ' (' + pdfMoney(n / 100) + ')' : '';
+  const days = Math.max(1, Math.round(+c.days) || 1), revs = Math.max(0, Math.round(+c.revs) || 0), sup = Math.max(0, Math.round(+c.support) || 0);
+  const when = d => (d ? fmtD(d) : '____________');
+  const client = (c.name || '____________').trim(), co = (c.company || '').trim();
+  const clientFull = client + (co ? ' of ' + co : '') + (c.addr ? ', ' + c.addr.trim() : '');
+  const type = (c.type || 'website').trim();
+  const S = [];
+  S.push({ h: '1. Scope of Work', p: ['The Developer agrees to design and build a ' + type + ' for the Client (the "Project"), as described below.'].concat(ctLines(c.scope).length ? ctLines(c.scope) : ['The detailed scope will be agreed in writing between both parties.']) });
+  const dl = ctLines(c.deliver);
+  S.push({ h: '2. Deliverables', p: [dl.length ? 'The Developer will deliver the following:' : 'The deliverables are those described in the Scope of Work.'], l: dl });
+  S.push({ h: '3. Timeline', p: ['This Agreement will start upon the down payment having been made. Once it has, the Project is expected to be finished within ' + days + ' business day' + (days === 1 ? '' : 's') + '. The timeline depends on the Client providing content, approvals and feedback on time. Delays on the Client\'s side move the dates by the same amount.'] });
+  const pay = [];
+  pay.push('Down payment: 40%' + amt(p1) + ', due before work begins.');
+  pay.push('Second payment: 30%' + amt(p2) + ', due once all the inclusions listed in this Agreement are completed and before ' + (revs > 0 ? 'the revision rounds begin.' : 'the Client\'s final review.'));
+  pay.push('Final payment: 30%' + amt(p3) + ', due once the Client approves the finished website, before it is launched or the final files are handed over.');
+  const bankLines = ['Bank Name: ' + CT_DEV.bank, 'Account Number: ' + CT_DEV.num, 'Account Name: ' + CT_DEV.acct], payNote = ['The Developer may pause work while any payment is overdue.'];
+  if (hard) payNote.push('Because this website is hard-coded (custom code), its source code stays locked and is released to the Client only after the final 30% payment has been fully settled.');
+  S.push({ h: '4. Fees and Payment', p: ['The total fee for the Project is ' + (price > 0 ? pdfMoney(price) : '____________') + ', paid in three parts:'], l: pay, p2: ['Payments are made to the following bank account:'], k: bankLines, p3: payNote });
+  S.push({ h: '5. Late Payment Penalty', p: ['In the event the Client fails to make any payment specified in this Agreement, a penalty of PHP 1,000 per day shall be imposed until full payment is received. Failure to settle the balance within 30 days of the due date may result in project suspension or termination at the discretion of the Developer.', 'In the event the Client fails to settle the balance within 30 days, the Developer has the right to delete all files for the Client\'s website.'] });
+  S.push({ h: '6. Revisions', p: [revs > 0 ? 'The fee includes up to ' + revs + ' round' + (revs === 1 ? '' : 's') + ' of revisions within the agreed scope. Revisions start after the second payment is received. Extra revisions, or changes outside the scope, are quoted and billed separately.' : 'Revisions are not included in the fee. Any changes after approval are quoted and billed separately.'] });
+  S.push({ h: '7. Client Responsibilities', p: ['7.1 The Client will provide the text, images, logos and other materials needed for the Project, give feedback and approvals within a reasonable time, and confirms that it owns or has permission to use everything it provides.',
+    '7.2 Liability of the Client: The Client shall be responsible for providing accurate and complete information and materials necessary for the Developer to complete the Project. The Developer shall not be liable for any delays or failures in performance resulting from the Client\'s failure to provide such information or materials. The Client agrees to use the website in compliance with all applicable laws and regulations and shall be solely responsible for any content posted on the website.'] });
+  S.push({ h: '8. Refund', p: [
+    'In the event that the project\'s completion status is at or below 80%, the Client is entitled to a partial refund equivalent to 50% of the total paid amount. This refund will be issued within 7 to 14 days from the formal request made by the Client.',
+    'However, if the project\'s completion status exceeds 80%, no refund will be granted to the Client. The 80% mark will be the completed integration of ' + (dl.length ? 'the following deliverables, being the first 80% of the deliverables listed in Section 2:' : 'the deliverables described in the Scope of Work.')],
+    l: dl.slice(0, Math.ceil(dl.length * 4 / 5)),
+    p2: ['The Client acknowledges that reaching the 80% completion milestone is indicative of substantial progress, and as such, the project is considered to have achieved a significant level of completion. The Client further understands and agrees that the absence of a refund beyond the 80% completion threshold is a reflection of the advanced stage of the project and the resources invested up to that point. If the total amount paid is below PHP 3,000, no refund will be made.',
+      'Any refund request must be submitted in writing to ' + CT_DEV.email + ' and will be processed in accordance with the terms outlined herein.'] });
+  S.push({ h: '9. Design Approval and Change Policy', p: [
+    'If the Client already has a design, this section is not applicable.',
+    '9.1 Design Approval: Upon completion of the design or mock-up user interface ("UI"), the Developer will present the design to the Client for approval. The Client shall have a period of three (3) business days to review the design and provide either approval or request changes.',
+    '9.2 No Changes After Approval: Once the Client approves the design or mock-up UI, no further changes will be made without additional charges, except for any errors or issues that are the fault of the Developer.',
+    '9.3 Change Policy: If the Client wishes to make changes to the approved design after the approval stage, the Developer reserves the right to charge an additional fee of PHP 1,000 per page affected by the requested changes. This fee will be added to the final payment.',
+    '9.4 Notification of Changes: The Client must notify the Developer in writing of any desired changes to the approved design, specifying the exact modifications required. The Developer will then assess the scope of the changes and inform the Client of any applicable charges before proceeding with the alterations.',
+    'If the changes contain inclusions that are not within this Agreement, the Developer is entitled to request an additional payment in writing, depending on the features added.'] });
+  S.push({ h: '10. Revisions Policy', p: [
+    '10.1 The Client is allowed up to two (2) minor revision meetings at no additional cost. Minor revisions include the following:'],
+    l: ['Texts', 'Alignment', 'Color', 'Images'],
+    p2: ['10.2 Beyond the third revision, additional changes will incur the following charges:'],
+    l2: ['PHP 5,000 per meeting for minor revisions.', 'PHP 10,000 per meeting for major revisions.'],
+    p3: ['10.3 Revisions must be communicated in writing, with clear details of the requested changes. The Developer will classify the revisions as minor or major based on their complexity and scope.'] });
+  S.push({ h: '11. Ownership', p: ['After full payment, ownership of the finished website design and custom code passes to the Client.' + (hard ? ' The source code is unlocked and handed over only when the final 30% payment is settled.' : '') + ' Until then, the Developer keeps all rights to the work. Third-party tools, fonts and libraries stay under their own licences. The Developer may show the finished work in its portfolio unless the Client asks otherwise in writing.'] });
+  S.push({ h: '12. Hosting, Maintenance and Support', p: [sup > 0 ? 'After launch, the Developer provides ' + sup + ' week' + (sup === 1 ? '' : 's') + ' of free maintenance and fixes for problems in the delivered work. After that, maintenance, hosting and domain renewals are billed separately at agreed rates.' : 'Hosting, domain and maintenance are not included. They are billed separately if the Client asks for them.'] });
+  S.push({ h: '13. Confidentiality', p: ['Both parties will keep the other\'s private business information confidential and will not share it with anyone else without permission, unless the law requires it.'] });
+  S.push({ h: '14. Term and Termination', p: [
+    '14.1 This Agreement shall commence on the Effective Date, which is the date the down payment is made, and shall continue until the completion of the engagement unless terminated earlier in accordance with the provisions below.',
+    '14.2 Either party may terminate this Agreement in the event of a material breach by the other party, subject to a written notice of thirty (30) days specifying the breach and providing an opportunity for remediation.',
+    '14.3 All information (for example: username, email and password) will be strictly confidential and should NOT be discussed outside the conversation of the website owner.',
+    '14.4 All the credentials will be owned by the Client.',
+    '14.5 If this Agreement is terminated, the Client pays for all work completed up to the date of termination, and any refund is governed solely by Section 8 (Refund). If the Developer ends this Agreement without good reason, the Developer refunds the part of the down payment for work not yet done.'] });
+  S.push({ h: '15. Limitation of Liability', p: ['The Developer is not liable for indirect losses, such as lost profits or lost data. The Developer\'s total liability under this Agreement is limited to the fees the Client has paid.'] });
+  S.push({ h: '16. Liability of the Client', p: ['The Client shall be responsible for providing accurate and complete information and materials necessary for the Developer to complete the Project. The Developer shall not be liable for any delays or failures in performance resulting from the Client\'s failure to provide such information or materials. The Client agrees to use the website in compliance with all applicable laws and regulations and shall be solely responsible for any content posted on the website.'] });
+  S.push({ h: '17. Indemnification', p: ['The Client agrees to indemnify, defend, and hold harmless the Developer, its affiliates, and their respective officers, directors, employees, and agents from and against any and all claims, damages, losses, liabilities, costs, and expenses (including reasonable attorneys\' fees) arising out of or in connection with:'] });
+  S.push({ h: '18. Force Majeure', p: ['Neither party shall be liable for any failure or delay in performance under this Agreement due to circumstances beyond its reasonable control, including, but not limited to, acts of God, war, terrorism, natural disasters, strikes, or interruptions in telecommunications or internet services.', 'By including these provisions, both parties acknowledge and agree to their respective liabilities and the terms of indemnification, ensuring clarity and mutual understanding in the contractual relationship.'] });
+  const ex = ctLines(c.extra);
+  if (ex.length) S.push({ h: '19. Additional Terms', p: ex });
+  const mn = ex.length ? 20 : 19;
+  S.push({ h: mn + '. Miscellaneous', p: [
+    mn + '.1 Notices: All notices, requests, demands, and other communications under this Agreement shall be in writing and shall be deemed to have been duly given if delivered personally, sent by certified mail, return receipt requested, or by a recognized courier service, to the respective parties at their addresses provided in this Agreement.',
+    mn + '.2 Amendments: No amendment, modification, or waiver of any provision of this Agreement shall be effective unless it is in writing and signed by both parties. Any such amendment, modification, or waiver shall be effective only in the specific instance and for the specific purpose for which it is given.',
+    mn + '.3 Entire Agreement: This Agreement constitutes the entire agreement between the parties with respect to the subject matter hereof and supersedes all prior and contemporaneous understandings, agreements, representations, and warranties, both written and oral, with respect to such subject matter.',
+    mn + '.4 Severability: If any provision of this Agreement is held to be invalid or unenforceable, such provision shall be struck and the remaining provisions shall be enforced to the fullest extent under law.',
+    mn + '.5 Waiver: The failure of either party to enforce any right or provision of this Agreement shall not be deemed a waiver of such right or provision.',
+    mn + '.6 Assignment: Neither party may assign its rights or delegate its obligations under this Agreement without the prior written consent of the other party.',
+    mn + '.7 Governing Law: This Agreement shall be governed by and construed in accordance with the laws of the Philippines, without regard to its conflict of law principles. The parties will first try to settle any dispute through good-faith discussion, and if that fails, in the proper courts of ' + ((c.city || '').trim() || 'Cebu City') + '.',
+    mn + '.8 Headings: The headings in this Agreement are for convenience of reference only and shall not affect in any way the meaning or interpretation of this Agreement.',
+    'By including these miscellaneous provisions, the parties ensure clarity regarding notifications, potential amendments, the comprehensive nature of the agreement, and other crucial elements, thereby fostering a clear and professional relationship.'] });
+  S.push({ h: (mn + 1) + '. Signatures', p: [
+    'This Agreement, once signed, including by electronic or digital signature, shall be binding upon and inure to the benefit of the parties hereto and their respective successors and assigns. Electronic signatures shall have the same legal effect and enforceability as handwritten signatures.',
+    'IN WITNESS WHEREOF, the parties have duly signed this Agreement on this ________________ day of ________________, at ___________, Philippines.'] });
+  const blank = '____________', cEmail = (c.email || '').trim(), nb = x => String(x).replace(/\*/g, '');   // nb: strip * so typed text can never turn bold
+  const pre = [
+    { t: 'KNOW ALL MEN BY THESE PRESENTS:' },
+    { t: 'This CONTRACT FOR A PIECE OF WORK (the "Agreement") is executed and entered into by and between:' },
+    { t: '**' + nb(client || blank) + (co ? ' of ' + nb(co) : '') + ',** of legal age, Filipino, and a resident of ' + nb((c.addr || '').trim() || blank) + ' and with email address ' + nb(cEmail || blank) + ', hereinafter collectively referred to as the "**CLIENT**".' },
+    { t: '-and-', c: 1 },
+    { t: '**' + CT_DEV.name + ',** of legal age, Filipino, Single and a resident of ' + CT_DEV.home + ' and with email address ' + CT_DEV.pemail + ', hereinafter collectively referred to as the "**THE DEVELOPER**".' },
+    { t: 'WITNESSETH:', c: 1 },
+    { t: '**WHEREAS,** the DEVELOPER is a professional internet web design and development firm of good standing that is engaged in the business of creating internet websites;', i: 1 },
+    { t: '**WHEREAS,** the CLIENT is in need of a company that is engaged in the business of website creation and is willing to enter into this contract;', i: 1 },
+    { t: '**NOW THEREFORE**, by virtue of this contract of piece of work, the parties herein agreed to the following terms and conditions.', i: 1 }];
+  return { title: 'Contract for a Piece of Work', date: c.date, client, co,
+    pre,
+    sections: S, sign: [{ role: 'Developer', name: CT_DEV.name, sub: CT_DEV.biz }, { role: 'Client', name: c.name.trim() || '', sub: co }] };
+}
+function ctHtml(d) {
+  ctFontPreview();
+  const bd = x => esc(x).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  const li = a => a && a.length ? `<ul class="list-disc pl-10 ml-3 mt-1.5 space-y-1 text-justify">${a.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '';
+  const kl = a => a && a.length ? `<div class="mt-1.5 ml-6">${a.map(x => `<div>${esc(x)}</div>`).join('')}</div>` : '';
+  const ps = a => (a || []).map(x => `<p class="mt-1.5 text-justify">${esc(x)}</p>`).join('');
+  return `<div class="bg-white text-slate-800 rounded-xl p-5 sm:p-8 shadow-lg text-[13px] leading-relaxed" style="font-family:'Braveold',Georgia,'Times New Roman',serif">
+    <div class="text-center"><div class="font-bold text-base text-slate-800">EM Development</div><div class="text-xs text-slate-600">${esc(CT_DEV.addr)}</div><div class="text-xs text-slate-600">${esc(CT_DEV.phone)} | ${esc(CT_DEV.email)}</div><h2 class="mt-5 text-lg sm:text-xl font-bold uppercase tracking-wide text-[#0e3080]">${esc(d.title)}</h2></div>
+    ${d.pre.map(x => `<p class="mt-4 ${x.c ? 'text-center' : 'text-justify'}"${x.i ? ' style="text-indent:2.5rem"' : ''}>${bd(x.t)}</p>`).join('')}
+    ${d.sections.map(s => `<div class="mt-4"><h3 class="font-bold text-[#0e3080]">${esc(s.h)}</h3>${ps(s.p)}${li(s.l)}${ps(s.p2)}${kl(s.k)}${li(s.l2)}${ps(s.p3)}</div>`).join('')}
+    <p class="mt-5 text-justify">By signing below, both parties agree to the terms of this Agreement.</p>
+    <div class="mt-8 grid grid-cols-2 gap-6">${d.sign.map(g => `<div><div class="h-10 border-b border-slate-400"></div><div class="mt-1.5 font-bold">${esc(g.name || ' ')}</div><div class="text-xs text-slate-500">${esc(g.role)}${g.sub ? ' &middot; ' + esc(g.sub) : ''}</div><div class="mt-3 text-xs text-slate-500">Date: ______________</div></div>`).join('')}</div>
+  </div>`;
+}
+const pdfSafe = t => String(t).replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"').replace(/[\u2013\u2014]/g, '-').replace(/\u2026/g, '...').replace(/\u00A0/g, ' ').replace(/[^\x09\x0A\x0D\x20-\x7E\u00A1-\u00FF]/g, '?');
+async function ctPdf(c) {
+  const d = ctBuild(c), JsPDF = await loadPdf(), doc = new JsPDF({ unit: 'mm', format: 'a4' }), FF = await ctFontLoad(doc);
+  const W = 210, H = 297, M = 20, CW = W - 2 * M, NAVY = [14, 48, 128], TXT = [38, 42, 58], MUTED = [112, 118, 136];
+  const ink = k => doc.setTextColor(k[0], k[1], k[2]), font = (st, sz) => { doc.setFont(st === 'bold' ? FF.bold : FF.normal, FF.ok && !(st === 'bold' && !FF.boldOk) ? st : (FF.ok ? 'normal' : st)); doc.setFontSize(sz); };
+  let y = 0;
+  const need = h => { if (y + h > H - 22) { doc.addPage(); y = 24; } };
+  // paragraph writer: wraps by hand so lines can be justified (last line stays left) and **bold** runs and a first-line indent are supported
+  const rich = (t, o = {}) => {
+    const ind = o.ind || 0, first = o.first || 0, gap = o.gap == null ? 1.5 : o.gap, words = []; let glue = false;
+    String(t).split('**').forEach((seg, i) => (pdfSafe(seg).match(/\s+|\S+/g) || []).forEach(tok => {
+      if (/^\s/.test(tok)) { glue = false; return; }
+      const part = { w: tok, b: i % 2 === 1 };
+      if (glue && words.length) words[words.length - 1].push(part); else words.push([part]);
+      glue = true;
+    }));
+    const wid = w => w.reduce((a, p) => { font(p.b ? 'bold' : 'normal', 10); return a + doc.getTextWidth(p.w); }, 0);
+    font('normal', 10); const sp = doc.getTextWidth(' ');
+    const lines = []; let cur = [], cw = 0, k = 0;
+    words.forEach(w => {
+      const ww = wid(w), avail = CW - ind - (k === 0 ? first : 0);
+      if (cur.length && cw + sp + ww > avail) { lines.push(cur); cur = []; cw = 0; k++; }
+      cw += (cur.length ? sp : 0) + ww; cur.push({ w, ww });
+    });
+    if (cur.length) lines.push(cur);
+    lines.forEach((ln, li) => {
+      need(5); const off = li === 0 ? first : 0, avail = CW - ind - off, last = li === lines.length - 1;
+      const tot = ln.reduce((a, x) => a + x.ww, 0), gapW = (last || ln.length < 2) ? sp : (avail - tot) / (ln.length - 1);
+      if (li === 0 && o.dot) { doc.setFillColor(TXT[0], TXT[1], TXT[2]); doc.circle(M + ind - 4.5, y - 1.2, 0.6, 'F'); }
+      let x = M + ind + off; ink(TXT);
+      ln.forEach(wd => { wd.w.forEach(p => { font(p.b ? 'bold' : 'normal', 10); doc.text(p.w, x, y); x += doc.getTextWidth(p.w); }); x += gapW; });
+      y += 5;
+    });
+    y += gap;
+  };
+  const para = (t, gap = 1.5) => rich(t, { gap });
+  const bullet = t => rich(t, { ind: 12, gap: 0.8, dot: 1 });
+  // header band and title
+  font('bold', 14); ink(TXT); doc.text('EM Development', W / 2, 18, { align: 'center' });
+  font('normal', 9.5); doc.text(pdfSafe(CT_DEV.addr), W / 2, 24, { align: 'center' }); doc.text(pdfSafe(CT_DEV.phone + ' | ' + CT_DEV.email), W / 2, 29.5, { align: 'center' });
+  y = 46; font('bold', 17); ink(NAVY); doc.text(d.title.toUpperCase(), W / 2, y, { align: 'center' });
+  y += 11; d.pre.forEach(x => { if (x.c) { need(9); font('normal', 10); ink(TXT); doc.text(pdfSafe(x.t), W / 2, y, { align: 'center' }); y += 9; } else rich(x.t, { first: x.i ? 10 : 0, gap: 4 }); });
+  d.sections.forEach(s => {
+    need(22); y += 3; font('bold', 11); ink(NAVY); doc.text(pdfSafe(s.h), M, y); y += 6;
+    (s.p || []).forEach(t => para(t)); (s.l || []).forEach(bullet); (s.p2 || []).forEach(t => para(t)); (s.k || []).forEach(t => rich(t, { ind: 6, gap: 0.5 })); if ((s.k || []).length) y += 1.5; (s.l2 || []).forEach(bullet); (s.p3 || []).forEach(t => para(t));
+  });
+  need(70); y += 4; para('By signing below, both parties agree to the terms of this Agreement.', 6);
+  const cols = [M, W / 2 + 8], cw = W / 2 - M - 8; y += 12;
+  d.sign.forEach((g, i) => {
+    doc.setDrawColor(MUTED[0], MUTED[1], MUTED[2]); doc.setLineWidth(0.3); doc.line(cols[i], y, cols[i] + cw, y);
+    font('bold', 10); ink(TXT); doc.text(pdfSafe(g.name || ' '), cols[i], y + 6);
+    font('normal', 9); ink(MUTED); doc.text(pdfSafe(g.role + (g.sub ? ' - ' + g.sub : '')), cols[i], y + 11); doc.text('Date: ____________________', cols[i], y + 20);
+  });
+  // footer on every page
+  const n = doc.getNumberOfPages();
+  for (let i = 1; i <= n; i++) { doc.setPage(i); doc.setDrawColor(200, 204, 216); doc.setLineWidth(0.2); doc.line(M, H - 16, W - M, H - 16); font('normal', 8); ink(MUTED); doc.text('EM Development - ' + d.title, M, H - 11); doc.text('Page ' + i + ' of ' + n, W - M, H - 11, { align: 'right' }); }
+  const slug = (d.client || 'client').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'client';
+  doc.save('contract-' + slug + '-' + (c.date || ctToday()) + '.pdf');
+}
+function ctUI() {
+  if (!ctEl) {
+    const lbl = 'block text-sm font-medium text-slate-300', fld = 'field mt-1.5';
+    ctEl = document.createElement('div'); ctEl.className = 'grid lg:grid-cols-2 gap-4 items-start';
+    ctEl.innerHTML = `
+      <form id="ctForm" novalidate class="${card} space-y-5" data-f>
+        <div><h2 class="text-lg font-extrabold tracking-tight">Contract details</h2><p class="mt-1 text-sm text-slate-400">Fill these in and the contract is written for you in the preview. Leave a field empty to use a blank line in the contract.</p></div>
+        <fieldset class="space-y-3.5"><legend class="text-xs font-bold uppercase tracking-wider text-brand-400 mb-1">Client</legend>
+          <label class="${lbl}">Pick an existing customer<select name="cust" class="${fld}"></select></label>
+          <div class="grid sm:grid-cols-2 gap-3.5">
+            <label class="${lbl}">Client name<input name="name" maxlength="80" autocomplete="off" class="${fld}"/></label>
+            <label class="${lbl}">Company (optional)<input name="company" maxlength="80" autocomplete="off" class="${fld}"/></label>
+            <label class="${lbl}">Email<input name="email" type="email" maxlength="120" autocomplete="off" class="${fld}"/></label>
+            <label class="${lbl}">Phone<input name="phone" maxlength="40" autocomplete="off" class="${fld}"/></label>
+          </div>
+          <label class="${lbl}">Address (optional)<input name="addr" maxlength="160" autocomplete="off" class="${fld}"/></label>
+        </fieldset>
+        <fieldset class="space-y-3.5"><legend class="text-xs font-bold uppercase tracking-wider text-brand-400 mb-1">Project</legend>
+          <label class="${lbl}">What are you building?<input name="type" maxlength="80" placeholder="e.g. business website, online store" class="${fld}"/></label>
+          <label class="${lbl}">Scope of work<textarea name="scope" rows="4" maxlength="1500" placeholder="Describe what the website will do and which pages it has." class="${fld} resize-y"></textarea></label>
+          <label class="${lbl}">Deliverables (one per line)<textarea name="deliver" rows="4" maxlength="1000" placeholder="Home, About and Contact pages&#10;Mobile-friendly design&#10;Contact form" class="${fld} resize-y"></textarea></label>
+        </fieldset>
+        <fieldset class="space-y-3.5"><legend class="text-xs font-bold uppercase tracking-wider text-brand-400 mb-1">Price and schedule</legend>
+          <div class="grid grid-cols-2 gap-3.5">
+            <label class="${lbl}">Total price (PHP)<input name="price" type="number" inputmode="decimal" min="0" step="0.01" class="${fld}"/></label>
+            <label class="${lbl}">How is it built?<select name="build" class="${fld}"><option value="code">Hard-coded (custom code)</option><option value="builder">Website builder / CMS</option></select></label>
+            <p class="col-span-2 -mt-1 text-xs text-slate-400">Payments are fixed at 40% down, 30% when all inclusions are done (before revisions) and 30% on final approval. Hard-coded sites also get the source code unlock clause.</p>
+            <label class="${lbl}">Business days to finish<input name="days" type="number" inputmode="numeric" min="1" step="1" class="${fld}"/></label>
+            <label class="${lbl}">Revision rounds<input name="revs" type="number" inputmode="numeric" min="0" step="1" class="${fld}"/></label>
+            <label class="${lbl}">Free support (weeks)<input name="support" type="number" inputmode="numeric" min="0" step="1" class="${fld}"/></label>
+          </div>
+        </fieldset>
+        <fieldset class="space-y-3.5"><legend class="text-xs font-bold uppercase tracking-wider text-brand-400 mb-1">Other</legend>
+          <div class="grid sm:grid-cols-2 gap-3.5">
+            <label class="${lbl}">Contract date<input name="date" type="date" class="${fld}"/></label>
+            <label class="${lbl}">City for legal matters<input name="city" maxlength="60" class="${fld}"/></label>
+          </div>
+          <label class="${lbl}">Additional terms (one per line, optional)<textarea name="extra" rows="3" maxlength="1000" class="${fld} resize-y"></textarea></label>
+        </fieldset>
+        <button type="button" data-ctreset class="w-full sm:w-auto px-5 py-2.5 rounded-xl glass text-sm font-semibold text-slate-300 hover:text-white transition">Clear form</button>
+      </form>
+      <div class="lg:sticky lg:top-0 space-y-3" data-f>
+        <div class="${card} !p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between"><div class="min-w-0"><div class="font-bold">Contract preview</div><p data-ctmsg class="text-sm text-slate-400" role="status" aria-live="polite">Updates as you type.</p></div>
+          <button type="button" data-ctpdf class="btn-shine w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white text-sm shadow-lg shadow-brand-500/30 inline-flex items-center justify-center gap-2">Download PDF</button></div>
+        <div data-ctprev class="lg:max-h-[calc(100dvh-11rem)] lg:overflow-y-auto rounded-xl"></div>
+      </div>`;
+    const f = ctEl.querySelector('#ctForm'), prev = ctEl.querySelector('[data-ctprev]'), msg = ctEl.querySelector('[data-ctmsg]'), btn = ctEl.querySelector('[data-ctpdf]');
+    const write = () => { ['name', 'company', 'email', 'phone', 'addr', 'type', 'scope', 'deliver', 'price', 'build', 'days', 'revs', 'support', 'date', 'city', 'extra'].forEach(k => { f.elements[k].value = CT[k]; }); f.elements.cust.value = CT.cust; };
+    const read = () => { ['name', 'company', 'email', 'phone', 'addr', 'type', 'scope', 'deliver', 'price', 'build', 'days', 'revs', 'support', 'date', 'city', 'extra'].forEach(k => { CT[k] = f.elements[k].value; }); CT.cust = f.elements.cust.value; };
+    ctEl._draw = () => { prev.innerHTML = ctHtml(ctBuild(CT)); };
+    ctEl._sync = () => {   // keep the customer list current without touching what has been typed
+      const s = f.elements.cust, v = s.value;
+      s.innerHTML = '<option value="">Type the details below</option>' + K.map(k => `<option value="${esc(k.id)}">${esc(k.name)}${k.company ? ' - ' + esc(k.company) : ''}</option>`).join('');
+      s.value = K.some(k => k.id === v) ? v : '';
+    };
+    f.addEventListener('input', () => { read(); msg.textContent = 'Updates as you type.'; ctEl._draw(); });
+    f.addEventListener('change', e => {
+      if (e.target.name !== 'cust') return;
+      const k = K.find(x => x.id === e.target.value);
+      if (k) { CT.name = k.name; CT.company = k.company; CT.email = k.email; CT.phone = k.phone; write(); }
+      read(); ctEl._draw();
+    });
+    ctEl.querySelector('[data-ctreset]').addEventListener('click', () => { CT = ctBlank(); write(); ctEl._sync(); ctEl._draw(); msg.textContent = 'Form cleared.'; });
+    btn.addEventListener('click', async () => {
+      read();
+      if (!CT.name.trim()) { msg.textContent = 'Enter the client name first.'; f.elements.name.focus(); return; }
+      if (!(+CT.price > 0)) { msg.textContent = 'Enter the total price first.'; f.elements.price.focus(); return; }
+      btn.disabled = true; const old = btn.textContent; btn.textContent = 'Preparing...'; msg.textContent = 'Creating your PDF...';
+      try { await ctPdf(CT); msg.textContent = 'Contract downloaded.'; toast('Contract downloaded'); }
+      catch (err) { console.error('contract pdf', err); msg.textContent = 'Could not create the PDF. Check your connection and try again.'; }
+      btn.disabled = false; btn.textContent = old;
+    });
+    ctEl._write = write;
+  }
+  ctEl._write(); ctEl._sync(); ctEl._draw();
+  return ctEl;
 }
 
 // ---------- chat with customers (one to one) ----------
@@ -1639,7 +1913,7 @@ async function bkRestore() {
 }
 
 // ---------- events ----------
-const navKeys = () => PORTAL ? ['portal', 'source', 'settings'] : ['overview', 'projects', 'invoices', 'subscriptions', 'source', 'accounting', 'customers', 'chat', 'messages', 'tracker', 'backup', 'settings'];
+const navKeys = () => PORTAL ? ['portal', 'source', 'settings'] : ['overview', 'projects', 'invoices', 'subscriptions', 'source', 'accounting', 'customers', 'chat', 'messages', 'contracts', 'tracker', 'backup', 'settings'];
 const buildNav = () => { $('#nav').innerHTML = navKeys().map(k => `<button data-v="${k}" class="nav-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold text-slate-300 hover:text-white">${svg(ICON[k])}${TITLES[k]}${k === 'chat' ? '<span id="chatBadge" class="hidden ml-auto min-w-[1.25rem] h-5 px-1.5 rounded-full bg-pink text-white text-[11px] font-bold items-center justify-center" aria-label="Unread chat messages"></span>' : ''}</button>`).join(''); chBadge(); };
 buildNav();
 $('#nav').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (b) go(b.dataset.v); });
@@ -2499,6 +2773,7 @@ const repaintK = () => {
   if (!document.body.classList.contains('ready')) return;
   if (view === 'subscriptions') return updateSView();
   if (view === 'source') return updateSCView();
+  if (view === 'contracts') { if (ctEl && ctEl._sync) ctEl._sync(); return; }   // just refresh the customer list in the contract form
   if (view !== 'customers' || kHold) return;
   const grid = $('#kgrid'), gone = grid ? [...grid.querySelectorAll('[data-kid]')].filter(n => !K.some(c => c.id === n.dataset.kid)) : [];
   if (!gone.length) { if (!kt) paint(false); return; }   // an unrelated change redraws now, unless a fade-out is already running
