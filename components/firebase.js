@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut, updateProfile, sendPasswordResetEmail, createUserWithEmailAndPassword, signInWithEmailAndPassword, deleteUser } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-functions.js";
 import { getDatabase, ref, push, set, update, remove, onValue, get, serverTimestamp, increment, query, limitToLast, orderByChild } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 const FB = {
@@ -2436,7 +2437,13 @@ dForm.addEventListener('submit', async e => {
   if (dIn.value !== delP.name) { dErr.textContent = 'The name you typed does not match the project name.'; dIn.focus(); return; }
   const target = delP; setDeleting(true);
   try {
-    if (target.cloud) await withTimeout(remove(ref(db, `users/${U.uid}/projects/${target.id}`)), 12000);
+    if (target.cloud) {
+      // remove the project AND everything that still points at it, in one atomic write
+      const up = { [`users/${U.uid}/projects/${target.id}`]: null };
+      K.forEach(c => { if (c.projects.includes(target.id)) { up[`users/${U.uid}/customers/${c.id}/projects/${target.id}`] = null; if (c.uid) up[`portal/${c.uid}/projects/${target.id}`] = null; } });   // customers it was shared with
+      Object.keys(MR || {}).forEach(u => { if (MR[u] && MR[u][target.id]) up[`maintenance/${u}/${target.id}`] = null; });   // maintenance requests for it
+      await withTimeout(update(ref(db), up), 12000);
+    }
     else { S.projects = S.projects.filter(x => String(x.id) !== String(target.id)); save(); }
     setDeleting(false); closeDel(); refresh(); toast('\u201c' + target.name + '\u201d deleted');
   } catch (err) {
@@ -2672,10 +2679,11 @@ xForm.addEventListener('submit', async e => {
   try {
     if (t.kind === 'disable') await withTimeout(update(ref(db), { [`users/${U.uid}/customers/${t.id}/disabled`]: true, [`portal/${t.uid}/disabled`]: true, [`portal/${t.uid}/revoked`]: true }), 12000);
     else if (t.kind === 'cust') {
+      t.authGone = await delAuthViaFunction(t.uid);   // deletes their login with the Admin SDK (works even after they changed their password)
       await withTimeout(update(ref(db), { [`users/${U.uid}/customers/${t.id}`]: null, [`portal/${t.uid}`]: { admin: U.uid, revoked: true } }), 12000);   // access is cut right away
       // then clean up everything else saved for this customer, and delete their login from Firebase Authentication
       await Promise.allSettled([`portal/${t.uid}`, `chats/${t.uid}`, `maintenance/${t.uid}`, `activity/${t.uid}`].map(path => withTimeout(remove(ref(db, path)), 12000)));
-      t.authGone = await delAuthAccount(t.email);
+      if (!t.authGone) t.authGone = await delAuthAccount(t.email);   // fallback: only works while the password is still the default
     }
     else if (t.kind === 'sub') { const up = { [`users/${U.uid}/subscriptions/${t.id}`]: null }; if (t.cuid) up[`portal/${t.cuid}/subscriptions/${t.id}`] = null; await withTimeout(update(ref(db), up), 12000); }
     else if (t.kind === 'source') { const up = { [`users/${U.uid}/sourcecodes/${t.id}`]: null }; if (t.cuid) up[`portal/${t.cuid}/sourcecode/${t.id}`] = null; await withTimeout(update(ref(db), up), 12000); if (scEdit === t.id) hideSCPanel(); }
@@ -2829,6 +2837,13 @@ async function saveCustomer(f) {
 }
 // deletes the customer's login from Firebase Authentication. Only possible while they still use the default password,
 // because a browser can only delete an account it is signed in to. Returns false when it could not be done.
+async function delAuthViaFunction(cuid) {
+  if (!cuid) return false;
+  try {
+    const r = await withTimeout(httpsCallable(getFunctions(app), 'deleteCustomerAuth')({ uid: cuid }), 15000);
+    return !!(r.data && r.data.ok);
+  } catch (e) { console.warn('deleteCustomerAuth is not available, falling back', e); return false; }
+}
 async function delAuthAccount(email) {
   const a2 = acctAuth();
   try {
