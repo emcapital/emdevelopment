@@ -2244,7 +2244,7 @@
     @media (min-width: 768px) {
       .tm-map {
         display: block;
-        height: 900px;
+        height: 1150px;
       }
 
       .tm-svg {
@@ -2295,7 +2295,7 @@
         left: var(--x);
         top: var(--y);
         transform: translate(-50%, -50%);
-        width: 13.75rem;
+        width: 10.75rem;
         z-index: 2;
       }
 
@@ -2311,7 +2311,7 @@
 
     @media (min-width: 1024px) {
       .tm-map {
-        height: 740px;
+        height: 860px;
       }
 
       .tm-node {
@@ -2325,6 +2325,49 @@
       .tm-line {
         animation: none;
       }
+    }
+
+    /* Testimonials: wide scatter across the whole section on large screens */
+    .tm-svg.wide {
+      display: none;
+    }
+
+    @media (min-width: 1280px) {
+      .tm-map {
+        height: 900px;
+        width: min(1500px, calc(100vw - 3rem));
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .tm-svg.ring {
+        display: none;
+      }
+
+      .tm-svg.wide {
+        display: block;
+      }
+
+      .tm-node {
+        left: var(--xw);
+        top: var(--yw);
+      }
+
+      .tm-line.ring {
+        stroke: rgba(124, 140, 255, .12);
+      }
+    }
+
+    /* Star ratings with half-star support */
+    .tm-stars {
+      display: inline-block;
+      font-size: 1rem;
+      line-height: 1;
+      letter-spacing: .04em;
+      background: linear-gradient(90deg, #fbbf24 calc(var(--r) / 5 * 100%), rgba(148, 163, 184, .38) 0);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
     }
   </style>
   </head>
@@ -3425,16 +3468,17 @@
                 us</span></h2>
           </div>
           <div class="tm-map" id="tmap">
-  <svg class="tm-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="tm-line" data-i="0" x1="50" y1="50" x2="18" y2="14"/><line class="tm-line" data-i="1" x1="50" y1="50" x2="82" y2="14"/><line class="tm-line" data-i="2" x1="50" y1="50" x2="14" y2="50"/><line class="tm-line" data-i="3" x1="50" y1="50" x2="86" y2="50"/><line class="tm-line" data-i="4" x1="50" y1="50" x2="22" y2="86"/><line class="tm-line" data-i="5" x1="50" y1="50" x2="78" y2="86"/><line class="tm-line ring" x1="18" y1="14" x2="14" y2="50"/><line class="tm-line ring" x1="14" y1="50" x2="22" y2="86"/><line class="tm-line ring" x1="22" y1="86" x2="78" y2="86"/><line class="tm-line ring" x1="78" y1="86" x2="86" y2="50"/><line class="tm-line ring" x1="86" y1="50" x2="82" y2="14"/><line class="tm-line ring" x1="82" y1="14" x2="18" y2="14"/></svg>
+  <svg class="tm-svg ring" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="tm-line" data-i="0" x1="50" y1="50" x2="50" y2="8"/><line class="tm-line" data-i="1" x1="50" y1="50" x2="76" y2="17"/><line class="tm-line" data-i="2" x1="50" y1="50" x2="86" y2="42"/><line class="tm-line" data-i="3" x1="50" y1="50" x2="84" y2="68"/><line class="tm-line" data-i="4" x1="50" y1="50" x2="65" y2="91"/><line class="tm-line" data-i="5" x1="50" y1="50" x2="35" y2="91"/><line class="tm-line" data-i="6" x1="50" y1="50" x2="16" y2="68"/><line class="tm-line" data-i="7" x1="50" y1="50" x2="14" y2="42"/><line class="tm-line" data-i="8" x1="50" y1="50" x2="24" y2="17"/><line class="tm-line ring" x1="50" y1="8" x2="76" y2="17"/><line class="tm-line ring" x1="76" y1="17" x2="86" y2="42"/><line class="tm-line ring" x1="86" y1="42" x2="84" y2="68"/><line class="tm-line ring" x1="84" y1="68" x2="65" y2="91"/><line class="tm-line ring" x1="65" y1="91" x2="35" y2="91"/><line class="tm-line ring" x1="35" y1="91" x2="16" y2="68"/><line class="tm-line ring" x1="16" y1="68" x2="14" y2="42"/><line class="tm-line ring" x1="14" y1="42" x2="24" y2="17"/><line class="tm-line ring" x1="24" y1="17" x2="50" y2="8"/></svg>
+  <svg class="tm-svg wide" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="tm-line" data-i="0" x1="50" y1="50" x2="37" y2="9"/><line class="tm-line" data-i="1" x1="50" y1="50" x2="63" y2="9"/><line class="tm-line" data-i="2" x1="50" y1="50" x2="88" y2="18"/><line class="tm-line" data-i="3" x1="50" y1="50" x2="80" y2="50"/><line class="tm-line" data-i="4" x1="50" y1="50" x2="88" y2="82"/><line class="tm-line" data-i="5" x1="50" y1="50" x2="50" y2="91"/><line class="tm-line" data-i="6" x1="50" y1="50" x2="12" y2="82"/><line class="tm-line" data-i="7" x1="50" y1="50" x2="20" y2="50"/><line class="tm-line" data-i="8" x1="50" y1="50" x2="12" y2="18"/><line class="tm-line ring" x1="37" y1="9" x2="63" y2="9"/><line class="tm-line ring" x1="63" y1="9" x2="88" y2="18"/><line class="tm-line ring" x1="88" y1="18" x2="80" y2="50"/><line class="tm-line ring" x1="80" y1="50" x2="88" y2="82"/><line class="tm-line ring" x1="88" y1="82" x2="50" y2="91"/><line class="tm-line ring" x1="50" y1="91" x2="12" y2="82"/><line class="tm-line ring" x1="12" y1="82" x2="20" y2="50"/><line class="tm-line ring" x1="20" y1="50" x2="12" y2="18"/><line class="tm-line ring" x1="12" y1="18" x2="37" y2="9"/></svg>
   <div class="tm-hub" aria-label="EM Development">
     <span class="absolute -inset-5 rounded-full bg-gradient-to-br from-brand-500 to-aqua opacity-25 blur-2xl"></span>
     <span class="absolute inset-0 rounded-full border border-aqua/40 animate-pulseRing"></span>
     <span class="absolute -inset-3 rounded-full border border-dashed border-brand-400/40 animate-spinSlow"></span>
     <span class="relative w-full h-full rounded-full bg-gradient-to-br from-brand-500 to-aqua flex items-center justify-center shadow-2xl shadow-brand-500/40"><span class="em-logo w-[4.2rem]"></span></span>
   </div>
-  <figure class="tm-node" data-i="0" tabindex="0" style="--x:18%;--y:14%;--bd:0ms">
+  <figure class="tm-node" data-i="0" tabindex="0" style="--x:50%;--y:8%;--xw:37%;--yw:9%;--bd:0ms">
   <div class="tm-card">
-    <div class="text-amber-400 text-sm tracking-widest">★★★★★</div>
+    <div class="flex items-center gap-2"><span class="tm-stars" style="--r:5" role="img" aria-label="5 out of 5 stars">★★★★★</span><span class="text-xs font-semibold text-slate-400">5</span></div>
     <blockquote class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“Our online orders doubled within two months. The site is fast, beautiful and finally feels like our bakery.”</blockquote>
     <figcaption class="mt-4 flex items-center gap-3">
       <span class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-pink to-brand-500 flex items-center justify-center text-xs font-bold text-white">MV</span>
@@ -3442,9 +3486,9 @@
     </figcaption>
   </div>
 </figure>
-<figure class="tm-node" data-i="1" tabindex="0" style="--x:82%;--y:14%;--bd:350ms">
+<figure class="tm-node" data-i="1" tabindex="0" style="--x:76%;--y:17%;--xw:63%;--yw:9%;--bd:350ms">
   <div class="tm-card">
-    <div class="text-amber-400 text-sm tracking-widest">★★★★★</div>
+    <div class="flex items-center gap-2"><span class="tm-stars" style="--r:4.5" role="img" aria-label="4.5 out of 5 stars">★★★★★</span><span class="text-xs font-semibold text-slate-400">4.5</span></div>
     <blockquote class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“They delivered our inventory system ahead of schedule. Real-time stock visibility changed how we work.”</blockquote>
     <figcaption class="mt-4 flex items-center gap-3">
       <span class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-brand-500 to-aqua flex items-center justify-center text-xs font-bold text-white">DC</span>
@@ -3452,9 +3496,9 @@
     </figcaption>
   </div>
 </figure>
-<figure class="tm-node" data-i="2" tabindex="0" style="--x:14%;--y:50%;--bd:700ms">
+<figure class="tm-node" data-i="2" tabindex="0" style="--x:86%;--y:42%;--xw:88%;--yw:18%;--bd:700ms">
   <div class="tm-card">
-    <div class="text-amber-400 text-sm tracking-widest">★★★★★</div>
+    <div class="flex items-center gap-2"><span class="tm-stars" style="--r:4.5" role="img" aria-label="4.5 out of 5 stars">★★★★★</span><span class="text-xs font-semibold text-slate-400">4.5</span></div>
     <blockquote class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“Clear communication, gorgeous design and zero stress. Bookings now come in every single week.”</blockquote>
     <figcaption class="mt-4 flex items-center gap-3">
       <span class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-aqua to-emerald-400 flex items-center justify-center text-xs font-bold text-white">AR</span>
@@ -3462,9 +3506,9 @@
     </figcaption>
   </div>
 </figure>
-<figure class="tm-node" data-i="3" tabindex="0" style="--x:86%;--y:50%;--bd:1050ms">
+<figure class="tm-node" data-i="3" tabindex="0" style="--x:84%;--y:68%;--xw:80%;--yw:50%;--bd:1050ms">
   <div class="tm-card">
-    <div class="text-amber-400 text-sm tracking-widest">★★★★★</div>
+    <div class="flex items-center gap-2"><span class="tm-stars" style="--r:4" role="img" aria-label="4 out of 5 stars">★★★★★</span><span class="text-xs font-semibold text-slate-400">4</span></div>
     <blockquote class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“The analytics dashboard gives us every branch in one view. No more spreadsheets on Monday mornings.”</blockquote>
     <figcaption class="mt-4 flex items-center gap-3">
       <span class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-amber-400 to-pink flex items-center justify-center text-xs font-bold text-white">RT</span>
@@ -3472,9 +3516,9 @@
     </figcaption>
   </div>
 </figure>
-<figure class="tm-node" data-i="4" tabindex="0" style="--x:22%;--y:86%;--bd:1400ms">
+<figure class="tm-node" data-i="4" tabindex="0" style="--x:65%;--y:91%;--xw:88%;--yw:82%;--bd:1400ms">
   <div class="tm-card">
-    <div class="text-amber-400 text-sm tracking-widest">★★★★★</div>
+    <div class="flex items-center gap-2"><span class="tm-stars" style="--r:5" role="img" aria-label="5 out of 5 stars">★★★★★</span><span class="text-xs font-semibold text-slate-400">5</span></div>
     <blockquote class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“Our mobile app got amazing feedback from customers. They treated our brand like it was their own.”</blockquote>
     <figcaption class="mt-4 flex items-center gap-3">
       <span class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-emerald-400 to-brand-500 flex items-center justify-center text-xs font-bold text-white">JL</span>
@@ -3482,13 +3526,43 @@
     </figcaption>
   </div>
 </figure>
-<figure class="tm-node" data-i="5" tabindex="0" style="--x:78%;--y:86%;--bd:1750ms">
+<figure class="tm-node" data-i="5" tabindex="0" style="--x:35%;--y:91%;--xw:50%;--yw:91%;--bd:1750ms">
   <div class="tm-card">
-    <div class="text-amber-400 text-sm tracking-widest">★★★★★</div>
+    <div class="flex items-center gap-2"><span class="tm-stars" style="--r:4" role="img" aria-label="4 out of 5 stars">★★★★★</span><span class="text-xs font-semibold text-slate-400">4</span></div>
     <blockquote class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“Court booking used to be chaos. Now members reserve in seconds and our staff finally breathe easy.”</blockquote>
     <figcaption class="mt-4 flex items-center gap-3">
       <span class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-brand-400 to-pink flex items-center justify-center text-xs font-bold text-white">MS</span>
       <span class="min-w-0"><span class="block text-sm font-semibold truncate">Mark Santos</span></span>
+    </figcaption>
+  </div>
+</figure>
+<figure class="tm-node" data-i="6" tabindex="0" style="--x:16%;--y:68%;--xw:12%;--yw:82%;--bd:2100ms">
+  <div class="tm-card">
+    <div class="flex items-center gap-2"><span class="tm-stars" style="--r:4.5" role="img" aria-label="4.5 out of 5 stars">★★★★★</span><span class="text-xs font-semibold text-slate-400">4.5</span></div>
+    <blockquote class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“Launch day went flawlessly. Our new online store handled the rush and customers kept saying how easy it was to use.”</blockquote>
+    <figcaption class="mt-4 flex items-center gap-3">
+      <span class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-aqua to-brand-500 flex items-center justify-center text-xs font-bold text-white">PG</span>
+      <span class="min-w-0"><span class="block text-sm font-semibold truncate">Patricia Gomez</span></span>
+    </figcaption>
+  </div>
+</figure>
+<figure class="tm-node" data-i="7" tabindex="0" style="--x:14%;--y:42%;--xw:20%;--yw:50%;--bd:2450ms">
+  <div class="tm-card">
+    <div class="flex items-center gap-2"><span class="tm-stars" style="--r:5" role="img" aria-label="5 out of 5 stars">★★★★★</span><span class="text-xs font-semibold text-slate-400">5</span></div>
+    <blockquote class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“They explained every step in plain language and never missed a deadline. Easily the best web partner we have had.”</blockquote>
+    <figcaption class="mt-4 flex items-center gap-3">
+      <span class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-pink to-amber-400 flex items-center justify-center text-xs font-bold text-white">JB</span>
+      <span class="min-w-0"><span class="block text-sm font-semibold truncate">Jerome Bautista</span></span>
+    </figcaption>
+  </div>
+</figure>
+<figure class="tm-node" data-i="8" tabindex="0" style="--x:24%;--y:17%;--xw:12%;--yw:18%;--bd:2800ms">
+  <div class="tm-card">
+    <div class="flex items-center gap-2"><span class="tm-stars" style="--r:3.5" role="img" aria-label="3.5 out of 5 stars">★★★★★</span><span class="text-xs font-semibold text-slate-400">3.5</span></div>
+    <blockquote class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“The redesign looks great and loads fast. A couple of revisions took longer than planned, but inquiries went up right away.”</blockquote>
+    <figcaption class="mt-4 flex items-center gap-3">
+      <span class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-emerald-400 to-aqua flex items-center justify-center text-xs font-bold text-white">HR</span>
+      <span class="min-w-0"><span class="block text-sm font-semibold truncate">Hannah Ramos</span></span>
     </figcaption>
   </div>
 </figure>
@@ -4677,7 +4751,7 @@
       function on(i) {
         cur = i;
         nodes.forEach((n, j) => n.classList.toggle('on', j === i));
-        lines.forEach((l, j) => l.classList.toggle('on', j === i));
+        lines.forEach(l => l.classList.toggle('on', +l.dataset.i === i));
       }
       nodes.forEach((n, i) => {
         n.addEventListener('mouseenter', () => {
