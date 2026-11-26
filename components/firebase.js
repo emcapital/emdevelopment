@@ -46,6 +46,7 @@ const ICON = {
   invoices: 'M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6',
   subscriptions: 'M21 12a9 9 0 0 1-15.5 6.2L3 16M3 12a9 9 0 0 1 15.5-6.2L21 8M21 3v5h-5M3 21v-5h5',
   messages: 'M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM3 7l9 6 9-6',
+  proposal: 'M4 4h16v12H8l-4 4zM8 9h8M8 12h5',
   contracts: 'M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 13h6M9 17h4',
   accounting: 'M4 20V11M10 20V5M16 20v-6M22 20H2',
   customers: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8',
@@ -57,7 +58,7 @@ const ICON = {
   tracker: 'M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',
   trash: 'M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M10 11v6M14 11v6'
 };
-const TITLES = { overview: 'Overview', projects: 'Projects', invoices: 'Invoices', subscriptions: 'Subscriptions', accounting: 'Accounting', source: 'Source Code', customers: 'Customers', portal: 'My Website', messages: 'Quotations', contracts: 'Contracts', chat: 'Chat', tracker: 'Tracker', backup: 'Backup', settings: 'Account' };
+const TITLES = { overview: 'Overview', projects: 'Projects', invoices: 'Invoices', subscriptions: 'Subscriptions', accounting: 'Accounting', source: 'Source Code', customers: 'Customers', portal: 'My Website', messages: 'Quotations', contracts: 'Contracts', proposal: 'Proposal', chat: 'Chat', tracker: 'Tracker', backup: 'Backup', settings: 'Account' };
 const svg = (d, c = 'w-5 h-5') => `<svg class="${c}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="${d}"/></svg>`;
 let toastT;
 function toast(t) { const el = $('#toast'); el.textContent = t; el.className = 'fixed left-1/2 z-50 glass rounded-2xl px-5 py-2.5 text-sm font-medium text-center max-w-[calc(100vw-2rem)]'; el.style.bottom = 'calc(1.5rem + env(safe-area-inset-bottom, 0px))'; el.style.animation = 'toastIn .4s ease both'; clearTimeout(toastT); toastT = setTimeout(() => { el.style.animation = 'toastOut .35s ease forwards'; toastT = setTimeout(() => el.classList.add('hidden'), 350); }, 2600); }
@@ -1287,6 +1288,7 @@ const views = {
   },
   chat() { return '<div id="chatHost"></div>'; },
   contracts() { return '<div id="ctHost"></div>'; },
+  proposal() { return '<div id="prHost"></div>'; },
   backup() {
     const last = bkLast(), sm = bk.sum;
     const stat = (n, l) => `<div class="rounded-xl bg-white/5 px-3 py-2.5"><div class="text-lg font-extrabold">${n}</div><div class="text-xs text-slate-400">${l}</div></div>`;
@@ -1320,6 +1322,7 @@ const views = {
 function paint(anim) {
   const v = $('#view'), top = v.scrollTop;
   v.innerHTML = views[view]();
+  const prh = v.querySelector('#prHost'); if (prh) prh.replaceWith(prUI());
   const cth = v.querySelector('#ctHost'); if (cth) cth.replaceWith(ctUI());   // the contract form is built once, so nothing typed is lost on a redraw
   const chh = v.querySelector('#chatHost'); if (chh) { chh.replaceWith(chUI()); chMount(); }   // the chat is built once, so a half-typed reply survives redraws
   if (anim) { v.scrollTop = 0; v.querySelectorAll('[data-f]').forEach((el, i) => { el.classList.add('fade-item'); el.style.setProperty('--i', i); }); } else v.scrollTop = top;
@@ -1658,6 +1661,361 @@ function ctUI() {
   return ctEl;
 }
 
+// ---------- proposal maker ----------
+// Same layout and wording as the "Service Proposal" template: Courier type, a company header on every page,
+// numbered sections, a package/price menu, payment terms and an acceptance page. Pick what to include on the left;
+// the proposal is written on the right and downloads as "Service Proposal for <Full Name>.pdf".
+// Nothing is stored in the database: the form lives in this page until it is cleared or the dashboard is closed.
+const prFmt = v => { const n = parseFloat(String(v).replace(/,/g, '')); return isFinite(n) ? n.toLocaleString('en-US', { maximumFractionDigits: 2 }) : String(v); };
+const PR_ADD = ['pages', 'host', 'book', 'ecom', 'pwa'];   // add-ons; everything else is a website service
+const PR_PK = [['one', 'One-Page Website', 3499], ['biz', 'Business Website', 5999], ['shop', 'E-Commerce Website', 24799], ['blog', 'Blog Website', 8999], ['bsite', 'Booking Website', 8999], ['pages', 'Additional Pages (price per page)', 750], ['host', 'Hosting through EM Development (per year)', 3999], ['book', 'Booking System', 4999], ['ecom', 'E-Commerce Integration', 9999], ['pwa', 'Progressive Web App (PWA)', 9999]];
+const prBlank = () => { const o = { cust: '', cur: 'PHP', salute: 'Mr.', name: '', company: '', email: '', service: 'Website Development', revs: 2, extra: '', date: ctToday() }; PR_PK.forEach(p => { o['inc_' + p[0]] = true; o['p_' + p[0]] = p[2]; }); return o; };
+const prLines = ctLines;
+let PR = prBlank(), prEl = null;
+const PR_KEYS = ['cur', 'salute', 'name', 'company', 'email', 'service', 'revs', 'extra', 'date'];
+const PR_CO = { name: 'EM Development Solutions', addr: 'Cebu City, Cebu, Philippines, 6000', phone: '(+63) 920 501 8789', email: 'emdevelopmentph@gmail.com' };
+// the proposal as data (blocks), so the preview and the PDF always say exactly the same thing. cur = '₱' on screen, 'PHP ' in the PDF
+function prBuild(c, pdf) {
+  const usd = c.cur === 'USD', cur = usd ? '$ ' : (pdf ? '\u00A4' : '₱ ');
+  const on = k => PR_ADD.includes(k) || !!c['inc_' + k], pr = k => Math.max(0, +c['p_' + k] || 0), m = n => cur + Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 });
+  const name = (c.name || '').trim() || '____________', co = (c.company || '').trim(), org = co || name, sal = (c.salute || '').trim();
+  const rep = (sal ? sal + ' ' : '') + name, email = (c.email || '').trim();
+  const revs = Math.max(1, Math.round(+c.revs) || 2), revW = revs + ' Minor Revision' + (revs === 1 ? '' : 's');
+  const service = (c.service || '').trim() || 'Website Development';
+  const B = []; let n = 0;
+  const h1 = (x, br) => { n++; B.push({ t: 'h1', x: n + '. ' + x.toUpperCase(), br }); return n; };
+  const h2 = x => B.push({ t: 'h2', x }), h3 = x => B.push({ t: 'h3', x }), p = x => B.push({ t: 'p', x }), ul = a => B.push({ t: 'ul', a }), ol = a => B.push({ t: 'ol', a }), kv = (k, v) => B.push({ t: 'kv', k, v });
+  const L = i => String.fromCharCode(65 + i);
+  // cover
+  B.push({ t: 'title', x: service.toUpperCase() + ' PROPOSAL' });
+  B.push({ t: 'sub', x: 'Professional ' + service + ' Services' });
+  kv('Prepared for', org); if (co) kv('Client Representative', rep); if (email) kv('Email', email);
+  B.push({ t: 'gap' }); kv('Prepared by', PR_CO.name); kv('Proposal Date', c.date ? fmtD(c.date) : '____________'); B.push({ t: 'rule' });
+  // 1
+  h1('Project Overview', false);
+  p('Dear ' + rep + ',');
+  p('Thank you for considering ' + PR_CO.name + ' as your ' + service.toLowerCase() + ' partner.');
+  p('We are pleased to present this proposal for the development of a professional website for ' + org + '.');
+  p('Our goal is to establish a strong online presence for ' + (co ? 'your company' : 'you') + ' through a modern, responsive, and user-friendly website that effectively showcases ' + (co ? "your company's" : 'your') + ' services, projects, and business information.');
+  p('We offer flexible website development packages and additional features that can be customized according to ' + (co ? "your company's" : 'your') + ' requirements and business objectives.');
+  // 2
+  if (on('one') || on('biz') || on('shop') || on('blog') || on('bsite') || on('pages')) {
+    h1('Website Development Packages', true); let i = 0;
+    if (on('one')) {
+      h2(L(i++) + '. ONE-PAGE WEBSITE'); h3(m(pr('one')));
+      p('A cost-effective website solution designed to present your business information in a single, professionally designed webpage.');
+      h3('Inclusions:'); ul(['Custom website design', 'Company introduction and business overview', 'Services or products section', 'Project or portfolio highlights', 'Contact information', 'Mobile-responsive layout', 'Social media integration', 'Basic Search Engine Optimization (SEO)']);
+      kv('Estimated Development Time', 'Less than 24 hours.'); kv('Domain', 'Not included.');
+    }
+    if (on('biz')) {
+      h2(L(i++) + '. BUSINESS WEBSITE'); h3(m(pr('biz')));
+      p("A complete multi-page website designed to establish your company's online presence and provide visitors with easy access to important business information.");
+      h3('Inclusions:');
+      h3('1. Home Page'); ul(['Company introduction', 'Featured services and projects', 'Important business highlights']);
+      h3('2. About Page'); ul(['Company background', 'Mission and vision', 'Company information']);
+      h3('3. Services / Products / Projects Page'); ul(['Showcase of company services', 'Product or service descriptions', 'Completed and ongoing project portfolio']);
+      h3('4. Contact Page'); ul(['Business contact information', 'Customer inquiry form', 'Business location and other contact details']);
+      h3('Additional Inclusions:'); ul(['Custom website design', 'Mobile-responsive layout', 'Social media integration', 'Basic Search Engine Optimization (SEO)', 'User-friendly website navigation', 'Free domain registration for the initial year registration period']);
+      kv('Estimated Development Time', '5-7 business days.');
+    }
+    const pkg = (k, title, desc, groups, extra, time) => {
+      h2(L(i++) + '. ' + title); h3(m(pr(k))); p(desc); h3('Inclusions:');
+      groups.forEach((g, j) => { h3((j + 1) + '. ' + g[0]); ul(g[1]); });
+      h3('Additional Inclusions:'); ul(extra); kv('Estimated Development Time', time);
+    };
+    if (on('shop')) pkg('shop', 'E-COMMERCE WEBSITE', 'A complete online shopping website designed for businesses that want to sell products directly through the internet. Customers can browse products, add items to their shopping cart, and place orders through the website.', [
+      ['Home Page', ['Business introduction', 'Featured products', 'Promotional banners', 'Featured categories', 'Special offers and announcements']],
+      ['Shop / Product Catalog', ['Product listings', 'Product categories', 'Product descriptions', 'Product images and galleries', 'Product pricing', 'Product search and filtering']],
+      ['Product Details Page', ['Individual product information', 'Product images', 'Product variations (if applicable)', 'Stock availability', 'Add-to-cart functionality']],
+      ['Shopping Cart', ['Add and remove products', 'Update product quantities', 'Automatic subtotal calculation', 'Order summary']],
+      ['Checkout System', ['Customer information form', 'Billing and shipping details', 'Order summary', 'Shipping method selection', 'Payment method integration']],
+      ['Customer Account', ['Customer registration and login', 'Customer profile management', 'Order history', 'Order status tracking']],
+      ['Order Management Dashboard', ['View and manage customer orders', 'Update order statuses', 'Manage product inventory', 'Add, edit, and remove products', 'Manage product categories', 'View customer information']],
+      ['About Page', ['Company background', 'Business information']],
+      ['Contact Page', ['Contact information', 'Customer inquiry form', 'Business location']]
+    ], ['Mobile-responsive design', 'Custom website design', 'Social media integration', 'Basic Search Engine Optimization (SEO)', 'Secure website configuration', 'Payment method integration, subject to provider availability and requirements'], '10-15 business days.');
+    if (on('blog')) pkg('blog', 'BLOG WEBSITE', 'A content-focused website designed for individuals, businesses, and organizations that want to publish articles, share information, and provide valuable content to their audience.', [
+      ['Home Page', ['Featured articles', 'Latest blog posts', 'Popular articles', 'Featured categories', 'Search functionality']],
+      ['Blog / Articles Page', ['Complete article listings', 'Article categories', 'Article thumbnails', 'Publication dates', 'Author information', 'Pagination for blog posts']],
+      ['Individual Blog Post Page', ['Full article content', 'Featured images', 'Author information', 'Publication date', 'Related articles', 'Social media sharing']],
+      ['About Page', ['Author or company introduction', 'Website purpose', 'Background information']],
+      ['Contact Page', ['Contact information', 'Customer inquiry form', 'Social media links']],
+      ['Blog Management Dashboard', ['Create and publish articles', 'Edit and delete blog posts', 'Upload and manage images', 'Manage article categories', 'Save drafts before publishing', 'Manage published and unpublished articles']]
+    ], ['Mobile-responsive design', 'Custom website design', 'Basic Search Engine Optimization (SEO)', 'Social media integration', 'User-friendly content management system'], '5-7 business days.');
+    if (on('bsite')) pkg('bsite', 'BOOKING WEBSITE', 'A professional website designed for businesses that accept appointments, reservations, or service bookings. This website allows customers to conveniently schedule appointments online without having to contact the business manually.', [
+      ['Home Page', ['Business introduction', 'Featured services', 'Booking call-to-action section']],
+      ['About Page', ['Company background', 'Business information', 'Mission and vision']],
+      ['Services Page', ['Service listings', 'Service descriptions', 'Service pricing (if applicable)']],
+      ['Online Booking System', ['Online appointment and reservation form', 'Service selection', 'Available date and time selection', 'Customer information collection', 'Booking confirmation', 'Booking request notifications']],
+      ['Booking Management Dashboard', ['View customer bookings', 'Manage appointment requests', 'Approve or reject booking requests', 'Update booking status', 'View booking schedules']],
+      ['Contact Page', ['Contact information', 'Customer inquiry form', 'Business location']]
+    ], ['Mobile-responsive design', 'Custom website design', 'User-friendly booking interface', 'Social media integration', 'Basic Search Engine Optimization (SEO)'], '7-10 business days.');
+    if (on('pages')) {
+      h2(L(i++) + '. ADDITIONAL WEBSITE PAGES'); h3(m(pr('pages')) + ' per page');
+      p('Additional pages can be created beyond the pages included in the selected website package.'); p('Examples include:');
+      ul(['Our Team', 'Frequently Asked Questions (FAQ)', 'Testimonials', 'Careers', 'Individual Service Pages', 'Individual Project Pages', 'Terms and Conditions', 'Privacy Policy']);
+      p('The final cost will depend on the number of additional pages requested.');
+    }
+  }
+  // 3
+  if (on('biz') || on('host')) {
+    h1('Domain Registration and Web Hosting', true); let i = 0;
+    if (on('biz')) {
+      h2(L(i++) + '. FREE DOMAIN REGISTRATION');
+      p('A free domain registration is exclusively included in the Business Website Package (' + m(pr('biz')) + ').');
+      h3('Terms and Conditions:'); ul(['Free domain registration applies to the initial registration period only.', 'The domain name is subject to availability.', 'Domain renewal fees after the initial registration period will be shouldered by the client.', 'Domain registration is not included in the One-Page Website Package.', 'The client may choose their preferred available domain name, subject to approval and availability.']);
+      h2(L(i++) + '. DOMAIN RENEWAL POLICY');
+      p('Upon expiration of the initial free domain registration period, ' + PR_CO.name + ' will notify the Client regarding the upcoming domain renewal.');
+      p('The Company will provide the Client with an invoice indicating the exact renewal amount before the renewal date.');
+      p('Please note that domain renewal prices vary depending on the domain extension and registration provider. Therefore, the renewal cost may differ from one domain name to another.');
+      p('The Client must settle the renewal invoice to ensure the continued registration and availability of the domain name. Any failure to renew before its expiration may result in website inaccessibility or loss of the domain name.');
+    }
+    if (on('host')) {
+      h2(L(i++) + '. WEBSITE HOSTING'); p('Clients have the flexibility to choose where their website will be hosted.');
+      h3('OPTION 1: CLIENT-PROVIDED HOSTING'); p('The client may purchase their own hosting service from their preferred hosting provider.'); p('Under this option:');
+      ul(['The client will be responsible for purchasing the hosting subscription.', 'The client will shoulder all hosting renewal fees.', 'The client will manage their hosting account and subscription.', PR_CO.name + " will configure the website to work with the client's hosting environment, subject to compatibility."]);
+      h3('OPTION 2: HOSTING THROUGH ' + PR_CO.name.toUpperCase()); h3(m(pr('host')) + ' per year');
+      p('Clients may choose to have their website hosted through ' + PR_CO.name + ' for an annual fee of ' + m(pr('host')) + '.');
+      h3('Inclusions:'); ul(['Website hosting for one year', 'Server space for website files and databases', 'Website accessibility through the registered domain', 'Basic server and hosting management', 'Basic hosting maintenance']);
+      h3('Hosting Terms:'); ul(['Hosting is billed annually at ' + m(pr('host')) + '.', 'Renewal payment is required every year to maintain the website hosting service.', 'Hosting is optional and separate from the website development package.'].concat(on('biz') ? ['The free domain included in the Business Website Package does not include free hosting.', 'Domain renewal and hosting renewal are separate expenses.'] : []));
+    }
+  }
+  // 4
+  if (on('book') || on('ecom') || on('pwa')) {
+    h1('Additional Features and Integrations', false); let i = 0;
+    p('The following features can be integrated into your website to provide additional functionality and improve the overall customer experience.');
+    if (on('book')) {
+      h2(L(i++) + '. BOOKING SYSTEM'); h3(m(pr('book')));
+      p('An integrated booking system that allows customers to schedule appointments or request services directly through your website.');
+      h3('Features may include:'); ul(['Online booking form', 'Appointment scheduling', 'Customer information collection', 'Booking request notifications', 'Booking management interface']); p('The exact functionality will depend on the agreed booking requirements.');
+    }
+    if (on('ecom')) {
+      h2(L(i++) + '. E-COMMERCE INTEGRATION'); h3(m(pr('ecom')));
+      p('An e-commerce solution that allows your company to sell products or services directly through your website.');
+      h3('Features may include:'); ul(['Product listings and catalog', 'Shopping cart functionality', 'Customer checkout system', 'Order management', 'Payment method integration', 'Product and inventory management']);
+      p("Payment gateway services, transaction charges, and third-party subscriptions, if applicable, are subject to their respective providers' fees.");
+    }
+    if (on('pwa')) {
+      h2(L(i++) + '. PROGRESSIVE WEB APP (PWA)'); h3(m(pr('pwa')));
+      p('A Progressive Web App (PWA) is an enhanced version of a website that provides an app-like experience without requiring customers to download an application from the Google Play Store or Apple App Store.');
+      p('With PWA integration, your website can offer the following features:');
+      [['1. Installable Website', 'Visitors can add your website to their mobile phone or computer home screen, similar to installing a mobile application.'], ['2. App-Like Experience', 'Provides a more application-like interface and browsing experience, making the website more convenient to access.'], ['3. Offline Access', 'Selected website content can remain accessible even without an internet connection, depending on the implemented caching functionality.'], ['4. Faster Loading', 'Uses caching technology to help improve loading performance and provide a smoother browsing experience.'], ['5. Push Notifications', 'Can support notifications for announcements, updates, and promotions, subject to browser and device permissions.']].forEach(a => { h3(a[0]); p(a[1]); });
+      p('PWA integration helps make your website more accessible and convenient for customers, especially those who frequently visit your business website.');
+    }
+  }
+  // 5
+  h1('Project Development Timeline', true); p('The estimated development duration is as follows:');
+  const rows = []; if (on('one')) rows.push(['One Pager Website', '24 Hours']); if (on('biz')) rows.push(['Business Page Website', '5 - 7 Business Days']);
+  if (on('shop')) rows.push(['E-Commerce Website', '10 - 15 Business Days']); if (on('blog')) rows.push(['Blog Website', '5 - 7 Business Days']); if (on('bsite')) rows.push(['Booking Website', '7 - 10 Business Days']);
+  if (on('pages')) rows.push(['Additional Pages', 'Depends on Complexity']); if (on('book')) rows.push(['Booking System', 'Depends on Complexity']); if (on('ecom')) rows.push(['E - Commerce Integration', 'Depends on Complexity']); if (on('pwa')) rows.push(['PWA Integration', 'Depends on Complexity']);
+  if (rows.length) B.push({ t: 'tbl', head: ['Website / Service', 'Estimated Duration'], rows });
+  B.push({ t: 'kv', k: 'Important', v: 'Development timelines begin once the required project information, content, materials, and initial payment have been received.', nl: true });
+  p('Delays in providing required materials, approvals, or feedback may affect the estimated completion date.');
+  // 6
+  h1('Payment Terms and Conditions', true); p('To ensure a smooth development process, payments will be divided into three stages:');
+  h2('FIRST PAYMENT - 40% DOWNPAYMENT'); p('A 40% downpayment is required before the development process begins.'); p('This confirms the project engagement and secures the development schedule.');
+  h2('SECOND PAYMENT - 30% UPON COMPLETION OF ALL FEATURES'); p('The second payment of 30% is due once all agreed website features and functionalities have been completed.'); p('This payment must be settled before the revision phase begins.');
+  h2('FINAL PAYMENT - 30% AFTER REVISIONS'); p('The remaining 30% balance is due after the agreed revisions have been completed.'); p('Upon full payment, the website source code will be unlocked and made accessible through the designated website dashboard, where applicable to hard-coded websites.');
+  h3('Payment Process:'); ol(['40% payment before development begins.', '30% payment after all agreed features have been completed and before revisions.', '30% payment after revisions and before source code access is unlocked.']);
+  // 7
+  h1('Revisions and Source Code Access', true); p("To ensure that the final website meets the client's expectations, a revision period will be provided after the second payment.");
+  h3('7.1 Revision Terms:'); ul([revW + ' will begin after the second payment has been settled.', 'The client may review the completed website and provide necessary revision requests.', 'Revisions must remain within the originally agreed project scope.', 'Additional features, major structural changes, or requests outside the original scope may require additional charges.']);
+  h3('7.2 Source Code Access:'); p('For hard-coded websites, the source code will be made accessible through the designated website dashboard after the final payment has been fully settled.');
+  p('The source code access arrangement applies to hard-coded websites only and does not include proprietary third-party software, licensed plugins, themes, or services where source code ownership or access is restricted by their respective providers.');
+  h3('7.3 MINOR AND MAJOR REVISIONS'); p('To ensure a clear understanding of the revision process, revisions are categorized into two types:');
+  h3('7.3.A MINOR REVISIONS (Included)'); p('Minor revisions refer to small adjustments and modifications to the existing website design and content without changing its overall layout or functionality.'); p('The following are included:');
+  ul([['Text Changes', 'Editing or correcting existing text and written content.'], ['Color Adjustments', 'Changing website colors, backgrounds, and other color elements.'], ['Image Replacement', 'Replacing existing images with new images provided by the client.'], ['Word Corrections', 'Correcting spelling, grammar, wording, and other written details.'], ['Font Changes', 'Adjusting font styles, font sizes, and typography.']]);
+  p('These revisions are included in the agreed revision phase, provided they remain within the original project scope.');
+  h3('7.3.B MAJOR REVISIONS (Additional Charges May Apply)'); p("Major revisions refer to significant changes that affect the website's original structure, design layout, or functionality."); p('The following are considered major revisions:');
+  ul([['Website Layout Changes', 'Restructuring or redesigning the arrangement of website sections, pages, and overall visual presentation.'], ['Functionality Changes', 'Modifying existing website features, adding new functions, or changing how specific website components operate.'], ['Structural Changes', 'Significant changes to the original website design or page structure.'], ['Feature Modifications', 'Changing or rebuilding previously approved features or functionalities.']]);
+  p("Major revisions are not included in the standard revision phase and may require additional charges depending on the complexity, time, and resources needed."); p('Any additional charges will be discussed with and approved by the Client before implementation.');
+  h3('IMPORTANT REMINDER:'); p('The revision process is intended to refine and improve the originally agreed website design and features. It is not intended to cover a complete redesign or the development of additional functionalities outside the original project scope.');
+  // 8
+  h1('Design Mockup and Client Approval', true);
+  p('Before the actual website development begins, ' + PR_CO.name + ' will prepare and present an initial website mockup design to the Client for review and approval.');
+  p("The mockup will serve as the visual reference for the website's overall appearance, including its layout, color scheme, typography, and general design direction.");
+  p('Approval Process:'); ol(["Initial Mockup Preparation - The Developer will create an initial mockup based on the Client's business requirements, preferences, and provided materials.", 'Client Review - The mockup will be presented to the Client for evaluation and feedback.', 'Design Confirmation - The Client will review and confirm the proposed design. Any necessary adjustments to the initial mockup must be discussed and finalized before approval.', 'Development Commencement - Actual website development will begin only after the Client has formally approved and confirmed the mockup design.']);
+  p('Important Conditions:'); ul(["The Developer will not proceed with actual website development without the Client's confirmation of the mockup design.", 'Any changes requested after the mockup has been approved, particularly major layout or structural changes, may be considered major revisions and may incur additional charges.', 'The estimated development timeline will begin once the mockup has been approved, the required materials have been received, and the initial 40% downpayment has been settled.']);
+  // 9
+  h1('General Terms and Conditions', true);
+  const gt = [usd ? 'All prices stated in this proposal are in United States Dollars (USD / $).' : 'All prices stated in this proposal are in Philippine Peso (PHP / ' + cur + ').', 'Prices cover only the services and features explicitly stated in the selected package.', 'Additional requirements not included in the selected package will be quoted separately.', 'The client is responsible for providing accurate company information, images, logos, written content, and other necessary materials.', 'Domain registration, web hosting, premium plugins, paid themes, third-party subscriptions, and external service fees are not included unless explicitly stated in the agreed quotation.'];
+  if (on('biz')) gt.push('The free domain registration applies exclusively to the Business Website Package and covers the initial year registration period only.');
+  if (on('host')) gt.push('Hosting through ' + PR_CO.name + ' is optional and costs ' + m(pr('host')) + ' per year.');
+  gt.push('Development timelines may vary depending on project complexity and the timely submission of required materials and feedback.', 'Work on the next project stage will proceed upon settlement of the corresponding payment.', 'Any additional functionality or major changes outside the original agreement may require a separate quotation.');
+  ol(gt);
+  // notes
+  const ex = prLines(c.extra); if (ex.length) { h1('Additional Notes', true); ul(ex); }
+  // acceptance
+  h1('Proposal Acceptance', true);
+  p('We appreciate the opportunity to work with ' + org + '.');
+  p(PR_CO.name + ' looks forward to helping ' + (co ? 'your company' : 'you') + ' establish a professional online presence through a modern and functional website that reflects ' + (co ? 'your brand' : 'your brand') + ', showcases ' + (co ? 'your' : 'your') + ' services, and supports your business growth.');
+  p('Should you wish to proceed, please confirm your preferred website package and any additional features you would like to include.');
+  p('Thank you for your time and consideration.');
+  B.push({ t: 'gap' }); B.push({ t: 'gap' }); B.push({ t: 'sign', a: ['Sincerely,', PR_CO.name.toUpperCase(), 'Website Development Services'] });
+  return { blocks: B, name };
+}
+function prHtml(blocks) {
+  const li = x => Array.isArray(x) ? `<b>${esc(x[0])}</b> - ${esc(x[1])}` : esc(x);
+  const html = blocks.map(b => {
+    switch (b.t) {
+      case 'title': return `<h2 class="text-center font-bold text-xl sm:text-2xl mt-6 mb-5 break-words">${esc(b.x)}</h2>`;
+      case 'sub': return `<div class="font-bold text-sm mb-3">${esc(b.x)}</div>`;
+      case 'kv': return b.nl ? `<p class="mt-3 text-justify"><b>${esc(b.k)}:</b> ${esc(b.v)}</p>` : `<div class="break-words"><b>${esc(b.k)}:</b> ${esc(b.v)}</div>`;
+      case 'gap': return '<div class="h-3"></div>';
+      case 'rule': return '<hr class="my-4 border-slate-400"/>';
+      case 'h1': return `<h3 class="${b.br ? 'mt-8 pt-6 border-t border-dashed border-slate-300 ' : 'mt-5 '}font-bold text-base sm:text-lg break-words">${esc(b.x)}</h3>`;
+      case 'h2': return `<h4 class="mt-4 font-bold text-sm break-words">${esc(b.x)}</h4>`;
+      case 'h3': return `<div class="mt-3 font-bold break-words">${esc(b.x)}</div>`;
+      case 'p': return `<p class="mt-2 text-justify break-words">${esc(b.x)}</p>`;
+      case 'ul': return `<ul class="list-disc pl-8 mt-2 space-y-0.5">${b.a.map(x => `<li class="break-words">${li(x)}</li>`).join('')}</ul>`;
+      case 'ol': return `<ol class="list-decimal pl-8 mt-2 space-y-0.5">${b.a.map(x => `<li class="break-words">${li(x)}</li>`).join('')}</ol>`;
+      case 'tbl': return `<div class="mt-2 border border-slate-800">${[b.head].concat(b.rows).map((r, i) => `<div class="grid grid-cols-2 ${i ? 'border-t' : ''} border-slate-800"><div class="px-2 py-1.5 min-w-0 break-words ${i ? '' : 'font-bold'}">${esc(r[0])}</div><div class="px-2 py-1.5 min-w-0 break-words border-l border-slate-800 ${i ? '' : 'font-bold'}">${esc(r[1])}</div></div>`).join('')}</div>`;
+      case 'sign': return `<div class="font-bold">${esc(b.a[0])}</div><div class="font-bold">${esc(b.a[1])}</div><div>${esc(b.a[2])}</div>`;
+    }
+    return '';
+  }).join('');
+  return `<div class="bg-white text-slate-900 rounded-xl p-5 sm:p-8 shadow-lg text-[12.5px] leading-relaxed" style="font-family:'Courier New',Courier,monospace"><div class="text-center text-xs text-slate-700"><div>${esc(PR_CO.name)}</div><div>${esc(PR_CO.addr)}</div><div class="break-words">${esc(PR_CO.phone)} | <span class="text-blue-600 underline">${esc(PR_CO.email)}</span></div></div>${html}</div>`;
+}
+async function prPdf(c) {
+  const d = prBuild(c, true), JsPDF = await loadPdf(), doc = new JsPDF({ unit: 'mm', format: 'a4' });
+  const W = 210, H = 297, M = 25, CW = W - 2 * M, LH = 5, TOP = 38;
+  let curSt = 'normal';
+  const font = (st, sz) => { curSt = st; doc.setFont('courier', st); doc.setFontSize(sz); }, S = pdfSafe, PS = '\u00A4';
+  // the PDF font has no peso sign, so it is drawn: a "P" with two strokes through it
+  const put = (t, x, yy) => {
+    if (t.indexOf(PS) < 0) { doc.text(t, x, yy); return; }
+    const em = doc.getFontSize() * 0.3528, ch = em * 0.57; let cx = x;
+    t.split(PS).forEach((seg, k, a) => {
+      if (seg) { doc.text(seg, cx, yy); cx += doc.getTextWidth(seg); }
+      if (k < a.length - 1) {
+        doc.text('P', cx, yy); const w = doc.getTextWidth('P');
+        doc.setDrawColor(20); doc.setLineWidth(curSt === 'bold' ? 0.3 : 0.2);
+        doc.line(cx - 0.04 * em, yy - ch * 0.38, cx + w + 0.04 * em, yy - ch * 0.38); doc.line(cx - 0.04 * em, yy - ch * 0.66, cx + w + 0.04 * em, yy - ch * 0.66);
+        cx += w;
+      }
+    });
+  };
+  let y = TOP;
+  const need = h => { if (y + h > H - 22) { doc.addPage(); y = TOP; } };
+  const lines = (t, w) => doc.splitTextToSize(S(t), w);
+  const wrap = (t, x, w, just) => { font('normal', 10); const ls = lines(t, w); need(LH * Math.min(ls.length, 2)); ls.forEach((ln, i) => { need(LH); if (just && i < ls.length - 1 && ln.indexOf(PS) < 0) doc.text(ln, x, y, { align: 'justify', maxWidth: w }); else put(ln, x, y); y += LH; }); };
+  // bold lead followed by normal text (Courier is monospace, so the lead width is exact)
+  const lead = (a, b, sep, x, w) => {
+    const pre = S(a) + sep; font('normal', 10); const ls = lines(pre + b, w); need(LH * Math.min(ls.length, 2));
+    ls.forEach((ln, i) => { need(LH); if (i === 0) { font('bold', 10); put(pre, x, y); const pw = doc.getTextWidth(pre); font('normal', 10); put(ln.slice(pre.length), x + pw, y); } else put(ln, x, y); y += LH; });
+  };
+  d.blocks.forEach(b => {
+    switch (b.t) {
+      case 'title': y = 58; font('bold', 20); doc.text(S(b.x), W / 2, y, { align: 'center', maxWidth: CW }); y += 14; break;
+      case 'sub': font('bold', 11); doc.text(S(b.x), M, y); y += 8; break;
+      case 'kv': if (b.nl) { y += 2; lead(b.k, b.v, ': ', M, CW); y += 1.5; } else lead(b.k, b.v, ': ', M, CW); break;
+      case 'gap': y += 4; break;
+      case 'rule': doc.setDrawColor(150); doc.setLineWidth(0.3); doc.line(M, y, W - M, y); y += 8; break;
+      case 'h1': if (b.br) { doc.addPage(); y = TOP + 14; } else { need(30); y += 6; } font('bold', 15); { const ls = lines(b.x, CW); ls.forEach(l => { doc.text(l, M, y); y += 7; }); } y += 3; break;
+      case 'h2': need(24); y += 3; font('bold', 11.5); lines(b.x, CW).forEach(l => { put(l, M, y); y += 6; }); y += 1.5; break;
+      case 'h3': need(20); y += 2; font('bold', 10); lines(b.x, CW).forEach(l => { put(l, M, y); y += LH; }); y += 1.5; break;
+      case 'p': wrap(b.x, M, CW, true); y += 2.5; break;
+      case 'ul': case 'ol': y += 0.5; b.a.forEach((x, i) => {
+        need(LH * 2); font('normal', 10);
+        if (b.t === 'ul') { doc.setFillColor(20); doc.circle(M + 7, y - 1.2, 0.9, 'F'); } else doc.text((i + 1) + '.', M + 4, y);
+        if (Array.isArray(x)) lead(x[0], x[1], ' - ', M + 12, CW - 12); else wrap(x, M + 12, CW - 12, true);
+        y += 1;
+      }); y += 2; break;
+      case 'tbl': {
+        y += 2; const cw = CW / 2; doc.setDrawColor(0); doc.setLineWidth(0.3);
+        [b.head].concat(b.rows).forEach((r, i) => { need(10); doc.rect(M, y - 6, CW, 9); doc.line(M + cw, y - 6, M + cw, y + 3); font(i ? 'normal' : 'bold', 10); doc.text(S(r[0]), M + 2, y, { maxWidth: cw - 4 }); doc.text(S(r[1]), M + cw + 2, y, { maxWidth: cw - 4 }); y += 9; });
+        y += 3; break;
+      }
+      case 'sign': need(24); font('bold', 10); doc.text(S(b.a[0]), M, y); y += LH; doc.text(S(b.a[1]), M, y); y += LH; font('normal', 10); doc.text(S(b.a[2]), M, y); y += LH; break;
+    }
+  });
+  const pages = doc.getNumberOfPages();
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i); font('normal', 9.5); doc.setTextColor(40);
+    doc.text(PR_CO.name, W / 2, 14, { align: 'center' }); doc.text(PR_CO.addr, W / 2, 19.5, { align: 'center' });
+    const a = PR_CO.phone + ' | ', aw = doc.getTextWidth(a), ew = doc.getTextWidth(PR_CO.email), x0 = W / 2 - (aw + ew) / 2;
+    doc.text(a, x0, 25); doc.setTextColor(26, 90, 200); doc.text(PR_CO.email, x0 + aw, 25); doc.setDrawColor(26, 90, 200); doc.setLineWidth(0.2); doc.line(x0 + aw, 25.7, x0 + aw + ew, 25.7);
+    doc.setTextColor(20); font('bold', 8); doc.text('Page | ' + i, W - M + 3, H - 15, { align: 'right' });
+  }
+  const safe = d.name.replace(/[\\/:*?"<>|\u0000-\u001f]/g, '').replace(/\s+/g, ' ').trim() || 'Client';
+  doc.save('Service Proposal for ' + safe + '.pdf');
+}
+function prUI() {
+  if (!prEl) {
+    const lbl = 'block text-sm font-medium text-slate-300', fld = 'field mt-1.5';
+    prEl = document.createElement('div'); prEl.className = 'grid grid-cols-1 lg:grid-cols-2 gap-4 items-start';
+    const pkRow = p => `<div class="flex items-center gap-3 rounded-xl glass px-3 py-2.5"><label class="flex items-center gap-2.5 min-w-0 flex-1 text-sm ${PR_ADD.includes(p[0]) ? '' : 'cursor-pointer'}">${PR_ADD.includes(p[0]) ? '<span class="w-4 h-4 shrink-0 inline-flex items-center justify-center text-emerald-400" aria-hidden="true">&#10003;</span>' : `<input type="checkbox" name="inc_${p[0]}" class="w-4 h-4 shrink-0 accent-sky-500"/>`}<span class="min-w-0 break-words">${esc(p[1])}</span></label><div class="relative w-36 shrink-0"><span data-sym class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400 pointer-events-none"></span><input name="p_${p[0]}" type="text" inputmode="decimal" autocomplete="off" aria-label="${esc(p[1])} price" class="field !py-1.5 w-full text-right !pl-8"/></div></div>`;
+    const pkSvc = PR_PK.filter(p => !PR_ADD.includes(p[0])).map(pkRow).join(''), pkAdd = PR_PK.filter(p => PR_ADD.includes(p[0])).map(pkRow).join('');
+    prEl.innerHTML = `
+      <form id="prForm" novalidate class="${card} space-y-5" data-f>
+        <div><h2 class="text-lg font-extrabold tracking-tight">Service proposal</h2><p class="mt-1 text-sm text-slate-400">Fill in the client, tick the services (website packages) and set the prices; the add-ons are always included. The proposal is written for you in the preview and downloads as <b>Service Proposal for [Full Name]</b>. Fields marked * are required.</p></div>
+        <fieldset class="space-y-3.5"><legend class="text-xs font-bold uppercase tracking-wider text-brand-400 mb-1">Client</legend>
+          <label class="${lbl}">Pick an existing customer<select name="cust" class="${fld}"></select></label>
+          <div class="grid grid-cols-3 gap-3.5">
+            <label class="${lbl}">Title<select name="salute" class="${fld}"><option value="Mr.">Mr.</option><option value="Ms.">Ms.</option><option value="Mrs.">Mrs.</option><option value="">None</option></select></label>
+            <label class="${lbl} col-span-2">Full name *<input name="name" maxlength="80" autocomplete="off" class="${fld}"/></label>
+          </div>
+          <label class="${lbl}">Company (optional)<input name="company" maxlength="80" autocomplete="off" class="${fld}"/></label>
+          <label class="${lbl}">Email (optional)<input name="email" type="email" maxlength="120" autocomplete="off" class="${fld}"/></label>
+          <div class="grid sm:grid-cols-2 gap-3.5">
+            <label class="${lbl}">Proposal date *<input name="date" type="date" class="${fld}"/></label>
+            <label class="${lbl}">Service name<input name="service" maxlength="40" placeholder="Website Development" class="${fld}"/></label>
+          </div>
+        </fieldset>
+        <fieldset class="space-y-2.5"><legend class="text-xs font-bold uppercase tracking-wider text-brand-400 mb-1">Services (tick the package the client wants, prices)</legend>${pkSvc}</fieldset>
+        <fieldset class="space-y-2.5"><legend class="text-xs font-bold uppercase tracking-wider text-brand-400 mb-1">Add-ons (always included in the proposal, prices)</legend>${pkAdd}</fieldset>
+        <fieldset class="space-y-3.5"><legend class="text-xs font-bold uppercase tracking-wider text-brand-400 mb-1">Terms</legend>
+          <label class="${lbl}">Currency<select name="cur" class="${fld}"><option value="PHP">Philippine Peso (&#8369;)</option><option value="USD">US Dollar ($)</option></select></label>
+          <label class="${lbl}">Minor revisions included *<input name="revs" type="number" inputmode="numeric" min="1" step="1" class="${fld}"/></label>
+          <label class="${lbl}">Additional notes (one per line, optional)<textarea name="extra" rows="3" maxlength="1000" class="${fld} resize-y"></textarea></label>
+          <p class="text-xs text-slate-400">Payments are split 40% down, 30% when all features are done and 30% after revisions.</p>
+        </fieldset>
+        <button type="button" data-prreset class="w-full sm:w-auto px-5 py-2.5 rounded-xl glass text-sm font-semibold text-slate-300 hover:text-white transition">Clear form</button>
+      </form>
+      <div class="lg:sticky lg:top-0 space-y-3 min-w-0" data-f>
+        <div class="${card} !p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between"><div class="min-w-0"><div class="font-bold">Proposal preview</div><p data-prmsg class="text-sm text-slate-400" role="status" aria-live="polite">Updates as you type.</p></div>
+          <button type="button" data-prpdf class="btn-shine w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white text-sm shadow-lg shadow-brand-500/30 inline-flex items-center justify-center gap-2">Download PDF</button></div>
+        <div data-prprev class="lg:max-h-[calc(100dvh-11rem)] lg:overflow-y-auto rounded-xl"></div>
+      </div>`;
+    const f = prEl.querySelector('#prForm'), prev = prEl.querySelector('[data-prprev]'), msg = prEl.querySelector('[data-prmsg]'), btn = prEl.querySelector('[data-prpdf]');
+    const write = () => { PR_KEYS.forEach(k => { f.elements[k].value = PR[k]; }); PR_PK.forEach(p => { if (f.elements['inc_' + p[0]]) f.elements['inc_' + p[0]].checked = !!PR['inc_' + p[0]]; f.elements['p_' + p[0]].value = prFmt(PR['p_' + p[0]]); }); f.elements.cust.value = PR.cust; };
+    const read = () => { PR_KEYS.forEach(k => { PR[k] = f.elements[k].value; }); PR_PK.forEach(p => { if (f.elements['inc_' + p[0]]) PR['inc_' + p[0]] = f.elements['inc_' + p[0]].checked; PR['p_' + p[0]] = f.elements['p_' + p[0]].value.replace(/,/g, ''); }); PR.cust = f.elements.cust.value; };
+    prEl._draw = () => { prEl.querySelectorAll('[data-sym]').forEach(e => { e.textContent = PR.cur === 'USD' ? '$' : '₱'; }); prev.innerHTML = prHtml(prBuild(PR).blocks); };
+    prEl._sync = () => {   // keep the customer list current without touching what has been typed
+      const s = f.elements.cust, v = s.value;
+      s.innerHTML = '<option value="">Type the details below</option>' + K.map(k => `<option value="${esc(k.id)}">${esc(k.name)}${k.company ? ' - ' + esc(k.company) : ''}</option>`).join('');
+      s.value = K.some(k => k.id === v) ? v : '';
+    };
+    f.addEventListener('focusout', e => { if (e.target.name && e.target.name.startsWith('p_')) e.target.value = prFmt(e.target.value.replace(/,/g, '')); });
+    f.addEventListener('focusin', e => { if (e.target.name && e.target.name.startsWith('p_')) e.target.value = e.target.value.replace(/,/g, ''); });
+    f.addEventListener('input', () => { read(); msg.textContent = 'Updates as you type.'; prEl._draw(); });
+    f.addEventListener('change', e => {
+      if (e.target.name === 'cust') {
+        const k = K.find(x => x.id === e.target.value);
+        if (k) { PR.name = k.name; PR.company = k.company; PR.email = k.email; write(); }
+      }
+      read(); prEl._draw();
+    });
+    prEl.querySelector('[data-prreset]').addEventListener('click', () => { PR = prBlank(); write(); prEl._sync(); prEl._draw(); msg.textContent = 'Form cleared.'; });
+    btn.addEventListener('click', async () => {
+      read();
+      if (!PR.name.trim()) { msg.textContent = 'Enter the client full name first.'; f.elements.name.focus(); return; }
+      if (!PR.date) { msg.textContent = 'Enter the proposal date first.'; f.elements.date.focus(); return; }
+      if (PR.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(PR.email.trim())) { msg.textContent = 'Enter a valid client email or leave it empty.'; f.elements.email.focus(); return; }
+      if (!PR_PK.some(p => !PR_ADD.includes(p[0]) && PR['inc_' + p[0]])) { msg.textContent = 'Tick at least one service.'; return; }
+      for (const p of PR_PK) { if ((PR_ADD.includes(p[0]) || PR['inc_' + p[0]]) && !(+PR['p_' + p[0]] > 0)) { msg.textContent = 'Enter a price for ' + p[1] + '.'; f.elements['p_' + p[0]].focus(); return; } }
+      if (!(+PR.revs >= 1)) { msg.textContent = 'Minor revisions must be at least 1.'; f.elements.revs.focus(); return; }
+      btn.disabled = true; const old = btn.textContent; btn.textContent = 'Preparing...'; msg.textContent = 'Creating your PDF...';
+      try { await prPdf(PR); msg.textContent = 'Proposal downloaded.'; toast('Proposal downloaded'); }
+      catch (err) { console.error('proposal pdf', err); msg.textContent = 'Could not create the PDF. Check your connection and try again.'; }
+      btn.disabled = false; btn.textContent = old;
+    });
+    prEl._write = write;
+  }
+  prEl._write(); prEl._sync(); prEl._draw();
+  return prEl;
+}
+
 // ---------- chat with customers (one to one) ----------
 // Saved at chats/<customerUid>/messages/<pushId>. chats/<customerUid>/meta holds the last message and each side's unread count.
 let chEl = null, chMeta = {}, chOffMeta = {}, chMsgs = [], chOffMsgs = () => {}, chSel = null, chErr = '', chFilter = '', chStick = false;
@@ -1917,7 +2275,7 @@ async function bkRestore() {
 }
 
 // ---------- events ----------
-const navKeys = () => PORTAL ? ['portal', 'source', 'settings'] : ['overview', 'projects', 'invoices', 'subscriptions', 'source', 'accounting', 'customers', 'chat', 'messages', 'contracts', 'tracker', 'backup', 'settings'];
+const navKeys = () => PORTAL ? ['portal', 'source', 'settings'] : ['overview', 'projects', 'invoices', 'subscriptions', 'source', 'accounting', 'customers', 'chat', 'messages', 'contracts', 'proposal', 'tracker', 'backup', 'settings'];
 const buildNav = () => { $('#nav').innerHTML = navKeys().map(k => `<button data-v="${k}" class="nav-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold text-slate-300 hover:text-white">${svg(ICON[k])}${TITLES[k]}${k === 'chat' ? '<span id="chatBadge" class="hidden ml-auto min-w-[1.25rem] h-5 px-1.5 rounded-full bg-pink text-white text-[11px] font-bold items-center justify-center" aria-label="Unread chat messages"></span>' : ''}</button>`).join(''); chBadge(); };
 buildNav();
 $('#nav').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (b) go(b.dataset.v); });
@@ -2784,6 +3142,7 @@ const repaintK = () => {
   if (!document.body.classList.contains('ready')) return;
   if (view === 'subscriptions') return updateSView();
   if (view === 'source') return updateSCView();
+  if (view === 'proposal') { if (prEl && prEl._sync) prEl._sync(); return; }
   if (view === 'contracts') { if (ctEl && ctEl._sync) ctEl._sync(); return; }   // just refresh the customer list in the contract form
   if (view !== 'customers' || kHold) return;
   const grid = $('#kgrid'), gone = grid ? [...grid.querySelectorAll('[data-kid]')].filter(n => !K.some(c => c.id === n.dataset.kid)) : [];
