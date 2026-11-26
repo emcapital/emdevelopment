@@ -864,7 +864,7 @@ function scCustView() {
       ${s.unlocked ? `<a href="${esc(s.link)}" target="_blank" rel="noopener noreferrer" class="btn-shine mt-4 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 font-bold text-white text-sm shadow-lg shadow-brand-500/30">Open source code</a>` : ''}</div>`;
   };
   return `<p data-f class="text-slate-400 mb-5">Source code files for your project are shared here as a Google Drive link. They unlock after payment is confirmed.</p>
-    <div class="grid md:grid-cols-2 gap-4">${list.map(cardOf).join('') || '<p class="text-slate-400">No source code has been assigned to you yet.</p>'}</div>`;
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">${list.map(cardOf).join('') || '<p class="text-slate-400">No source code has been assigned to you yet.</p>'}</div>`;
 }
 
 // PDF (jsPDF is loaded the first time it's needed)
@@ -1196,8 +1196,8 @@ const views = {
     const ids = Object.keys(PORTAL.projects || {}), ps = ids.map(id => PP[id]).filter(Boolean);
     const all = ps.flatMap(p => p.items), done = all.filter(m => m.d).length, overall = all.length ? Math.round(done / all.length * 100) : 0;
     return `<p data-f class="text-slate-400 mb-5">Hi <span class="font-semibold text-slate-200">${esc(PORTAL.name || U.displayName || '')}</span>. Here is how your website is coming along.</p>
-    ${(() => { let seen = false; try { seen = !!localStorage.getItem('pwn:' + U.uid); } catch (e) {} return seen ? '' : `<div data-f class="${card} mb-4 flex flex-wrap items-center justify-between gap-3"><p class="text-sm text-slate-300 min-w-0 flex-1" style="min-width:14rem">For your security, please change the temporary password we gave you.</p><div class="flex items-center gap-4"><button data-act="rpw" class="text-sm font-semibold text-brand-400 hover:text-white">Email me a reset link</button><button data-act="pwdone" class="text-sm font-semibold text-slate-400 hover:text-white">Dismiss</button></div></div>`; })()}
-    <div class="grid lg:grid-cols-[1fr_1.4fr] gap-4">
+    ${(() => { let seen = false; try { seen = !!localStorage.getItem('pwn:' + U.uid); } catch (e) {} return seen ? '' : `<div data-f class="${card} mb-4 flex flex-wrap items-center justify-between gap-3"><p class="text-sm text-slate-300 min-w-0 flex-1" style="min-width:min(14rem,100%)">For your security, please change the temporary password we gave you.</p><div class="flex items-center gap-4"><button data-act="rpw" class="text-sm font-semibold text-brand-400 hover:text-white">Email me a reset link</button><button data-act="pwdone" class="text-sm font-semibold text-slate-400 hover:text-white">Dismiss</button></div></div>`; })()}
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-4">
       <div data-f class="${card} flex items-center gap-5">
         <div class="relative w-28 h-28 shrink-0"><svg viewBox="0 0 36 36" class="w-28 h-28 -rotate-90"><defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#5b6cff"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><circle cx="18" cy="18" r="15.5" fill="none" stroke="currentColor" stroke-opacity=".12" stroke-width="3.2"/><circle cx="18" cy="18" r="15.5" fill="none" stroke="url(#g)" stroke-width="3.2" stroke-linecap="round" stroke-dasharray="${(overall * 97.4 / 100).toFixed(1)} 97.4"/></svg><div class="absolute inset-0 flex items-center justify-center font-extrabold text-xl">${overall}%</div></div>
         <div><div class="font-bold">Overall progress</div><p class="text-sm text-slate-400 mt-1">${done} of ${all.length} items done.</p></div></div>

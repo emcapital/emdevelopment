@@ -270,6 +270,15 @@
     html.light .ov-orbit-ring { border-color: rgba(67,81,232,.4); }
     html.light .text-pink { color: #db2777; }
 
+    /* ===== Fit to screen: no sideways scrolling anywhere ===== */
+    #view { overflow-x: hidden; }
+    #view > * { min-width: 0; max-width: 100%; }
+    #view .grid > *, #view .pgrid > *, #view .flex > * { min-width: 0; }
+    #view .grid:not([class*="grid-cols"]) { grid-template-columns: minmax(0, 1fr); }
+    #view p, #view .font-bold, #view .font-semibold, #view span { overflow-wrap: anywhere; }
+    #view svg { max-width: 100%; }
+    @media (max-width: 639px) { #view { padding-left: .75rem; padding-right: .75rem; } }
+
     html.light body { background: #f5f6ff; color: #0f1535; }
     html.light .glass { background: rgba(255,255,255,.75); border-color: rgba(15,21,53,.1); box-shadow: 0 6px 24px rgba(67,81,232,.07); }
     html.light .grid-bg { background-image: linear-gradient(rgba(67,81,232,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(67,81,232,.09) 1px, transparent 1px); }
