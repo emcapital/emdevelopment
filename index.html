@@ -1372,6 +1372,960 @@
       z-index: 2;
     }
 
+
+    /* =====================================================
+       RECENT PROJECTS — editorial showcase layout
+       featured card on top, 2x2 grid, wide closing card
+       ===================================================== */
+    @media (min-width: 1024px) {
+      #work:not(.ps)>div {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.75rem;
+        counter-reset: proj;
+      }
+
+      #work:not(.ps)>div>*:first-child,
+      #work:not(.ps)>div>article.proj-card,
+      #work:not(.ps)>div>div[data-fade]:last-child {
+        grid-column: 1 / -1;
+      }
+
+      #work:not(.ps)>div>article.proj-card {
+        margin-top: 1rem !important;
+      }
+
+      #work:not(.ps)>div>div[data-fade] {
+        margin-top: 0 !important;
+        display: flex;
+      }
+
+      #work:not(.ps)>div>div[data-fade]>.proj-card {
+        width: 100%;
+      }
+
+      /* compact vertical cards in the grid */
+      #work:not(.ps)>div>div[data-fade]:not(:last-child)>.proj-card {
+        grid-template-columns: 1fr !important;
+        grid-template-rows: auto 1fr;
+        border-radius: 1.75rem;
+      }
+
+      #work:not(.ps)>div>div[data-fade]:not(:last-child)>.proj-card>div:first-child {
+        order: 0 !important;
+        min-height: 17rem !important;
+        max-height: 19rem;
+      }
+
+      #work:not(.ps)>div>div[data-fade]:not(:last-child)>.proj-card>div:last-child {
+        padding: 1.75rem 2rem 2rem !important;
+        justify-content: flex-start;
+      }
+
+      #work:not(.ps)>div>div[data-fade]:not(:last-child)>.proj-card h3 {
+        font-size: 1.75rem !important;
+        margin-top: .6rem !important;
+      }
+
+      #work:not(.ps)>div>div[data-fade]:not(:last-child)>.proj-card p {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        font-size: .95rem;
+      }
+    }
+
+    /* number badge on every project card */
+    #work .proj-card::after {
+      counter-increment: proj;
+      content: "0" counter(proj);
+      position: absolute;
+      top: 1.1rem;
+      left: 1.25rem;
+      z-index: 6;
+      padding: .28rem .65rem;
+      font: 600 .72rem/1 'JetBrains Mono', monospace;
+      letter-spacing: .12em;
+      color: #cfd6ff;
+      border: 1px solid rgba(255, 255, 255, .18);
+      border-radius: 999px;
+      background: rgba(8, 11, 24, .55);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      pointer-events: none;
+    }
+
+    #work>div {
+      counter-reset: proj;
+    }
+
+    #work .proj-card {
+      transition: transform .5s var(--ease), border-color .35s, box-shadow .5s var(--ease);
+    }
+
+    #work .proj-card:hover {
+      transform: translateY(-6px);
+    }
+
+    /* image panels: finer edge + soft fade into the text side */
+    #work .proj-card>div:first-child {
+      box-shadow: inset 0 -1px 0 rgba(255, 255, 255, .06);
+    }
+
+    #work .proj-card h3 {
+      letter-spacing: -.03em;
+    }
+
+    #work .pm-chip {
+      font-size: .72rem;
+      padding: .32rem .75rem;
+      border-radius: 999px;
+    }
+
+    /* header row: tidy 'Have a project' link as an outlined pill */
+    #work a[href="#contact"] {
+      display: inline-flex;
+      align-items: center;
+      padding: .65rem 1.2rem;
+      border: 1px solid var(--line-strong);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .03);
+      transition: background .3s, border-color .3s, transform .3s;
+    }
+
+    #work a[href="#contact"]:hover {
+      background: rgba(255, 255, 255, .08);
+      border-color: rgba(154, 166, 255, .5);
+      transform: translateY(-2px);
+    }
+
+    html.light #work .proj-card::after {
+      color: #e4e8ff;
+    }
+
+    /* =====================================================
+       RECENT PROJECTS — split view (desktop only)
+       left: sticky project image, right: scrolling details
+       ===================================================== */
+    @media (min-width: 1024px) {
+      #work.ps .relative.max-w-7xl {
+        display: grid;
+        grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
+        column-gap: 4rem;
+        align-items: start;
+      }
+
+      #work.ps .relative.max-w-7xl>*:first-child {
+        grid-column: 1 / -1;
+        margin-bottom: 2rem;
+      }
+
+      #work.ps .relative.max-w-7xl>div[data-fade],
+      #work.ps .proj-card {
+        display: contents;
+        margin: 0 !important;
+      }
+
+      #work.ps .proj-card::before,
+      #work.ps .proj-card::after,
+      #work.ps .spot::before {
+        display: none !important;
+      }
+
+      #work.ps .proj-card:hover {
+        transform: none;
+      }
+
+      /* left column: all images share one sticky slot, active one fades in */
+      #work.ps .ps-img {
+        grid-column: 1;
+        grid-row: 2 / span var(--n, 6);
+        position: sticky;
+        top: 6.5rem;
+        align-self: start;
+        order: 0 !important;
+        height: min(72vh, 36rem);
+        min-height: 0 !important;
+        max-height: none !important;
+        border-radius: 1.75rem;
+        border: 1px solid var(--line-strong);
+        box-shadow: 0 40px 90px -40px rgba(0, 0, 0, .85), inset 0 1px 0 rgba(255, 255, 255, .08);
+        opacity: 0;
+        transform: translateY(14px) scale(.985);
+        pointer-events: none;
+        transition: opacity .55s var(--ease), transform .7s var(--ease);
+      }
+
+      #work.ps .ps-img.is-active {
+        opacity: 1;
+        transform: none;
+        pointer-events: auto;
+        z-index: 2;
+      }
+
+      /* right column: one tall, scrollable detail block per project */
+      #work.ps .ps-txt {
+        grid-column: 2;
+        min-height: 78vh;
+        padding: 2rem 0 2rem 2.25rem !important;
+        justify-content: center;
+        border-left: 2px solid rgba(255, 255, 255, .08);
+        opacity: .32;
+        transition: opacity .5s var(--ease), border-color .5s;
+      }
+
+      #work.ps .ps-txt.is-active {
+        opacity: 1;
+        border-left-color: #7c8cff;
+      }
+
+      #work.ps .ps-txt::before {
+        content: "PROJECT 0" attr(data-n) " / 0" attr(data-t);
+        display: block;
+        margin-bottom: 1.1rem;
+        font: 500 .72rem/1 'JetBrains Mono', monospace;
+        letter-spacing: .2em;
+        color: #8e9bd8;
+      }
+
+      #work.ps .ps-txt h3 {
+        font-size: clamp(2rem, 3vw, 2.8rem) !important;
+      }
+
+      #work.ps .ps-txt p {
+        display: block;
+        -webkit-line-clamp: unset;
+        overflow: visible;
+        font-size: 1.02rem;
+      }
+    }
+
+    html.light #work.ps .ps-txt {
+      border-left-color: rgba(15, 23, 60, .1);
+    }
+
+    /* =====================================================
+       PROJECTS v2 — per-project colour, story rail, 3D tilt
+       ===================================================== */
+    @media (min-width: 1024px) {
+      #work.ps {
+        --pc: #7c8cff;
+      }
+
+      /* ambient orb behind the pinned image, recoloured per project */
+      #work.ps .relative.max-w-7xl::before {
+        content: "";
+        position: absolute;
+        left: -6%;
+        top: 22%;
+        width: 52%;
+        height: 60%;
+        border-radius: 50%;
+        background: radial-gradient(closest-side, var(--pc), transparent 70%);
+        opacity: .16;
+        filter: blur(40px);
+        transition: background 1s var(--ease);
+        pointer-events: none;
+      }
+
+      #work.ps .ps-img {
+        perspective: 1200px;
+        transition: opacity .55s var(--ease), transform .7s var(--ease), box-shadow .8s var(--ease), border-color .8s;
+      }
+
+      #work.ps .ps-img.is-active {
+        transform: perspective(1400px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+        transition: opacity .55s var(--ease), transform .35s ease-out, box-shadow .8s var(--ease), border-color .8s;
+        border-color: color-mix(in srgb, var(--pc) 55%, transparent);
+        box-shadow: 0 50px 110px -40px color-mix(in srgb, var(--pc) 55%, transparent), 0 30px 70px -40px rgba(0, 0, 0, .9), inset 0 1px 0 rgba(255, 255, 255, .1);
+      }
+
+      /* glossy light that follows the cursor over the active image */
+      #work.ps .ps-img::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 5;
+        pointer-events: none;
+        background: radial-gradient(420px circle at var(--gx, 50%) var(--gy, 0%), rgba(255, 255, 255, .13), transparent 55%);
+        opacity: 0;
+        transition: opacity .3s;
+      }
+
+      #work.ps .ps-img.is-active:hover::after {
+        opacity: 1;
+      }
+
+      #work.ps .ps-txt {
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+      }
+
+      #work.ps .ps-txt.is-active {
+        border-left-color: var(--pc);
+      }
+
+      #work.ps .ps-txt::before {
+        color: var(--pc);
+      }
+
+      /* oversized outlined numeral behind each text block */
+      #work.ps .ps-txt::after {
+        content: "0" attr(data-n);
+        position: absolute;
+        right: -.5rem;
+        top: 1rem;
+        font: 800 clamp(7rem, 12vw, 12rem)/1 'Sora', sans-serif;
+        letter-spacing: -.06em;
+        color: transparent;
+        -webkit-text-stroke: 1.5px color-mix(in srgb, var(--pc) 45%, transparent);
+        opacity: .22;
+        pointer-events: none;
+        z-index: -1;
+      }
+
+      #work.ps .ps-txt>* {
+        position: relative;
+      }
+
+      /* story-style progress rail under the pinned image */
+      #work.ps .ps-rail {
+        grid-column: 1;
+        grid-row: 2 / span var(--n, 6);
+        position: sticky;
+        top: calc(6.5rem + min(72vh, 36rem) + 1.1rem);
+        margin-top: calc(min(72vh, 36rem) + 1.1rem);
+        align-self: start;
+        z-index: 4;
+        display: flex;
+        gap: .5rem;
+        align-items: center;
+      }
+
+      #work.ps .ps-rail button {
+        flex: 1;
+        height: 26px;
+        padding: 0;
+        background: none;
+        border: 0;
+        cursor: pointer;
+        position: relative;
+      }
+
+      #work.ps .ps-rail button::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 11px;
+        height: 4px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, .14);
+        transition: background .3s, transform .3s;
+      }
+
+      #work.ps .ps-rail button:hover::before {
+        background: rgba(255, 255, 255, .3);
+      }
+
+      #work.ps .ps-rail button.is-active::before {
+        background: var(--pc);
+        box-shadow: 0 0 14px var(--pc);
+        transform: scaleY(1.25);
+      }
+
+      #work.ps .ps-rail span {
+        font: 500 .72rem/1 'JetBrains Mono', monospace;
+        letter-spacing: .14em;
+        color: #8e9bd8;
+        min-width: 4.5rem;
+        text-align: right;
+      }
+    }
+
+    html.light #work.ps .ps-rail button::before {
+      background: rgba(15, 23, 60, .14);
+    }
+
+    /* =====================================================
+       PROJECTS — mobile & tablet: same story, swiped sideways
+       ===================================================== */
+    @media (max-width: 0px) {
+      #work.ps {
+        --pc: #7c8cff;
+      }
+
+      #work.ps .relative.max-w-7xl {
+        display: grid;
+        grid-template-columns: repeat(var(--n, 6), min(86vw, 26rem));
+        grid-template-rows: auto 1fr auto;
+        column-gap: 1rem;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        scroll-padding-inline: 1.25rem;
+        overscroll-behavior-x: contain;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding-bottom: .5rem;
+      }
+
+      #work.ps .relative.max-w-7xl::-webkit-scrollbar {
+        display: none;
+      }
+
+      /* heading stays put while the cards slide underneath */
+      #work.ps .relative.max-w-7xl>*:first-child {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        position: sticky;
+        left: 1.25rem;
+        width: calc(100vw - 2.5rem);
+        margin-bottom: 1.75rem;
+      }
+
+      #work.ps .relative.max-w-7xl>div[data-fade],
+      #work.ps .relative.max-w-7xl>article.proj-card {
+        grid-row: 2;
+        margin: 0 !important;
+        display: flex;
+        scroll-snap-align: start;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+
+      #work.ps .relative.max-w-7xl>div[data-fade]>.proj-card {
+        width: 100%;
+      }
+
+      #work.ps .proj-card {
+        height: 100%;
+        border-radius: 1.75rem !important;
+        opacity: .62;
+        transform: scale(.965);
+        transition: opacity .45s var(--ease), transform .45s var(--ease), border-color .45s, box-shadow .45s;
+      }
+
+      #work.ps .proj-card.is-current {
+        opacity: 1;
+        transform: none;
+        border-color: color-mix(in srgb, var(--pc) 55%, transparent);
+        box-shadow: 0 30px 70px -36px color-mix(in srgb, var(--pc) 55%, transparent);
+      }
+
+      #work.ps .proj-card::before,
+      #work.ps .proj-card::after {
+        display: none !important;
+      }
+
+      #work.ps .proj-card>div:first-child {
+        min-height: 15rem !important;
+        order: 0 !important;
+      }
+
+      #work.ps .proj-card>div:last-child {
+        padding: 1.4rem 1.4rem 1.6rem !important;
+      }
+
+      #work.ps .proj-card h3 {
+        font-size: 1.6rem !important;
+      }
+
+      #work.ps .proj-card p {
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        font-size: .93rem;
+      }
+
+      /* progress bars + counter under the carousel */
+      #work.ps .ps-rail {
+        grid-column: 1 / -1;
+        grid-row: 3;
+        position: sticky;
+        left: 1.25rem;
+        width: calc(100vw - 2.5rem);
+        margin-top: 1.25rem;
+        display: flex;
+        gap: .4rem;
+        align-items: center;
+      }
+
+      #work.ps .ps-rail button {
+        flex: 1;
+        height: 24px;
+        padding: 0;
+        background: none;
+        border: 0;
+        position: relative;
+      }
+
+      #work.ps .ps-rail button::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 10px;
+        height: 4px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, .16);
+        transition: background .3s, transform .3s;
+      }
+
+      #work.ps .ps-rail button.is-active::before {
+        background: var(--pc);
+        box-shadow: 0 0 12px var(--pc);
+        transform: scaleY(1.25);
+      }
+
+      #work.ps .ps-rail span {
+        font: 500 .7rem/1 'JetBrains Mono', monospace;
+        letter-spacing: .12em;
+        color: #8e9bd8;
+        min-width: 4.2rem;
+        text-align: right;
+      }
+
+      html.light #work.ps .ps-rail button::before {
+        background: rgba(15, 23, 60, .16);
+      }
+    }
+
+    /* =====================================================
+       PROJECTS — mobile & tablet: swipeable showcase
+       snap-scrolling cards, active card glows in its colour
+       ===================================================== */
+    @media (max-width: 0px) {
+      #work.ps .relative.max-w-7xl {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: 82%;
+        grid-template-rows: auto 1fr auto;
+        column-gap: 1rem;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        scroll-padding-inline: 1.25rem;
+        overscroll-behavior-x: contain;
+        scrollbar-width: none;
+        padding-bottom: .75rem;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      #work.ps .relative.max-w-7xl::-webkit-scrollbar {
+        display: none;
+      }
+
+      /* header + dots stay pinned while the cards swipe underneath */
+      #work.ps .relative.max-w-7xl>*:first-child {
+        grid-row: 1;
+        grid-column: 1;
+        position: sticky;
+        left: 0;
+        width: calc(100vw - 2.5rem);
+        margin-bottom: 1.5rem;
+        z-index: 3;
+      }
+
+      #work.ps .relative.max-w-7xl>article.proj-card,
+      #work.ps .relative.max-w-7xl>div[data-fade] {
+        grid-row: 2;
+        margin: 0 !important;
+        scroll-snap-align: start;
+        scroll-snap-stop: always;
+        opacity: 1 !important;
+        transform: none !important;
+        display: flex;
+      }
+
+      #work.ps .proj-card {
+        width: 100%;
+        height: auto;
+        border-radius: 1.75rem !important;
+        transform: scale(.93);
+        opacity: .5;
+        transform-origin: center bottom;
+        transition: transform .5s var(--ease), opacity .5s var(--ease), border-color .5s, box-shadow .6s;
+      }
+
+      #work.ps .proj-card.is-on {
+        transform: none;
+        opacity: 1;
+        border-color: color-mix(in srgb, var(--pc, #7c8cff) 60%, transparent);
+        box-shadow: 0 30px 70px -30px color-mix(in srgb, var(--pc, #7c8cff) 65%, transparent), inset 0 1px 0 rgba(255, 255, 255, .1);
+      }
+
+      #work.ps .ps-img {
+        order: 0 !important;
+        min-height: 0 !important;
+        height: 14.5rem;
+        max-height: none !important;
+        padding-top: 2.8rem !important;
+      }
+
+      #work.ps .ps-img::after {
+        content: "";
+        position: absolute;
+        inset: auto 0 0 0;
+        height: 40%;
+        background: linear-gradient(transparent, rgba(8, 11, 24, .7));
+        pointer-events: none;
+        z-index: 4;
+      }
+
+      #work.ps .ps-txt {
+        padding: 1.3rem 1.4rem 1.6rem !important;
+        position: relative;
+      }
+
+      #work.ps .ps-txt::before {
+        content: "0" attr(data-n) " / 0" attr(data-t);
+        display: block;
+        margin-bottom: .7rem;
+        font: 500 .7rem/1 'JetBrains Mono', monospace;
+        letter-spacing: .2em;
+        color: var(--pc, #7c8cff);
+      }
+
+      #work.ps .ps-txt h3 {
+        font-size: 1.7rem !important;
+        margin-top: .4rem !important;
+      }
+
+      #work.ps .ps-txt p {
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        font-size: .92rem;
+        margin-top: .8rem !important;
+      }
+
+      #work.ps .ps-txt>div.mt-8 {
+        margin-top: 1.2rem !important;
+      }
+
+      #work.ps .proj-card::after {
+        top: .9rem;
+        left: 1rem;
+      }
+
+      /* dots */
+      #work.ps .ps-rail {
+        grid-row: 3;
+        grid-column: 1;
+        position: sticky;
+        left: 0;
+        width: calc(100vw - 2.5rem);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: .45rem;
+        margin-top: 1.4rem;
+      }
+
+      #work.ps .ps-rail button {
+        width: 8px;
+        height: 8px;
+        padding: 0;
+        border: 0;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, .22);
+        transition: width .4s var(--ease), background .4s;
+      }
+
+      #work.ps .ps-rail button.is-active {
+        width: 28px;
+        background: var(--pc, #7c8cff);
+        box-shadow: 0 0 12px var(--pc, #7c8cff);
+      }
+
+      #work.ps .ps-rail span {
+        display: none;
+      }
+    }
+
+    @media (max-width: 0px) {
+      html.light #work.ps .ps-rail button {
+        background: rgba(15, 23, 60, .2);
+      }
+    }
+
+    /* =====================================================
+       PROJECTS — mobile & tablet: vertical stacking deck
+       cards scroll down and pile up under each other
+       ===================================================== */
+    @media (max-width: 1023px) {
+      #work.ps .relative.max-w-7xl {
+        display: block;
+      }
+
+      #work.ps .relative.max-w-7xl>*:first-child {
+        margin-bottom: 1.75rem;
+      }
+
+      #work.ps .relative.max-w-7xl>article.proj-card,
+      #work.ps .relative.max-w-7xl>div[data-fade] {
+        position: sticky;
+        top: calc(5.25rem + var(--k, 0) * .8rem);
+        display: block;
+        max-width: 40rem;
+        margin: 0 auto 1.6rem !important;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+
+      #work.ps .ps-rail {
+        display: none;
+      }
+
+      #work.ps .proj-card {
+        display: grid;
+        grid-template-columns: 1fr !important;
+        width: 100%;
+        overflow: hidden;
+        border-radius: 1.75rem !important;
+        background: linear-gradient(165deg, #131a38, #0a0e20) !important;
+        border: 1px solid rgba(255, 255, 255, .1);
+        border-top: 2px solid var(--pc, #7c8cff);
+        box-shadow: 0 -18px 40px -22px rgba(0, 0, 0, .9), 0 30px 60px -34px color-mix(in srgb, var(--pc, #7c8cff) 55%, transparent);
+        transition: border-color .5s, box-shadow .6s;
+      }
+
+      #work.ps .proj-card:hover {
+        transform: none;
+      }
+
+      #work.ps .proj-card.is-on {
+        border-color: color-mix(in srgb, var(--pc, #7c8cff) 60%, transparent);
+      }
+
+      #work.ps .proj-card::after {
+        top: 3.1rem;
+        left: 1.1rem;
+        z-index: 7;
+      }
+
+      #work.ps .ps-img {
+        order: 0 !important;
+        min-height: 0 !important;
+        height: 15rem;
+        max-height: none !important;
+        padding-top: 2.8rem !important;
+      }
+
+      #work.ps .ps-img::after {
+        content: "";
+        position: absolute;
+        inset: auto 0 0 0;
+        height: 45%;
+        background: linear-gradient(transparent, #0d1330);
+        pointer-events: none;
+        z-index: 4;
+      }
+
+      #work.ps .ps-txt {
+        position: relative;
+        padding: .6rem 1.5rem 1.7rem !important;
+      }
+
+      #work.ps .ps-txt::before {
+        content: "PROJECT 0" attr(data-n) " / 0" attr(data-t);
+        display: block;
+        margin-bottom: .8rem;
+        font: 500 .68rem/1 'JetBrains Mono', monospace;
+        letter-spacing: .2em;
+        color: var(--pc, #7c8cff);
+      }
+
+      #work.ps .ps-txt h3 {
+        font-size: 1.75rem !important;
+        margin-top: .2rem !important;
+      }
+
+      #work.ps .ps-txt p {
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        font-size: .93rem;
+        margin-top: .8rem !important;
+      }
+
+      #work.ps .ps-txt>div.mt-8 {
+        margin-top: 1.3rem !important;
+      }
+
+      #work.ps .ps-txt>div.mt-8>span {
+        display: flex;
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 1023px) {
+      html.light #work.ps .proj-card {
+        background: linear-gradient(165deg, #ffffff, #eef0fb) !important;
+        border-color: rgba(15, 23, 60, .1);
+      }
+
+      html.light #work.ps .ps-img::after {
+        background: linear-gradient(transparent, #f3f4fc);
+      }
+    }
+
+    /* =====================================================
+       TESTIMONIALS — web map around the EM logo
+       ===================================================== */
+    .tm-map {
+      position: relative;
+      margin-top: 3.5rem;
+      display: grid;
+      gap: 1rem;
+    }
+
+    .tm-svg {
+      display: none;
+    }
+
+    .tm-hub {
+      position: relative;
+      width: 7.5rem;
+      height: 7.5rem;
+      margin: 0 auto 1rem;
+    }
+
+    .tm-node {
+      margin: 0;
+      outline: none;
+    }
+
+    .tm-card {
+      padding: 1.15rem 1.2rem 1.2rem;
+      border-radius: 1.4rem;
+      background: rgba(10, 14, 32, .88);
+      border: 1px solid var(--line-strong);
+      box-shadow: 0 24px 50px -28px rgba(0, 0, 0, .9);
+      transition: border-color .35s, box-shadow .35s, background .35s;
+    }
+
+    .tm-node:hover .tm-card,
+    .tm-node:focus-visible .tm-card,
+    .tm-node.on .tm-card {
+      border-color: rgba(34, 211, 238, .6);
+      box-shadow: 0 0 0 1px rgba(34, 211, 238, .25), 0 28px 60px -24px rgba(34, 211, 238, .35);
+    }
+
+    html.light .tm-card {
+      background: rgba(255, 255, 255, .92);
+    }
+
+    @keyframes tmflow {
+      to {
+        stroke-dashoffset: -20;
+      }
+    }
+
+    @keyframes tmbob {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-8px);
+      }
+    }
+
+    @media (min-width: 768px) {
+      .tm-map {
+        display: block;
+        height: 900px;
+      }
+
+      .tm-svg {
+        display: block;
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+      }
+
+      .tm-line {
+        stroke: rgba(124, 140, 255, .42);
+        stroke-width: 1.3;
+        stroke-dasharray: 4 6;
+        vector-effect: non-scaling-stroke;
+        animation: tmflow 1.6s linear infinite;
+        transition: stroke .3s, stroke-width .3s;
+      }
+
+      .tm-line.ring {
+        stroke: rgba(124, 140, 255, .16);
+        animation-duration: 3.2s;
+      }
+
+      .tm-line.on {
+        stroke: #22d3ee;
+        stroke-width: 2.2;
+      }
+
+      .tm-hub {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 9.5rem;
+        height: 9.5rem;
+        margin: 0;
+        transform: translate(-50%, -50%);
+        z-index: 3;
+      }
+
+      .tm-hub .em-logo {
+        width: 5.2rem;
+      }
+
+      .tm-node {
+        position: absolute;
+        left: var(--x);
+        top: var(--y);
+        transform: translate(-50%, -50%);
+        width: 13.75rem;
+        z-index: 2;
+      }
+
+      .tm-card {
+        animation: tmbob 6s ease-in-out infinite;
+        animation-delay: var(--bd, 0ms);
+      }
+
+      .tm-node:hover .tm-card {
+        animation-play-state: paused;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .tm-map {
+        height: 740px;
+      }
+
+      .tm-node {
+        width: 18rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      .tm-card,
+      .tm-line {
+        animation: none;
+      }
+    }
   </style>
   </head>
 
@@ -2462,7 +3416,7 @@
       <!-- TESTIMONIALS -->
       <section id="testimonials" class="py-24 relative overflow-hidden">
         <div class="max-w-7xl mx-auto px-5 sm:px-8">
-          <div class="max-w-2xl">
+          <div class="max-w-2xl mx-auto text-center">
             <span data-reveal
               class="text-sm font-semibold uppercase tracking-[.25em] text-aqua">Testimonials</span>
             <h2 data-reveal style="--d:100ms"
@@ -2470,57 +3424,75 @@
               who <span class="gradient-text">grew with
                 us</span></h2>
           </div>
-          <div class="mt-14 grid md:grid-cols-3 gap-6">
-            <figure data-reveal
-              class="glass spot rounded-3xl p-6 sm:p-8">
-              <div
-                class="text-amber-400 tracking-widest">★★★★★</div>
-              <blockquote
-                class="mt-4 text-slate-200 leading-relaxed">“They
-                delivered our system ahead of schedule and it's
-                been rock solid. Our team finally has real-time
-                visibility of our stock.”</blockquote>
-              <figcaption
-                class="mt-6 flex items-center gap-3"><span class="relative w-12 h-12 shrink-0 rounded-full bg-gradient-to-br from-brand-500 to-aqua flex items-center justify-center font-bold">AR<img src="images/testimonial-1.jpg" alt="Client photo" loading="lazy" onerror="this.remove()" class="absolute inset-0 w-full h-full rounded-full object-cover ring-2 ring-white/20"></span><span><span
-                    class="block font-semibold">Client
-                    Name</span><span
-                    class="text-sm text-slate-400">Operations
-                    Manager</span></span></figcaption>
-            </figure>
-            <figure data-reveal style="--d:120ms"
-              class="glass spot rounded-3xl p-6 sm:p-8 md:-translate-y-4">
-              <div
-                class="text-amber-400 tracking-widest">★★★★★</div>
-              <blockquote
-                class="mt-4 text-slate-200 leading-relaxed">“Our
-                new mobile app got amazing feedback from
-                customers. Communication was clear and the
-                design quality was outstanding.”</blockquote>
-              <figcaption
-                class="mt-6 flex items-center gap-3"><span class="relative w-12 h-12 shrink-0 rounded-full bg-gradient-to-br from-pink to-brand-500 flex items-center justify-center font-bold">MJ<img src="images/testimonial-2.jpg" alt="Client photo" loading="lazy" onerror="this.remove()" class="absolute inset-0 w-full h-full rounded-full object-cover ring-2 ring-white/20"></span><span><span
-                    class="block font-semibold">Client
-                    Name</span><span
-                    class="text-sm text-slate-400">Founder,
-                    Retail Brand</span></span></figcaption>
-            </figure>
-            <figure data-reveal style="--d:240ms"
-              class="glass spot rounded-3xl p-6 sm:p-8">
-              <div
-                class="text-amber-400 tracking-widest">★★★★★</div>
-              <blockquote
-                class="mt-4 text-slate-200 leading-relaxed">“Professional,
-                fast, and genuinely invested in our success. Our
-                website now brings in new inquiries every single
-                week.”</blockquote>
-              <figcaption
-                class="mt-6 flex items-center gap-3"><span class="relative w-12 h-12 shrink-0 rounded-full bg-gradient-to-br from-emerald-400 to-aqua flex items-center justify-center font-bold">LC<img src="images/testimonial-3.jpg" alt="Client photo" loading="lazy" onerror="this.remove()" class="absolute inset-0 w-full h-full rounded-full object-cover ring-2 ring-white/20"></span><span><span
-                    class="block font-semibold">Client
-                    Name</span><span
-                    class="text-sm text-slate-400">CEO,
-                    Services
-                    Company</span></span></figcaption>
-            </figure>
-          </div>
+          <div class="tm-map" id="tmap">
+  <svg class="tm-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="tm-line" data-i="0" x1="50" y1="50" x2="18" y2="14"/><line class="tm-line" data-i="1" x1="50" y1="50" x2="82" y2="14"/><line class="tm-line" data-i="2" x1="50" y1="50" x2="14" y2="50"/><line class="tm-line" data-i="3" x1="50" y1="50" x2="86" y2="50"/><line class="tm-line" data-i="4" x1="50" y1="50" x2="22" y2="86"/><line class="tm-line" data-i="5" x1="50" y1="50" x2="78" y2="86"/><line class="tm-line ring" x1="18" y1="14" x2="14" y2="50"/><line class="tm-line ring" x1="14" y1="50" x2="22" y2="86"/><line class="tm-line ring" x1="22" y1="86" x2="78" y2="86"/><line class="tm-line ring" x1="78" y1="86" x2="86" y2="50"/><line class="tm-line ring" x1="86" y1="50" x2="82" y2="14"/><line class="tm-line ring" x1="82" y1="14" x2="18" y2="14"/></svg>
+  <div class="tm-hub" aria-label="EM Development">
+    <span class="absolute -inset-5 rounded-full bg-gradient-to-br from-brand-500 to-aqua opacity-25 blur-2xl"></span>
+    <span class="absolute inset-0 rounded-full border border-aqua/40 animate-pulseRing"></span>
+    <span class="absolute -inset-3 rounded-full border border-dashed border-brand-400/40 animate-spinSlow"></span>
+    <span class="relative w-full h-full rounded-full bg-gradient-to-br from-brand-500 to-aqua flex items-center justify-center shadow-2xl shadow-brand-500/40"><span class="em-logo w-[4.2rem]"></span></span>
+  </div>
+  <figure class="tm-node" data-i="0" tabindex="0" style="--x:18%;--y:14%;--bd:0ms">
+  <div class="tm-card">
+    <div class="text-amber-400 text-sm tracking-widest">★★★★★</div>
+    <blockquote class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“Our online orders doubled within two months. The site is fast, beautiful and finally feels like our bakery.”</blockquote>
+    <figcaption class="mt-4 flex items-center gap-3">
+      <span class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-pink to-brand-500 flex items-center justify-center text-xs font-bold text-white">MV</span>
+      <span class="min-w-0"><span class="block text-sm font-semibold truncate">Marites Villanueva</span></span>
+    </figcaption>
+  </div>
+</figure>
+<figure class="tm-node" data-i="1" tabindex="0" style="--x:82%;--y:14%;--bd:350ms">
+  <div class="tm-card">
+    <div class="text-amber-400 text-sm tracking-widest">★★★★★</div>
+    <blockquote class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“They delivered our inventory system ahead of schedule. Real-time stock visibility changed how we work.”</blockquote>
+    <figcaption class="mt-4 flex items-center gap-3">
+      <span class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-brand-500 to-aqua flex items-center justify-center text-xs font-bold text-white">DC</span>
+      <span class="min-w-0"><span class="block text-sm font-semibold truncate">Daniel Cruz</span></span>
+    </figcaption>
+  </div>
+</figure>
+<figure class="tm-node" data-i="2" tabindex="0" style="--x:14%;--y:50%;--bd:700ms">
+  <div class="tm-card">
+    <div class="text-amber-400 text-sm tracking-widest">★★★★★</div>
+    <blockquote class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“Clear communication, gorgeous design and zero stress. Bookings now come in every single week.”</blockquote>
+    <figcaption class="mt-4 flex items-center gap-3">
+      <span class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-aqua to-emerald-400 flex items-center justify-center text-xs font-bold text-white">AR</span>
+      <span class="min-w-0"><span class="block text-sm font-semibold truncate">Angela Reyes</span></span>
+    </figcaption>
+  </div>
+</figure>
+<figure class="tm-node" data-i="3" tabindex="0" style="--x:86%;--y:50%;--bd:1050ms">
+  <div class="tm-card">
+    <div class="text-amber-400 text-sm tracking-widest">★★★★★</div>
+    <blockquote class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“The analytics dashboard gives us every branch in one view. No more spreadsheets on Monday mornings.”</blockquote>
+    <figcaption class="mt-4 flex items-center gap-3">
+      <span class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-amber-400 to-pink flex items-center justify-center text-xs font-bold text-white">RT</span>
+      <span class="min-w-0"><span class="block text-sm font-semibold truncate">Rico Tan</span></span>
+    </figcaption>
+  </div>
+</figure>
+<figure class="tm-node" data-i="4" tabindex="0" style="--x:22%;--y:86%;--bd:1400ms">
+  <div class="tm-card">
+    <div class="text-amber-400 text-sm tracking-widest">★★★★★</div>
+    <blockquote class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“Our mobile app got amazing feedback from customers. They treated our brand like it was their own.”</blockquote>
+    <figcaption class="mt-4 flex items-center gap-3">
+      <span class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-emerald-400 to-brand-500 flex items-center justify-center text-xs font-bold text-white">JL</span>
+      <span class="min-w-0"><span class="block text-sm font-semibold truncate">Joanna Lim</span></span>
+    </figcaption>
+  </div>
+</figure>
+<figure class="tm-node" data-i="5" tabindex="0" style="--x:78%;--y:86%;--bd:1750ms">
+  <div class="tm-card">
+    <div class="text-amber-400 text-sm tracking-widest">★★★★★</div>
+    <blockquote class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“Court booking used to be chaos. Now members reserve in seconds and our staff finally breathe easy.”</blockquote>
+    <figcaption class="mt-4 flex items-center gap-3">
+      <span class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-brand-400 to-pink flex items-center justify-center text-xs font-bold text-white">MS</span>
+      <span class="min-w-0"><span class="block text-sm font-semibold truncate">Mark Santos</span></span>
+    </figcaption>
+  </div>
+</figure>
+</div>
         </div>
       </section>
 
@@ -3568,6 +4540,163 @@
       if (m && P[m[1]]) open(m[1], null);
     })();
   </script>
-  </body>
+  
+  <script>
+    (function () {
+      const w = document.getElementById('work');
+      if (!w) return;
+      const cards = [...w.querySelectorAll('.proj-card')].filter(c => c.children.length >= 2);
+      if (cards.length < 2) return;
+      const imgs = [],
+        txts = [];
+      cards.forEach((c, i) => {
+        const im = c.children[0],
+          tx = c.children[1];
+        im.classList.add('ps-img');
+        tx.classList.add('ps-txt');
+        tx.dataset.n = i + 1;
+        tx.dataset.t = cards.length;
+        im.dataset.i = tx.dataset.i = i;
+        imgs.push(im);
+        txts.push(tx);
+      });
+      w.style.setProperty('--n', cards.length);
+      w.classList.add('ps');
+
+      const mq = matchMedia('(max-width: 1023px)');
+      const colors = ['#fbbf24', '#facc15', '#22d3ee', '#34d399', '#7c8cff', '#f472b6'];
+      const rail = document.createElement('div');
+      rail.className = 'ps-rail';
+      const btns = cards.map((c, i) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('aria-label', 'Go to project ' + (i + 1));
+        b.addEventListener('click', () => {
+          if (mq.matches) {
+            const box = w.querySelector('.relative.max-w-7xl'),
+              slide = cards[i].closest('[data-fade]') || cards[i];
+            box.scrollTo({
+              left: slide.offsetLeft - 20,
+              behavior: 'smooth'
+            });
+          } else txts[i].scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          });
+        });
+        rail.appendChild(b);
+        return b;
+      });
+      const count = document.createElement('span');
+      rail.appendChild(count);
+      w.querySelector('.relative.max-w-7xl').appendChild(rail);
+
+      function set(i) {
+        imgs.forEach((el, j) => el.classList.toggle('is-active', j === i));
+        txts.forEach((el, j) => el.classList.toggle('is-active', j === i));
+        btns.forEach((el, j) => el.classList.toggle('is-active', j === i));
+        cards.forEach((el, j) => el.classList.toggle('is-current', j === i));
+        cards.forEach((c, j) => c.classList.toggle('is-on', j === i));
+        w.style.setProperty('--pc', colors[i % colors.length]);
+        count.textContent = '0' + (i + 1) + ' / 0' + cards.length;
+      }
+      // 3D tilt + glossy highlight on the pinned image (desktop, mouse only)
+      imgs.forEach(im => {
+        im.addEventListener('mousemove', e => {
+          const r = im.getBoundingClientRect(),
+            px = (e.clientX - r.left) / r.width,
+            py = (e.clientY - r.top) / r.height;
+          im.style.setProperty('--ry', ((px - .5) * 7).toFixed(2) + 'deg');
+          im.style.setProperty('--rx', ((.5 - py) * 5).toFixed(2) + 'deg');
+          im.style.setProperty('--gx', (px * 100) + '%');
+          im.style.setProperty('--gy', (py * 100) + '%');
+        });
+        im.addEventListener('mouseleave', () => {
+          im.style.setProperty('--rx', '0deg');
+          im.style.setProperty('--ry', '0deg');
+        });
+      });
+      const box = w.querySelector('.relative.max-w-7xl');
+      let raf = 0;
+      box.addEventListener('scroll', () => {
+        if (!mq.matches) return;
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(() => {
+          const mid = box.scrollLeft + box.clientWidth * .4;
+          let best = 0,
+            d = 1e9;
+          cards.forEach((c, i) => {
+            const sl = c.closest('[data-fade]') || c,
+              cx = sl.offsetLeft + sl.offsetWidth / 2,
+              dd = Math.abs(cx - mid);
+            if (dd < d) {
+              d = dd;
+              best = i;
+            }
+          });
+          set(best);
+        });
+      }, {
+        passive: true
+      });
+      set(0);
+      const io = new IntersectionObserver(es => {
+        if (mq.matches) return;
+        es.forEach(e => {
+          if (e.isIntersecting) set(+e.target.dataset.i);
+        });
+      }, {
+        rootMargin: '-42% 0px -42% 0px'
+      });
+
+      cards.forEach((c, i) => c.style.setProperty('--pc', colors[i % colors.length]));
+      cards.forEach((c, i) => (c.closest('[data-fade]') || c).style.setProperty('--k', i));
+      const io2 = new IntersectionObserver(es => {
+        if (!mq.matches) return;
+        es.forEach(e => {
+          if (e.isIntersecting) set(cards.indexOf(e.target));
+        });
+      }, {
+        rootMargin: '-38% 0px -38% 0px'
+      });
+      cards.forEach(c => io2.observe(c));
+      txts.forEach(t => io.observe(t));
+    })();
+  </script>
+
+  <script>
+    (function () {
+      const map = document.getElementById('tmap');
+      if (!map) return;
+      const nodes = [...map.querySelectorAll('.tm-node')],
+        lines = [...map.querySelectorAll('.tm-line:not(.ring)')];
+      let cur = -1,
+        hold = false,
+        visible = false;
+
+      function on(i) {
+        cur = i;
+        nodes.forEach((n, j) => n.classList.toggle('on', j === i));
+        lines.forEach((l, j) => l.classList.toggle('on', j === i));
+      }
+      nodes.forEach((n, i) => {
+        n.addEventListener('mouseenter', () => {
+          hold = true;
+          on(i);
+        });
+        n.addEventListener('mouseleave', () => {
+          hold = false;
+        });
+        n.addEventListener('focus', () => on(i));
+      });
+      new IntersectionObserver(e => {
+        visible = e[0].isIntersecting;
+      }).observe(map);
+      setInterval(() => {
+        if (visible && !hold && matchMedia('(min-width:768px)').matches) on((cur + 1) % nodes.length);
+      }, 2800);
+    })();
+  </script>
+</body>
 
 </html>
