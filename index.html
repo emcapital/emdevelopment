@@ -172,15 +172,6 @@
       overflow-wrap: break-word;
     }
 
-    #contact [data-reveal="left"]>div {
-      min-width: 0;
-      overflow-wrap: anywhere;
-    }
-
-    #contact [data-reveal="left"]>span {
-      flex-shrink: 0;
-    }
-
     ::selection {
       background: #5b6cff;
       color: #fff;
@@ -848,15 +839,226 @@
     }
 
 
-    /* ===== Contact card (static) ===== */
-    #contactCard .cc-map {
-      background: linear-gradient(160deg, rgba(91, 108, 255, .14), rgba(34, 211, 238, .06));
-      border: 1px solid rgba(255, 255, 255, .09);
-    }
-
-    #contactCard .cc-ring {
+    /* ===== Contact (ways to reach us) ===== */
+    .ct-bg {
       position: absolute;
       inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .ct-blob {
+      position: absolute;
+      border-radius: 9999px;
+      filter: blur(90px);
+      animation: blob 16s ease-in-out infinite;
+    }
+
+    .ct-blob-a {
+      width: 28rem;
+      height: 28rem;
+      top: -8rem;
+      left: -8rem;
+      background: rgba(91, 108, 255, .28);
+    }
+
+    .ct-blob-b {
+      width: 24rem;
+      height: 24rem;
+      bottom: -6rem;
+      right: -6rem;
+      background: rgba(34, 211, 238, .18);
+      animation-delay: -5s;
+    }
+
+    .ct-blob-c {
+      width: 18rem;
+      height: 18rem;
+      top: 40%;
+      left: 45%;
+      background: rgba(244, 114, 182, .14);
+      animation-delay: -9s;
+    }
+
+    .ct-eyebrow {
+      padding: .45rem .9rem;
+      border-radius: 9999px;
+      border: 1px solid rgba(34, 211, 238, .3);
+      background: rgba(34, 211, 238, .07);
+    }
+
+    .ct-card {
+      position: relative;
+      transition: transform .35s cubic-bezier(.2, .7, .2, 1), border-color .35s, box-shadow .35s;
+    }
+
+    .ct-spot {
+      overflow: hidden;
+    }
+
+    .ct-spot::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(300px circle at var(--mx, 50%) var(--my, 50%), rgba(124, 140, 255, .28), transparent 60%);
+      opacity: 0;
+      transition: opacity .3s;
+      pointer-events: none;
+    }
+
+    .ct-spot::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 18%;
+      bottom: 18%;
+      width: 3px;
+      border-radius: 3px;
+      background: linear-gradient(#7c8cff, #22d3ee);
+      transform: scaleY(0);
+      transition: transform .4s cubic-bezier(.2, .7, .2, 1);
+    }
+
+    .ct-spot:hover {
+      transform: translateX(6px);
+      border-color: rgba(124, 140, 255, .55);
+      box-shadow: 0 18px 40px -18px rgba(91, 108, 255, .55);
+    }
+
+    .ct-spot:hover::before {
+      opacity: 1;
+    }
+
+    .ct-spot:hover::after {
+      transform: scaleY(1);
+    }
+
+    .ct-spot>* {
+      position: relative;
+    }
+
+    .ct-ico {
+      flex-shrink: 0;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, .05);
+      border: 1px solid rgba(255, 255, 255, .09);
+      transition: transform .4s cubic-bezier(.2, .7, .2, 1);
+    }
+
+    .ct-ico-lg {
+      width: 3.6rem;
+      height: 3.6rem;
+      border-radius: 1.2rem;
+    }
+
+    .ct-spot:hover .ct-ico {
+      transform: rotate(-8deg) scale(1.1);
+    }
+
+    .ct-link {
+      background: linear-gradient(currentColor, currentColor) 0 100% / 0 1.5px no-repeat;
+      transition: background-size .35s;
+      width: fit-content;
+      max-width: 100%;
+    }
+
+    .ct-link:hover {
+      background-size: 100% 1.5px;
+    }
+
+    .ct-copy {
+      flex-shrink: 0;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: .8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #aab3e6;
+      background: rgba(255, 255, 255, .05);
+      border: 1px solid rgba(255, 255, 255, .09);
+      transition: all .25s;
+    }
+
+    .ct-copy:hover {
+      color: #fff;
+      background: #5b6cff;
+      border-color: #5b6cff;
+      transform: scale(1.08);
+    }
+
+    .ct-copy.done {
+      color: #052e1c;
+      background: #34d399;
+      border-color: #34d399;
+    }
+
+    .ct-mag {
+      transition: transform .25s cubic-bezier(.2, .7, .2, 1), box-shadow .25s;
+    }
+
+    .ct-mag:hover {
+      box-shadow: 0 18px 40px -12px rgba(91, 108, 255, .7);
+    }
+
+    .ct-ghost {
+      color: #dfe3ff;
+      border: 1px solid rgba(255, 255, 255, .18);
+      background: rgba(255, 255, 255, .04);
+      transition: all .25s;
+    }
+
+    .ct-ghost:hover {
+      border-color: #22d3ee;
+      color: #22d3ee;
+      transform: translateY(-2px);
+    }
+
+    /* Animated hub */
+    .ct-hub {
+      width: min(100%, 30rem);
+      aspect-ratio: 1;
+      transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+      transition: transform .25s ease-out;
+    }
+
+    .ct-hub-glow {
+      position: absolute;
+      inset: 8%;
+      border-radius: 9999px;
+      background: radial-gradient(circle, rgba(91, 108, 255, .35), rgba(34, 211, 238, .12) 55%, transparent 72%);
+      filter: blur(20px);
+      animation: ctBreath 5s ease-in-out infinite;
+    }
+
+    @keyframes ctBreath {
+
+      0%,
+      100% {
+        transform: scale(.92);
+        opacity: .7;
+      }
+
+      50% {
+        transform: scale(1.05);
+        opacity: 1;
+      }
+    }
+
+    .ct-hub-grid {
+      position: absolute;
+      inset: 0;
+      opacity: .7;
+    }
+
+    .ct-ring {
+      position: absolute;
+      inset: 14%;
       border-radius: 9999px;
       border: 1.5px solid rgba(34, 211, 238, .55);
       animation: ccPing 3.9s ease-out infinite;
@@ -869,18 +1071,687 @@
       }
 
       100% {
-        transform: scale(1.6);
+        transform: scale(1.5);
         opacity: 0;
       }
     }
 
-    html.light #contactCard .cc-map {
-      background: linear-gradient(160deg, rgba(67, 81, 232, .1), rgba(8, 145, 178, .05));
+    .ct-sweep {
+      position: absolute;
+      inset: 14%;
+      border-radius: 9999px;
+      background: conic-gradient(from 0deg, rgba(34, 211, 238, .35), rgba(34, 211, 238, 0) 26%);
+      -webkit-mask-image: radial-gradient(circle, #000 60%, transparent 72%);
+      mask-image: radial-gradient(circle, #000 60%, transparent 72%);
+      animation: spinSweep 4.5s linear infinite;
+    }
+
+    @keyframes spinSweep {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .ct-orbit {
+      position: absolute;
+      border-radius: 9999px;
+    }
+
+    .ct-orbit-out {
+      inset: 12%;
+      border: 1.5px dashed rgba(124, 140, 255, .4);
+      animation: spinSweep 28s linear infinite;
+    }
+
+    .ct-orbit-in {
+      inset: 30%;
+      border: 1px solid rgba(34, 211, 238, .25);
+      animation: spinSweep 18s linear infinite reverse;
+    }
+
+    .ct-node {
+      position: absolute;
+      width: 3.6rem;
+      height: 3.6rem;
+      margin: -1.8rem 0 0 -1.8rem;
+    }
+
+    .ct-node-in {
+      width: 100%;
+      height: 100%;
+      border-radius: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(13, 18, 38, .9);
+      border: 1px solid rgba(255, 255, 255, .14);
+      box-shadow: 0 10px 30px -8px rgba(91, 108, 255, .6);
+      animation: spinSweep 28s linear infinite reverse;
+    }
+
+    .ct-spark-dot {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      margin: -4px 0 0 -4px;
+      border-radius: 9999px;
+      background: #22d3ee;
+      box-shadow: 0 0 12px 3px rgba(34, 211, 238, .8);
+    }
+
+    .ct-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ct-center-pin {
+      width: 5rem;
+      height: 5rem;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #5b6cff, #f472b6);
+      box-shadow: 0 0 0 10px rgba(91, 108, 255, .15), 0 0 50px rgba(91, 108, 255, .6);
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .ct-float {
+      position: absolute;
+      animation: float 7s ease-in-out infinite;
+    }
+
+    .ct-float-a {
+      top: 2%;
+      right: 0;
+    }
+
+    .ct-float-b {
+      bottom: 3%;
+      left: 0;
+      animation-delay: -3s;
+    }
+
+    .ct-toast {
+      position: fixed;
+      left: 50%;
+      bottom: 1.5rem;
+      z-index: 70;
+      padding: .75rem 1.2rem;
+      border-radius: 9999px;
+      font-size: .85rem;
+      font-weight: 600;
+      color: #fff;
+      background: rgba(13, 18, 38, .95);
+      border: 1px solid rgba(52, 211, 153, .5);
+      box-shadow: 0 14px 40px -10px rgba(0, 0, 0, .6);
+      transform: translate(-50%, 140%);
+      opacity: 0;
+      transition: transform .4s cubic-bezier(.2, .9, .3, 1.2), opacity .3s;
+      pointer-events: none;
+      max-width: 90vw;
+    }
+
+    .ct-toast.show {
+      transform: translate(-50%, 0);
+      opacity: 1;
+    }
+
+    .ct-spark {
+      position: fixed;
+      z-index: 80;
+      width: 8px;
+      height: 8px;
+      border-radius: 9999px;
+      pointer-events: none;
+    }
+
+    html.light .ct-eyebrow {
+      border-color: rgba(8, 145, 178, .3);
+      background: rgba(8, 145, 178, .08);
+    }
+
+    html.light .ct-ico,
+    html.light .ct-copy {
+      background: rgba(67, 81, 232, .06);
+      border-color: rgba(15, 21, 53, .1);
+      color: #4351e8;
+    }
+
+    html.light .ct-ico.text-aqua {
+      color: #0891b2;
+    }
+
+    html.light .ct-ico.text-pink {
+      color: #db2777;
+    }
+
+    html.light .ct-ring {
+      border-color: rgba(8, 145, 178, .5);
+    }
+
+    html.light .ct-orbit-out {
+      border-color: rgba(67, 81, 232, .35);
+    }
+
+    html.light .ct-node-in {
+      background: #fff;
+      border-color: rgba(15, 21, 53, .12);
+    }
+
+    html.light .ct-ghost {
+      color: #2a3270;
+      border-color: rgba(15, 21, 53, .2);
+      background: rgba(255, 255, 255, .7);
+    }
+
+    html.light .ct-ghost:hover {
+      color: #0891b2;
+      border-color: #0891b2;
+    }
+
+    html.light .ct-toast {
+      color: #0f1535;
+      background: #fff;
+    }
+
+    @media (max-width: 480px) {
+      .ct-node {
+        width: 2.9rem;
+        height: 2.9rem;
+        margin: -1.45rem 0 0 -1.45rem;
+      }
+
+      .ct-center-pin {
+        width: 4rem;
+        height: 4rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      .ct-sweep,
+      .ct-blob,
+      .ct-orbit,
+      .ct-node-in,
+      .ct-hub-glow,
+      .ct-float,
+      .ct-center-pin {
+        animation: none !important;
+      }
+
+      .ct-hub {
+        transform: none !important;
+      }
+    }
+
+    /* ===== Footer (animated) ===== */
+    .ft-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #5b6cff, #22d3ee, #f472b6, transparent);
+      background-size: 200% 100%;
+      animation: ftFlow 5s linear infinite;
+    }
+
+    @keyframes ftFlow {
+      to {
+        background-position: -200% 0;
+      }
+    }
+
+    .ft-bg {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .ft-blob {
+      position: absolute;
+      border-radius: 9999px;
+      filter: blur(100px);
+      animation: blob 18s ease-in-out infinite;
+    }
+
+    .ft-blob-a {
+      width: 26rem;
+      height: 26rem;
+      top: -6rem;
+      left: -8rem;
+      background: rgba(91, 108, 255, .22);
+    }
+
+    .ft-blob-b {
+      width: 24rem;
+      height: 24rem;
+      bottom: -8rem;
+      right: -6rem;
+      background: rgba(244, 114, 182, .14);
+      animation-delay: -7s;
+    }
+
+    .ft-p {
+      position: absolute;
+      bottom: -10px;
+      left: var(--x);
+      width: var(--s);
+      height: var(--s);
+      border-radius: 9999px;
+      background: #22d3ee;
+      box-shadow: 0 0 10px 2px rgba(34, 211, 238, .6);
+      opacity: 0;
+      animation: ftRise var(--t) linear var(--d) infinite;
+    }
+
+    .ft-p:nth-child(3n) {
+      background: #7c8cff;
+      box-shadow: 0 0 10px 2px rgba(124, 140, 255, .6);
+    }
+
+    .ft-p:nth-child(4n) {
+      background: #f472b6;
+      box-shadow: 0 0 10px 2px rgba(244, 114, 182, .55);
+    }
+
+    @keyframes ftRise {
+      0% {
+        transform: translate(0, 0);
+        opacity: 0;
+      }
+
+      10% {
+        opacity: .9;
+      }
+
+      50% {
+        transform: translate(18px, -45vh);
+      }
+
+      90% {
+        opacity: .5;
+      }
+
+      100% {
+        transform: translate(-12px, -95vh);
+        opacity: 0;
+      }
+    }
+
+    /* CTA banner */
+    .ft-cta-wrap {
+      position: relative;
+      border-radius: 1.5rem;
+    }
+
+    @property --fang {
+      syntax: "<angle>";
+      inherits: false;
+      initial-value: 0deg;
+    }
+
+    .ft-cta-border {
+      position: absolute;
+      inset: -1.5px;
+      border-radius: calc(1.5rem + 1.5px);
+      background: conic-gradient(from var(--fang), #5b6cff, #22d3ee, #f472b6, #5b6cff);
+      animation: ftSpin 7s linear infinite;
+      opacity: .8;
+    }
+
+    @keyframes ftSpin {
+      to {
+        --fang: 360deg;
+      }
+    }
+
+    .ft-cta {
+      background: #0d1226;
+    }
+
+    .ft-cta-glow {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(500px circle at var(--mx, 85%) var(--my, 20%), rgba(91, 108, 255, .3), transparent 60%);
+      transition: background .2s;
+      pointer-events: none;
+    }
+
+    .ft-btn {
+      overflow: hidden;
+      transition: transform .3s cubic-bezier(.2, .7, .2, 1), box-shadow .3s;
+      animation: ftPulse 2.6s ease-in-out infinite;
+    }
+
+    .ft-btn:hover {
+      transform: translateY(-3px) scale(1.04);
+      box-shadow: 0 20px 44px -12px rgba(91, 108, 255, .8);
+    }
+
+    @keyframes ftPulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(91, 108, 255, .5);
+      }
+
+      50% {
+        box-shadow: 0 0 0 14px rgba(91, 108, 255, 0);
+      }
+    }
+
+    /* Brand */
+    .ft-logo {
+      position: relative;
+      transition: transform .5s cubic-bezier(.2, .8, .3, 1.3);
+    }
+
+    .ft-logo::after {
+      content: "";
+      position: absolute;
+      inset: -5px;
+      border-radius: 1rem;
+      border: 1.5px solid rgba(34, 211, 238, .6);
+      animation: ftHalo 2.8s ease-out infinite;
+    }
+
+    @keyframes ftHalo {
+      0% {
+        transform: scale(.9);
+        opacity: .9;
+      }
+
+      100% {
+        transform: scale(1.35);
+        opacity: 0;
+      }
+    }
+
+    .ft-brand:hover .ft-logo {
+      transform: rotate(-8deg) scale(1.1);
+    }
+
+    /* Links */
+    .ft-h {
+      position: relative;
+      display: inline-block;
+      font-size: .8rem;
+      font-weight: 700;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: #e5e9ff;
+    }
+
+    .ft-h::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -8px;
+      width: 28px;
+      height: 2px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, #5b6cff, #22d3ee);
+    }
+
+    .ft-a {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      color: #8f98c9;
+      transition: color .3s, transform .3s cubic-bezier(.2, .7, .2, 1);
+    }
+
+    .ft-a::before {
+      content: "";
+      width: 0;
+      height: 2px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, #5b6cff, #22d3ee);
+      transition: width .3s cubic-bezier(.2, .7, .2, 1);
+    }
+
+    .ft-a:hover {
+      color: #fff;
+      transform: translateX(4px);
+    }
+
+    .ft-a:hover::before {
+      width: 14px;
+    }
+
+    .ft-c {
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+      color: #aab3e6;
+      transition: color .3s, transform .3s cubic-bezier(.2, .7, .2, 1);
+    }
+
+    .ft-c:hover {
+      color: #fff;
+      transform: translateX(4px);
+    }
+
+    .ft-ci {
+      flex-shrink: 0;
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: .75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, .05);
+      border: 1px solid rgba(255, 255, 255, .09);
+      transition: transform .4s cubic-bezier(.2, .8, .3, 1.4), background .3s;
+    }
+
+    .ft-c:hover .ft-ci {
+      transform: rotate(-10deg) scale(1.15);
+      background: rgba(91, 108, 255, .2);
+    }
+
+    .ft-soc {
+      width: 2.8rem;
+      height: 2.8rem;
+      border-radius: .9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #c4caf2;
+      background: rgba(255, 255, 255, .05);
+      border: 1px solid rgba(255, 255, 255, .1);
+      transition: transform .35s cubic-bezier(.2, .8, .3, 1.4), background .3s, color .3s, box-shadow .3s;
+    }
+
+    .ft-soc:hover {
+      color: #fff;
+      background: linear-gradient(135deg, #5b6cff, #22d3ee);
+      transform: translateY(-6px) rotate(-6deg) scale(1.08);
+      box-shadow: 0 16px 30px -10px rgba(91, 108, 255, .8);
+    }
+
+    .ft-heart {
+      display: inline-block;
+      color: #f472b6;
+      animation: ftBeat 1.4s ease-in-out infinite;
+    }
+
+    @keyframes ftBeat {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      15% {
+        transform: scale(1.35);
+      }
+
+      30% {
+        transform: scale(1);
+      }
+
+      45% {
+        transform: scale(1.25);
+      }
+    }
+
+    /* Back to top */
+    .ft-top {
+      position: fixed;
+      right: 1.25rem;
+      bottom: 1.25rem;
+      z-index: 60;
+      width: 3.2rem;
+      height: 3.2rem;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      background: rgba(13, 18, 38, .92);
+      box-shadow: 0 12px 30px -8px rgba(0, 0, 0, .6);
+      opacity: 0;
+      transform: translateY(30px) scale(.7);
+      pointer-events: none;
+      transition: opacity .4s, transform .4s cubic-bezier(.2, .9, .3, 1.3);
+    }
+
+    .ft-top.show {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+    }
+
+    .ft-top:hover {
+      transform: translateY(-4px) scale(1.08);
+    }
+
+    .ft-top:hover .ft-top-arrow {
+      animation: ftBounce .7s ease-in-out infinite;
+    }
+
+    @keyframes ftBounce {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-3px);
+      }
+    }
+
+    .ft-top-ring {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .ft-top-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, .12);
+      stroke-width: 3;
+    }
+
+    .ft-top-arc {
+      fill: none;
+      stroke: #22d3ee;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-dasharray: 131.95;
+      stroke-dashoffset: 131.95;
+    }
+
+    .ft-top-arrow {
+      position: relative;
+      width: 1.2rem;
+      height: 1.2rem;
+    }
+
+    /* Light mode */
+    html.light .ft-cta {
+      background: #fff;
+    }
+
+    html.light .ft-h {
+      color: #0f1535;
+    }
+
+    html.light .ft-a,
+    html.light .ft-c {
+      color: #4a5380;
+    }
+
+    html.light .ft-a:hover,
+    html.light .ft-c:hover {
+      color: #0b1030;
+    }
+
+    html.light .ft-ci,
+    html.light .ft-soc {
+      background: rgba(67, 81, 232, .06);
       border-color: rgba(15, 21, 53, .1);
     }
 
-    html.light #contactCard .cc-ring {
-      border-color: rgba(8, 145, 178, .5);
+    html.light .ft-soc {
+      color: #4351e8;
+    }
+
+    html.light .ft-soc:hover {
+      color: #fff;
+    }
+
+    html.light .ft-ci.text-aqua {
+      color: #0891b2;
+    }
+
+    html.light .ft-ci.text-pink {
+      color: #db2777;
+    }
+
+    html.light .ft-status .bg-white\/15 {
+      background: rgba(15, 21, 53, .15);
+    }
+
+    html.light .ft-top {
+      background: #fff;
+      color: #2a3270;
+      box-shadow: 0 12px 30px -8px rgba(40, 52, 120, .35);
+    }
+
+    html.light .ft-top-bg {
+      stroke: rgba(15, 21, 53, .12);
+    }
+
+    @media (max-width: 640px) {
+      .ft-top {
+        right: .9rem;
+        bottom: .9rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      .ft-line,
+      .ft-blob,
+      .ft-p,
+      .ft-cta-border,
+      .ft-btn,
+      .ft-logo::after,
+      .ft-heart {
+        animation: none !important;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -3599,209 +4470,244 @@
       </section>
 
       <!-- CONTACT -->
-      <section id="contact" class="py-24">
-        <div
-          class="max-w-7xl mx-auto px-5 sm:px-8 grid lg:grid-cols-2 gap-14">
-          <div>
-            <span data-reveal
-              class="text-sm font-semibold uppercase tracking-[.25em] text-aqua">Contact</span>
-            <h2 data-reveal style="--d:100ms"
-              class="mt-4 text-3xl sm:text-5xl font-extrabold tracking-tight">Let's
-              start your <span
-                class="gradient-text">project</span></h2>
-            <p data-reveal style="--d:200ms"
-              class="mt-5 text-slate-400 text-lg max-w-md">Share a
-              few details and we'll get back to you shortly. No
-              pressure, no obligation.</p>
-            <div class="mt-10 space-y-5">
-              <div data-reveal="left"
-                class="flex items-center gap-4"><span
-                  class="w-12 h-12 rounded-2xl glass flex items-center justify-center text-brand-400">✉</span>
-                <div>
-                  <div
-                    class="text-xs text-slate-500">Email</div>
-                  <div
-                    class="font-semibold">emdevelopmentph@gmail.com</div>
+      <section id="contact" class="ct relative py-24 sm:py-32 overflow-hidden">
+        <div class="ct-bg" aria-hidden="true">
+          <div class="grid-bg absolute inset-0 opacity-60"></div>
+          <span class="ct-blob ct-blob-a"></span>
+          <span class="ct-blob ct-blob-b"></span>
+          <span class="ct-blob ct-blob-c"></span>
+        </div>
+
+        <div class="relative max-w-7xl mx-auto px-5 sm:px-8">
+          <div class="text-center max-w-3xl mx-auto">
+            <span data-reveal class="ct-eyebrow inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[.25em] text-aqua">
+              <span class="relative flex w-2 h-2"><span class="absolute inset-0 rounded-full bg-emerald-400 animate-pulseRing"></span><span class="relative w-2 h-2 rounded-full bg-emerald-400"></span></span>
+              Contact · Open to new projects
+            </span>
+            <h2 data-reveal style="--d:100ms" class="mt-5 text-4xl sm:text-6xl font-extrabold tracking-tight leading-[1.05]">
+              Let's <span class="gradient-text">talk</span> about your project
+            </h2>
+            <p data-reveal style="--d:200ms" class="mt-5 text-slate-400 text-lg max-w-xl mx-auto">
+              Email us, give us a call, or drop by our office in Cebu. Tell us what you want to build and we'll take it from there. No pressure, no obligation.
+            </p>
+          </div>
+
+          <div class="mt-14 grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
+            <!-- Ways to reach us -->
+            <div class="space-y-5">
+              <div data-reveal="left" style="--d:100ms">
+                <div class="ct-card ct-spot glass rounded-3xl p-5 sm:p-6 flex items-center gap-4 sm:gap-5">
+                  <span class="ct-ico ct-ico-lg text-brand-400">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg>
+                  </span>
+                  <div class="min-w-0 flex-1">
+                    <div class="text-xs font-semibold uppercase tracking-[.2em] text-slate-500">Email us</div>
+                    <a href="mailto:emdevelopmentph@gmail.com" class="ct-link mt-1 block text-base sm:text-xl font-bold break-all">emdevelopmentph@gmail.com</a>
+                    <div class="mt-1 text-xs text-slate-400">We reply within 24 hours</div>
+                  </div>
+                  <button type="button" class="ct-copy" data-copy="emdevelopmentph@gmail.com" aria-label="Copy email address">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
+                  </button>
                 </div>
               </div>
-              <div data-reveal="left" style="--d:100ms"
-                class="flex items-center gap-4"><span
-                  class="w-12 h-12 rounded-2xl glass flex items-center justify-center text-aqua">☎</span>
-                <div>
-                  <div
-                    class="text-xs text-slate-500">Phone</div>
-                  <div class="font-semibold">(+63) 920 501
-                    8789</div>
+
+              <div data-reveal="left" style="--d:200ms">
+                <div class="ct-card ct-spot glass rounded-3xl p-5 sm:p-6 flex items-center gap-4 sm:gap-5">
+                  <span class="ct-ico ct-ico-lg text-aqua">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>
+                  </span>
+                  <div class="min-w-0 flex-1">
+                    <div class="text-xs font-semibold uppercase tracking-[.2em] text-slate-500">Call us</div>
+                    <a href="tel:+639205018789" class="ct-link mt-1 block text-base sm:text-xl font-bold">(+63) 920 501 8789</a>
+                    <div class="mt-1 text-xs text-slate-400">Philippine time · UTC+8</div>
+                  </div>
+                  <button type="button" class="ct-copy" data-copy="+63 920 501 8789" aria-label="Copy phone number">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
+                  </button>
                 </div>
               </div>
-              <div data-reveal="left" style="--d:200ms"
-                class="flex items-center gap-4"><span
-                  class="w-12 h-12 rounded-2xl glass flex items-center justify-center text-pink">⌖</span>
-                <div>
-                  <div
-                    class="text-xs text-slate-500">Office</div>
-                  <div class="font-semibold">Cebu City, Cebu,
-                    Philippines, 6000</div>
+
+              <div data-reveal="left" style="--d:300ms">
+                <div class="ct-card ct-spot glass rounded-3xl p-5 sm:p-6 flex items-center gap-4 sm:gap-5">
+                  <span class="ct-ico ct-ico-lg text-pink">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7"><path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+                  </span>
+                  <div class="min-w-0 flex-1">
+                    <div class="text-xs font-semibold uppercase tracking-[.2em] text-slate-500">Visit us</div>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Cebu+City+Philippines" target="_blank" rel="noopener" class="ct-link mt-1 block text-base sm:text-xl font-bold">Cebu City, Cebu, Philippines, 6000</a>
+                    <div class="mt-1 text-xs text-slate-400">Tap to open in Maps</div>
+                  </div>
+                  <button type="button" class="ct-copy" data-copy="Cebu City, Cebu, Philippines, 6000" aria-label="Copy office address">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div data-reveal style="--d:400ms" class="flex flex-col sm:flex-row gap-3 pt-2">
+                <a href="mailto:emdevelopmentph@gmail.com" class="ct-mag btn-shine group inline-flex items-center justify-center gap-2.5 rounded-full bg-gradient-to-r from-brand-500 to-aqua px-7 py-4 text-sm font-bold text-white shadow-lg shadow-brand-500/30">
+                  Email us now
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 transition-transform group-hover:translate-x-1"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </a>
+                <a href="tel:+639205018789" class="ct-ghost inline-flex items-center justify-center rounded-full px-7 py-4 text-sm font-bold">Call now</a>
+              </div>
+            </div>
+
+            <!-- Animated hub -->
+            <div data-reveal="right" style="--d:150ms">
+              <div id="ctHub" class="ct-hub relative mx-auto" aria-hidden="true">
+                <div class="ct-hub-glow"></div>
+                <div class="ct-hub-grid grid-bg"></div>
+                <span class="ct-ring"></span><span class="ct-ring" style="animation-delay:-1.3s"></span><span class="ct-ring" style="animation-delay:-2.6s"></span>
+                <div class="ct-sweep"></div>
+
+                <div class="ct-orbit ct-orbit-in"><span class="ct-spark-dot" style="top:0;left:50%"></span><span class="ct-spark-dot" style="top:85%;left:15%;background:#f472b6"></span></div>
+
+                <div class="ct-orbit ct-orbit-out">
+                  <div class="ct-node" style="top:0;left:50%"><div class="ct-node-in text-brand-400">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg></div></div>
+                  <div class="ct-node" style="top:75%;left:93.3%"><div class="ct-node-in text-aqua">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg></div></div>
+                  <div class="ct-node" style="top:75%;left:6.7%"><div class="ct-node-in text-pink">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div></div>
+                </div>
+
+                <div class="ct-center">
+                  <span class="ct-center-pin">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+                  </span>
+                </div>
+
+                <div class="ct-float ct-float-a glass rounded-2xl px-4 py-3">
+                  <div id="ctClock" class="text-lg font-mono font-bold tabular-nums">--:--:--</div>
+                  <div class="text-[10px] uppercase tracking-wider text-slate-400">Cebu local time</div>
+                </div>
+                <div class="ct-float ct-float-b glass rounded-2xl px-4 py-3">
+                  <div class="text-sm font-bold">Cebu City, PH</div>
+                  <div class="text-[11px] font-mono text-slate-400">10.3157° N · 123.8854° E</div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div id="contactCard" data-reveal="right"
-            class="glass rounded-3xl p-6 sm:p-9 relative overflow-hidden">
-            <div
-              class="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-brand-500/25 blur-3xl pointer-events-none"></div>
-            <div
-              class="absolute -bottom-20 -left-16 w-56 h-56 rounded-full bg-aqua/15 blur-3xl pointer-events-none"></div>
-            <div class="relative">
-              <span
-                class="text-xs font-semibold uppercase tracking-[.25em] text-aqua">Say
-                hello</span>
-              <h3
-                class="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight">No
-                forms. <span class="gradient-text">Just a
-                  conversation.</span></h3>
-              <p
-                class="mt-3 text-slate-400 text-sm sm:text-base max-w-md">Send
-                us an email or give us a call. Tell us what you
-                want to build and we'll take it from there.</p>
-
-              <!-- Radar location graphic -->
-              <div
-                class="cc-map mt-8 rounded-2xl relative overflow-hidden h-56 sm:h-64">
-                <div
-                  class="absolute inset-0 grid-bg opacity-70"></div>
-                <div
-                  class="cc-rings absolute inset-0 m-auto w-44 h-44 sm:w-52 sm:h-52">
-                  <span class="cc-ring"></span><span
-                    class="cc-ring"
-                    style="animation-delay:-1.3s"></span><span
-                    class="cc-ring"
-                    style="animation-delay:-2.6s"></span>
-                </div>
-                <div
-                  class="absolute inset-0 m-auto w-44 h-44 sm:w-52 sm:h-52 rounded-full border border-dashed border-brand-400/30 animate-spinSlow"></div>
-                <div
-                  class="absolute inset-0 flex items-center justify-center">
-                  <div
-                    class="relative flex flex-col items-center animate-float">
-                    <span
-                      class="w-11 h-11 rounded-full bg-gradient-to-br from-brand-500 to-pink flex items-center justify-center shadow-lg shadow-brand-500/40">
-                      <svg class="w-5 h-5 text-white"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2.2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        viewBox="0 0 24 24">
-                        <path
-                          d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21z" />
-                        <circle cx="12" cy="9.5"
-                          r="2.5" />
-                      </svg>
-                    </span>
-                    <span
-                      class="w-0.5 h-3 bg-gradient-to-b from-pink to-transparent"></span>
-                  </div>
-                </div>
-                <div
-                  class="absolute left-4 bottom-4 glass rounded-xl px-3.5 py-2">
-                  <div class="text-sm font-bold">Cebu City,
-                    PH</div>
-                  <div
-                    class="text-[11px] font-mono text-slate-400">10.3157°
-                    N · 123.8854° E</div>
-                </div>
-                <div
-                  class="absolute right-4 top-4 glass rounded-full px-3 py-1.5 flex items-center gap-2 text-xs font-medium">
-                  <span class="relative flex w-2 h-2"><span
-                      class="absolute inset-0 rounded-full bg-emerald-400 animate-pulseRing"></span><span
-                      class="relative w-2 h-2 rounded-full bg-emerald-400"></span></span>
-                  Open to new projects
-                </div>
-              </div>
-
-              <!-- Fact tiles -->
-              <div
-                class="mt-5 grid grid-cols-1 min-[360px]:grid-cols-3 gap-2.5 sm:gap-3">
-                <div
-                  class="glass rounded-2xl p-3 sm:p-4 text-center">
-                  <div
-                    class="text-lg sm:text-2xl font-extrabold gradient-text">24h</div>
-                  <div
-                    class="mt-1 text-[11px] sm:text-xs text-slate-400">Reply
-                    time</div>
-                </div>
-                <div
-                  class="glass rounded-2xl p-3 sm:p-4 text-center">
-                  <div
-                    class="text-lg sm:text-2xl font-extrabold gradient-text">UTC+8</div>
-                  <div
-                    class="mt-1 text-[11px] sm:text-xs text-slate-400">Philippine
-                    time</div>
-                </div>
-                <div
-                  class="glass rounded-2xl p-3 sm:p-4 text-center">
-                  <div
-                    class="text-lg sm:text-2xl font-extrabold gradient-text">Free</div>
-                  <div
-                    class="mt-1 text-[11px] sm:text-xs text-slate-400">First
-                    estimate</div>
-                </div>
-              </div>
+          <div class="mt-16 grid grid-cols-1 min-[420px]:grid-cols-3 gap-3 sm:gap-5">
+            <div data-reveal style="--d:100ms" class="glass rounded-2xl p-4 sm:p-6 text-center">
+              <div class="text-2xl sm:text-4xl font-extrabold gradient-text">24h</div>
+              <div class="mt-1 text-xs sm:text-sm text-slate-400">Average reply time</div>
+            </div>
+            <div data-reveal style="--d:200ms" class="glass rounded-2xl p-4 sm:p-6 text-center">
+              <div class="text-2xl sm:text-4xl font-extrabold gradient-text">UTC+8</div>
+              <div class="mt-1 text-xs sm:text-sm text-slate-400">Philippine time</div>
+            </div>
+            <div data-reveal style="--d:300ms" class="glass rounded-2xl p-4 sm:p-6 text-center">
+              <div class="text-2xl sm:text-4xl font-extrabold gradient-text">Free</div>
+              <div class="mt-1 text-xs sm:text-sm text-slate-400">First estimate</div>
             </div>
           </div>
         </div>
+
+        <div id="ctToast" class="ct-toast" role="status" aria-live="polite"></div>
       </section>
     </main>
 
     <!-- FOOTER -->
-    <footer class="relative z-[2] border-t border-white/5 bg-panel/60">
-      <div
-        class="max-w-7xl mx-auto px-5 sm:px-8 py-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
-        <div class="lg:col-span-2">
-          <a href="#home" class="flex items-center gap-3"><span
-              class="w-14 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-aqua flex items-center justify-center"><span
-                class="em-logo w-8"></span></span><span
-              class="text-lg font-bold">EM <span
-                class="text-brand-400">Development</span></span></a>
-          <p
-            class="mt-4 text-slate-400 max-w-sm text-sm leading-relaxed">We
-            craft websites and mobile apps that help ambitious
-            businesses stand out and grow.</p>
+    <footer class="ft relative z-[2] overflow-hidden border-t border-white/5 bg-panel/60">
+      <div class="ft-line" aria-hidden="true"></div>
+      <div class="ft-bg" aria-hidden="true">
+        <span class="ft-blob ft-blob-a"></span>
+        <span class="ft-blob ft-blob-b"></span>
+        <span class="ft-p" style="--x:6%;--s:5px;--t:11s;--d:-2s"></span>
+        <span class="ft-p" style="--x:14%;--s:3px;--t:14s;--d:-7s"></span>
+        <span class="ft-p" style="--x:23%;--s:6px;--t:12s;--d:-4s"></span>
+        <span class="ft-p" style="--x:34%;--s:4px;--t:16s;--d:-10s"></span>
+        <span class="ft-p" style="--x:45%;--s:3px;--t:10s;--d:-1s"></span>
+        <span class="ft-p" style="--x:55%;--s:5px;--t:15s;--d:-6s"></span>
+        <span class="ft-p" style="--x:64%;--s:4px;--t:13s;--d:-9s"></span>
+        <span class="ft-p" style="--x:73%;--s:6px;--t:11s;--d:-3s"></span>
+        <span class="ft-p" style="--x:83%;--s:3px;--t:17s;--d:-12s"></span>
+        <span class="ft-p" style="--x:92%;--s:5px;--t:12s;--d:-5s"></span>
+      </div>
+
+      <div class="relative max-w-7xl mx-auto px-5 sm:px-8 pt-16 pb-14">
+        <!-- CTA banner -->
+        <div data-reveal="zoom" class="ft-cta-wrap">
+          <div class="ft-cta-border"></div>
+          <div class="ft-cta relative rounded-3xl p-7 sm:p-10 lg:p-12 flex flex-col lg:flex-row lg:items-center justify-between gap-7 overflow-hidden">
+            <div class="ft-cta-glow" aria-hidden="true"></div>
+            <div class="relative">
+              <div class="text-xs font-semibold uppercase tracking-[.25em] text-aqua">Ready when you are</div>
+              <h3 class="mt-3 text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.1]">Have an idea? <span class="gradient-text">Let's build it.</span></h3>
+              <p class="mt-3 text-slate-400 max-w-lg">Tell us what you want to create. The first estimate is free.</p>
+            </div>
+            <button type="button" data-open-quote aria-haspopup="dialog" class="ft-btn btn-shine group relative inline-flex items-center justify-center gap-3 self-start lg:self-auto rounded-full bg-gradient-to-r from-brand-500 to-aqua px-8 py-4 text-sm font-bold text-white shadow-lg shadow-brand-500/30">
+              Get a Free Quote
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+          </div>
         </div>
-        <div>
-          <h4 class="font-semibold mb-4">Company</h4>
-          <ul class="space-y-3 text-sm text-slate-400">
-            <li><a class="hover:text-white transition"
-                href="#services">Services</a></li>
-            <li><a class="hover:text-white transition"
-                href="#work">Work</a></li>
-            <li><a class="hover:text-white transition"
-                href="#process">Process</a></li>
-            <li><a class="hover:text-white transition"
-                href="#contact">Contact</a></li>
-          </ul>
-        </div>
-        <div>
-          <h4 class="font-semibold mb-4">Follow us</h4>
-          <div class="flex gap-3">
-            <a href="https://www.facebook.com/share/18LsqE5oKK/"
-              class="w-10 h-10 rounded-xl glass flex items-center justify-center text-sm font-bold hover:bg-brand-500 hover:-translate-y-1 transition-all">f</a>
-            <!-- <a href="#"
-                            class="w-10 h-10 rounded-xl glass flex items-center justify-center text-sm font-bold hover:bg-brand-500 hover:-translate-y-1 transition-all">in</a>
-                        <a href="#"
-                            class="w-10 h-10 rounded-xl glass flex items-center justify-center text-sm font-bold hover:bg-brand-500 hover:-translate-y-1 transition-all">ig</a>
-                        <a href="#"
-                            class="w-10 h-10 rounded-xl glass flex items-center justify-center text-sm font-bold hover:bg-brand-500 hover:-translate-y-1 transition-all">gh</a> -->
+
+        <!-- Columns -->
+        <div class="mt-16 grid sm:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8">
+          <div class="lg:col-span-5" data-reveal>
+            <a href="#home" class="ft-brand inline-flex items-center gap-3">
+              <span class="ft-logo w-14 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-aqua flex items-center justify-center"><span class="em-logo w-8"></span></span>
+              <span class="text-xl font-bold">EM <span class="text-brand-400">Development</span></span>
+            </a>
+            <p class="mt-5 text-slate-400 max-w-sm text-sm leading-relaxed">We craft websites and mobile apps that help ambitious businesses stand out and grow.</p>
+            <div class="ft-status mt-6 inline-flex items-center gap-3 rounded-full glass px-4 py-2.5">
+              <span class="relative flex w-2.5 h-2.5"><span class="absolute inset-0 rounded-full bg-emerald-400 animate-pulseRing"></span><span class="relative w-2.5 h-2.5 rounded-full bg-emerald-400"></span></span>
+              <span class="text-xs font-medium">Open to new projects</span>
+              <span class="w-px h-4 bg-white/15"></span>
+              <span class="text-xs font-mono tabular-nums text-slate-400">Philippines <span id="ftClock">--:--:--</span></span>
+            </div>
+          </div>
+
+          <div class="lg:col-span-2" data-reveal style="--d:100ms">
+            <h4 class="ft-h">Company</h4>
+            <ul class="mt-5 space-y-3 text-sm">
+              <li><a class="ft-a" href="#services">Services</a></li>
+              <li><a class="ft-a" href="#work">Work</a></li>
+              <li><a class="ft-a" href="#process">Process</a></li>
+              <li><a class="ft-a" href="#testimonials">Clients</a></li>
+              <li><a class="ft-a" href="#contact">Contact</a></li>
+            </ul>
+          </div>
+
+          <div class="lg:col-span-3" data-reveal style="--d:200ms">
+            <h4 class="ft-h">Reach us</h4>
+            <ul class="mt-5 space-y-4 text-sm">
+              <li><a class="ft-c group" href="mailto:emdevelopmentph@gmail.com"><span class="ft-ci text-brand-400"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg></span><span class="min-w-0 break-all">emdevelopmentph@gmail.com</span></a></li>
+              <li><a class="ft-c group" href="tel:+639205018789"><span class="ft-ci text-aqua"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg></span><span>(+63) 920 501 8789</span></a></li>
+              <li><a class="ft-c group" href="https://www.google.com/maps/search/?api=1&query=Cebu+City+Philippines" target="_blank" rel="noopener"><span class="ft-ci text-pink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></span><span>Cebu City, Cebu, Philippines, 6000</span></a></li>
+            </ul>
+          </div>
+
+          <div class="lg:col-span-2" data-reveal style="--d:300ms">
+            <h4 class="ft-h">Follow us</h4>
+            <div class="mt-5 flex gap-3">
+              <a href="https://www.facebook.com/share/18LsqE5oKK/" target="_blank" rel="noopener" aria-label="Facebook" class="ft-soc">
+                <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.6-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.2H8v3h2.5V21h3z"/></svg>
+              </a>
+              <a href="https://www.instagram.com/emdevsolutions/" target="_blank" rel="noopener" aria-label="Instagram @emdevsolutions" class="ft-soc">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none"/></svg>
+              </a>
+            </div>
+            <a href="https://www.instagram.com/emdevsolutions/" target="_blank" rel="noopener" class="ft-a mt-4 text-sm">@emdevsolutions</a>
           </div>
         </div>
       </div>
-      <div
-        class="border-t border-white/5 py-6 text-center text-sm text-slate-500">©
-        <span id="year"></span> EM Development. All rights
-        reserved.
+
+      <div class="relative border-t border-white/5 py-6 px-5">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-slate-500">
+          <div>© <span id="year"></span> EM Development. All rights reserved.</div>
+          <div class="flex items-center gap-2">Crafted with <span class="ft-heart" aria-label="love">♥</span> in the Philippines</div>
+        </div>
       </div>
+
+      <!-- Back to top with scroll progress -->
+      <button type="button" id="ftTop" class="ft-top" aria-label="Back to top">
+        <svg viewBox="0 0 48 48" class="ft-top-ring" aria-hidden="true"><circle cx="24" cy="24" r="21" class="ft-top-bg"/><circle id="ftTopArc" cx="24" cy="24" r="21" class="ft-top-arc"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" class="ft-top-arrow"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      </button>
     </footer>
 
     <!-- QUOTE MODAL -->
@@ -4769,6 +5675,133 @@
       setInterval(() => {
         if (visible && !hold && matchMedia('(min-width:768px)').matches) on((cur + 1) % nodes.length);
       }, 2800);
+    })();
+  </script>
+  <script>
+    // Contact section interactions
+    (function () {
+      const sec = document.getElementById('contact');
+      if (!sec) return;
+      const fine = matchMedia('(hover:hover) and (pointer:fine)').matches;
+      const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      sec.querySelectorAll('.ct-spot').forEach(c => c.addEventListener('pointermove', e => {
+        const r = c.getBoundingClientRect();
+        c.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+        c.style.setProperty('--my', (e.clientY - r.top) + 'px');
+      }));
+
+      const clock = document.getElementById('ctClock');
+      const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+      const tick = () => { clock.textContent = fmt.format(new Date()); };
+      tick();
+      setInterval(tick, 1000);
+
+      const toast = document.getElementById('ctToast');
+      let tt;
+      function say(msg) {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(tt);
+        tt = setTimeout(() => toast.classList.remove('show'), 2200);
+      }
+      function burst(x, y) {
+        if (calm) return;
+        const cols = ['#7c8cff', '#22d3ee', '#f472b6', '#34d399', '#fbbf24'];
+        for (let i = 0; i < 16; i++) {
+          const s = document.createElement('span');
+          s.className = 'ct-spark';
+          s.style.left = x + 'px';
+          s.style.top = y + 'px';
+          s.style.background = cols[i % cols.length];
+          document.body.appendChild(s);
+          const a = Math.random() * Math.PI * 2, d = 40 + Math.random() * 70;
+          s.animate([
+            { transform: 'translate(-50%,-50%) scale(1)', opacity: 1 },
+            { transform: 'translate(calc(-50% + ' + Math.cos(a) * d + 'px), calc(-50% + ' + (Math.sin(a) * d + 24) + 'px)) scale(0)', opacity: 0 }
+          ], { duration: 700 + Math.random() * 300, easing: 'cubic-bezier(.2,.8,.3,1)' }).onfinish = () => s.remove();
+        }
+      }
+
+      sec.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', async () => {
+        const v = b.dataset.copy;
+        try { await navigator.clipboard.writeText(v); }
+        catch (_) {
+          const t = document.createElement('textarea');
+          t.value = v; t.style.position = 'fixed'; t.style.opacity = '0';
+          document.body.appendChild(t); t.select();
+          try { document.execCommand('copy'); } catch (__) {}
+          t.remove();
+        }
+        b.classList.add('done');
+        setTimeout(() => b.classList.remove('done'), 1400);
+        const r = b.getBoundingClientRect();
+        burst(r.left + r.width / 2, r.top + r.height / 2);
+        say('Copied: ' + v);
+      }));
+
+      if (fine && !calm) {
+        const hub = document.getElementById('ctHub');
+        const wrap = hub.parentElement;
+        wrap.style.perspective = '1200px';
+        wrap.addEventListener('pointermove', e => {
+          const r = hub.getBoundingClientRect();
+          hub.style.setProperty('--ry', (((e.clientX - r.left) / r.width - .5) * 10).toFixed(2) + 'deg');
+          hub.style.setProperty('--rx', (-((e.clientY - r.top) / r.height - .5) * 8).toFixed(2) + 'deg');
+        });
+        wrap.addEventListener('pointerleave', () => {
+          hub.style.setProperty('--rx', '0deg');
+          hub.style.setProperty('--ry', '0deg');
+        });
+        sec.querySelectorAll('.ct-mag').forEach(m => {
+          m.addEventListener('pointermove', e => {
+            const r = m.getBoundingClientRect();
+            m.style.transform = 'translate(' + ((e.clientX - r.left - r.width / 2) * .18) + 'px,' + ((e.clientY - r.top - r.height / 2) * .3) + 'px)';
+          });
+          m.addEventListener('pointerleave', () => { m.style.transform = ''; });
+        });
+      }
+    })();
+  </script>
+
+  <script>
+    // Footer interactions
+    (function () {
+      const f = document.querySelector('footer.ft');
+      if (!f) return;
+
+      // Live Cebu clock
+      const clock = document.getElementById('ftClock');
+      const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+      const tick = () => { clock.textContent = fmt.format(new Date()); };
+      tick();
+      setInterval(tick, 1000);
+
+      // CTA spotlight follows the mouse
+      const cta = f.querySelector('.ft-cta');
+      cta.addEventListener('pointermove', e => {
+        const r = cta.getBoundingClientRect();
+        cta.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+        cta.style.setProperty('--my', (e.clientY - r.top) + 'px');
+      });
+
+      // Back-to-top button with scroll progress ring
+      const top = document.getElementById('ftTop');
+      const arc = document.getElementById('ftTopArc');
+      const C = 131.95;
+      let ticking = false;
+      function update() {
+        const h = document.documentElement.scrollHeight - innerHeight;
+        const p = h > 0 ? Math.min(1, Math.max(0, scrollY / h)) : 0;
+        arc.style.strokeDashoffset = (C * (1 - p)).toFixed(2);
+        top.classList.toggle('show', scrollY > 600);
+        ticking = false;
+      }
+      addEventListener('scroll', () => {
+        if (!ticking) { ticking = true; requestAnimationFrame(update); }
+      }, { passive: true });
+      update();
+      top.addEventListener('click', () => scrollTo({ top: 0, behavior: 'smooth' }));
     })();
   </script>
 </body>
