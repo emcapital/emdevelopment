@@ -6,6 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EM Development | Website & Mobile App Development</title>
     <script>
+// Seasonal calendar (updates automatically every year)
+window.__season=function(d){d=d||new Date();var m=d.getMonth()+1,n=d.getDate();
+  if((m===12&&n>=26)||(m===1&&n<=10))return'newyear';   // Dec 26 - Jan 10
+  if(m===12||(m===11&&n>=3))return'christmas';          // Nov 3 - Dec 25
+  if((m===10&&n>=15)||(m===11&&n<=2))return'halloween'; // Oct 15 - Nov 2 (Halloween / Undas)
+  if(m>=3&&m<=5)return'summer';                         // Mar 1 - May 31
+  return'default'};
+(function(){var t=window.__season();if(t!=='default')document.documentElement.setAttribute('data-theme',t)})();
+</script>
+    <script>
     // Apply saved theme before first paint (prevents a flash)
     try {
       if (localStorage.getItem('theme') === 'light') document.documentElement.classList.add('light');
@@ -28,15 +38,11 @@
             mono: ['"JetBrains Mono"', 'monospace']
           },
           colors: {
-            ink: '#070a16',
-            panel: '#0d1226',
-            brand: {
-              400: '#7c8cff',
-              500: '#5b6cff',
-              600: '#4351e8'
-            },
-            aqua: '#22d3ee',
-            pink: '#f472b6'
+            ink: 'rgba(var(--ink), <alpha-value>)',
+ panel: 'rgba(var(--panel), <alpha-value>)',
+ brand: { 400: 'rgba(var(--b400), <alpha-value>)', 500: 'rgba(var(--b500), <alpha-value>)', 600: 'rgba(var(--b600), <alpha-value>)' },
+ aqua: 'rgba(var(--aqua), <alpha-value>)',
+ pink: 'rgba(var(--pink), <alpha-value>)'
           },
           keyframes: {
             float: {
@@ -135,8 +141,8 @@
     }
 
     body {
-      background: #070a16;
-      color: #e5e9ff;
+      background: rgb(var(--ink));
+      color: rgb(var(--txt));
       overflow-x: hidden;
     }
 
@@ -173,7 +179,7 @@
     }
 
     ::selection {
-      background: #5b6cff;
+      background: rgb(var(--b500));
       color: #fff;
     }
 
@@ -182,11 +188,11 @@
     }
 
     ::-webkit-scrollbar-track {
-      background: #070a16;
+      background: rgb(var(--ink));
     }
 
     ::-webkit-scrollbar-thumb {
-      background: #2a3270;
+      background: rgb(var(--line));
       border-radius: 10px;
     }
 
@@ -245,14 +251,14 @@
     }
 
     .grid-bg {
-      background-image: linear-gradient(rgba(124, 140, 255, .08) 1px, transparent 1px), linear-gradient(90deg, rgba(124, 140, 255, .08) 1px, transparent 1px);
+      background-image: linear-gradient(rgba(var(--b400), .08) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--b400), .08) 1px, transparent 1px);
       background-size: 56px 56px;
       mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
       -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
     }
 
     .gradient-text {
-      background: linear-gradient(90deg, #7c8cff, #22d3ee, #f472b6, #7c8cff);
+      background: linear-gradient(90deg, rgb(var(--b400)), rgb(var(--aqua)), rgb(var(--pink)), rgb(var(--b400)));
       background-size: 300% 100%;
       -webkit-background-clip: text;
       background-clip: text;
@@ -279,7 +285,7 @@
       content: "";
       position: absolute;
       inset: 0;
-      background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(124, 140, 255, .22), transparent 45%);
+      background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(var(--b400), .22), transparent 45%);
       opacity: 0;
       transition: opacity .3s;
       pointer-events: none;
@@ -290,7 +296,7 @@
     }
 
     .spot:hover {
-      border-color: rgba(124, 140, 255, .5);
+      border-color: rgba(var(--b400), .5);
     }
 
     /* Button shine */
@@ -322,7 +328,7 @@
       bottom: -6px;
       height: 2px;
       width: 0;
-      background: linear-gradient(90deg, #7c8cff, #22d3ee);
+      background: linear-gradient(90deg, rgb(var(--b400)), rgb(var(--aqua)));
       transition: width .35s ease;
     }
 
@@ -357,13 +363,13 @@
     }
 
     .em-logo-grad {
-      background: linear-gradient(90deg, #7c8cff, #22d3ee, #f472b6, #7c8cff);
+      background: linear-gradient(90deg, rgb(var(--b400)), rgb(var(--aqua)), rgb(var(--pink)), rgb(var(--b400)));
       background-size: 300% 100%;
       animation: gradient 6s ease infinite;
     }
 
     .em-logo-ghost {
-      background: rgba(124, 140, 255, .16);
+      background: rgba(var(--b400), .16);
     }
 
     #logoFill {
@@ -411,12 +417,12 @@
 
     /* ===== Light mode ===== */
     html.light body {
-      background: #f5f6ff;
-      color: #0f1535;
+      background: rgb(var(--txt2));
+      color: rgb(var(--d1));
     }
 
     html.light ::-webkit-scrollbar-track {
-      background: #f5f6ff;
+      background: rgb(var(--txt2));
     }
 
     html.light ::-webkit-scrollbar-thumb {
@@ -425,16 +431,16 @@
 
     html.light .glass {
       background: rgba(255, 255, 255, .75);
-      border-color: rgba(15, 21, 53, .1);
-      box-shadow: 0 6px 24px rgba(67, 81, 232, .07);
+      border-color: rgba(var(--d1), .1);
+      box-shadow: 0 6px 24px rgba(var(--b600), .07);
     }
 
     html.light .grid-bg {
-      background-image: linear-gradient(rgba(67, 81, 232, .09) 1px, transparent 1px), linear-gradient(90deg, rgba(67, 81, 232, .09) 1px, transparent 1px);
+      background-image: linear-gradient(rgba(var(--b600), .09) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--b600), .09) 1px, transparent 1px);
     }
 
     html.light .gradient-text {
-      background-image: linear-gradient(90deg, #4351e8, #0891b2, #db2777, #4351e8);
+      background-image: linear-gradient(90deg, rgb(var(--b600)), rgb(var(--aqua2)), rgb(var(--pink2)), rgb(var(--b600)));
     }
 
     html.light .text-slate-200 {
@@ -459,15 +465,15 @@
     }
 
     html.light .hover\:text-white:hover {
-      color: #0f1535;
+      color: rgb(var(--d1));
     }
 
     html.light .text-aqua {
-      color: #0891b2;
+      color: rgb(var(--aqua2));
     }
 
     html.light .text-brand-400 {
-      color: #4351e8;
+      color: rgb(var(--b600));
     }
 
     html.light .text-emerald-300 {
@@ -475,35 +481,35 @@
     }
 
     html.light #typed {
-      color: #0f1535;
+      color: rgb(var(--d1));
     }
 
     html.light .border-white\/5 {
-      border-color: rgba(15, 21, 53, .08);
+      border-color: rgba(var(--d1), .08);
     }
 
     html.light .border-white\/10 {
-      border-color: rgba(15, 21, 53, .12);
+      border-color: rgba(var(--d1), .12);
     }
 
     html.light .border-ink {
-      border-color: #f5f6ff;
+      border-color: rgb(var(--txt2));
     }
 
     html.light .bg-white\/5 {
-      background-color: rgba(15, 21, 53, .05);
+      background-color: rgba(var(--d1), .05);
     }
 
     html.light #heroVisual .glass .bg-white\/10 {
-      background-color: rgba(15, 21, 53, .08);
+      background-color: rgba(var(--d1), .08);
     }
 
     html.light #heroVisual .glass .bg-white\/15 {
-      background-color: rgba(15, 21, 53, .12);
+      background-color: rgba(var(--d1), .12);
     }
 
     html.light #process .bg-white\/10 {
-      background-color: rgba(15, 21, 53, .12);
+      background-color: rgba(var(--d1), .12);
     }
 
     html.light #home a.glass:hover {
@@ -511,23 +517,23 @@
     }
 
     html.light #stack .bg-gradient-to-r.from-ink {
-      background-image: linear-gradient(to right, #f5f6ff, transparent);
+      background-image: linear-gradient(to right, rgb(var(--txt2)), transparent);
     }
 
     html.light #stack .bg-gradient-to-l.from-ink {
-      background-image: linear-gradient(to left, #f5f6ff, transparent);
+      background-image: linear-gradient(to left, rgb(var(--txt2)), transparent);
     }
 
     html.light #nav.bg-ink\/80 {
-      background-color: rgba(245, 246, 255, .85);
+      background-color: rgba(var(--txt2), .85);
     }
 
     html.light #mobileMenu {
-      background-color: rgba(245, 246, 255, .97);
+      background-color: rgba(var(--txt2), .97);
     }
 
     html.light #menuBtn span {
-      background-color: #0f1535;
+      background-color: rgb(var(--d1));
     }
 
     html.light .mlink.bg-brand-500 {
@@ -535,7 +541,7 @@
     }
 
     html.light #preloader {
-      background-color: #f5f6ff;
+      background-color: rgb(var(--txt2));
     }
 
     html.light #preloader .bg-panel {
@@ -543,7 +549,7 @@
     }
 
     html.light #preloader .bg-white\/10 {
-      background-color: rgba(15, 21, 53, .1);
+      background-color: rgba(var(--d1), .1);
     }
 
     html.light footer {
@@ -552,7 +558,7 @@
 
     html.light option.bg-panel {
       background-color: #fff;
-      color: #0f1535;
+      color: rgb(var(--d1));
     }
 
     html.light .animate-blob {
@@ -583,9 +589,9 @@
     }
 
     #quoteModal .q-panel {
-      background: #0d1226;
+      background: rgb(var(--panel));
       border: 1px solid rgba(255, 255, 255, .1);
-      box-shadow: 0 30px 80px rgba(0, 0, 0, .55), 0 0 0 1px rgba(124, 140, 255, .08);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, .55), 0 0 0 1px rgba(var(--b400), .08);
       transform: translateY(48px) scale(.92);
       opacity: 0;
       transition: transform .55s cubic-bezier(.2, .9, .25, 1.05), opacity .4s ease, background-color .5s ease, border-color .5s ease;
@@ -593,8 +599,8 @@
 
     html.light #quoteModal .q-panel {
       background: #fff;
-      border-color: rgba(15, 21, 53, .1);
-      box-shadow: 0 30px 80px rgba(67, 81, 232, .25);
+      border-color: rgba(var(--d1), .1);
+      box-shadow: 0 30px 80px rgba(var(--b600), .25);
     }
 
     #quoteModal.is-open .q-panel {
@@ -771,7 +777,7 @@
       align-items: center;
       justify-content: center;
       gap: 28px;
-      background: #070a16;
+      background: rgb(var(--ink));
       opacity: 0;
       visibility: hidden;
       transition: opacity .5s ease, visibility 0s linear .5s;
@@ -797,27 +803,27 @@
     }
 
     #pageTransition.is-leaving {
-      background: #070a16;
+      background: rgb(var(--ink));
     }
 
     html.light #pageTransition {
-      background: #f5f6ff;
+      background: rgb(var(--txt2));
     }
 
     #pageTransition .pt-ring {
       position: absolute;
       inset: 0;
       border-radius: 9999px;
-      border: 4px solid rgba(124, 140, 255, .18);
-      border-top-color: #7c8cff;
-      border-right-color: #22d3ee;
+      border: 4px solid rgba(var(--b400), .18);
+      border-top-color: rgb(var(--b400));
+      border-right-color: rgb(var(--aqua));
       animation: qspin 1s linear infinite;
     }
 
     #pageTransition .pt-bar {
       height: 100%;
       width: 0;
-      background: linear-gradient(90deg, #5b6cff, #22d3ee, #f472b6);
+      background: linear-gradient(90deg, rgb(var(--b500)), rgb(var(--aqua)), rgb(var(--pink)));
       border-radius: 9999px;
     }
 
@@ -859,7 +865,7 @@
       height: 28rem;
       top: -8rem;
       left: -8rem;
-      background: rgba(91, 108, 255, .28);
+      background: rgba(var(--b500), .28);
     }
 
     .ct-blob-b {
@@ -867,7 +873,7 @@
       height: 24rem;
       bottom: -6rem;
       right: -6rem;
-      background: rgba(34, 211, 238, .18);
+      background: rgba(var(--aqua), .18);
       animation-delay: -5s;
     }
 
@@ -876,15 +882,15 @@
       height: 18rem;
       top: 40%;
       left: 45%;
-      background: rgba(244, 114, 182, .14);
+      background: rgba(var(--pink), .14);
       animation-delay: -9s;
     }
 
     .ct-eyebrow {
       padding: .45rem .9rem;
       border-radius: 9999px;
-      border: 1px solid rgba(34, 211, 238, .3);
-      background: rgba(34, 211, 238, .07);
+      border: 1px solid rgba(var(--aqua), .3);
+      background: rgba(var(--aqua), .07);
     }
 
     .ct-card {
@@ -900,7 +906,7 @@
       content: "";
       position: absolute;
       inset: 0;
-      background: radial-gradient(300px circle at var(--mx, 50%) var(--my, 50%), rgba(124, 140, 255, .28), transparent 60%);
+      background: radial-gradient(300px circle at var(--mx, 50%) var(--my, 50%), rgba(var(--b400), .28), transparent 60%);
       opacity: 0;
       transition: opacity .3s;
       pointer-events: none;
@@ -914,15 +920,15 @@
       bottom: 18%;
       width: 3px;
       border-radius: 3px;
-      background: linear-gradient(#7c8cff, #22d3ee);
+      background: linear-gradient(rgb(var(--b400)), rgb(var(--aqua)));
       transform: scaleY(0);
       transition: transform .4s cubic-bezier(.2, .7, .2, 1);
     }
 
     .ct-spot:hover {
       transform: translateX(6px);
-      border-color: rgba(124, 140, 255, .55);
-      box-shadow: 0 18px 40px -18px rgba(91, 108, 255, .55);
+      border-color: rgba(var(--b400), .55);
+      box-shadow: 0 18px 40px -18px rgba(var(--b500), .55);
     }
 
     .ct-spot:hover::before {
@@ -979,7 +985,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #aab3e6;
+      color: rgb(var(--mut2));
       background: rgba(255, 255, 255, .05);
       border: 1px solid rgba(255, 255, 255, .09);
       transition: all .25s;
@@ -987,8 +993,8 @@
 
     .ct-copy:hover {
       color: #fff;
-      background: #5b6cff;
-      border-color: #5b6cff;
+      background: rgb(var(--b500));
+      border-color: rgb(var(--b500));
       transform: scale(1.08);
     }
 
@@ -1003,7 +1009,7 @@
     }
 
     .ct-mag:hover {
-      box-shadow: 0 18px 40px -12px rgba(91, 108, 255, .7);
+      box-shadow: 0 18px 40px -12px rgba(var(--b500), .7);
     }
 
     .ct-ghost {
@@ -1014,8 +1020,8 @@
     }
 
     .ct-ghost:hover {
-      border-color: #22d3ee;
-      color: #22d3ee;
+      border-color: rgb(var(--aqua));
+      color: rgb(var(--aqua));
       transform: translateY(-2px);
     }
 
@@ -1031,7 +1037,7 @@
       position: absolute;
       inset: 8%;
       border-radius: 9999px;
-      background: radial-gradient(circle, rgba(91, 108, 255, .35), rgba(34, 211, 238, .12) 55%, transparent 72%);
+      background: radial-gradient(circle, rgba(var(--b500), .35), rgba(var(--aqua), .12) 55%, transparent 72%);
       filter: blur(20px);
       animation: ctBreath 5s ease-in-out infinite;
     }
@@ -1060,7 +1066,7 @@
       position: absolute;
       inset: 14%;
       border-radius: 9999px;
-      border: 1.5px solid rgba(34, 211, 238, .55);
+      border: 1.5px solid rgba(var(--aqua), .55);
       animation: ccPing 3.9s ease-out infinite;
     }
 
@@ -1080,7 +1086,7 @@
       position: absolute;
       inset: 14%;
       border-radius: 9999px;
-      background: conic-gradient(from 0deg, rgba(34, 211, 238, .35), rgba(34, 211, 238, 0) 26%);
+      background: conic-gradient(from 0deg, rgba(var(--aqua), .35), rgba(var(--aqua), 0) 26%);
       -webkit-mask-image: radial-gradient(circle, #000 60%, transparent 72%);
       mask-image: radial-gradient(circle, #000 60%, transparent 72%);
       animation: spinSweep 4.5s linear infinite;
@@ -1099,13 +1105,13 @@
 
     .ct-orbit-out {
       inset: 12%;
-      border: 1.5px dashed rgba(124, 140, 255, .4);
+      border: 1.5px dashed rgba(var(--b400), .4);
       animation: spinSweep 28s linear infinite;
     }
 
     .ct-orbit-in {
       inset: 30%;
-      border: 1px solid rgba(34, 211, 238, .25);
+      border: 1px solid rgba(var(--aqua), .25);
       animation: spinSweep 18s linear infinite reverse;
     }
 
@@ -1123,9 +1129,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(13, 18, 38, .9);
+      background: rgba(var(--panel), .9);
       border: 1px solid rgba(255, 255, 255, .14);
-      box-shadow: 0 10px 30px -8px rgba(91, 108, 255, .6);
+      box-shadow: 0 10px 30px -8px rgba(var(--b500), .6);
       animation: spinSweep 28s linear infinite reverse;
     }
 
@@ -1135,8 +1141,8 @@
       height: 8px;
       margin: -4px 0 0 -4px;
       border-radius: 9999px;
-      background: #22d3ee;
-      box-shadow: 0 0 12px 3px rgba(34, 211, 238, .8);
+      background: rgb(var(--aqua));
+      box-shadow: 0 0 12px 3px rgba(var(--aqua), .8);
     }
 
     .ct-center {
@@ -1154,8 +1160,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, #5b6cff, #f472b6);
-      box-shadow: 0 0 0 10px rgba(91, 108, 255, .15), 0 0 50px rgba(91, 108, 255, .6);
+      background: linear-gradient(135deg, rgb(var(--b500)), rgb(var(--pink)));
+      box-shadow: 0 0 0 10px rgba(var(--b500), .15), 0 0 50px rgba(var(--b500), .6);
       animation: float 6s ease-in-out infinite;
     }
 
@@ -1185,7 +1191,7 @@
       font-size: .85rem;
       font-weight: 600;
       color: #fff;
-      background: rgba(13, 18, 38, .95);
+      background: rgba(var(--panel), .95);
       border: 1px solid rgba(52, 211, 153, .5);
       box-shadow: 0 14px 40px -10px rgba(0, 0, 0, .6);
       transform: translate(-50%, 140%);
@@ -1210,51 +1216,51 @@
     }
 
     html.light .ct-eyebrow {
-      border-color: rgba(8, 145, 178, .3);
-      background: rgba(8, 145, 178, .08);
+      border-color: rgba(var(--aqua2), .3);
+      background: rgba(var(--aqua2), .08);
     }
 
     html.light .ct-ico,
     html.light .ct-copy {
-      background: rgba(67, 81, 232, .06);
-      border-color: rgba(15, 21, 53, .1);
-      color: #4351e8;
+      background: rgba(var(--b600), .06);
+      border-color: rgba(var(--d1), .1);
+      color: rgb(var(--b600));
     }
 
     html.light .ct-ico.text-aqua {
-      color: #0891b2;
+      color: rgb(var(--aqua2));
     }
 
     html.light .ct-ico.text-pink {
-      color: #db2777;
+      color: rgb(var(--pink2));
     }
 
     html.light .ct-ring {
-      border-color: rgba(8, 145, 178, .5);
+      border-color: rgba(var(--aqua2), .5);
     }
 
     html.light .ct-orbit-out {
-      border-color: rgba(67, 81, 232, .35);
+      border-color: rgba(var(--b600), .35);
     }
 
     html.light .ct-node-in {
       background: #fff;
-      border-color: rgba(15, 21, 53, .12);
+      border-color: rgba(var(--d1), .12);
     }
 
     html.light .ct-ghost {
-      color: #2a3270;
-      border-color: rgba(15, 21, 53, .2);
+      color: rgb(var(--line));
+      border-color: rgba(var(--d1), .2);
       background: rgba(255, 255, 255, .7);
     }
 
     html.light .ct-ghost:hover {
-      color: #0891b2;
-      border-color: #0891b2;
+      color: rgb(var(--aqua2));
+      border-color: rgb(var(--aqua2));
     }
 
     html.light .ct-toast {
-      color: #0f1535;
+      color: rgb(var(--d1));
       background: #fff;
     }
 
@@ -1295,7 +1301,7 @@
       left: 0;
       right: 0;
       height: 2px;
-      background: linear-gradient(90deg, transparent, #5b6cff, #22d3ee, #f472b6, transparent);
+      background: linear-gradient(90deg, transparent, rgb(var(--b500)), rgb(var(--aqua)), rgb(var(--pink)), transparent);
       background-size: 200% 100%;
       animation: ftFlow 5s linear infinite;
     }
@@ -1325,7 +1331,7 @@
       height: 26rem;
       top: -6rem;
       left: -8rem;
-      background: rgba(91, 108, 255, .22);
+      background: rgba(var(--b500), .22);
     }
 
     .ft-blob-b {
@@ -1333,7 +1339,7 @@
       height: 24rem;
       bottom: -8rem;
       right: -6rem;
-      background: rgba(244, 114, 182, .14);
+      background: rgba(var(--pink), .14);
       animation-delay: -7s;
     }
 
@@ -1344,20 +1350,20 @@
       width: var(--s);
       height: var(--s);
       border-radius: 9999px;
-      background: #22d3ee;
-      box-shadow: 0 0 10px 2px rgba(34, 211, 238, .6);
+      background: rgb(var(--aqua));
+      box-shadow: 0 0 10px 2px rgba(var(--aqua), .6);
       opacity: 0;
       animation: ftRise var(--t) linear var(--d) infinite;
     }
 
     .ft-p:nth-child(3n) {
-      background: #7c8cff;
-      box-shadow: 0 0 10px 2px rgba(124, 140, 255, .6);
+      background: rgb(var(--b400));
+      box-shadow: 0 0 10px 2px rgba(var(--b400), .6);
     }
 
     .ft-p:nth-child(4n) {
-      background: #f472b6;
-      box-shadow: 0 0 10px 2px rgba(244, 114, 182, .55);
+      background: rgb(var(--pink));
+      box-shadow: 0 0 10px 2px rgba(var(--pink), .55);
     }
 
     @keyframes ftRise {
@@ -1400,7 +1406,7 @@
       position: absolute;
       inset: -1.5px;
       border-radius: calc(1.5rem + 1.5px);
-      background: conic-gradient(from var(--fang), #5b6cff, #22d3ee, #f472b6, #5b6cff);
+      background: conic-gradient(from var(--fang), rgb(var(--b500)), rgb(var(--aqua)), rgb(var(--pink)), rgb(var(--b500)));
       animation: ftSpin 7s linear infinite;
       opacity: .8;
     }
@@ -1412,13 +1418,13 @@
     }
 
     .ft-cta {
-      background: #0d1226;
+      background: rgb(var(--panel));
     }
 
     .ft-cta-glow {
       position: absolute;
       inset: 0;
-      background: radial-gradient(500px circle at var(--mx, 85%) var(--my, 20%), rgba(91, 108, 255, .3), transparent 60%);
+      background: radial-gradient(500px circle at var(--mx, 85%) var(--my, 20%), rgba(var(--b500), .3), transparent 60%);
       transition: background .2s;
       pointer-events: none;
     }
@@ -1431,18 +1437,18 @@
 
     .ft-btn:hover {
       transform: translateY(-3px) scale(1.04);
-      box-shadow: 0 20px 44px -12px rgba(91, 108, 255, .8);
+      box-shadow: 0 20px 44px -12px rgba(var(--b500), .8);
     }
 
     @keyframes ftPulse {
 
       0%,
       100% {
-        box-shadow: 0 0 0 0 rgba(91, 108, 255, .5);
+        box-shadow: 0 0 0 0 rgba(var(--b500), .5);
       }
 
       50% {
-        box-shadow: 0 0 0 14px rgba(91, 108, 255, 0);
+        box-shadow: 0 0 0 14px rgba(var(--b500), 0);
       }
     }
 
@@ -1457,7 +1463,7 @@
       position: absolute;
       inset: -5px;
       border-radius: 1rem;
-      border: 1.5px solid rgba(34, 211, 238, .6);
+      border: 1.5px solid rgba(var(--aqua), .6);
       animation: ftHalo 2.8s ease-out infinite;
     }
 
@@ -1485,7 +1491,7 @@
       font-weight: 700;
       letter-spacing: .2em;
       text-transform: uppercase;
-      color: #e5e9ff;
+      color: rgb(var(--txt));
     }
 
     .ft-h::after {
@@ -1496,7 +1502,7 @@
       width: 28px;
       height: 2px;
       border-radius: 2px;
-      background: linear-gradient(90deg, #5b6cff, #22d3ee);
+      background: linear-gradient(90deg, rgb(var(--b500)), rgb(var(--aqua)));
     }
 
     .ft-a {
@@ -1513,7 +1519,7 @@
       width: 0;
       height: 2px;
       border-radius: 2px;
-      background: linear-gradient(90deg, #5b6cff, #22d3ee);
+      background: linear-gradient(90deg, rgb(var(--b500)), rgb(var(--aqua)));
       transition: width .3s cubic-bezier(.2, .7, .2, 1);
     }
 
@@ -1530,7 +1536,7 @@
       display: flex;
       align-items: center;
       gap: .8rem;
-      color: #aab3e6;
+      color: rgb(var(--mut2));
       transition: color .3s, transform .3s cubic-bezier(.2, .7, .2, 1);
     }
 
@@ -1554,7 +1560,7 @@
 
     .ft-c:hover .ft-ci {
       transform: rotate(-10deg) scale(1.15);
-      background: rgba(91, 108, 255, .2);
+      background: rgba(var(--b500), .2);
     }
 
     .ft-soc {
@@ -1572,14 +1578,14 @@
 
     .ft-soc:hover {
       color: #fff;
-      background: linear-gradient(135deg, #5b6cff, #22d3ee);
+      background: linear-gradient(135deg, rgb(var(--b500)), rgb(var(--aqua)));
       transform: translateY(-6px) rotate(-6deg) scale(1.08);
-      box-shadow: 0 16px 30px -10px rgba(91, 108, 255, .8);
+      box-shadow: 0 16px 30px -10px rgba(var(--b500), .8);
     }
 
     .ft-heart {
       display: inline-block;
-      color: #f472b6;
+      color: rgb(var(--pink));
       animation: ftBeat 1.4s ease-in-out infinite;
     }
 
@@ -1616,7 +1622,7 @@
       align-items: center;
       justify-content: center;
       color: #fff;
-      background: rgba(13, 18, 38, .92);
+      background: rgba(var(--panel), .92);
       box-shadow: 0 12px 30px -8px rgba(0, 0, 0, .6);
       opacity: 0;
       transform: translateY(30px) scale(.7);
@@ -1666,7 +1672,7 @@
 
     .ft-top-arc {
       fill: none;
-      stroke: #22d3ee;
+      stroke: rgb(var(--aqua));
       stroke-width: 3;
       stroke-linecap: round;
       stroke-dasharray: 131.95;
@@ -1685,12 +1691,12 @@
     }
 
     html.light .ft-h {
-      color: #0f1535;
+      color: rgb(var(--d1));
     }
 
     html.light .ft-a,
     html.light .ft-c {
-      color: #4a5380;
+      color: rgb(var(--mut3));
     }
 
     html.light .ft-a:hover,
@@ -1700,12 +1706,12 @@
 
     html.light .ft-ci,
     html.light .ft-soc {
-      background: rgba(67, 81, 232, .06);
-      border-color: rgba(15, 21, 53, .1);
+      background: rgba(var(--b600), .06);
+      border-color: rgba(var(--d1), .1);
     }
 
     html.light .ft-soc {
-      color: #4351e8;
+      color: rgb(var(--b600));
     }
 
     html.light .ft-soc:hover {
@@ -1713,25 +1719,25 @@
     }
 
     html.light .ft-ci.text-aqua {
-      color: #0891b2;
+      color: rgb(var(--aqua2));
     }
 
     html.light .ft-ci.text-pink {
-      color: #db2777;
+      color: rgb(var(--pink2));
     }
 
     html.light .ft-status .bg-white\/15 {
-      background: rgba(15, 21, 53, .15);
+      background: rgba(var(--d1), .15);
     }
 
     html.light .ft-top {
       background: #fff;
-      color: #2a3270;
-      box-shadow: 0 12px 30px -8px rgba(40, 52, 120, .35);
+      color: rgb(var(--line));
+      box-shadow: 0 12px 30px -8px rgba(var(--d4), .35);
     }
 
     html.light .ft-top-bg {
-      stroke: rgba(15, 21, 53, .12);
+      stroke: rgba(var(--d1), .12);
     }
 
     @media (max-width: 640px) {
@@ -1776,7 +1782,7 @@
     }
 
     .proj-card:focus-visible {
-      outline: 2px solid #22d3ee;
+      outline: 2px solid rgb(var(--aqua));
       outline-offset: 3px;
     }
 
@@ -1786,13 +1792,13 @@
       gap: .4rem;
       font-size: .8rem;
       font-weight: 700;
-      color: #7c8cff;
+      color: rgb(var(--b400));
       transition: gap .3s, color .3s;
     }
 
     .proj-card:hover .view-link {
       gap: .8rem;
-      color: #22d3ee;
+      color: rgb(var(--aqua));
     }
 
     .shot {
@@ -1811,7 +1817,7 @@
       position: fixed;
       inset: 0;
       z-index: 9990;
-      background: #070a16;
+      background: rgb(var(--ink));
       overflow-y: auto;
       overscroll-behavior: contain;
       opacity: 0;
@@ -1852,8 +1858,8 @@
       border-radius: 999px;
       font-size: .75rem;
       font-weight: 600;
-      background: rgba(124, 140, 255, .12);
-      border: 1px solid rgba(124, 140, 255, .3);
+      background: rgba(var(--b400), .12);
+      border: 1px solid rgba(var(--b400), .3);
       color: #aab4ff;
     }
 
@@ -1877,25 +1883,25 @@
     }
 
     html.light #projModal {
-      background: #f5f6ff;
+      background: rgb(var(--txt2));
     }
 
     html.light .pm-chip {
-      background: rgba(67, 81, 232, .08);
-      border-color: rgba(67, 81, 232, .25);
-      color: #4351e8;
+      background: rgba(var(--b600), .08);
+      border-color: rgba(var(--b600), .25);
+      color: rgb(var(--b600));
     }
 
     html.light .pm-shot {
-      border-color: rgba(15, 21, 53, .12);
+      border-color: rgba(var(--d1), .12);
     }
 
     html.light .view-link {
-      color: #4351e8;
+      color: rgb(var(--b600));
     }
 
     html.light #projModal .text-white {
-      color: #0f1535;
+      color: rgb(var(--d1));
     }
 
     html.light #projModal .btn-solid {
@@ -1915,8 +1921,8 @@
 
     body {
       background:
-        radial-gradient(1100px 600px at 85% -10%, rgba(91, 108, 255, .12), transparent 60%),
-        radial-gradient(900px 500px at -10% 40%, rgba(34, 211, 238, .06), transparent 60%),
+        radial-gradient(1100px 600px at 85% -10%, rgba(var(--b500), .12), transparent 60%),
+        radial-gradient(900px 500px at -10% 40%, rgba(var(--aqua), .06), transparent 60%),
         var(--bg);
       font-feature-settings: "ss01", "cv11";
       letter-spacing: -.005em;
@@ -1954,7 +1960,7 @@
     }
 
     .gradient-text {
-      background-image: linear-gradient(95deg, #9aa6ff 0%, #5eead4 45%, #f0abfc 80%, #9aa6ff 100%);
+      background-image: linear-gradient(95deg, rgb(var(--b300)) 0%, #5eead4 45%, #f0abfc 80%, rgb(var(--b300)) 100%);
     }
 
     /* Section eyebrow labels -> refined pill */
@@ -1998,7 +2004,7 @@
 
     #nav.scrolled>div:first-child,
     #nav[class*="bg-"]>div:first-child {
-      background: rgba(8, 11, 24, .62);
+      background: rgba(var(--d3), .62);
       border-color: var(--line);
       backdrop-filter: blur(18px) saturate(160%);
       -webkit-backdrop-filter: blur(18px) saturate(160%);
@@ -2023,12 +2029,12 @@
     }
 
     .spot:hover {
-      border-color: rgba(154, 166, 255, .45);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), 0 30px 70px -30px rgba(91, 108, 255, .45);
+      border-color: rgba(var(--b300), .45);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), 0 30px 70px -30px rgba(var(--b500), .45);
     }
 
     .spot::before {
-      background: radial-gradient(480px circle at var(--mx, 50%) var(--my, 50%), rgba(124, 140, 255, .18), transparent 45%);
+      background: radial-gradient(480px circle at var(--mx, 50%) var(--my, 50%), rgba(var(--b400), .18), transparent 45%);
     }
 
     article.spot h3 {
@@ -2095,7 +2101,7 @@
       width: min(1100px, 86%);
       height: 1px;
       transform: translateX(-50%);
-      background: linear-gradient(90deg, transparent, rgba(154, 166, 255, .28), transparent);
+      background: linear-gradient(90deg, transparent, rgba(var(--b300), .28), transparent);
     }
 
     main>section.py-24 {
@@ -2114,37 +2120,37 @@
     textarea:focus,
     select:focus {
       outline: none;
-      border-color: rgba(154, 166, 255, .7) !important;
-      box-shadow: 0 0 0 4px rgba(91, 108, 255, .16);
+      border-color: rgba(var(--b300), .7) !important;
+      box-shadow: 0 0 0 4px rgba(var(--b500), .16);
     }
 
     /* ---------- Footer ---------- */
     footer {
-      background: linear-gradient(180deg, transparent, rgba(91, 108, 255, .05)) !important;
+      background: linear-gradient(180deg, transparent, rgba(var(--b500), .05)) !important;
     }
 
     /* ---------- Focus & scrollbar ---------- */
     :focus-visible {
-      outline: 2px solid #9aa6ff;
+      outline: 2px solid rgb(var(--b300));
       outline-offset: 3px;
     }
 
     ::-webkit-scrollbar-thumb {
-      background: linear-gradient(#3a44a0, #2a3270);
+      background: linear-gradient(#3a44a0, rgb(var(--line)));
     }
 
     /* ---------- Light mode counterparts ---------- */
     html.light {
       --bg: #f6f7fc;
-      --line: rgba(15, 23, 60, .09);
-      --line-strong: rgba(15, 23, 60, .18);
+      --line: rgba(var(--d2), .09);
+      --line-strong: rgba(var(--d2), .18);
       --card: linear-gradient(160deg, rgba(255, 255, 255, .95), rgba(255, 255, 255, .7));
     }
 
     html.light body {
       background:
-        radial-gradient(1100px 600px at 85% -10%, rgba(91, 108, 255, .14), transparent 60%),
-        radial-gradient(900px 500px at -10% 40%, rgba(34, 211, 238, .10), transparent 60%),
+        radial-gradient(1100px 600px at 85% -10%, rgba(var(--b500), .14), transparent 60%),
+        radial-gradient(900px 500px at -10% 40%, rgba(var(--aqua), .10), transparent 60%),
         var(--bg);
     }
 
@@ -2153,17 +2159,17 @@
     }
 
     html.light .glass {
-      box-shadow: 0 1px 0 rgba(255, 255, 255, .9) inset, 0 18px 44px -24px rgba(40, 52, 120, .25);
+      box-shadow: 0 1px 0 rgba(255, 255, 255, .9) inset, 0 18px 44px -24px rgba(var(--d4), .25);
     }
 
     html.light #nav.scrolled>div:first-child,
     html.light #nav[class*="bg-"]>div:first-child {
       background: rgba(255, 255, 255, .72);
-      box-shadow: 0 10px 40px -16px rgba(40, 52, 120, .25);
+      box-shadow: 0 10px 40px -16px rgba(var(--d4), .25);
     }
 
     html.light #nav nav a {
-      color: #4a5380;
+      color: rgb(var(--mut3));
     }
 
     html.light #nav nav a:hover {
@@ -2171,7 +2177,7 @@
     }
 
     html.light .gradient-text {
-      background-image: linear-gradient(95deg, #4351e8 0%, #0891b2 50%, #c026d3 100%);
+      background-image: linear-gradient(95deg, rgb(var(--b600)) 0%, rgb(var(--aqua2)) 50%, #c026d3 100%);
     }
 
     html.light section span.uppercase.tracking-\[\.25em\] {
@@ -2215,8 +2221,8 @@
     html.light body {
       background-color: var(--bg) !important;
       background-image:
-        radial-gradient(1100px 600px at 85% -10%, rgba(91, 108, 255, .13), transparent 60%),
-        radial-gradient(900px 500px at -10% 40%, rgba(34, 211, 238, .08), transparent 60%) !important;
+        radial-gradient(1100px 600px at 85% -10%, rgba(var(--b500), .13), transparent 60%),
+        radial-gradient(900px 500px at -10% 40%, rgba(var(--aqua), .08), transparent 60%) !important;
     }
 
     html.theme-instant *,
@@ -2321,7 +2327,7 @@
       color: #cfd6ff;
       border: 1px solid rgba(255, 255, 255, .18);
       border-radius: 999px;
-      background: rgba(8, 11, 24, .55);
+      background: rgba(var(--d3), .55);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       pointer-events: none;
@@ -2367,7 +2373,7 @@
 
     #work a[href="#contact"]:hover {
       background: rgba(255, 255, 255, .08);
-      border-color: rgba(154, 166, 255, .5);
+      border-color: rgba(var(--b300), .5);
       transform: translateY(-2px);
     }
 
@@ -2448,7 +2454,7 @@
 
       #work.ps .ps-txt.is-active {
         opacity: 1;
-        border-left-color: #7c8cff;
+        border-left-color: rgb(var(--b400));
       }
 
       #work.ps .ps-txt::before {
@@ -2457,7 +2463,7 @@
         margin-bottom: 1.1rem;
         font: 500 .72rem/1 'JetBrains Mono', monospace;
         letter-spacing: .2em;
-        color: #8e9bd8;
+        color: rgb(var(--mut1));
       }
 
       #work.ps .ps-txt h3 {
@@ -2473,7 +2479,7 @@
     }
 
     html.light #work.ps .ps-txt {
-      border-left-color: rgba(15, 23, 60, .1);
+      border-left-color: rgba(var(--d2), .1);
     }
 
     /* =====================================================
@@ -2481,7 +2487,7 @@
        ===================================================== */
     @media (min-width: 1024px) {
       #work.ps {
-        --pc: #7c8cff;
+        --pc: rgb(var(--b400));
       }
 
       /* ambient orb behind the pinned image, recoloured per project */
@@ -2610,14 +2616,14 @@
       #work.ps .ps-rail span {
         font: 500 .72rem/1 'JetBrains Mono', monospace;
         letter-spacing: .14em;
-        color: #8e9bd8;
+        color: rgb(var(--mut1));
         min-width: 4.5rem;
         text-align: right;
       }
     }
 
     html.light #work.ps .ps-rail button::before {
-      background: rgba(15, 23, 60, .14);
+      background: rgba(var(--d2), .14);
     }
 
     /* =====================================================
@@ -2625,7 +2631,7 @@
        ===================================================== */
     @media (max-width: 0px) {
       #work.ps {
-        --pc: #7c8cff;
+        --pc: rgb(var(--b400));
       }
 
       #work.ps .relative.max-w-7xl {
@@ -2755,13 +2761,13 @@
       #work.ps .ps-rail span {
         font: 500 .7rem/1 'JetBrains Mono', monospace;
         letter-spacing: .12em;
-        color: #8e9bd8;
+        color: rgb(var(--mut1));
         min-width: 4.2rem;
         text-align: right;
       }
 
       html.light #work.ps .ps-rail button::before {
-        background: rgba(15, 23, 60, .16);
+        background: rgba(var(--d2), .16);
       }
     }
 
@@ -2825,8 +2831,8 @@
       #work.ps .proj-card.is-on {
         transform: none;
         opacity: 1;
-        border-color: color-mix(in srgb, var(--pc, #7c8cff) 60%, transparent);
-        box-shadow: 0 30px 70px -30px color-mix(in srgb, var(--pc, #7c8cff) 65%, transparent), inset 0 1px 0 rgba(255, 255, 255, .1);
+        border-color: color-mix(in srgb, var(--pc, rgb(var(--b400))) 60%, transparent);
+        box-shadow: 0 30px 70px -30px color-mix(in srgb, var(--pc, rgb(var(--b400))) 65%, transparent), inset 0 1px 0 rgba(255, 255, 255, .1);
       }
 
       #work.ps .ps-img {
@@ -2842,7 +2848,7 @@
         position: absolute;
         inset: auto 0 0 0;
         height: 40%;
-        background: linear-gradient(transparent, rgba(8, 11, 24, .7));
+        background: linear-gradient(transparent, rgba(var(--d3), .7));
         pointer-events: none;
         z-index: 4;
       }
@@ -2858,7 +2864,7 @@
         margin-bottom: .7rem;
         font: 500 .7rem/1 'JetBrains Mono', monospace;
         letter-spacing: .2em;
-        color: var(--pc, #7c8cff);
+        color: var(--pc, rgb(var(--b400)));
       }
 
       #work.ps .ps-txt h3 {
@@ -2910,8 +2916,8 @@
 
       #work.ps .ps-rail button.is-active {
         width: 28px;
-        background: var(--pc, #7c8cff);
-        box-shadow: 0 0 12px var(--pc, #7c8cff);
+        background: var(--pc, rgb(var(--b400)));
+        box-shadow: 0 0 12px var(--pc, rgb(var(--b400)));
       }
 
       #work.ps .ps-rail span {
@@ -2921,7 +2927,7 @@
 
     @media (max-width: 0px) {
       html.light #work.ps .ps-rail button {
-        background: rgba(15, 23, 60, .2);
+        background: rgba(var(--d2), .2);
       }
     }
 
@@ -2961,8 +2967,8 @@
         border-radius: 1.75rem !important;
         background: linear-gradient(165deg, #131a38, #0a0e20) !important;
         border: 1px solid rgba(255, 255, 255, .1);
-        border-top: 2px solid var(--pc, #7c8cff);
-        box-shadow: 0 -18px 40px -22px rgba(0, 0, 0, .9), 0 30px 60px -34px color-mix(in srgb, var(--pc, #7c8cff) 55%, transparent);
+        border-top: 2px solid var(--pc, rgb(var(--b400)));
+        box-shadow: 0 -18px 40px -22px rgba(0, 0, 0, .9), 0 30px 60px -34px color-mix(in srgb, var(--pc, rgb(var(--b400))) 55%, transparent);
         transition: border-color .5s, box-shadow .6s;
       }
 
@@ -2971,7 +2977,7 @@
       }
 
       #work.ps .proj-card.is-on {
-        border-color: color-mix(in srgb, var(--pc, #7c8cff) 60%, transparent);
+        border-color: color-mix(in srgb, var(--pc, rgb(var(--b400))) 60%, transparent);
       }
 
       #work.ps .proj-card::after {
@@ -3009,7 +3015,7 @@
         margin-bottom: .8rem;
         font: 500 .68rem/1 'JetBrains Mono', monospace;
         letter-spacing: .2em;
-        color: var(--pc, #7c8cff);
+        color: var(--pc, rgb(var(--b400)));
       }
 
       #work.ps .ps-txt h3 {
@@ -3040,7 +3046,7 @@
     @media (max-width: 1023px) {
       html.light #work.ps .proj-card {
         background: linear-gradient(165deg, #ffffff, #eef0fb) !important;
-        border-color: rgba(15, 23, 60, .1);
+        border-color: rgba(var(--d2), .1);
       }
 
       html.light #work.ps .ps-img::after {
@@ -3086,8 +3092,8 @@
     .tm-node:hover .tm-card,
     .tm-node:focus-visible .tm-card,
     .tm-node.on .tm-card {
-      border-color: rgba(34, 211, 238, .6);
-      box-shadow: 0 0 0 1px rgba(34, 211, 238, .25), 0 28px 60px -24px rgba(34, 211, 238, .35);
+      border-color: rgba(var(--aqua), .6);
+      box-shadow: 0 0 0 1px rgba(var(--aqua), .25), 0 28px 60px -24px rgba(var(--aqua), .35);
     }
 
     html.light .tm-card {
@@ -3128,7 +3134,7 @@
       }
 
       .tm-line {
-        stroke: rgba(124, 140, 255, .42);
+        stroke: rgba(var(--b400), .42);
         stroke-width: 1.3;
         stroke-dasharray: 4 6;
         vector-effect: non-scaling-stroke;
@@ -3137,12 +3143,12 @@
       }
 
       .tm-line.ring {
-        stroke: rgba(124, 140, 255, .16);
+        stroke: rgba(var(--b400), .16);
         animation-duration: 3.2s;
       }
 
       .tm-line.on {
-        stroke: #22d3ee;
+        stroke: rgb(var(--aqua));
         stroke-width: 2.2;
       }
 
@@ -3225,7 +3231,7 @@
       }
 
       .tm-line.ring {
-        stroke: rgba(124, 140, 255, .12);
+        stroke: rgba(var(--b400), .12);
       }
     }
 
@@ -3240,7 +3246,105 @@
       background-clip: text;
       color: transparent;
     }
-  </style>
+  
+    /* ===== Christmas floating button + popup ===== */
+    #xmasBtn {
+      position: fixed; right: 1.25rem; bottom: 5.2rem; z-index: 61;
+      width: 3.4rem; height: 3.4rem; border-radius: 9999px;
+      display: flex; align-items: center; justify-content: center;
+      background: radial-gradient(circle at 32% 28%, #ff6b6b 0%, #dc2626 45%, #8f1212 100%);
+      box-shadow: 0 14px 30px -8px rgba(220,38,38,.65), inset 0 -6px 10px rgba(0,0,0,.25), inset 0 3px 6px rgba(255,255,255,.35);
+      transition: transform .35s cubic-bezier(.2,.9,.3,1.3), box-shadow .3s;
+      animation: xmBob 3.4s ease-in-out infinite;
+    }
+    #xmasBtn::before { /* gold ornament cap */
+      content:""; position:absolute; top:-7px; left:50%; width:16px; height:9px; transform:translateX(-50%);
+      background:linear-gradient(#fde68a,#d4a017); border-radius:3px 3px 1px 1px; box-shadow:0 1px 3px rgba(0,0,0,.4);
+    }
+    #xmasBtn::after { /* dashed tinsel ring */
+      content:""; position:absolute; inset:4px; border-radius:9999px; border:2px dashed rgba(255,255,255,.75); pointer-events:none;
+    }
+    #xmasBtn:hover { transform: translateY(-4px) scale(1.08); box-shadow: 0 18px 36px -8px rgba(220,38,38,.85), inset 0 -6px 10px rgba(0,0,0,.25), inset 0 3px 6px rgba(255,255,255,.35); }
+    #xmasBtn .xm-emoji { font-size:1.45rem; line-height:1; filter:drop-shadow(0 2px 3px rgba(0,0,0,.35)); }
+    #xmasBtn .xm-dot { position:absolute; top:-2px; right:-2px; width:12px; height:12px; border-radius:9999px; background:#fde68a; box-shadow:0 0 0 2px #dc2626, 0 0 10px #fde68a; animation: xmPulse 1.6s ease-in-out infinite; }
+    #xmasBtn .xm-tip {
+      position:absolute; right:calc(100% + .7rem); top:50%; transform:translate(8px,-50%); white-space:nowrap;
+      padding:.4rem .8rem; border-radius:9999px; font-size:.75rem; font-weight:700; color:#fff; background:#7f1d1d;
+      border:1px solid rgba(253,230,138,.5); opacity:0; pointer-events:none; transition:opacity .25s, transform .25s;
+    }
+    #xmasBtn:hover .xm-tip, #xmasBtn:focus-visible .xm-tip { opacity:1; transform:translate(0,-50%); }
+    @keyframes xmBob { 0%,100%{transform:translateY(0) rotate(-3deg)} 50%{transform:translateY(-5px) rotate(3deg)} }
+    @keyframes xmPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.3)} }
+    @media (max-width: 640px) { #xmasBtn { right:.9rem; bottom:4.7rem; width:3.2rem; height:3.2rem; } #xmasBtn .xm-tip { display:none; } }
+
+    #xmasModal { visibility:hidden; opacity:0; transition:opacity .4s ease, visibility 0s linear .4s; }
+    #xmasModal.is-open { visibility:visible; opacity:1; transition:opacity .4s ease, visibility 0s; }
+    #xmasModal .xm-backdrop { background:rgba(20,4,6,.72); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
+    #xmasModal .xm-panel {
+      position:relative; overflow:hidden; width:100%; max-width:27rem; text-align:center; color:#fff;
+      padding:2.6rem 1.75rem 1.75rem; border-radius:1.5rem;
+      background:
+        radial-gradient(90% 60% at 50% 0%, rgba(255,255,255,.14), transparent 70%),
+        linear-gradient(160deg, #b91c1c 0%, #7f1212 55%, #4a0a0e 100%);
+      border:2px solid rgba(253,230,138,.55);
+      box-shadow:0 30px 90px rgba(0,0,0,.65), 0 0 0 6px rgba(253,230,138,.12), 0 0 70px rgba(239,68,68,.3);
+      transform:translateY(40px) scale(.92) rotate(-1.5deg); opacity:0;
+      transition:transform .6s cubic-bezier(.2,.9,.25,1.1), opacity .4s ease;
+    }
+    #xmasModal.is-open .xm-panel { transform:none; opacity:1; }
+    #xmasModal .xm-candy { position:absolute; top:0; left:0; right:0; height:12px; background:repeating-linear-gradient(135deg,#fff 0 10px,#ef4444 10px 20px); }
+    #xmasModal .xm-ornament { position:absolute; top:12px; left:50%; width:2px; height:26px; background:rgba(253,230,138,.8); transform:translateX(-50%); }
+    #xmasModal .xm-ball {
+      position:relative; width:4.4rem; height:4.4rem; margin:0 auto; border-radius:9999px; font-size:2.2rem; display:flex; align-items:center; justify-content:center;
+      background:radial-gradient(circle at 32% 28%, #fff7d6, #fbbf24 40%, #b7791f 100%);
+      box-shadow:0 12px 26px rgba(0,0,0,.45), inset 0 -6px 10px rgba(0,0,0,.2);
+      transform-origin:50% -1.6rem; animation:xmSwing 3s ease-in-out infinite;
+    }
+    @keyframes xmSwing { 0%,100%{transform:rotate(-6deg)} 50%{transform:rotate(6deg)} }
+    #xmasModal .xm-hang { margin-top:1.1rem; }
+    #xmasModal .xm-eyebrow { margin-top:1.1rem; font-family:'JetBrains Mono',monospace; font-size:.7rem; letter-spacing:.22em; text-transform:uppercase; color:#fde68a; }
+    #xmasModal h2 { font-family:'Sora','Plus Jakarta Sans',sans-serif; font-weight:800; font-size:clamp(1.55rem,5vw,2rem); line-height:1.15; margin-top:.4rem; }
+    #xmasModal h2 span { display:block; color:#fde68a; }
+    #xmasModal .xm-sub { margin-top:.7rem; color:rgba(255,255,255,.85); font-size:.93rem; line-height:1.55; }
+    #xmasModal .xm-count { display:grid; grid-template-columns:repeat(4,1fr); gap:.5rem; margin:1.2rem 0 .2rem; }
+    #xmasModal .xm-count div { background:#fff8ea; border-radius:.85rem; padding:.5rem 0; box-shadow:0 6px 14px rgba(0,0,0,.25); }
+    #xmasModal .xm-count b { display:block; font-family:'JetBrains Mono',monospace; font-size:1.35rem; font-weight:500; color:#b91c1c; }
+    #xmasModal .xm-count small { font-size:.6rem; letter-spacing:.12em; text-transform:uppercase; color:#7f1d1d; opacity:.8; }
+    #xmasModal .xm-actions { display:flex; flex-wrap:wrap; gap:.6rem; justify-content:center; margin-top:1.3rem; }
+    #xmasModal .xm-cta { display:inline-flex; align-items:center; gap:.4rem; padding:.75rem 1.5rem; border-radius:9999px; font-weight:800; font-size:.9rem; color:#5b0f0f; background:linear-gradient(135deg,#fde68a,#f5b92b); box-shadow:0 10px 24px rgba(245,185,43,.4); transition:transform .25s, box-shadow .25s; }
+    #xmasModal .xm-cta:hover { transform:translateY(-2px); box-shadow:0 14px 30px rgba(245,185,43,.55); }
+    #xmasModal .xm-ghost { padding:.75rem 1.2rem; border-radius:9999px; font-weight:600; font-size:.9rem; color:#fff; border:1px solid rgba(255,255,255,.35); background:rgba(255,255,255,.1); transition:background .25s; }
+    #xmasModal .xm-ghost:hover { background:rgba(255,255,255,.22); }
+    #xmasModal .xm-close { position:absolute; top:1.4rem; right:.9rem; width:2.1rem; height:2.1rem; border-radius:9999px; background:rgba(0,0,0,.25); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1rem; z-index:3; transition:background .25s, transform .25s; }
+    #xmasModal .xm-close:hover { background:rgba(0,0,0,.45); transform:rotate(90deg); }
+    #xmasModal .xm-inner { position:relative; z-index:2; }
+    #xmasModal canvas.xm-snow { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:1; }
+    #xmasSnow { position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:40; }
+    @media (prefers-reduced-motion: reduce) { #xmasBtn, #xmasBtn .xm-dot, #xmasModal .xm-ball { animation:none; } }
+</style>
+    <style>
+:root{--ink:7,10,22;--panel:13,18,38;--b400:124,140,255;--b500:91,108,255;--b600:67,81,232;--b300:154,166,255;--aqua:34,211,238;--aqua2:8,145,178;--pink:244,114,182;--pink2:219,39,119;--d1:15,21,53;--d2:15,23,60;--d3:8,11,24;--d4:40,52,120;--line:42,50,112;--txt:229,233,255;--txt2:245,246,255;--mut1:142,155,216;--mut2:170,179,230;--mut3:74,83,128}
+html[data-theme=christmas]{--ink:7,20,13;--panel:14,33,24;--b400:255,90,95;--b500:200,16,46;--b600:155,13,36;--b300:255,179,179;--aqua:46,204,113;--aqua2:21,128,61;--pink:246,196,83;--pink2:212,160,23;--d1:18,40,28;--d2:18,40,28;--d3:6,18,11;--d4:40,90,60;--line:47,90,63;--txt:255,244,230;--txt2:255,250,242;--mut1:199,183,158;--mut2:217,201,176;--mut3:107,127,107}
+html[data-theme=halloween]{--ink:12,8,18;--panel:24,14,32;--b400:255,138,61;--b500:255,106,0;--b600:204,80,0;--b300:255,190,140;--aqua:168,85,247;--aqua2:126,34,206;--pink:163,230,53;--pink2:101,163,13;--d1:28,16,40;--d2:28,16,40;--d3:10,6,16;--d4:70,40,100;--line:70,42,96;--txt:255,240,228;--txt2:255,246,238;--mut1:190,160,200;--mut2:210,185,220;--mut3:110,85,130}
+html[data-theme=christmas]:not(.light) body{background:radial-gradient(1200px 700px at 15% -10%,rgba(200,16,46,.18),transparent 60%),radial-gradient(1000px 700px at 100% 10%,rgba(46,204,113,.14),transparent 60%),rgb(var(--ink)) !important}
+html[data-theme=halloween]:not(.light) body{background:radial-gradient(1000px 700px at 85% -10%,rgba(255,106,0,.16),transparent 60%),radial-gradient(900px 600px at 0% 30%,rgba(168,85,247,.14),transparent 60%),rgb(var(--ink)) !important}
+#fxCanvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:60}
+#fxLights{display:none;position:fixed;top:0;left:0;right:0;height:26px;z-index:70;justify-content:space-between;pointer-events:none;padding:0 6px}
+html[data-theme=christmas] #fxLights{display:flex}
+#fxLights i{display:block;width:10px;height:16px;border-radius:50% 50% 50% 50%/40% 40% 60% 60%;background:var(--c);margin-top:2px;box-shadow:0 0 12px 3px var(--c);animation:fxTw 1.4s ease-in-out infinite}
+@keyframes fxTw{0%,100%{opacity:1}50%{opacity:.35}}
+html[data-theme=christmas] #nav{top:14px !important}
+.fx-hat{display:none;position:absolute;top:-16px;left:-9px;font-size:20px;transform:rotate(-18deg);pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+html[data-theme=christmas] section:not(#home)::before{content:"";display:block;height:6px;max-width:min(1100px,90%);margin:0 auto;border-radius:6px;opacity:.55;background:repeating-linear-gradient(45deg,#c8102e 0 14px,#fff 14px 28px)}
+html[data-theme=christmas] ::-webkit-scrollbar-thumb{background:linear-gradient(#c8102e,#15803d)}
+html[data-theme=halloween] ::-webkit-scrollbar-thumb{background:linear-gradient(#ff6a00,#a855f7)}
+html[data-theme=newyear]{--ink:10,10,18;--panel:20,18,30;--b400:252,211,77;--b500:202,138,4;--b600:161,98,7;--b300:253,230,138;--aqua:167,139,250;--aqua2:109,40,217;--pink:244,114,182;--pink2:219,39,119;--d1:20,18,34;--d2:20,18,34;--d3:8,8,14;--d4:70,55,110;--line:60,52,90;--txt:255,248,230;--txt2:255,252,240;--mut1:190,180,160;--mut2:215,205,185;--mut3:110,104,90}
+html[data-theme=summer]{--ink:9,20,34;--panel:14,30,48;--b400:255,183,77;--b500:249,115,22;--b600:234,88,12;--b300:253,186,116;--aqua:34,211,238;--aqua2:8,145,178;--pink:253,224,71;--pink2:234,179,8;--d1:12,30,50;--d2:12,30,50;--d3:5,12,22;--d4:30,80,110;--line:28,70,100;--txt:255,247,235;--txt2:255,251,244;--mut1:175,190,205;--mut2:200,210,220;--mut3:95,115,135}
+html[data-theme=newyear]:not(.light) body{background:radial-gradient(1000px 700px at 80% -10%,rgba(250,204,21,.16),transparent 60%),radial-gradient(900px 600px at 0% 35%,rgba(167,139,250,.16),transparent 60%),rgb(var(--ink)) !important}
+html[data-theme=summer]:not(.light) body{background:radial-gradient(1000px 700px at 85% -10%,rgba(249,115,22,.2),transparent 60%),radial-gradient(900px 600px at 0% 40%,rgba(34,211,238,.14),transparent 60%),rgb(var(--ink)) !important}
+html[data-theme=newyear] ::-webkit-scrollbar-thumb{background:linear-gradient(#facc15,#a78bfa)}
+html[data-theme=summer] ::-webkit-scrollbar-thumb{background:linear-gradient(#f97316,#22d3ee)}
+</style>
   </head>
 
   <body class="font-sans antialiased">
@@ -3286,7 +3390,7 @@
     <!-- Cursor glow -->
     <div id="cursorGlow"
       class="pointer-events-none fixed z-[1] w-[500px] h-[500px] rounded-full opacity-0 lg:opacity-100 transition-opacity"
-      style="background: radial-gradient(circle, rgba(91,108,255,.14), transparent 65%); transform: translate(-50%,-50%); left:-999px; top:-999px;"></div>
+      style="background: radial-gradient(circle, rgba(var(--b500),.14), transparent 65%); transform: translate(-50%,-50%); left:-999px; top:-999px;"></div>
 
     <!-- NAV -->
     <header id="nav"
@@ -4253,7 +4357,6 @@
             </a>
           </div>
 
-          
         </div>
       </section>
 
@@ -4339,105 +4442,244 @@
                 us</span></h2>
           </div>
           <div class="tm-map" id="tmap">
-  <svg class="tm-svg ring" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="tm-line" data-i="0" x1="50" y1="50" x2="50" y2="8"/><line class="tm-line" data-i="1" x1="50" y1="50" x2="76" y2="17"/><line class="tm-line" data-i="2" x1="50" y1="50" x2="86" y2="42"/><line class="tm-line" data-i="3" x1="50" y1="50" x2="84" y2="68"/><line class="tm-line" data-i="4" x1="50" y1="50" x2="65" y2="91"/><line class="tm-line" data-i="5" x1="50" y1="50" x2="35" y2="91"/><line class="tm-line" data-i="6" x1="50" y1="50" x2="16" y2="68"/><line class="tm-line" data-i="7" x1="50" y1="50" x2="14" y2="42"/><line class="tm-line" data-i="8" x1="50" y1="50" x2="24" y2="17"/><line class="tm-line ring" x1="50" y1="8" x2="76" y2="17"/><line class="tm-line ring" x1="76" y1="17" x2="86" y2="42"/><line class="tm-line ring" x1="86" y1="42" x2="84" y2="68"/><line class="tm-line ring" x1="84" y1="68" x2="65" y2="91"/><line class="tm-line ring" x1="65" y1="91" x2="35" y2="91"/><line class="tm-line ring" x1="35" y1="91" x2="16" y2="68"/><line class="tm-line ring" x1="16" y1="68" x2="14" y2="42"/><line class="tm-line ring" x1="14" y1="42" x2="24" y2="17"/><line class="tm-line ring" x1="24" y1="17" x2="50" y2="8"/></svg>
-  <svg class="tm-svg wide" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="tm-line" data-i="0" x1="50" y1="50" x2="37" y2="9"/><line class="tm-line" data-i="1" x1="50" y1="50" x2="63" y2="9"/><line class="tm-line" data-i="2" x1="50" y1="50" x2="88" y2="18"/><line class="tm-line" data-i="3" x1="50" y1="50" x2="80" y2="50"/><line class="tm-line" data-i="4" x1="50" y1="50" x2="88" y2="82"/><line class="tm-line" data-i="5" x1="50" y1="50" x2="50" y2="91"/><line class="tm-line" data-i="6" x1="50" y1="50" x2="12" y2="82"/><line class="tm-line" data-i="7" x1="50" y1="50" x2="20" y2="50"/><line class="tm-line" data-i="8" x1="50" y1="50" x2="12" y2="18"/><line class="tm-line ring" x1="37" y1="9" x2="63" y2="9"/><line class="tm-line ring" x1="63" y1="9" x2="88" y2="18"/><line class="tm-line ring" x1="88" y1="18" x2="80" y2="50"/><line class="tm-line ring" x1="80" y1="50" x2="88" y2="82"/><line class="tm-line ring" x1="88" y1="82" x2="50" y2="91"/><line class="tm-line ring" x1="50" y1="91" x2="12" y2="82"/><line class="tm-line ring" x1="12" y1="82" x2="20" y2="50"/><line class="tm-line ring" x1="20" y1="50" x2="12" y2="18"/><line class="tm-line ring" x1="12" y1="18" x2="37" y2="9"/></svg>
-  <div class="tm-hub" aria-label="EM Development">
-    <span class="absolute -inset-5 rounded-full bg-gradient-to-br from-brand-500 to-aqua opacity-25 blur-2xl"></span>
-    <span class="absolute inset-0 rounded-full border border-aqua/40 animate-pulseRing"></span>
-    <span class="absolute -inset-3 rounded-full border border-dashed border-brand-400/40 animate-spinSlow"></span>
-    <span class="relative w-full h-full rounded-full bg-gradient-to-br from-brand-500 to-aqua flex items-center justify-center shadow-2xl shadow-brand-500/40"><span class="em-logo w-[4.2rem]"></span></span>
-  </div>
-  <figure class="tm-node" data-i="0" tabindex="0" style="--x:50%;--y:8%;--xw:37%;--yw:9%;--bd:0ms">
-  <div class="tm-card">
-    <div class="flex items-center gap-2"><span class="tm-stars" style="--r:5" role="img" aria-label="5 out of 5 stars">★★★★★</span><span class="text-xs font-semibold text-slate-400">5</span></div>
-    <blockquote class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“Our online orders doubled within two months. The site is fast, beautiful and finally feels like our bakery.”</blockquote>
-    <figcaption class="mt-4 flex items-center gap-3">
-      <span class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-pink to-brand-500 flex items-center justify-center text-xs font-bold text-white">MV</span>
-      <span class="min-w-0"><span class="block text-sm font-semibold truncate">Marites Villanueva</span></span>
-    </figcaption>
-  </div>
-</figure>
-<figure class="tm-node" data-i="1" tabindex="0" style="--x:76%;--y:17%;--xw:63%;--yw:9%;--bd:350ms">
-  <div class="tm-card">
-    <div class="flex items-center gap-2"><span class="tm-stars" style="--r:4.5" role="img" aria-label="4.5 out of 5 stars">★★★★★</span><span class="text-xs font-semibold text-slate-400">4.5</span></div>
-    <blockquote class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“They delivered our inventory system ahead of schedule. Real-time stock visibility changed how we work.”</blockquote>
-    <figcaption class="mt-4 flex items-center gap-3">
-      <span class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-brand-500 to-aqua flex items-center justify-center text-xs font-bold text-white">DC</span>
-      <span class="min-w-0"><span class="block text-sm font-semibold truncate">Daniel Cruz</span></span>
-    </figcaption>
-  </div>
-</figure>
-<figure class="tm-node" data-i="2" tabindex="0" style="--x:86%;--y:42%;--xw:88%;--yw:18%;--bd:700ms">
-  <div class="tm-card">
-    <div class="flex items-center gap-2"><span class="tm-stars" style="--r:4.5" role="img" aria-label="4.5 out of 5 stars">★★★★★</span><span class="text-xs font-semibold text-slate-400">4.5</span></div>
-    <blockquote class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“Clear communication, gorgeous design and zero stress. Bookings now come in every single week.”</blockquote>
-    <figcaption class="mt-4 flex items-center gap-3">
-      <span class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-aqua to-emerald-400 flex items-center justify-center text-xs font-bold text-white">AR</span>
-      <span class="min-w-0"><span class="block text-sm font-semibold truncate">Angela Reyes</span></span>
-    </figcaption>
-  </div>
-</figure>
-<figure class="tm-node" data-i="3" tabindex="0" style="--x:84%;--y:68%;--xw:80%;--yw:50%;--bd:1050ms">
-  <div class="tm-card">
-    <div class="flex items-center gap-2"><span class="tm-stars" style="--r:4" role="img" aria-label="4 out of 5 stars">★★★★★</span><span class="text-xs font-semibold text-slate-400">4</span></div>
-    <blockquote class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“The analytics dashboard gives us every branch in one view. No more spreadsheets on Monday mornings.”</blockquote>
-    <figcaption class="mt-4 flex items-center gap-3">
-      <span class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-amber-400 to-pink flex items-center justify-center text-xs font-bold text-white">RT</span>
-      <span class="min-w-0"><span class="block text-sm font-semibold truncate">Rico Tan</span></span>
-    </figcaption>
-  </div>
-</figure>
-<figure class="tm-node" data-i="4" tabindex="0" style="--x:65%;--y:91%;--xw:88%;--yw:82%;--bd:1400ms">
-  <div class="tm-card">
-    <div class="flex items-center gap-2"><span class="tm-stars" style="--r:5" role="img" aria-label="5 out of 5 stars">★★★★★</span><span class="text-xs font-semibold text-slate-400">5</span></div>
-    <blockquote class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“Our mobile app got amazing feedback from customers. They treated our brand like it was their own.”</blockquote>
-    <figcaption class="mt-4 flex items-center gap-3">
-      <span class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-emerald-400 to-brand-500 flex items-center justify-center text-xs font-bold text-white">JL</span>
-      <span class="min-w-0"><span class="block text-sm font-semibold truncate">Joanna Lim</span></span>
-    </figcaption>
-  </div>
-</figure>
-<figure class="tm-node" data-i="5" tabindex="0" style="--x:35%;--y:91%;--xw:50%;--yw:91%;--bd:1750ms">
-  <div class="tm-card">
-    <div class="flex items-center gap-2"><span class="tm-stars" style="--r:4" role="img" aria-label="4 out of 5 stars">★★★★★</span><span class="text-xs font-semibold text-slate-400">4</span></div>
-    <blockquote class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“Court booking used to be chaos. Now members reserve in seconds and our staff finally breathe easy.”</blockquote>
-    <figcaption class="mt-4 flex items-center gap-3">
-      <span class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-brand-400 to-pink flex items-center justify-center text-xs font-bold text-white">MS</span>
-      <span class="min-w-0"><span class="block text-sm font-semibold truncate">Mark Santos</span></span>
-    </figcaption>
-  </div>
-</figure>
-<figure class="tm-node" data-i="6" tabindex="0" style="--x:16%;--y:68%;--xw:12%;--yw:82%;--bd:2100ms">
-  <div class="tm-card">
-    <div class="flex items-center gap-2"><span class="tm-stars" style="--r:4.5" role="img" aria-label="4.5 out of 5 stars">★★★★★</span><span class="text-xs font-semibold text-slate-400">4.5</span></div>
-    <blockquote class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“Launch day went flawlessly. Our new online store handled the rush and customers kept saying how easy it was to use.”</blockquote>
-    <figcaption class="mt-4 flex items-center gap-3">
-      <span class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-aqua to-brand-500 flex items-center justify-center text-xs font-bold text-white">PG</span>
-      <span class="min-w-0"><span class="block text-sm font-semibold truncate">Patricia Gomez</span></span>
-    </figcaption>
-  </div>
-</figure>
-<figure class="tm-node" data-i="7" tabindex="0" style="--x:14%;--y:42%;--xw:20%;--yw:50%;--bd:2450ms">
-  <div class="tm-card">
-    <div class="flex items-center gap-2"><span class="tm-stars" style="--r:5" role="img" aria-label="5 out of 5 stars">★★★★★</span><span class="text-xs font-semibold text-slate-400">5</span></div>
-    <blockquote class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“They explained every step in plain language and never missed a deadline. Easily the best web partner we have had.”</blockquote>
-    <figcaption class="mt-4 flex items-center gap-3">
-      <span class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-pink to-amber-400 flex items-center justify-center text-xs font-bold text-white">JB</span>
-      <span class="min-w-0"><span class="block text-sm font-semibold truncate">Jerome Bautista</span></span>
-    </figcaption>
-  </div>
-</figure>
-<figure class="tm-node" data-i="8" tabindex="0" style="--x:24%;--y:17%;--xw:12%;--yw:18%;--bd:2800ms">
-  <div class="tm-card">
-    <div class="flex items-center gap-2"><span class="tm-stars" style="--r:3.5" role="img" aria-label="3.5 out of 5 stars">★★★★★</span><span class="text-xs font-semibold text-slate-400">3.5</span></div>
-    <blockquote class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“The redesign looks great and loads fast. A couple of revisions took longer than planned, but inquiries went up right away.”</blockquote>
-    <figcaption class="mt-4 flex items-center gap-3">
-      <span class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-emerald-400 to-aqua flex items-center justify-center text-xs font-bold text-white">HR</span>
-      <span class="min-w-0"><span class="block text-sm font-semibold truncate">Hannah Ramos</span></span>
-    </figcaption>
-  </div>
-</figure>
-</div>
+            <svg class="tm-svg ring" viewBox="0 0 100 100"
+              preserveAspectRatio="none" aria-hidden="true"><line
+                class="tm-line" data-i="0" x1="50" y1="50" x2="50"
+                y2="8" /><line class="tm-line" data-i="1" x1="50" y1="50"
+                x2="76" y2="17" /><line class="tm-line" data-i="2" x1="50"
+                y1="50" x2="86" y2="42" /><line class="tm-line" data-i="3"
+                x1="50" y1="50" x2="84" y2="68" /><line class="tm-line"
+                data-i="4" x1="50" y1="50" x2="65" y2="91" /><line
+                class="tm-line" data-i="5" x1="50" y1="50" x2="35"
+                y2="91" /><line class="tm-line" data-i="6" x1="50" y1="50"
+                x2="16" y2="68" /><line class="tm-line" data-i="7" x1="50"
+                y1="50" x2="14" y2="42" /><line class="tm-line" data-i="8"
+                x1="50" y1="50" x2="24" y2="17" /><line class="tm-line ring"
+                x1="50" y1="8" x2="76" y2="17" /><line class="tm-line ring"
+                x1="76" y1="17" x2="86" y2="42" /><line class="tm-line ring"
+                x1="86" y1="42" x2="84" y2="68" /><line class="tm-line ring"
+                x1="84" y1="68" x2="65" y2="91" /><line class="tm-line ring"
+                x1="65" y1="91" x2="35" y2="91" /><line class="tm-line ring"
+                x1="35" y1="91" x2="16" y2="68" /><line class="tm-line ring"
+                x1="16" y1="68" x2="14" y2="42" /><line class="tm-line ring"
+                x1="14" y1="42" x2="24" y2="17" /><line class="tm-line ring"
+                x1="24" y1="17" x2="50" y2="8" /></svg>
+            <svg class="tm-svg wide" viewBox="0 0 100 100"
+              preserveAspectRatio="none" aria-hidden="true"><line
+                class="tm-line" data-i="0" x1="50" y1="50" x2="37"
+                y2="9" /><line class="tm-line" data-i="1" x1="50" y1="50"
+                x2="63" y2="9" /><line class="tm-line" data-i="2" x1="50"
+                y1="50" x2="88" y2="18" /><line class="tm-line" data-i="3"
+                x1="50" y1="50" x2="80" y2="50" /><line class="tm-line"
+                data-i="4" x1="50" y1="50" x2="88" y2="82" /><line
+                class="tm-line" data-i="5" x1="50" y1="50" x2="50"
+                y2="91" /><line class="tm-line" data-i="6" x1="50" y1="50"
+                x2="12" y2="82" /><line class="tm-line" data-i="7" x1="50"
+                y1="50" x2="20" y2="50" /><line class="tm-line" data-i="8"
+                x1="50" y1="50" x2="12" y2="18" /><line class="tm-line ring"
+                x1="37" y1="9" x2="63" y2="9" /><line class="tm-line ring"
+                x1="63" y1="9" x2="88" y2="18" /><line class="tm-line ring"
+                x1="88" y1="18" x2="80" y2="50" /><line class="tm-line ring"
+                x1="80" y1="50" x2="88" y2="82" /><line class="tm-line ring"
+                x1="88" y1="82" x2="50" y2="91" /><line class="tm-line ring"
+                x1="50" y1="91" x2="12" y2="82" /><line class="tm-line ring"
+                x1="12" y1="82" x2="20" y2="50" /><line class="tm-line ring"
+                x1="20" y1="50" x2="12" y2="18" /><line class="tm-line ring"
+                x1="12" y1="18" x2="37" y2="9" /></svg>
+            <div class="tm-hub" aria-label="EM Development">
+              <span
+                class="absolute -inset-5 rounded-full bg-gradient-to-br from-brand-500 to-aqua opacity-25 blur-2xl"></span>
+              <span
+                class="absolute inset-0 rounded-full border border-aqua/40 animate-pulseRing"></span>
+              <span
+                class="absolute -inset-3 rounded-full border border-dashed border-brand-400/40 animate-spinSlow"></span>
+              <span
+                class="relative w-full h-full rounded-full bg-gradient-to-br from-brand-500 to-aqua flex items-center justify-center shadow-2xl shadow-brand-500/40"><span
+                  class="em-logo w-[4.2rem]"></span></span>
+            </div>
+            <figure class="tm-node" data-i="0" tabindex="0"
+              style="--x:50%;--y:8%;--xw:37%;--yw:9%;--bd:0ms">
+              <div class="tm-card">
+                <div class="flex items-center gap-2"><span class="tm-stars"
+                    style="--r:5" role="img"
+                    aria-label="5 out of 5 stars">★★★★★</span><span
+                    class="text-xs font-semibold text-slate-400">5</span></div>
+                <blockquote
+                  class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“Our
+                  online orders doubled within two months. The site is fast,
+                  beautiful and finally feels like our bakery.”</blockquote>
+                <figcaption class="mt-4 flex items-center gap-3">
+                  <span
+                    class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-pink to-brand-500 flex items-center justify-center text-xs font-bold text-white">MV</span>
+                  <span class="min-w-0"><span
+                      class="block text-sm font-semibold truncate">Marites
+                      Villanueva</span></span>
+                </figcaption>
+              </div>
+            </figure>
+            <figure class="tm-node" data-i="1" tabindex="0"
+              style="--x:76%;--y:17%;--xw:63%;--yw:9%;--bd:350ms">
+              <div class="tm-card">
+                <div class="flex items-center gap-2"><span class="tm-stars"
+                    style="--r:4.5" role="img"
+                    aria-label="4.5 out of 5 stars">★★★★★</span><span
+                    class="text-xs font-semibold text-slate-400">4.5</span></div>
+                <blockquote
+                  class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“They
+                  delivered our inventory system ahead of schedule. Real-time
+                  stock visibility changed how we work.”</blockquote>
+                <figcaption class="mt-4 flex items-center gap-3">
+                  <span
+                    class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-brand-500 to-aqua flex items-center justify-center text-xs font-bold text-white">DC</span>
+                  <span class="min-w-0"><span
+                      class="block text-sm font-semibold truncate">Daniel
+                      Cruz</span></span>
+                </figcaption>
+              </div>
+            </figure>
+            <figure class="tm-node" data-i="2" tabindex="0"
+              style="--x:86%;--y:42%;--xw:88%;--yw:18%;--bd:700ms">
+              <div class="tm-card">
+                <div class="flex items-center gap-2"><span class="tm-stars"
+                    style="--r:4.5" role="img"
+                    aria-label="4.5 out of 5 stars">★★★★★</span><span
+                    class="text-xs font-semibold text-slate-400">4.5</span></div>
+                <blockquote
+                  class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“Clear
+                  communication, gorgeous design and zero stress. Bookings now
+                  come in every single week.”</blockquote>
+                <figcaption class="mt-4 flex items-center gap-3">
+                  <span
+                    class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-aqua to-emerald-400 flex items-center justify-center text-xs font-bold text-white">AR</span>
+                  <span class="min-w-0"><span
+                      class="block text-sm font-semibold truncate">Angela
+                      Reyes</span></span>
+                </figcaption>
+              </div>
+            </figure>
+            <figure class="tm-node" data-i="3" tabindex="0"
+              style="--x:84%;--y:68%;--xw:80%;--yw:50%;--bd:1050ms">
+              <div class="tm-card">
+                <div class="flex items-center gap-2"><span class="tm-stars"
+                    style="--r:4" role="img"
+                    aria-label="4 out of 5 stars">★★★★★</span><span
+                    class="text-xs font-semibold text-slate-400">4</span></div>
+                <blockquote
+                  class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“The
+                  analytics dashboard gives us every branch in one view. No more
+                  spreadsheets on Monday mornings.”</blockquote>
+                <figcaption class="mt-4 flex items-center gap-3">
+                  <span
+                    class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-amber-400 to-pink flex items-center justify-center text-xs font-bold text-white">RT</span>
+                  <span class="min-w-0"><span
+                      class="block text-sm font-semibold truncate">Rico
+                      Tan</span></span>
+                </figcaption>
+              </div>
+            </figure>
+            <figure class="tm-node" data-i="4" tabindex="0"
+              style="--x:65%;--y:91%;--xw:88%;--yw:82%;--bd:1400ms">
+              <div class="tm-card">
+                <div class="flex items-center gap-2"><span class="tm-stars"
+                    style="--r:5" role="img"
+                    aria-label="5 out of 5 stars">★★★★★</span><span
+                    class="text-xs font-semibold text-slate-400">5</span></div>
+                <blockquote
+                  class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“Our
+                  mobile app got amazing feedback from customers. They treated
+                  our brand like it was their own.”</blockquote>
+                <figcaption class="mt-4 flex items-center gap-3">
+                  <span
+                    class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-emerald-400 to-brand-500 flex items-center justify-center text-xs font-bold text-white">JL</span>
+                  <span class="min-w-0"><span
+                      class="block text-sm font-semibold truncate">Joanna
+                      Lim</span></span>
+                </figcaption>
+              </div>
+            </figure>
+            <figure class="tm-node" data-i="5" tabindex="0"
+              style="--x:35%;--y:91%;--xw:50%;--yw:91%;--bd:1750ms">
+              <div class="tm-card">
+                <div class="flex items-center gap-2"><span class="tm-stars"
+                    style="--r:4" role="img"
+                    aria-label="4 out of 5 stars">★★★★★</span><span
+                    class="text-xs font-semibold text-slate-400">4</span></div>
+                <blockquote
+                  class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“Court
+                  booking used to be chaos. Now members reserve in seconds and
+                  our staff finally breathe easy.”</blockquote>
+                <figcaption class="mt-4 flex items-center gap-3">
+                  <span
+                    class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-brand-400 to-pink flex items-center justify-center text-xs font-bold text-white">MS</span>
+                  <span class="min-w-0"><span
+                      class="block text-sm font-semibold truncate">Mark
+                      Santos</span></span>
+                </figcaption>
+              </div>
+            </figure>
+            <figure class="tm-node" data-i="6" tabindex="0"
+              style="--x:16%;--y:68%;--xw:12%;--yw:82%;--bd:2100ms">
+              <div class="tm-card">
+                <div class="flex items-center gap-2"><span class="tm-stars"
+                    style="--r:4.5" role="img"
+                    aria-label="4.5 out of 5 stars">★★★★★</span><span
+                    class="text-xs font-semibold text-slate-400">4.5</span></div>
+                <blockquote
+                  class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“Launch
+                  day went flawlessly. Our new online store handled the rush and
+                  customers kept saying how easy it was to use.”</blockquote>
+                <figcaption class="mt-4 flex items-center gap-3">
+                  <span
+                    class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-aqua to-brand-500 flex items-center justify-center text-xs font-bold text-white">PG</span>
+                  <span class="min-w-0"><span
+                      class="block text-sm font-semibold truncate">Patricia
+                      Gomez</span></span>
+                </figcaption>
+              </div>
+            </figure>
+            <figure class="tm-node" data-i="7" tabindex="0"
+              style="--x:14%;--y:42%;--xw:20%;--yw:50%;--bd:2450ms">
+              <div class="tm-card">
+                <div class="flex items-center gap-2"><span class="tm-stars"
+                    style="--r:5" role="img"
+                    aria-label="5 out of 5 stars">★★★★★</span><span
+                    class="text-xs font-semibold text-slate-400">5</span></div>
+                <blockquote
+                  class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“They
+                  explained every step in plain language and never missed a
+                  deadline. Easily the best web partner we have
+                  had.”</blockquote>
+                <figcaption class="mt-4 flex items-center gap-3">
+                  <span
+                    class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-pink to-amber-400 flex items-center justify-center text-xs font-bold text-white">JB</span>
+                  <span class="min-w-0"><span
+                      class="block text-sm font-semibold truncate">Jerome
+                      Bautista</span></span>
+                </figcaption>
+              </div>
+            </figure>
+            <figure class="tm-node" data-i="8" tabindex="0"
+              style="--x:24%;--y:17%;--xw:12%;--yw:18%;--bd:2800ms">
+              <div class="tm-card">
+                <div class="flex items-center gap-2"><span class="tm-stars"
+                    style="--r:3.5" role="img"
+                    aria-label="3.5 out of 5 stars">★★★★★</span><span
+                    class="text-xs font-semibold text-slate-400">3.5</span></div>
+                <blockquote
+                  class="mt-2.5 text-[.82rem] lg:text-sm leading-relaxed text-slate-200">“The
+                  redesign looks great and loads fast. A couple of revisions
+                  took longer than planned, but inquiries went up right
+                  away.”</blockquote>
+                <figcaption class="mt-4 flex items-center gap-3">
+                  <span
+                    class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-emerald-400 to-aqua flex items-center justify-center text-xs font-bold text-white">HR</span>
+                  <span class="min-w-0"><span
+                      class="block text-sm font-semibold truncate">Hannah
+                      Ramos</span></span>
+                </figcaption>
+              </div>
+            </figure>
+          </div>
         </div>
       </section>
 
@@ -4480,15 +4722,22 @@
 
         <div class="relative max-w-7xl mx-auto px-5 sm:px-8">
           <div class="text-center max-w-3xl mx-auto">
-            <span data-reveal class="ct-eyebrow inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[.25em] text-aqua">
-              <span class="relative flex w-2 h-2"><span class="absolute inset-0 rounded-full bg-emerald-400 animate-pulseRing"></span><span class="relative w-2 h-2 rounded-full bg-emerald-400"></span></span>
+            <span data-reveal
+              class="ct-eyebrow inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[.25em] text-aqua">
+              <span class="relative flex w-2 h-2"><span
+                  class="absolute inset-0 rounded-full bg-emerald-400 animate-pulseRing"></span><span
+                  class="relative w-2 h-2 rounded-full bg-emerald-400"></span></span>
               Contact · Open to new projects
             </span>
-            <h2 data-reveal style="--d:100ms" class="mt-5 text-4xl sm:text-6xl font-extrabold tracking-tight leading-[1.05]">
+            <h2 data-reveal style="--d:100ms"
+              class="mt-5 text-4xl sm:text-6xl font-extrabold tracking-tight leading-[1.05]">
               Let's <span class="gradient-text">talk</span> about your project
             </h2>
-            <p data-reveal style="--d:200ms" class="mt-5 text-slate-400 text-lg max-w-xl mx-auto">
-              Email us, give us a call, or drop by our office in Cebu. Tell us what you want to build and we'll take it from there. No pressure, no obligation.
+            <p data-reveal style="--d:200ms"
+              class="mt-5 text-slate-400 text-lg max-w-xl mx-auto">
+              Email us, give us a call, or drop by our office in Cebu. Tell us
+              what you want to build and we'll take it from there. No pressure,
+              no obligation.
             </p>
           </div>
 
@@ -4496,121 +4745,216 @@
             <!-- Ways to reach us -->
             <div class="space-y-5">
               <div data-reveal="left" style="--d:100ms">
-                <div class="ct-card ct-spot glass rounded-3xl p-5 sm:p-6 flex items-center gap-4 sm:gap-5">
+                <div
+                  class="ct-card ct-spot glass rounded-3xl p-5 sm:p-6 flex items-center gap-4 sm:gap-5">
                   <span class="ct-ico ct-ico-lg text-brand-400">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="1.8" stroke-linecap="round"
+                      stroke-linejoin="round" class="w-7 h-7"><rect x="3" y="5"
+                        width="18" height="14" rx="3" /><path
+                        d="m4 7 8 6 8-6" /></svg>
                   </span>
                   <div class="min-w-0 flex-1">
-                    <div class="text-xs font-semibold uppercase tracking-[.2em] text-slate-500">Email us</div>
-                    <a href="mailto:emdevelopmentph@gmail.com" class="ct-link mt-1 block text-base sm:text-xl font-bold break-all">emdevelopmentph@gmail.com</a>
-                    <div class="mt-1 text-xs text-slate-400">We reply within 24 hours</div>
+                    <div
+                      class="text-xs font-semibold uppercase tracking-[.2em] text-slate-500">Email
+                      us</div>
+                    <a href="mailto:emdevelopmentph@gmail.com"
+                      class="ct-link mt-1 block text-base sm:text-xl font-bold break-all">emdevelopmentph@gmail.com</a>
+                    <div class="mt-1 text-xs text-slate-400">We reply within 24
+                      hours</div>
                   </div>
-                  <button type="button" class="ct-copy" data-copy="emdevelopmentph@gmail.com" aria-label="Copy email address">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
+                  <button type="button" class="ct-copy"
+                    data-copy="emdevelopmentph@gmail.com"
+                    aria-label="Copy email address">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round" class="w-4 h-4"><rect x="9" y="9"
+                        width="11" height="11" rx="2.5" /><path
+                        d="M5 15V6a2 2 0 0 1 2-2h9" /></svg>
                   </button>
                 </div>
               </div>
 
               <div data-reveal="left" style="--d:200ms">
-                <div class="ct-card ct-spot glass rounded-3xl p-5 sm:p-6 flex items-center gap-4 sm:gap-5">
+                <div
+                  class="ct-card ct-spot glass rounded-3xl p-5 sm:p-6 flex items-center gap-4 sm:gap-5">
                   <span class="ct-ico ct-ico-lg text-aqua">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="1.8" stroke-linecap="round"
+                      stroke-linejoin="round" class="w-7 h-7"><path
+                        d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z" /></svg>
                   </span>
                   <div class="min-w-0 flex-1">
-                    <div class="text-xs font-semibold uppercase tracking-[.2em] text-slate-500">Call us</div>
-                    <a href="tel:+639205018789" class="ct-link mt-1 block text-base sm:text-xl font-bold">(+63) 920 501 8789</a>
-                    <div class="mt-1 text-xs text-slate-400">Philippine time · UTC+8</div>
+                    <div
+                      class="text-xs font-semibold uppercase tracking-[.2em] text-slate-500">Call
+                      us</div>
+                    <a href="tel:+639205018789"
+                      class="ct-link mt-1 block text-base sm:text-xl font-bold">(+63)
+                      920 501 8789</a>
+                    <div class="mt-1 text-xs text-slate-400">Philippine time ·
+                      UTC+8</div>
                   </div>
-                  <button type="button" class="ct-copy" data-copy="+63 920 501 8789" aria-label="Copy phone number">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
+                  <button type="button" class="ct-copy"
+                    data-copy="+63 920 501 8789" aria-label="Copy phone number">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round" class="w-4 h-4"><rect x="9" y="9"
+                        width="11" height="11" rx="2.5" /><path
+                        d="M5 15V6a2 2 0 0 1 2-2h9" /></svg>
                   </button>
                 </div>
               </div>
 
               <div data-reveal="left" style="--d:300ms">
-                <div class="ct-card ct-spot glass rounded-3xl p-5 sm:p-6 flex items-center gap-4 sm:gap-5">
+                <div
+                  class="ct-card ct-spot glass rounded-3xl p-5 sm:p-6 flex items-center gap-4 sm:gap-5">
                   <span class="ct-ico ct-ico-lg text-pink">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7"><path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="1.8" stroke-linecap="round"
+                      stroke-linejoin="round" class="w-7 h-7"><path
+                        d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21z" /><circle
+                        cx="12" cy="9.5" r="2.5" /></svg>
                   </span>
                   <div class="min-w-0 flex-1">
-                    <div class="text-xs font-semibold uppercase tracking-[.2em] text-slate-500">Visit us</div>
-                    <a href="https://www.google.com/maps/search/?api=1&query=Cebu+City+Philippines" target="_blank" rel="noopener" class="ct-link mt-1 block text-base sm:text-xl font-bold">Cebu City, Cebu, Philippines, 6000</a>
-                    <div class="mt-1 text-xs text-slate-400">Tap to open in Maps</div>
+                    <div
+                      class="text-xs font-semibold uppercase tracking-[.2em] text-slate-500">Visit
+                      us</div>
+                    <a
+                      href="https://www.google.com/maps/search/?api=1&query=Cebu+City+Philippines"
+                      target="_blank" rel="noopener"
+                      class="ct-link mt-1 block text-base sm:text-xl font-bold">Cebu
+                      City, Cebu, Philippines, 6000</a>
+                    <div class="mt-1 text-xs text-slate-400">Tap to open in
+                      Maps</div>
                   </div>
-                  <button type="button" class="ct-copy" data-copy="Cebu City, Cebu, Philippines, 6000" aria-label="Copy office address">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
+                  <button type="button" class="ct-copy"
+                    data-copy="Cebu City, Cebu, Philippines, 6000"
+                    aria-label="Copy office address">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round" class="w-4 h-4"><rect x="9" y="9"
+                        width="11" height="11" rx="2.5" /><path
+                        d="M5 15V6a2 2 0 0 1 2-2h9" /></svg>
                   </button>
                 </div>
               </div>
 
-              <div data-reveal style="--d:400ms" class="flex flex-col sm:flex-row gap-3 pt-2">
-                <a href="mailto:emdevelopmentph@gmail.com" class="ct-mag btn-shine group inline-flex items-center justify-center gap-2.5 rounded-full bg-gradient-to-r from-brand-500 to-aqua px-7 py-4 text-sm font-bold text-white shadow-lg shadow-brand-500/30">
+              <div data-reveal style="--d:400ms"
+                class="flex flex-col sm:flex-row gap-3 pt-2">
+                <a href="mailto:emdevelopmentph@gmail.com"
+                  class="ct-mag btn-shine group inline-flex items-center justify-center gap-2.5 rounded-full bg-gradient-to-r from-brand-500 to-aqua px-7 py-4 text-sm font-bold text-white shadow-lg shadow-brand-500/30">
                   Email us now
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 transition-transform group-hover:translate-x-1"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2.2" stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="w-4 h-4 transition-transform group-hover:translate-x-1"><path
+                      d="M5 12h14M13 6l6 6-6 6" /></svg>
                 </a>
-                <a href="tel:+639205018789" class="ct-ghost inline-flex items-center justify-center rounded-full px-7 py-4 text-sm font-bold">Call now</a>
+                <a href="tel:+639205018789"
+                  class="ct-ghost inline-flex items-center justify-center rounded-full px-7 py-4 text-sm font-bold">Call
+                  now</a>
               </div>
             </div>
 
             <!-- Animated hub -->
             <div data-reveal="right" style="--d:150ms">
-              <div id="ctHub" class="ct-hub relative mx-auto" aria-hidden="true">
+              <div id="ctHub" class="ct-hub relative mx-auto"
+                aria-hidden="true">
                 <div class="ct-hub-glow"></div>
                 <div class="ct-hub-grid grid-bg"></div>
-                <span class="ct-ring"></span><span class="ct-ring" style="animation-delay:-1.3s"></span><span class="ct-ring" style="animation-delay:-2.6s"></span>
+                <span class="ct-ring"></span><span class="ct-ring"
+                  style="animation-delay:-1.3s"></span><span class="ct-ring"
+                  style="animation-delay:-2.6s"></span>
                 <div class="ct-sweep"></div>
 
-                <div class="ct-orbit ct-orbit-in"><span class="ct-spark-dot" style="top:0;left:50%"></span><span class="ct-spark-dot" style="top:85%;left:15%;background:#f472b6"></span></div>
+                <div class="ct-orbit ct-orbit-in"><span class="ct-spark-dot"
+                    style="top:0;left:50%"></span><span class="ct-spark-dot"
+                    style="top:85%;left:15%;background:rgb(var(--pink))"></span></div>
 
                 <div class="ct-orbit ct-orbit-out">
-                  <div class="ct-node" style="top:0;left:50%"><div class="ct-node-in text-brand-400">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg></div></div>
-                  <div class="ct-node" style="top:75%;left:93.3%"><div class="ct-node-in text-aqua">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg></div></div>
-                  <div class="ct-node" style="top:75%;left:6.7%"><div class="ct-node-in text-pink">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div></div>
+                  <div class="ct-node" style="top:0;left:50%"><div
+                      class="ct-node-in text-brand-400">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.8" stroke-linecap="round"
+                        stroke-linejoin="round" class="w-6 h-6"><rect x="3"
+                          y="5" width="18" height="14" rx="3" /><path
+                          d="m4 7 8 6 8-6" /></svg></div></div>
+                  <div class="ct-node" style="top:75%;left:93.3%"><div
+                      class="ct-node-in text-aqua">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.8" stroke-linecap="round"
+                        stroke-linejoin="round" class="w-6 h-6"><path
+                          d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z" /></svg></div></div>
+                  <div class="ct-node" style="top:75%;left:6.7%"><div
+                      class="ct-node-in text-pink">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.8" stroke-linecap="round"
+                        stroke-linejoin="round" class="w-6 h-6"><path
+                          d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21z" /><circle
+                          cx="12" cy="9.5" r="2.5" /></svg></div></div>
                 </div>
 
                 <div class="ct-center">
                   <span class="ct-center-pin">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+                    <svg class="w-8 h-8 text-white" fill="none"
+                      stroke="currentColor" stroke-width="2.2"
+                      stroke-linecap="round" stroke-linejoin="round"
+                      viewBox="0 0 24 24"><path
+                        d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21z" /><circle
+                        cx="12" cy="9.5" r="2.5" /></svg>
                   </span>
                 </div>
 
                 <div class="ct-float ct-float-a glass rounded-2xl px-4 py-3">
-                  <div id="ctClock" class="text-lg font-mono font-bold tabular-nums">--:--:--</div>
-                  <div class="text-[10px] uppercase tracking-wider text-slate-400">Cebu local time</div>
+                  <div id="ctClock"
+                    class="text-lg font-mono font-bold tabular-nums">--:--:--</div>
+                  <div
+                    class="text-[10px] uppercase tracking-wider text-slate-400">Cebu
+                    local time</div>
                 </div>
                 <div class="ct-float ct-float-b glass rounded-2xl px-4 py-3">
                   <div class="text-sm font-bold">Cebu City, PH</div>
-                  <div class="text-[11px] font-mono text-slate-400">10.3157° N · 123.8854° E</div>
+                  <div class="text-[11px] font-mono text-slate-400">10.3157° N ·
+                    123.8854° E</div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="mt-16 grid grid-cols-1 min-[420px]:grid-cols-3 gap-3 sm:gap-5">
-            <div data-reveal style="--d:100ms" class="glass rounded-2xl p-4 sm:p-6 text-center">
-              <div class="text-2xl sm:text-4xl font-extrabold gradient-text">24h</div>
-              <div class="mt-1 text-xs sm:text-sm text-slate-400">Average reply time</div>
+          <div
+            class="mt-16 grid grid-cols-1 min-[420px]:grid-cols-3 gap-3 sm:gap-5">
+            <div data-reveal style="--d:100ms"
+              class="glass rounded-2xl p-4 sm:p-6 text-center">
+              <div
+                class="text-2xl sm:text-4xl font-extrabold gradient-text">24h</div>
+              <div class="mt-1 text-xs sm:text-sm text-slate-400">Average reply
+                time</div>
             </div>
-            <div data-reveal style="--d:200ms" class="glass rounded-2xl p-4 sm:p-6 text-center">
-              <div class="text-2xl sm:text-4xl font-extrabold gradient-text">UTC+8</div>
-              <div class="mt-1 text-xs sm:text-sm text-slate-400">Philippine time</div>
+            <div data-reveal style="--d:200ms"
+              class="glass rounded-2xl p-4 sm:p-6 text-center">
+              <div
+                class="text-2xl sm:text-4xl font-extrabold gradient-text">UTC+8</div>
+              <div class="mt-1 text-xs sm:text-sm text-slate-400">Philippine
+                time</div>
             </div>
-            <div data-reveal style="--d:300ms" class="glass rounded-2xl p-4 sm:p-6 text-center">
-              <div class="text-2xl sm:text-4xl font-extrabold gradient-text">Free</div>
-              <div class="mt-1 text-xs sm:text-sm text-slate-400">First estimate</div>
+            <div data-reveal style="--d:300ms"
+              class="glass rounded-2xl p-4 sm:p-6 text-center">
+              <div
+                class="text-2xl sm:text-4xl font-extrabold gradient-text">Free</div>
+              <div class="mt-1 text-xs sm:text-sm text-slate-400">First
+                estimate</div>
             </div>
           </div>
         </div>
 
-        <div id="ctToast" class="ct-toast" role="status" aria-live="polite"></div>
+        <div id="ctToast" class="ct-toast" role="status"
+          aria-live="polite"></div>
       </section>
     </main>
 
     <!-- FOOTER -->
-    <footer class="ft relative z-[2] overflow-hidden border-t border-white/5 bg-panel/60">
+    <footer
+      class="ft relative z-[2] overflow-hidden border-t border-white/5 bg-panel/60">
       <div class="ft-line" aria-hidden="true"></div>
       <div class="ft-bg" aria-hidden="true">
         <span class="ft-blob ft-blob-a"></span>
@@ -4631,16 +4975,27 @@
         <!-- CTA banner -->
         <div data-reveal="zoom" class="ft-cta-wrap">
           <div class="ft-cta-border"></div>
-          <div class="ft-cta relative rounded-3xl p-7 sm:p-10 lg:p-12 flex flex-col lg:flex-row lg:items-center justify-between gap-7 overflow-hidden">
+          <div
+            class="ft-cta relative rounded-3xl p-7 sm:p-10 lg:p-12 flex flex-col lg:flex-row lg:items-center justify-between gap-7 overflow-hidden">
             <div class="ft-cta-glow" aria-hidden="true"></div>
             <div class="relative">
-              <div class="text-xs font-semibold uppercase tracking-[.25em] text-aqua">Ready when you are</div>
-              <h3 class="mt-3 text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.1]">Have an idea? <span class="gradient-text">Let's build it.</span></h3>
-              <p class="mt-3 text-slate-400 max-w-lg">Tell us what you want to create. The first estimate is free.</p>
+              <div
+                class="text-xs font-semibold uppercase tracking-[.25em] text-aqua">Ready
+                when you are</div>
+              <h3
+                class="mt-3 text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.1]">Have
+                an idea? <span class="gradient-text">Let's build it.</span></h3>
+              <p class="mt-3 text-slate-400 max-w-lg">Tell us what you want to
+                create. The first estimate is free.</p>
             </div>
-            <button type="button" data-open-quote aria-haspopup="dialog" class="ft-btn btn-shine group relative inline-flex items-center justify-center gap-3 self-start lg:self-auto rounded-full bg-gradient-to-r from-brand-500 to-aqua px-8 py-4 text-sm font-bold text-white shadow-lg shadow-brand-500/30">
+            <button type="button" data-open-quote aria-haspopup="dialog"
+              class="ft-btn btn-shine group relative inline-flex items-center justify-center gap-3 self-start lg:self-auto rounded-full bg-gradient-to-r from-brand-500 to-aqua px-8 py-4 text-sm font-bold text-white shadow-lg shadow-brand-500/30">
               Get a Free Quote
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2.4" stroke-linecap="round"
+                stroke-linejoin="round"
+                class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1.5"><path
+                  d="M5 12h14M13 6l6 6-6 6" /></svg>
             </button>
           </div>
         </div>
@@ -4649,15 +5004,25 @@
         <div class="mt-16 grid sm:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8">
           <div class="lg:col-span-5" data-reveal>
             <a href="#home" class="ft-brand inline-flex items-center gap-3">
-              <span class="ft-logo w-14 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-aqua flex items-center justify-center"><span class="em-logo w-8"></span></span>
-              <span class="text-xl font-bold">EM <span class="text-brand-400">Development</span></span>
+              <span
+                class="ft-logo w-14 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-aqua flex items-center justify-center"><span
+                  class="em-logo w-8"></span></span>
+              <span class="text-xl font-bold">EM <span
+                  class="text-brand-400">Development</span></span>
             </a>
-            <p class="mt-5 text-slate-400 max-w-sm text-sm leading-relaxed">We craft websites and mobile apps that help ambitious businesses stand out and grow.</p>
-            <div class="ft-status mt-6 inline-flex items-center gap-3 rounded-full glass px-4 py-2.5">
-              <span class="relative flex w-2.5 h-2.5"><span class="absolute inset-0 rounded-full bg-emerald-400 animate-pulseRing"></span><span class="relative w-2.5 h-2.5 rounded-full bg-emerald-400"></span></span>
+            <p class="mt-5 text-slate-400 max-w-sm text-sm leading-relaxed">We
+              craft websites and mobile apps that help ambitious businesses
+              stand out and grow.</p>
+            <div
+              class="ft-status mt-6 inline-flex items-center gap-3 rounded-full glass px-4 py-2.5">
+              <span class="relative flex w-2.5 h-2.5"><span
+                  class="absolute inset-0 rounded-full bg-emerald-400 animate-pulseRing"></span><span
+                  class="relative w-2.5 h-2.5 rounded-full bg-emerald-400"></span></span>
               <span class="text-xs font-medium">Open to new projects</span>
               <span class="w-px h-4 bg-white/15"></span>
-              <span class="text-xs font-mono tabular-nums text-slate-400">Philippines <span id="ftClock">--:--:--</span></span>
+              <span
+                class="text-xs font-mono tabular-nums text-slate-400">Philippines
+                <span id="ftClock">--:--:--</span></span>
             </div>
           </div>
 
@@ -4675,38 +5040,80 @@
           <div class="lg:col-span-3" data-reveal style="--d:200ms">
             <h4 class="ft-h">Reach us</h4>
             <ul class="mt-5 space-y-4 text-sm">
-              <li><a class="ft-c group" href="mailto:emdevelopmentph@gmail.com"><span class="ft-ci text-brand-400"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg></span><span class="min-w-0 break-all">emdevelopmentph@gmail.com</span></a></li>
-              <li><a class="ft-c group" href="tel:+639205018789"><span class="ft-ci text-aqua"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg></span><span>(+63) 920 501 8789</span></a></li>
-              <li><a class="ft-c group" href="https://www.google.com/maps/search/?api=1&query=Cebu+City+Philippines" target="_blank" rel="noopener"><span class="ft-ci text-pink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></span><span>Cebu City, Cebu, Philippines, 6000</span></a></li>
+              <li><a class="ft-c group"
+                  href="mailto:emdevelopmentph@gmail.com"><span
+                    class="ft-ci text-brand-400"><svg viewBox="0 0 24 24"
+                      fill="none" stroke="currentColor" stroke-width="1.9"
+                      stroke-linecap="round" stroke-linejoin="round"
+                      class="w-4 h-4"><rect x="3" y="5" width="18" height="14"
+                        rx="3" /><path d="m4 7 8 6 8-6" /></svg></span><span
+                    class="min-w-0 break-all">emdevelopmentph@gmail.com</span></a></li>
+              <li><a class="ft-c group" href="tel:+639205018789"><span
+                    class="ft-ci text-aqua"><svg viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="1.9"
+                      stroke-linecap="round" stroke-linejoin="round"
+                      class="w-4 h-4"><path
+                        d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z" /></svg></span><span>(+63)
+                    920 501 8789</span></a></li>
+              <li><a class="ft-c group"
+                  href="https://www.google.com/maps/search/?api=1&query=Cebu+City+Philippines"
+                  target="_blank" rel="noopener"><span
+                    class="ft-ci text-pink"><svg viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="1.9"
+                      stroke-linecap="round" stroke-linejoin="round"
+                      class="w-4 h-4"><path
+                        d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21z" /><circle
+                        cx="12" cy="9.5" r="2.5" /></svg></span><span>Cebu City,
+                    Cebu, Philippines, 6000</span></a></li>
             </ul>
           </div>
 
           <div class="lg:col-span-2" data-reveal style="--d:300ms">
             <h4 class="ft-h">Follow us</h4>
             <div class="mt-5 flex gap-3">
-              <a href="https://www.facebook.com/share/18LsqE5oKK/" target="_blank" rel="noopener" aria-label="Facebook" class="ft-soc">
-                <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.6-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.2H8v3h2.5V21h3z"/></svg>
+              <a href="https://www.facebook.com/share/18LsqE5oKK/"
+                target="_blank" rel="noopener" aria-label="Facebook"
+                class="ft-soc">
+                <svg viewBox="0 0 24 24" fill="currentColor"
+                  class="w-5 h-5"><path
+                    d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.6-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.2H8v3h2.5V21h3z" /></svg>
               </a>
-              <a href="https://www.instagram.com/emdevsolutions/" target="_blank" rel="noopener" aria-label="Instagram @emdevsolutions" class="ft-soc">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none"/></svg>
+              <a href="https://www.instagram.com/emdevsolutions/"
+                target="_blank" rel="noopener"
+                aria-label="Instagram @emdevsolutions" class="ft-soc">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round" class="w-5 h-5"><rect x="3" y="3"
+                    width="18" height="18" rx="5" /><circle cx="12" cy="12"
+                    r="4" /><circle cx="17.3" cy="6.7" r="1" fill="currentColor"
+                    stroke="none" /></svg>
               </a>
             </div>
-            <a href="https://www.instagram.com/emdevsolutions/" target="_blank" rel="noopener" class="ft-a mt-4 text-sm">@emdevsolutions</a>
+            <a href="https://www.instagram.com/emdevsolutions/" target="_blank"
+              rel="noopener" class="ft-a mt-4 text-sm">@emdevsolutions</a>
           </div>
         </div>
       </div>
 
       <div class="relative border-t border-white/5 py-6 px-5">
-        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-slate-500">
-          <div>© <span id="year"></span> EM Development. All rights reserved.</div>
-          <div class="flex items-center gap-2">Crafted with <span class="ft-heart" aria-label="love">♥</span> in the Philippines</div>
+        <div
+          class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-slate-500">
+          <div>© <span id="year"></span> EM Development. All rights
+            reserved.</div>
+          <div class="flex items-center gap-2">Crafted with <span
+              class="ft-heart" aria-label="love">♥</span> in the
+            Philippines</div>
         </div>
       </div>
 
       <!-- Back to top with scroll progress -->
       <button type="button" id="ftTop" class="ft-top" aria-label="Back to top">
-        <svg viewBox="0 0 48 48" class="ft-top-ring" aria-hidden="true"><circle cx="24" cy="24" r="21" class="ft-top-bg"/><circle id="ftTopArc" cx="24" cy="24" r="21" class="ft-top-arc"/></svg>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" class="ft-top-arrow"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        <svg viewBox="0 0 48 48" class="ft-top-ring" aria-hidden="true"><circle
+            cx="24" cy="24" r="21" class="ft-top-bg" /><circle id="ftTopArc"
+            cx="24" cy="24" r="21" class="ft-top-arc" /></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"
+          class="ft-top-arrow"><path d="M12 19V5M5 12l7-7 7 7" /></svg>
       </button>
     </footer>
 
@@ -5520,8 +5927,8 @@
       if (m && P[m[1]]) open(m[1], null);
     })();
   </script>
-  
-  <script>
+
+    <script>
     (function () {
       const w = document.getElementById('work');
       if (!w) return;
@@ -5544,7 +5951,7 @@
       w.classList.add('ps');
 
       const mq = matchMedia('(max-width: 1023px)');
-      const colors = ['#fbbf24', '#facc15', '#22d3ee', '#34d399', '#7c8cff', '#f472b6'];
+      const colors = ['#fbbf24', '#facc15', 'rgb(var(--aqua))', '#34d399', 'rgb(var(--b400))', 'rgb(var(--pink))'];
       const rail = document.createElement('div');
       rail.className = 'ps-rail';
       const btns = cards.map((c, i) => {
@@ -5644,7 +6051,7 @@
     })();
   </script>
 
-  <script>
+    <script>
     (function () {
       const map = document.getElementById('tmap');
       if (!map) return;
@@ -5677,7 +6084,7 @@
       }, 2800);
     })();
   </script>
-  <script>
+    <script>
     // Contact section interactions
     (function () {
       const sec = document.getElementById('contact');
@@ -5707,7 +6114,7 @@
       }
       function burst(x, y) {
         if (calm) return;
-        const cols = ['#7c8cff', '#22d3ee', '#f472b6', '#34d399', '#fbbf24'];
+        const cols = ['rgb(var(--b400))', 'rgb(var(--aqua))', 'rgb(var(--pink))', '#34d399', '#fbbf24'];
         for (let i = 0; i < 16; i++) {
           const s = document.createElement('span');
           s.className = 'ct-spark';
@@ -5764,7 +6171,7 @@
     })();
   </script>
 
-  <script>
+    <script>
     // Footer interactions
     (function () {
       const f = document.querySelector('footer.ft');
@@ -5804,6 +6211,159 @@
       top.addEventListener('click', () => scrollTo({ top: 0, behavior: 'smooth' }));
     })();
   </script>
-</body>
+
+    <style id="fxReal">
+/* ===== Realistic seasonal effects ===== */
+#fxScene{position:fixed;inset:0;pointer-events:none;z-index:55;overflow:hidden}
+/* Christmas: hanging string lights + Santa hat */
+.fx-hat{width:26px;height:22px;background:center/contain no-repeat;font-size:0;top:-15px;left:-8px}
+#fxLights{height:46px;overflow:hidden;padding:0}
+#fxLights::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(255,170,90,.12),transparent)}
+#fxLights svg{position:absolute;left:0;top:0}
+#fxLights i{position:absolute;margin:0 0 0 -4.5px;width:9px;height:15px;transform-origin:50% 0;border-radius:50% 50% 46% 46%/32% 32% 68% 68%;
+  background:radial-gradient(ellipse at 35% 30%,rgba(255,255,255,.85),transparent 32%),var(--c);box-shadow:0 0 10px 2px var(--c);animation:fxTwinkle 2.4s ease-in-out infinite}
+#fxLights i::before{content:"";position:absolute;left:1.5px;top:-4px;width:6px;height:5px;border-radius:1px;background:linear-gradient(90deg,#1b2a20,#4b6a55,#1b2a20)}
+html[data-theme=christmas] #nav{top:24px !important}
+@keyframes fxTwinkle{0%,100%{opacity:1;filter:brightness(1.15)}50%{opacity:.55;filter:brightness(.8)}}
+/* Halloween / Undas: drifting fog, candlelight flicker, cobwebs, bats */
+.fx-fog{position:absolute;left:-20%;bottom:0;width:140%;height:40%;filter:blur(20px);background:radial-gradient(ellipse at 20% 85%,rgba(200,180,225,.17),transparent 55%),radial-gradient(ellipse at 75% 95%,rgba(200,180,225,.14),transparent 60%);animation:fxFog 46s ease-in-out infinite alternate}
+.fx-fog.b{height:30%;opacity:.8;animation-duration:64s;animation-direction:alternate-reverse}
+.fx-glow{position:absolute;bottom:-150px;width:460px;height:460px;border-radius:50%;background:radial-gradient(circle,rgba(255,140,40,.22),transparent 65%);animation:fxFlick 3.4s linear infinite}
+.fx-glow.l{left:-170px}
+.fx-glow.r{right:-170px;animation-delay:-1.7s}
+.fx-web{position:absolute;top:0;left:0;width:130px;height:130px;opacity:.45}
+.fx-web.r{left:auto;right:0;transform:scaleX(-1)}
+.fx-bat{position:absolute;top:0;left:0;will-change:transform}
+.fx-bat svg{display:block;width:100%;animation:fxFlap .28s ease-in-out infinite alternate}
+@keyframes fxFog{from{transform:translateX(-7%)}to{transform:translateX(7%)}}
+@keyframes fxFlick{0%,100%{opacity:.9}7%{opacity:.6}12%{opacity:1}30%{opacity:.75}41%{opacity:.95}55%{opacity:.62}70%{opacity:1}86%{opacity:.8}}
+@keyframes fxFlap{to{transform:scaleY(.45)}}
+/* Summer: warm sun with slowly turning light rays */
+.fx-sun{position:absolute;top:-200px;right:-200px;width:560px;height:560px;border-radius:50%;background:radial-gradient(circle,rgba(255,236,170,.55),rgba(255,190,90,.22) 32%,transparent 66%)}
+.fx-sun::after{content:"";position:absolute;inset:-70%;background:repeating-conic-gradient(rgba(255,226,140,.10) 0 5deg,transparent 5deg 15deg);-webkit-mask:radial-gradient(circle,#000,transparent 58%);mask:radial-gradient(circle,#000,transparent 58%);animation:fxSpin 140s linear infinite}
+@keyframes fxSpin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){#fxLights i,.fx-fog,.fx-glow,.fx-bat svg,.fx-sun::after{animation:none}}
+</style>
+    <div id="fxLights" aria-hidden="true"></div>
+    <canvas id="fxCanvas" aria-hidden="true"></canvas>
+    <script>
+// Seasonal theme engine v2: realistic effects, theme follows today's date automatically
+(function(){
+  var root=document.documentElement,season=window.__season,cur=season(),
+  calm=matchMedia('(prefers-reduced-motion: reduce)').matches,
+  cv=document.getElementById('fxCanvas'),x=cv.getContext('2d'),w,h,P=[],R=[],raf,next=0,batT,
+  rnd=function(a,b){return a+Math.random()*(b-a)},
+  sc=document.createElement('div');
+  sc.id='fxScene';sc.setAttribute('aria-hidden','true');document.body.appendChild(sc);
+  var HAT="<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 34'><path d='M6 27C7 12 17 4 31 5c-5 4-5 11-2 17l6 5z' fill='rgb(214,32,45)'/><path d='M6 27C9 20 12 14 20 10' stroke='rgb(150,15,30)' stroke-width='2' fill='none' opacity='.5'/><rect x='3' y='24' width='34' height='9' rx='4.5' fill='white'/><circle cx='31' cy='6' r='4.5' fill='white'/></svg>";
+  var BAT='<svg viewBox="0 0 60 24"><path fill="#0b0712" d="M30 8L27 2L25 9C19 4 9 3 1 7C6 9 8 13 8 17C12 13 16 13 19 17C22 14 26 14 30 20C34 14 38 14 41 17C44 13 48 13 52 17C52 13 54 9 59 7C51 3 41 4 35 9L33 2Z"/></svg>';
+  var COL=['#b45309','#c2410c','#92400e','#d97706','#7c2d12','#a16207'];
+  function size(){var d=Math.min(devicePixelRatio||1,2);w=innerWidth;h=innerHeight;cv.width=w*d;cv.height=h*d;x.setTransform(d,0,0,d,0,0)}
+  function light(){return root.classList.contains('light')}
+
+  // ---- particles ----
+  function mk(fresh){
+    var p={x:rnd(0,w),y:fresh?-20:rnd(0,h),a:rnd(0,6.28)};
+    if(cur==='christmas'){p.z=Math.random();p.r=.7+p.z*p.z*3;p.v=.3+p.z*1.2;p.s=rnd(.008,.025)}
+    else if(cur==='halloween'){p.r=rnd(6,11);p.v=rnd(.5,1.2);p.s=rnd(.012,.03);p.rot=rnd(0,6.28);p.vr=rnd(-.03,.03);p.f=rnd(0,6.28);p.vf=rnd(.03,.07);p.col=COL[Math.floor(rnd(0,COL.length))]}
+    else{p.r=rnd(5,26);p.v=-rnd(.08,.3);p.s=rnd(.003,.012);p.al=rnd(.05,.16);p.y=fresh?h+30:rnd(0,h)}
+    return p}
+  function launch(){var ty=rnd(h*.1,h*.45);R.push({x:rnd(w*.15,w*.85),y:h+8,vx:rnd(-.5,.5),vy:-Math.sqrt(.24*(h-ty)),hue:[45,48,335,200,280,20][Math.floor(rnd(0,6))]})}
+  function burst(r){var n=Math.round(rnd(60,95)),ring=Math.random()<.4,sp=rnd(2.2,3.6),a,v;
+    for(var i=0;i<n;i++){a=rnd(0,6.283);v=ring?sp:sp*Math.sqrt(Math.random());
+      P.push({x:r.x,y:r.y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:1,d:rnd(.009,.017),hue:r.hue+rnd(-12,12)})}}
+  function seed(){
+    P=[];R=[];x.clearRect(0,0,w,h);if(calm)return;
+    var base=Math.min(110,innerWidth/12),n=0,i;
+    if(cur==='christmas')n=base;else if(cur==='halloween')n=base*.22;else if(cur==='summer')n=base*.35;
+    for(i=0;i<n;i++)P.push(mk(0));
+    if(cur==='newyear'){launch();setTimeout(launch,500)}}
+
+  function loop(t){
+    raf=requestAnimationFrame(loop);
+    var wind=Math.sin(t/4200)*.45+Math.sin(t/1500)*.15,lt=light();
+    if(cur==='newyear'){
+      x.globalCompositeOperation='destination-out';x.fillStyle='rgba(0,0,0,.2)';x.fillRect(0,0,w,h);
+      x.globalCompositeOperation='lighter';
+      if(t>next&&!document.hidden){launch();next=t+rnd(900,2000)}
+      R=R.filter(function(r){r.x+=r.vx;r.y+=r.vy;r.vy+=.12;
+        x.fillStyle='hsl('+r.hue+',100%,80%)';x.beginPath();x.arc(r.x,r.y,1.8,0,6.283);x.fill();
+        if(r.vy>-.6){burst(r);return false}return true});
+      P=P.filter(function(p){p.vx*=.985;p.vy=p.vy*.985+.04;p.x+=p.vx;p.y+=p.vy;p.l-=p.d;if(p.l<=0)return false;
+        x.fillStyle='hsla('+p.hue+',100%,'+(55+p.l*20)+'%,'+p.l+')';x.beginPath();x.arc(p.x,p.y,.6+1.6*p.l,0,6.283);x.fill();return true});
+      x.globalCompositeOperation='source-over';return}
+    x.clearRect(0,0,w,h);
+    if(cur==='christmas'){
+      var c=lt?'105,135,180':'255,255,255';
+      P.forEach(function(p){p.y+=p.v;p.a+=p.s;p.x+=Math.sin(p.a)*.35*(.4+p.z)+wind*(.3+p.z);
+        if(p.y>h+10){p.y=-10;p.x=rnd(0,w)}if(p.x>w+10)p.x=-10;else if(p.x<-10)p.x=w+10;
+        var al=.5+p.z*.4,g=x.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*2);
+        g.addColorStop(0,'rgba('+c+','+al+')');g.addColorStop(.45,'rgba('+c+','+al*.8+')');g.addColorStop(1,'rgba('+c+',0)');
+        x.fillStyle=g;x.beginPath();x.arc(p.x,p.y,p.r*2,0,6.283);x.fill()})}
+    else if(cur==='halloween'){
+      P.forEach(function(p){p.y+=p.v;p.a+=p.s;p.x+=Math.sin(p.a)*1.1+wind*1.4;p.rot+=p.vr;p.f+=p.vf;
+        if(p.y>h+20||p.x>w+30||p.x<-30)Object.assign(p,mk(1));
+        x.save();x.translate(p.x,p.y);x.rotate(p.rot);x.scale(1,Math.cos(p.f));x.globalAlpha=.85;x.fillStyle=p.col;
+        x.beginPath();x.moveTo(0,-p.r);x.bezierCurveTo(p.r*.9,-p.r*.4,p.r*.7,p.r*.6,0,p.r);x.bezierCurveTo(-p.r*.7,p.r*.6,-p.r*.9,-p.r*.4,0,-p.r);x.fill();
+        x.strokeStyle='rgba(0,0,0,.3)';x.beginPath();x.moveTo(0,-p.r);x.lineTo(0,p.r);x.stroke();x.restore()})}
+    else if(cur==='summer'){
+      var mc=lt?'255,160,50':'255,214,140',k=lt?1.6:1;
+      x.globalCompositeOperation='lighter';
+      P.forEach(function(p){p.y+=p.v;p.a+=p.s*10;p.x+=Math.sin(p.a)*.25+wind*.3;
+        if(p.y<-40)Object.assign(p,mk(1));
+        var g=x.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);g.addColorStop(0,'rgba('+mc+','+p.al*k+')');g.addColorStop(1,'rgba('+mc+',0)');
+        x.fillStyle=g;x.beginPath();x.arc(p.x,p.y,p.r,0,6.283);x.fill()});
+      x.globalCompositeOperation='source-over'}}
+
+  // ---- Christmas: string lights hanging in swags ----
+  function lights(){
+    var L=document.getElementById('fxLights');L.innerHTML='';if(cur!=='christmas')return;
+    var cols=['#ff3b4a','#ffd24a','#3ddc84','#4aa8ff'],seg=Math.max(120,Math.min(190,innerWidth/6)),n=Math.ceil(innerWidth/seg),sag=15,d='M0 2',b='',k=0,i,j,t,px,py,ang;
+    for(i=0;i<n;i++){
+      d+='Q'+(i*seg+seg/2)+' '+(2+sag*2)+' '+(i+1)*seg+' 2';
+      for(j=1;j<=4;j++){t=j/5;px=i*seg+t*seg;py=2+4*sag*t*(1-t);ang=Math.atan(4*sag*(1-2*t)/seg)*57.3;
+        b+='<i style="left:'+px.toFixed(1)+'px;top:'+py.toFixed(1)+'px;--c:'+cols[k%4]+';transform:rotate('+ang.toFixed(1)+'deg);animation-delay:-'+((k%5)*.5)+'s"></i>';k++}}
+    L.innerHTML='<svg width="'+n*seg+'" height="'+(sag*2+4)+'"><path d="'+d+'" fill="none" stroke="#35523f" stroke-width="1.6"/></svg>'+b}
+
+  // ---- Halloween: cobwebs + bats; Summer: sun ----
+  function web(){
+    var s='<svg viewBox="0 0 120 120" fill="none" stroke="rgba(255,255,255,.55)" stroke-width=".8">',
+    a=[0,22.5,45,67.5,90].map(function(g){return g/57.3});
+    a.forEach(function(g){s+='<path d="M0 0L'+(120*Math.cos(g)).toFixed(1)+' '+(120*Math.sin(g)).toFixed(1)+'"/>'});
+    [26,50,74,98].forEach(function(r){var d='',i,X,Y,m;
+      for(i=0;i<a.length;i++){X=r*Math.cos(a[i]);Y=r*Math.sin(a[i]);
+        if(i){m=(a[i]+a[i-1])/2;d+='Q'+(r*.82*Math.cos(m)).toFixed(1)+' '+(r*.82*Math.sin(m)).toFixed(1)+' '+X.toFixed(1)+' '+Y.toFixed(1)}
+        else d+='M'+X.toFixed(1)+' '+Y.toFixed(1)}
+      s+='<path d="'+d+'"/>'});
+    return s+'</svg>'}
+  function bat(){
+    var b=document.createElement('div'),dir=Math.random()<.5?1:-1,s=rnd(.6,1.3),ph=rnd(0,6),amp=rnd(20,60),K=[],n=6,i,px;
+    b.className='fx-bat';b.innerHTML=BAT;b.style.top=rnd(.08,.5)*h+'px';b.style.width=46*s+'px';
+    for(i=0;i<=n;i++){px=dir>0?-80+(w+160)*i/n:w+80-(w+160)*i/n;
+      K.push({transform:'translate('+px.toFixed(0)+'px,'+(Math.sin(i*1.7+ph)*amp).toFixed(0)+'px) scaleX('+dir+')'})}
+    sc.appendChild(b);b.animate(K,{duration:rnd(6500,10000),easing:'linear'}).onfinish=function(){b.remove()}}
+  function bats(){clearTimeout(batT);if(cur!=='halloween'||calm)return;
+    batT=setTimeout(function(){if(!document.hidden)bat();bats()},rnd(5000,12000))}
+  function scene(){
+    sc.innerHTML='';clearTimeout(batT);
+    if(cur==='halloween'){sc.innerHTML='<div class="fx-fog"></div><div class="fx-fog b"></div><div class="fx-glow l"></div><div class="fx-glow r"></div><div class="fx-web">'+web()+'</div><div class="fx-web r">'+web()+'</div>';bats()}
+    else if(cur==='summer')sc.innerHTML='<div class="fx-sun"></div>'}
+
+  var logo=document.querySelector('#nav a[href="#home"] > span'),hat=document.createElement('span');hat.className='fx-hat';
+  if(logo){logo.style.position='relative';logo.appendChild(hat)}
+  function apply(){
+    cur=season();
+    if(cur==='default')root.removeAttribute('data-theme');else root.setAttribute('data-theme',cur);
+    hat.style.display=cur==='christmas'?'block':'none';
+    hat.style.backgroundImage=cur==='christmas'?'url("data:image/svg+xml,'+encodeURIComponent(HAT)+'")':'none';
+    scene();lights();seed();cancelAnimationFrame(raf);next=0;
+    if(!calm&&cur!=='default')raf=requestAnimationFrame(loop)}
+  size();addEventListener('resize',function(){size();seed();lights()});
+  apply();
+  // flip automatically if the page stays open across a season change
+  setInterval(function(){if(season()!==cur)apply()},60000);
+})();
+</script>
+  </body>
 
 </html>
