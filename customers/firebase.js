@@ -399,7 +399,7 @@ function watchMaint() {
 
 // ---------- view ----------
 function ring(v) {
-  return `<div class="relative w-28 h-28 shrink-0"><svg viewBox="0 0 36 36" class="w-28 h-28 -rotate-90"><defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#5b6cff"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><circle cx="18" cy="18" r="15.5" fill="none" stroke="currentColor" stroke-opacity=".12" stroke-width="3.2"/><circle class="ring" cx="18" cy="18" r="15.5" fill="none" stroke="url(#g)" stroke-width="3.2" stroke-linecap="round" stroke-dasharray="${(v * 97.4 / 100).toFixed(1)} 97.4"/></svg><div class="absolute inset-0 flex items-center justify-center font-extrabold text-xl">${v}%</div></div>`;
+  return `<div class="relative w-28 h-28 shrink-0"><svg viewBox="0 0 36 36" class="w-28 h-28 -rotate-90"><defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#d4343f"/><stop offset="1" stop-color="#3ddc97"/></linearGradient></defs><circle cx="18" cy="18" r="15.5" fill="none" stroke="currentColor" stroke-opacity=".12" stroke-width="3.2"/><circle class="ring" cx="18" cy="18" r="15.5" fill="none" stroke="url(#g)" stroke-width="3.2" stroke-linecap="round" stroke-dasharray="${(v * 97.4 / 100).toFixed(1)} 97.4"/></svg><div class="absolute inset-0 flex items-center justify-center font-extrabold text-xl">${v}%</div></div>`;
 }
 function projectCard(p) {
   const s = status(p), v = pct(p), nextIdx = p.items.findIndex(m => !m.d);
@@ -433,7 +433,7 @@ function render() {
   const mailSubj = encodeURIComponent('Question about my website | ' + (PORTAL.company || PORTAL.name || ''));
   const overviewV = () => {
     const name = PORTAL.name || U.displayName || U.email.split('@')[0];
-    const hr = new Date().getHours(), hello = hr < 5 ? 'Still up' : hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening';
+    const hr = new Date().getHours(), md = new Date().getMonth() * 100 + new Date().getDate(), hello = md >= 1224 && md <= 1226 ? 'Merry Christmas' : md === 1231 || md === 100 ? 'Happy New Year' : hr < 5 ? 'Still up' : hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening';
     const todayTxt = new Date().toLocaleDateString('en', { weekday: 'long', month: 'long', day: 'numeric' });
     const ph = s => '-' + ((Date.now() / 1000) % s).toFixed(2) + 's';   // keeps the slow animations in phase when the page redraws
     const inProg = ps.filter(p => status(p) === 'active').length;
@@ -442,7 +442,7 @@ function render() {
       : finished === ps.length ? 'Your website has been delivered. Thank you for trusting us.'
       : all.length ? done + ' of ' + all.length + ' items are complete across ' + plur(ps.length, 'project') + '.' : 'Items will appear here once your project starts.';
     const chip = (c, t) => `<span class="ov-chip"><i style="background:${c}"></i>${t}</span>`;
-    const chips = [PORTAL.company ? chip('#7c8cff', esc(PORTAL.company)) : '', target ? chip('#22d3ee', 'Target ' + esc(fmtD(target))) : '', finished ? chip('#34d399', finished + ' delivered') : ''].join('');
+    const chips = [PORTAL.company ? chip('#ff8f8f', esc(PORTAL.company)) : '', target ? chip('#3ddc97', 'Target ' + esc(fmtD(target))) : '', finished ? chip('#34d399', finished + ' delivered') : ''].join('');
     const tile = (l, v, s, ac, ic, g) => `<div data-f class="ov-tile" style="--ac:${ac}"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="text-xs font-semibold tracking-wide text-slate-400">${l}</div><div class="stat-v mt-1.5 text-xl min-[420px]:text-2xl sm:text-[1.7rem] font-extrabold tracking-tight ${g ? 'gradient-text' : ''}">${v}</div></div><span class="ov-ico">${svgI(ic, 'w-[18px] h-[18px]')}</span></div><div class="mt-3 text-xs text-slate-400 truncate">${s}</div></div>`;
     const seg = p => { const n = Math.max(1, Math.min(12, p.items.length)), on = Math.round(pct(p) * n / 100); return `<div class="ov-seg" role="progressbar" aria-valuenow="${pct(p)}" aria-valuemin="0" aria-valuemax="100" aria-label="${esc(p.name)} progress">${Array.from({ length: n }, (_, k) => `<i class="${k < on ? 'on' : ''}"></i>`).join('')}</div>`; };
     const link = (a, t) => `<button type="button" data-act="${a}" class="ov-link">${t}<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>`;
@@ -452,9 +452,9 @@ function render() {
     const att = (ac, ic, title, subTxt, actions) => `<div class="ov-att"><span class="ov-ico" style="--ac:${ac}">${svgI(ic, 'w-[18px] h-[18px]')}</span><div class="min-w-0 flex-1" style="min-width:12rem"><div class="font-semibold">${title}</div><p class="text-sm text-slate-400 mt-0.5">${subTxt}</p></div><div class="flex items-center gap-4 shrink-0">${actions}</div></div>`;
     const todo = [];
     if (!seenPw) todo.push(att('#f59e0b', KEY, 'Secure your account', 'Please change the temporary password we gave you.', `<button data-act="pwdone" class="ov-link !text-slate-400">Dismiss</button><button data-act="gosec" class="ov-btn">Change password</button>`));
-    if (invOwed.length) todo.push(att(overdueN ? '#f87171' : '#f472b6', NAV_ICON.invoices, plur(invOwed.length, 'unpaid invoice'), `<span class="${overdueN ? 'text-red-300' : ''}">${money(owedAmt)} outstanding${overdueN ? ' &middot; ' + overdueN + ' overdue' : ''}</span>`, `<button data-act="goinv" class="ov-btn">View invoices</button>`));
-    if (subSoon.length) todo.push(att('#7c8cff', NAV_ICON.subscriptions, plur(subSoon.length, 'subscription') + ' renewing soon', esc(subSoon.slice(0, 2).map(x => x.name).join(', ')) + (subSoon.length > 2 ? ' and more' : ''), `<button data-act="gosubs" class="ov-btn">View subscriptions</button>`));
-    ps.filter(mtCanOffer).slice(0, 3).forEach(p => { const m = mtInfo(p); todo.push(att('#22d3ee', WRENCH, m.k === 'soon' ? 'Free maintenance ends in ' + plur(m.left, 'day') : 'Free maintenance has ended', esc(p.name) + ': keep your website maintained for ' + esc(money(p.mf)) + ' per month.', `<button data-act="msub" data-p="${esc(p.id)}" class="ov-btn">Subscribe</button>`)); });
+    if (invOwed.length) todo.push(att(overdueN ? '#f87171' : '#f6c453', NAV_ICON.invoices, plur(invOwed.length, 'unpaid invoice'), `<span class="${overdueN ? 'text-red-300' : ''}">${money(owedAmt)} outstanding${overdueN ? ' &middot; ' + overdueN + ' overdue' : ''}</span>`, `<button data-act="goinv" class="ov-btn">View invoices</button>`));
+    if (subSoon.length) todo.push(att('#ff8f8f', NAV_ICON.subscriptions, plur(subSoon.length, 'subscription') + ' renewing soon', esc(subSoon.slice(0, 2).map(x => x.name).join(', ')) + (subSoon.length > 2 ? ' and more' : ''), `<button data-act="gosubs" class="ov-btn">View subscriptions</button>`));
+    ps.filter(mtCanOffer).slice(0, 3).forEach(p => { const m = mtInfo(p); todo.push(att('#3ddc97', WRENCH, m.k === 'soon' ? 'Free maintenance ends in ' + plur(m.left, 'day') : 'Free maintenance has ended', esc(p.name) + ': keep your website maintained for ' + esc(money(p.mf)) + ' per month.', `<button data-act="msub" data-p="${esc(p.id)}" class="ov-btn">Subscribe</button>`)); });
     const attn = todo.length ? `<div data-f class="${card} mt-4"><div class="flex items-center gap-2.5 mb-1"><div class="font-bold">Needs your attention</div><span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-pink/15 text-pink">${todo.length}</span></div><div class="ov-att-list">${todo.join('')}</div></div>` : '';
 
     const shown = ps.slice().sort((a, b) => (a.archived ? 1 : 0) - (b.archived ? 1 : 0) || pct(b) - pct(a)).slice(0, 5);
@@ -476,13 +476,13 @@ function render() {
         </div>
         <div class="ov-orbit shrink-0 self-center" style="--ph:${ph(24)}">
           <div class="ov-orbit-ring"><i></i></div>
-          <svg viewBox="0 0 36 36" class="ov-orbit-svg" role="img" aria-label="Overall progress ${overall}%"><defs><linearGradient id="ovg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#7c8cff"/><stop offset=".55" stop-color="#22d3ee"/><stop offset="1" stop-color="#f472b6"/></linearGradient></defs><circle cx="18" cy="18" r="15.5" fill="none" stroke="currentColor" stroke-opacity=".12" stroke-width="2.6"/><circle class="ring" cx="18" cy="18" r="15.5" fill="none" stroke="url(#ovg)" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="${(overall * 97.4 / 100).toFixed(1)} 97.4"/></svg>
+          <svg viewBox="0 0 36 36" class="ov-orbit-svg" role="img" aria-label="Overall progress ${overall}%"><defs><linearGradient id="ovg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#ff8f8f"/><stop offset=".55" stop-color="#3ddc97"/><stop offset="1" stop-color="#f6c453"/></linearGradient></defs><circle cx="18" cy="18" r="15.5" fill="none" stroke="currentColor" stroke-opacity=".12" stroke-width="2.6"/><circle class="ring" cx="18" cy="18" r="15.5" fill="none" stroke="url(#ovg)" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="${(overall * 97.4 / 100).toFixed(1)} 97.4"/></svg>
           <div class="absolute inset-0 flex flex-col items-center justify-center"><div class="text-3xl sm:text-4xl font-extrabold tracking-tight">${overall}<span class="text-lg text-slate-400">%</span></div><div class="text-[11px] font-semibold uppercase tracking-[.18em] text-slate-400">complete</div></div>
         </div>
       </div>
     </section>
     ${attn}
-    <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">${tile('Items done', done + ' / ' + all.length, overall + '% complete', '#7c8cff', CHECK, 1)}${tile('Projects', ps.length, inProg + ' in progress', '#22d3ee', NAV_ICON.projects)}${tile('Delivered', finished, 'of ' + ps.length + (ps.length === 1 ? ' project' : ' projects'), '#34d399', 'M5 12.5l4.5 4.5L19 7.5')}${tile('Balance due', money(owedAmt), invOwed.length ? plur(invOwed.length, 'unpaid invoice') : invAll.length ? 'All paid up' : 'No invoices yet', '#f472b6', NAV_ICON.invoices)}</div>
+    <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">${tile('Items done', done + ' / ' + all.length, overall + '% complete', '#ff8f8f', CHECK, 1)}${tile('Projects', ps.length, inProg + ' in progress', '#3ddc97', NAV_ICON.projects)}${tile('Delivered', finished, 'of ' + ps.length + (ps.length === 1 ? ' project' : ' projects'), '#34d399', 'M5 12.5l4.5 4.5L19 7.5')}${tile('Balance due', money(owedAmt), invOwed.length ? plur(invOwed.length, 'unpaid invoice') : invAll.length ? 'All paid up' : 'No invoices yet', '#f6c453', NAV_ICON.invoices)}</div>
     <div class="mt-4 grid lg:grid-cols-[1.35fr_1fr] gap-4">
       <div data-f class="${card}"><div class="flex items-center justify-between gap-3 mb-1"><div class="font-bold">Project progress</div>${ps.length ? link('goproj', 'View details') : ''}</div><div class="ov-rows">${rows}</div></div>
       ${upd}
@@ -962,10 +962,17 @@ const root = document.documentElement, themeBtn = $('#themeBtn');
 const syncTheme = () => themeBtn.setAttribute('aria-label', root.classList.contains('light') ? 'Switch to dark mode' : 'Switch to light mode');
 syncTheme();
 themeBtn.addEventListener('click', () => {
-  root.classList.add('theme-switching');
-  const light = root.classList.toggle('light');
-  try { localStorage.setItem('theme', light ? 'light' : 'dark'); } catch (e) {}
-  syncTheme(); clearTimeout(window.__tt); window.__tt = setTimeout(() => root.classList.remove('theme-switching'), 650);
+  const flip = () => { const light = root.classList.toggle('light'); try { localStorage.setItem('theme', light ? 'light' : 'dark'); } catch (e) {} syncTheme(); };
+  if (!document.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    root.classList.add('theme-switching'); flip(); clearTimeout(window.__tt); window.__tt = setTimeout(() => root.classList.remove('theme-switching'), 650); return;
+  }
+  // theme change spreads across the whole page from the toggle button
+  const r = themeBtn.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+  const rad = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+  root.classList.add('vt');
+  const t = document.startViewTransition(flip);
+  t.finished.finally(() => root.classList.remove('vt'));
+  t.ready.then(() => root.animate({ clipPath: ['circle(0px at ' + x + 'px ' + y + 'px)', 'circle(' + rad + 'px at ' + x + 'px ' + y + 'px)'] }, { duration: 650, easing: 'cubic-bezier(.4,0,.2,1)', pseudoElement: '::view-transition-new(root)' })).catch(() => {});
 });
 document.querySelectorAll('[data-leave]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); leave(a.getAttribute('href')); }));
 $('#logoutBtn').addEventListener('click', async () => {

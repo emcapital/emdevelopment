@@ -132,7 +132,7 @@ function projCard(p) {
         <div data-slot data-k="${slotKey(p)}">${actHtml(p)}</div></div>`;
 }
 // ---------- list helpers (quotations + invoices) ----------
-const pillCls = on => 'flex-1 sm:flex-none text-center whitespace-nowrap px-3 sm:px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 ' + (on ? 'bg-brand-500 text-white' : 'glass text-slate-300 hover:text-white');
+const pillCls = on => 'flex-auto sm:flex-none text-center whitespace-nowrap px-3 sm:px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 ' + (on ? 'bg-brand-500 text-white' : 'glass text-slate-300 hover:text-white');
 // fade a card out, then close the gap it leaves
 function collapseOut(n) {
   if (n._gone) return; n._gone = true;
@@ -1091,7 +1091,7 @@ const views = {
     const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
     const sub = !P.length ? 'Your workspace is ready. Start a project and it will light up here.'
       : act ? `${plural(act, 'project')} in motion, ${overall}% of all inclusions delivered.` : 'No project is in motion right now. Tick an inclusion to start one.';
-    const chip = (c, t) => `<span class="ov-chip"><i style="background:${c}"></i>${t}</span>`;
+    const chip = (c, t, wide) => `<span class="ov-chip${wide ? ' w-full sm:w-auto' : ''}"><i style="background:${c}"></i>${t}</span>`;
     const dueTxt = p => {
       if (!p.due) return { t: 'No target date', late: false };
       const t = new Date(/^\d{4}-\d\d-\d\d$/.test(p.due) ? p.due + 'T00:00:00' : p.due); if (isNaN(t)) return { t: 'No target date', late: false };
@@ -1112,7 +1112,7 @@ const views = {
           <div class="ov-eyebrow"><span class="ov-live"></span>${esc(today)}</div>
           <h2 class="mt-3 text-[1.65rem] sm:text-4xl font-extrabold tracking-tight leading-[1.1]">${hello},<br><span class="gradient-text break-words">${esc(name)}</span></h2>
           <p class="mt-3 text-sm sm:text-base text-slate-400 max-w-md">${esc(sub)}</p>
-          <div class="mt-5 flex flex-wrap gap-2">${chip('#22d3ee', plural(act, 'active project'))}${chip('#f472b6', unpaidInv.length + ' awaiting payment')}${chip('#7c8cff', plural(toMail, 'quote') + ' to email')}</div>
+          <div class="mt-5 flex flex-wrap gap-2">${chip('#22d3ee', plural(act, 'active project'))}${chip('#f472b6', unpaidInv.length + ' awaiting payment')}${chip('#7c8cff', plural(toMail, 'quote') + ' to email', 1)}</div>
         </div>
         <div class="ov-orbit shrink-0 self-center" style="--ph:${ph(24)}">
           <div class="ov-orbit-ring"><i></i></div>
