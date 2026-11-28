@@ -1946,6 +1946,31 @@ window.__season=function(d){d=d||new Date();var m=d.getMonth()+1,n=d.getDate();
       color: rgb(var(--d1));
     }
 
+    /* Project detail: solid header bar + no theme stripe leaking into the stat grid */
+    #projModal #pmHead {
+      background: rgb(var(--ink));
+      border-bottom: 1px solid rgba(255, 255, 255, .08);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+
+    html.light #projModal #pmHead {
+      background: rgb(var(--txt2));
+      border-bottom-color: rgba(0, 0, 0, .08);
+    }
+
+    /* Built with: chips stretch so each row fills the full width */
+    #projModal .pm-chip {
+      flex: 1 1 auto;
+      text-align: center;
+    }
+
+    #projModal section::before,
+    #projModal section::after {
+      content: none !important;
+      display: none !important;
+    }
+
     html.light #projModal .btn-solid {
       color: #fff;
     }
@@ -4225,8 +4250,7 @@ html[data-theme=summer] ::-webkit-scrollbar-thumb{background:linear-gradient(#f9
 
           <!-- ORIEL ARCHITECTS PROJECT -->
           <div data-fade class="mt-6">
-            <a href="../projects/architecture/home.html"
-              aria-label="View Oriel Architects project"
+            <article data-project="oriel" tabindex="0" role="button" aria-label="View Oriel Architects project"
               class="proj-card group glass rounded-[2rem] overflow-hidden spot grid lg:grid-cols-[1fr_1.35fr]">
               <div
                 class="relative min-h-[20rem] lg:min-h-[28rem] lg:order-2 bg-gradient-to-br from-[#16224a] via-[#0f1a3d] to-[#09090d] overflow-hidden flex items-center justify-center px-5 py-12 sm:px-10">
@@ -4283,13 +4307,12 @@ html[data-theme=summer] ::-webkit-scrollbar-thumb{background:linear-gradient(#f9
                     project <span
                       aria-hidden="true">&rarr;</span></span></div>
               </div>
-            </a>
+            </article>
           </div>
 
           <!-- STOCKSHELF INVENTORY PROJECT -->
           <div data-fade class="mt-6">
-            <a href="../projects/inventory/auth.html"
-              aria-label="View StockShelf Inventory Management project"
+            <article data-project="stockshelf" tabindex="0" role="button" aria-label="View StockShelf Inventory Management project"
               class="proj-card group glass rounded-[2rem] overflow-hidden spot grid lg:grid-cols-[1.35fr_1fr]">
               <div
                 class="relative min-h-[20rem] lg:min-h-[28rem] bg-gradient-to-br from-[#3a2a0a] via-[#1f2937] to-[#09090d] overflow-hidden flex items-center justify-center px-5 py-12 sm:px-10">
@@ -4347,13 +4370,12 @@ html[data-theme=summer] ::-webkit-scrollbar-thumb{background:linear-gradient(#f9
                     project <span
                       aria-hidden="true">&rarr;</span></span></div>
               </div>
-            </a>
+            </article>
           </div>
 
           <!-- SAKAYNA CEBU COMMUTE PROJECT -->
           <div data-fade class="mt-6">
-            <a href="../projects/commute/home.html"
-              aria-label="View SakayNa Cebu commute tracking app project"
+            <article data-project="sakayna" tabindex="0" role="button" aria-label="View SakayNa Cebu commute tracking app project"
               class="proj-card group glass rounded-[2rem] overflow-hidden spot grid lg:grid-cols-[1fr_1.35fr]">
               <div
                 class="relative min-h-[20rem] lg:min-h-[28rem] lg:order-2 bg-gradient-to-br from-[#0b2447] via-[#0f1a3d] to-[#09090d] overflow-hidden flex items-center justify-center px-5 py-12 sm:px-10">
@@ -4412,13 +4434,12 @@ html[data-theme=summer] ::-webkit-scrollbar-thumb{background:linear-gradient(#f9
                     project <span
                       aria-hidden="true">&rarr;</span></span></div>
               </div>
-            </a>
+            </article>
           </div>
 
           <!-- KPIHARBOR ANALYTICS DASHBOARD PROJECT -->
           <div data-fade class="mt-6">
-            <a href="./projects/KpiHarbor/dashboard.html"
-              aria-label="View KPIHarbor Business Analytics Dashboard project"
+            <article data-project="kpiharbor" tabindex="0" role="button" aria-label="View KPIHarbor Business Analytics Dashboard project"
               class="proj-card group glass rounded-[2rem] overflow-hidden spot grid lg:grid-cols-[1.35fr_1fr]">
               <div
                 class="relative min-h-[20rem] lg:min-h-[28rem] bg-gradient-to-br from-[#06324a] via-[#0b1e2d] to-[#09090d] overflow-hidden flex items-center justify-center px-5 py-12 sm:px-10">
@@ -4476,13 +4497,12 @@ html[data-theme=summer] ::-webkit-scrollbar-thumb{background:linear-gradient(#f9
                     project <span
                       aria-hidden="true">&rarr;</span></span></div>
               </div>
-            </a>
+            </article>
           </div>
 
           <!-- DINKLINE PICKLEBALL COURT BOOKING PROJECT -->
           <div data-fade class="mt-6">
-            <a href="./projects/dinkline/auth.html"
-              aria-label="View Dinkline pickleball court booking project"
+            <article data-project="dinkline" tabindex="0" role="button" aria-label="View Dinkline pickleball court booking project"
               class="proj-card group glass rounded-[2rem] overflow-hidden spot grid lg:grid-cols-[1.35fr_1fr]">
               <div
                 class="relative min-h-[20rem] lg:min-h-[28rem] bg-gradient-to-br from-[#0a2a3a] via-[#08151f] to-[#09090d] overflow-hidden flex items-center justify-center px-5 py-12 sm:px-10">
@@ -4538,7 +4558,7 @@ html[data-theme=summer] ::-webkit-scrollbar-thumb{background:linear-gradient(#f9
                     project <span
                       aria-hidden="true">&rarr;</span></span></div>
               </div>
-            </a>
+            </article>
           </div>
 
         </div>
@@ -5949,12 +5969,12 @@ html[data-theme=summer] ::-webkit-scrollbar-thumb{background:linear-gradient(#f9
       <div class="max-w-6xl mx-auto px-5 sm:px-8 pb-24">
         <div
           class="sticky top-0 z-10 -mx-5 sm:-mx-8 px-5 sm:px-8 py-4 flex items-center justify-between backdrop-blur-xl"
-          style="background:inherit">
+          id="pmHead">
           <button type="button" id="pmBack"
             class="inline-flex items-center gap-2 text-sm font-semibold text-slate-300 hover:text-white transition"><span
               aria-hidden="true">←</span> All projects</button>
           <button type="button" id="pmClose" aria-label="Close"
-            class="w-10 h-10 rounded-full glass flex items-center justify-center text-xl leading-none hover:rotate-90 transition-transform">×</button>
+            class="w-10 h-10 rounded-full glass flex items-center justify-center text-xl leading-none hover:rotate-90 transition-transform"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="display:block"><path d="M2 2l10 10M12 2L2 12"/></svg></button>
         </div>
         <div id="pmBody"></div>
       </div>
@@ -6046,15 +6066,117 @@ html[data-theme=summer] ::-webkit-scrollbar-thumb{background:linear-gradient(#f9
             ['Decision-ready', 'The numbers owners need, without the spreadsheets.']
           ],
           stack: ['Data visualization', 'Interactive charts', 'Multi-branch']
+        },
+        oriel: {
+          host: 'Oriel Architects',
+          cat: 'Architecture Website',
+          accent: 'text-yellow-300',
+          title: 'Oriel Architects',
+          tag: 'Designing homes, galleries and civic spaces.',
+          url: './projects/architecture/home.html',
+          intro: 'A website for a twelve-person architecture studio that designs homes, galleries and civic spaces. It pairs a blueprint-inspired hero with bold typography and a theme that switches between dark and light.',
+          stats: [['Multi-page', 'Website'], ['Dark & light', 'Theme'], ['12', 'Person studio'], ['Blueprint', 'Design style']],
+          features: [
+            ['Blueprint-inspired hero', 'An opening section that borrows the look of an architect\'s drawing.'],
+            ['Bold typography', 'Large, confident headlines that give the studio a strong voice.'],
+            ['Dark & light theme', 'Visitors can switch the whole site between dark and light mode.'],
+            ['Multi-page website', 'A complete website with its own pages, not just a single landing page.'],
+            ['Made for a studio', 'Written around a twelve-person team and the way they work.'],
+            ['Homes, galleries & civic spaces', 'The kinds of projects the studio designs, presented front and centre.']
+          ],
+          stack: ['Multi-page', 'Dark & light mode', 'Blueprint design', 'Bold typography']
+        },
+        stockshelf: {
+          host: 'StockShelf · Stock overview',
+          cat: 'Web System',
+          accent: 'text-amber-300',
+          title: 'StockShelf',
+          tag: 'Inventory management, always up to date.',
+          url: './projects/inventory/auth.html',
+          intro: 'An inventory management platform with a live stock overview, low-stock alerts, recent orders and supplier tracking. A built-in guided tour helps new users find their way, all in a bold dark and light interface.',
+          stats: [['Live', 'Stock overview'], ['Alerts', 'Low stock'], ['Orders', 'Recent activity'], ['Tour', 'Guided']],
+          features: [
+            ['Live stock overview', 'Products tracked, units in stock and low-stock items at a glance.'],
+            ['Low-stock alerts', 'Spot items that are running out before they cause a problem.'],
+            ['Recent orders', 'See the latest orders as they come in.'],
+            ['Supplier tracking', 'Keep track of suppliers alongside the stock they provide.'],
+            ['Guided tour', 'A built-in walkthrough that shows new users around the dashboard.'],
+            ['Dark & light interface', 'A bold look that works in both dark and light mode.']
+          ],
+          stack: ['Dashboard', 'Orders & suppliers', 'Dark & light mode', 'Guided tour']
+        },
+        sakayna: {
+          host: 'SakayNa Cebu · Landing page',
+          cat: 'Commute App Website',
+          accent: 'text-sky-300',
+          title: 'SakayNa Cebu',
+          tag: 'Know when your jeepney or bus arrives.',
+          url: './projects/commute/home.html',
+          intro: 'A landing page and live demo for a jeepney and bus tracking app for Cebu City commuters. It features an animated map, arrival countdowns, a nearest-stop finder and a waitlist signup.',
+          stats: [['Live', 'Map demo'], ['Countdown', 'Arrival times'], ['Nearest', 'Stop finder'], ['Waitlist', 'Signup']],
+          features: [
+            ['Live map demo', 'An animated map showing jeepneys and buses moving around the city.'],
+            ['Arrival countdowns', 'Clear countdowns so commuters know how long they have to wait.'],
+            ['Nearest-stop finder', 'Helps riders find the closest stop to where they are.'],
+            ['Waitlist signup', 'A signup modal that collects early interest in the app.'],
+            ['Animated experience', 'Motion that shows how the app works before it is even launched.'],
+            ['Made for Cebu City', 'Built around the jeepney and bus routes commuters use every day.']
+          ],
+          stack: ['Live map demo', 'Arrival countdowns', 'Waitlist modal', 'Animated']
+        },
+        kpiharbor: {
+          host: 'KPIHarbor · Business overview',
+          cat: 'Analytics Dashboard',
+          accent: 'text-sky-300',
+          title: 'KPIHarbor',
+          tag: 'Turn your own numbers into live charts.',
+          url: './projects/KpiHarbor/dashboard.html',
+          intro: 'A business analytics dashboard that turns your own numbers into live charts. Add records by hand or upload JSON, Excel and CSV files, with animated metrics, a guided tour and a light and dark mode that spreads across the whole page.',
+          stats: [['Live', 'Charts'], ['3', 'Import formats'], ['Guided', 'Tour'], ['Dark & light', 'Theme']],
+          features: [
+            ['Live charts', 'Revenue, expenses, profit and more, drawn from your own data.'],
+            ['Add records by hand', 'Enter figures directly in the dashboard whenever you need to.'],
+            ['JSON, Excel & CSV import', 'Upload your existing files and see them as charts straight away.'],
+            ['Animated metrics', 'Key numbers such as revenue, orders and profit margin come to life on screen.'],
+            ['Guided tour', 'A built-in walkthrough that introduces each part of the dashboard.'],
+            ['Dark & light mode', 'A theme switch that spreads smoothly across the whole page.']
+          ],
+          stack: ['Live charts', 'JSON, Excel & CSV import', 'Dark & light mode', 'Guided tour']
+        },
+        dinkline: {
+          host: 'Dinkline · Customer home',
+          cat: 'Court Booking App',
+          accent: 'text-lime-300',
+          title: 'Dinkline',
+          tag: 'Book a pickleball court in a few taps.',
+          url: './projects/dinkline/auth.html',
+          intro: 'A pickleball court booking app where players pick a day up to a week ahead, reserve a court, and keep track of their games, monthly hours and membership from one clean dashboard, in dark and light mode.',
+          stats: [['7 days', 'Booking window'], ['Courts', 'Reserve online'], ['Hours', 'Tracked monthly'], ['Dark & light', 'Theme']],
+          features: [
+            ['Court booking', 'Pick a day up to a week ahead and reserve a court.'],
+            ['My bookings', 'Keep track of upcoming games and past bookings in one place.'],
+            ['Monthly hours', 'See how many hours you have played this month.'],
+            ['Membership', 'Check membership details right from the dashboard.'],
+            ['One clean dashboard', 'Next game, games played and upcoming bookings all on the home screen.'],
+            ['Dark & light mode', 'Switch between a dark and a light look to suit the player.']
+          ],
+          stack: ['Court booking', 'My bookings', 'Membership', 'Dark & light mode']
         }
       };
+      // Use each card's own screenshot as the detail page preview (no duplicate image data)
+      Object.keys(P).forEach(k => {
+        if (P[k].hero) return;
+        const c = document.querySelector('[data-project="' + k + '"]'),
+          im = c && c.querySelector('.shot img');
+        if (im) P[k].hero = im.currentSrc || im.src;
+      });
       const modal = document.getElementById('projModal'),
         body = document.getElementById('pmBody');
       let last = null;
 
       function render(k) {
         const d = P[k];
-        const hero = d.hero ? '<div class="pm-in mt-12 rounded-2xl overflow-hidden border border-white/10 shadow-2xl"><div class="flex items-center gap-1.5 px-4 py-2.5 bg-white/5 border-b border-white/10"><span class="w-2.5 h-2.5 rounded-full bg-red-400/80"></span><span class="w-2.5 h-2.5 rounded-full bg-yellow-400/80"></span><span class="w-2.5 h-2.5 rounded-full bg-green-400/80"></span><span class="ml-3 text-xs font-mono text-slate-400">morentimepiece.com</span></div><img src="' + d.hero + '" alt="' + d.title + ' landing page" class="block w-full h-auto"></div>' : '';
+        const hero = d.hero ? '<div class="pm-in mt-12 rounded-2xl overflow-hidden border border-white/10 shadow-2xl"><div class="flex items-center gap-1.5 px-4 py-2.5 bg-white/5 border-b border-white/10"><span class="w-2.5 h-2.5 rounded-full bg-red-400/80"></span><span class="w-2.5 h-2.5 rounded-full bg-yellow-400/80"></span><span class="w-2.5 h-2.5 rounded-full bg-green-400/80"></span><span class="ml-3 text-xs font-mono text-slate-400">' + (d.host || 'morentimepiece.com') + '</span></div><img src="' + d.hero + '" alt="' + d.title + ' preview" class="block w-full h-auto"></div>' : '';
         const shots = d.shots ? '<section class="pm-in mt-14"><h2 class="text-xl font-bold">Featured pieces</h2><div class="mt-5 grid grid-cols-2 sm:grid-cols-3 gap-4">' +
           d.shots.map(u => '<div class="pm-shot"><img src="' + u + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>').join('') +
           '</div><p class="mt-3 text-xs text-slate-500">' + d.shotNote + '</p></section>' : '';
