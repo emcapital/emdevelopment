@@ -6,6 +6,16 @@
       content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Login | EM Development</title>
     <script>
+// Seasonal calendar (updates automatically every year)
+window.__season=function(d){d=d||new Date();var m=d.getMonth()+1,n=d.getDate();
+  if((m===12&&n>=26)||(m===1&&n<=10))return'newyear';   // Dec 26 - Jan 10
+  if(m===12||(m===11&&n>=3))return'christmas';          // Nov 3 - Dec 25
+  if((m===10&&n>=15)||(m===11&&n<=2))return'halloween'; // Oct 15 - Nov 2 (Halloween / Undas)
+  if(m>=3&&m<=5)return'summer';                         // Mar 1 - May 31
+  return'default'};
+(function(){var t=window.__season();if(t!=='default')document.documentElement.setAttribute('data-theme',t)})();
+</script>
+    <script>
     // Apply saved theme before first paint (shared with the home page)
     try { if (localStorage.getItem('theme') === 'light') document.documentElement.classList.add('light'); } catch (e) {}
   </script>
@@ -42,11 +52,7 @@
         extend: {
           fontFamily: { sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] },
           colors: {
-            ink: '#070a16',
-            panel: '#0d1226',
-            brand: { 400: '#7c8cff', 500: '#5b6cff', 600: '#4351e8' },
-            aqua: '#22d3ee',
-            pink: '#f472b6'
+            ink: 'rgba(var(--ink), <alpha-value>)', panel: 'rgba(var(--panel), <alpha-value>)', brand: { 400: 'rgba(var(--b400), <alpha-value>)', 500: 'rgba(var(--b500), <alpha-value>)', 600: 'rgba(var(--b600), <alpha-value>)' }, aqua: 'rgba(var(--aqua), <alpha-value>)', pink: 'rgba(var(--pink), <alpha-value>)'
           },
           keyframes: {
             float: { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-14px)' } },
@@ -72,8 +78,8 @@
     /* ===== The page scrolls only when it has to (small or landscape screens, on-screen keyboard) ===== */
     html { -webkit-text-size-adjust: 100%; }
     html, body { min-height: 100%; overflow-x: hidden; }
-    body { background: #070a16; color: #e5e9ff; }
-    ::selection { background: #5b6cff; color: #fff; }
+    body { background: rgb(var(--ink)); color: rgb(var(--txt)); }
+    ::selection { background: rgb(var(--b500)); color: #fff; }
     .app { min-height: 100vh; min-height: 100dvh; }
 
     /* ===== Fade in ===== */
@@ -91,30 +97,30 @@
     html.pwa [data-home-btn] { display: none !important; }
     html.pwa a[data-home] { pointer-events: none; cursor: default; }
     .em-logo { display: block; flex: none; aspect-ratio: 520 / 180; background: #fff; -webkit-mask: var(--em-logo) center / contain no-repeat; mask: var(--em-logo) center / contain no-repeat; }
-    .em-logo-grad { background: linear-gradient(90deg, #7c8cff, #22d3ee, #f472b6, #7c8cff); background-size: 300% 100%; animation: gradient 6s ease infinite; }
+    .em-logo-grad { background: linear-gradient(90deg, rgb(var(--b400)), rgb(var(--aqua)), rgb(var(--pink)), rgb(var(--b400))); background-size: 300% 100%; animation: gradient 6s ease infinite; }
 
     /* ===== Page transition overlay: loading (2s) -> fade out -> navigate ===== */
-    #pageLoader { position: fixed; inset: 0; z-index: 9999; background: #070a16; opacity: 0; visibility: hidden; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; transition: opacity .5s ease, visibility 0s linear .5s; }
-    html.light #pageLoader { background: #f5f6ff; }
+    #pageLoader { position: fixed; inset: 0; z-index: 9999; background: rgb(var(--ink)); opacity: 0; visibility: hidden; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; transition: opacity .5s ease, visibility 0s linear .5s; }
+    html.light #pageLoader { background: rgb(var(--txt2)); }
     #pageLoader.show { opacity: 1; visibility: visible; pointer-events: all; transition: opacity .5s ease, visibility 0s; }
     #pageLoader .pl-content { display: flex; flex-direction: column; align-items: center; gap: 18px; opacity: 1; transition: opacity .7s ease; }
     #pageLoader.finish .pl-content { opacity: 0; }
-    .pl-ring { width: 52px; height: 52px; border-radius: 9999px; border: 4px solid rgba(124,140,255,.25); border-top-color: #7c8cff; border-right-color: #22d3ee; animation: qspin .8s linear infinite; }
+    .pl-ring { width: 52px; height: 52px; border-radius: 9999px; border: 4px solid rgba(var(--b400),.25); border-top-color: rgb(var(--b400)); border-right-color: rgb(var(--aqua)); animation: qspin .8s linear infinite; }
     .pl-text { font-size: 14px; font-weight: 600; letter-spacing: .04em; color: #a9b2e6; }
     html.light .pl-text { color: #55608a; }
-    .pl-bar { width: 180px; height: 4px; border-radius: 9999px; background: rgba(124,140,255,.2); overflow: hidden; }
-    .pl-bar > span { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, #5b6cff, #22d3ee, #f472b6); }
+    .pl-bar { width: 180px; height: 4px; border-radius: 9999px; background: rgba(var(--b400),.2); overflow: hidden; }
+    .pl-bar > span { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, rgb(var(--b500)), rgb(var(--aqua)), rgb(var(--pink))); }
     #pageLoader.show .pl-bar > span { width: 100%; transition: width 2s linear; }
     /* Reduced-motion users still get a gentle fade (no scaling) instead of an instant cut */
     @media (prefers-reduced-motion: reduce) { body.is-leaving { transform: none; transition: opacity .6s ease !important; } }
 
     .grid-bg {
-      background-image: linear-gradient(rgba(124,140,255,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(124,140,255,.08) 1px, transparent 1px);
+      background-image: linear-gradient(rgba(var(--b400),.08) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--b400),.08) 1px, transparent 1px);
       background-size: 56px 56px;
       mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
       -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
     }
-    .gradient-text { background: linear-gradient(90deg, #7c8cff, #22d3ee, #f472b6, #7c8cff); background-size: 300% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: gradient 6s ease infinite; }
+    .gradient-text { background: linear-gradient(90deg, rgb(var(--b400)), rgb(var(--aqua)), rgb(var(--pink)), rgb(var(--b400))); background-size: 300% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: gradient 6s ease infinite; }
     .glass { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.09); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
 
     .btn-shine { position: relative; overflow: hidden; }
@@ -123,9 +129,9 @@
     /* Inputs */
     .field { width: 100%; border-radius: 12px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); min-height: 48px; font-size: 16px; padding: 12px 14px 12px 44px; transition: border-color .25s, box-shadow .25s, background-color .25s; }
     .field::placeholder { color: #6b7599; }
-    .field:focus { outline: none; border-color: #7c8cff; box-shadow: 0 0 0 4px rgba(91,108,255,.2); }
+    .field:focus { outline: none; border-color: rgb(var(--b400)); box-shadow: 0 0 0 4px rgba(var(--b500),.2); }
     .field-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: #6b7599; pointer-events: none; transition: color .25s; }
-    .field-wrap:focus-within .field-icon { color: #7c8cff; }
+    .field-wrap:focus-within .field-icon { color: rgb(var(--b400)); }
 
     /* Theme toggle */
     .theme-icon { position: absolute; inset: 0; transition: opacity .5s ease, transform .6s cubic-bezier(.2,.7,.2,1); }
@@ -143,9 +149,9 @@
 
     /* Checkbox */
     .chk { appearance: none; -webkit-appearance: none; width: 18px; height: 18px; border-radius: 6px; border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.05); display: inline-grid; place-content: center; cursor: pointer; transition: all .25s ease; }
-    .chk:checked { background: linear-gradient(135deg, #5b6cff, #22d3ee); border-color: transparent; }
+    .chk:checked { background: linear-gradient(135deg, rgb(var(--b500)), rgb(var(--aqua))); border-color: transparent; }
     .chk:checked::after { content: ""; width: 9px; height: 5px; border-left: 2px solid #fff; border-bottom: 2px solid #fff; transform: rotate(-45deg) translate(1px, -1px); }
-    .chk:focus-visible { outline: none; box-shadow: 0 0 0 4px rgba(91,108,255,.25); }
+    .chk:focus-visible { outline: none; box-shadow: 0 0 0 4px rgba(var(--b500),.25); }
 
     /* ===== Layout (all devices, notches and home bars included) ===== */
     .login-head { padding-top: env(safe-area-inset-top); padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
@@ -155,7 +161,7 @@
     html.pwa .brand-text { display: inline; }
 
     /* Message pop-up: bottom-right on desktop, full width at the bottom on phones */
-    .login-toast { position: fixed; z-index: 10000; right: max(1rem, env(safe-area-inset-right)); bottom: max(1rem, env(safe-area-inset-bottom)); width: min(24rem, calc(100vw - 2rem)); display: flex; align-items: flex-start; gap: 12px; padding: 14px 12px 14px 14px; border-radius: 16px; background: rgba(13,18,38,.94); border: 1px solid rgba(255,255,255,.12); box-shadow: 0 18px 50px rgba(0,0,0,.45); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); color: #e5e9ff; opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(18px) scale(.97); transition: opacity .35s ease, transform .45s cubic-bezier(.2,.8,.2,1), visibility 0s linear .45s; }
+    .login-toast { position: fixed; z-index: 10000; right: max(1rem, env(safe-area-inset-right)); bottom: max(1rem, env(safe-area-inset-bottom)); width: min(24rem, calc(100vw - 2rem)); display: flex; align-items: flex-start; gap: 12px; padding: 14px 12px 14px 14px; border-radius: 16px; background: rgba(var(--panel),.94); border: 1px solid rgba(255,255,255,.12); box-shadow: 0 18px 50px rgba(0,0,0,.45); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); color: #e5e9ff; opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(18px) scale(.97); transition: opacity .35s ease, transform .45s cubic-bezier(.2,.8,.2,1), visibility 0s linear .45s; }
     .login-toast.show { opacity: 1; visibility: visible; pointer-events: auto; transform: none; transition: opacity .35s ease, transform .45s cubic-bezier(.2,.8,.2,1), visibility 0s; }
     .login-toast .lt-icon { flex: none; width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
     .login-toast .lt-icon svg { width: 18px; height: 18px; }
@@ -167,7 +173,7 @@
     .login-toast.err { border-color: rgba(244,114,182,.45); }
     .login-toast.err .lt-icon { background: rgba(244,114,182,.16); color: #f9a8d4; }
     @media (max-width: 639px) { .login-toast { left: max(1rem, env(safe-area-inset-left)); width: auto; } }
-    html.light .login-toast { background: rgba(255,255,255,.97); color: #0f1535; border-color: rgba(15,21,53,.12); box-shadow: 0 18px 50px rgba(67,81,232,.22); }
+    html.light .login-toast { background: rgba(255,255,255,.97); color: #0f1535; border-color: rgba(15,21,53,.12); box-shadow: 0 18px 50px rgba(var(--b600),.22); }
     html.light .login-toast .lt-close { color: #6b7599; }
     html.light .login-toast .lt-close:hover { background: rgba(15,21,53,.07); color: #0f1535; }
     html.light .login-toast.ok { border-color: rgba(5,150,105,.4); }
@@ -176,16 +182,16 @@
     html.light .login-toast.err .lt-icon { background: rgba(219,39,119,.10); color: #be185d; }
 
     /* ===== Light mode ===== */
-    html.light body { background: #f5f6ff; color: #0f1535; }
-    html.light .glass { background: rgba(255,255,255,.75); border-color: rgba(15,21,53,.1); box-shadow: 0 6px 24px rgba(67,81,232,.07); }
-    html.light .grid-bg { background-image: linear-gradient(rgba(67,81,232,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(67,81,232,.09) 1px, transparent 1px); }
-    html.light .gradient-text { background-image: linear-gradient(90deg, #4351e8, #0891b2, #db2777, #4351e8); }
+    html.light body { background: rgb(var(--txt2)); color: rgb(var(--d1)); }
+    html.light .glass { background: rgba(255,255,255,.75); border-color: rgba(15,21,53,.1); box-shadow: 0 6px 24px rgba(var(--b600),.07); }
+    html.light .grid-bg { background-image: linear-gradient(rgba(var(--b600),.09) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--b600),.09) 1px, transparent 1px); }
+    html.light .gradient-text { background-image: linear-gradient(90deg, rgb(var(--b600)), rgb(var(--aqua2)), rgb(var(--pink2)), rgb(var(--b600))); }
     html.light .text-slate-200 { color: #1f2650; }
     html.light .text-slate-300 { color: #374068; }
     html.light .text-slate-400 { color: #55608a; }
     html.light .text-slate-500 { color: #6b7599; }
-    html.light .text-aqua { color: #0891b2; }
-    html.light .text-brand-400 { color: #4351e8; }
+    html.light .text-aqua { color: rgb(var(--aqua2)); }
+    html.light .text-brand-400 { color: rgb(var(--b600)); }
     html.light .text-emerald-300 { color: #059669; }
     html.light .hover\:text-white:hover { color: #0f1535; }
     html.light .border-white\/10 { border-color: rgba(15,21,53,.12); }
@@ -199,6 +205,86 @@
       *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
     }
   </style>
+  <style>
+:root{--ink:7,10,22;--panel:13,18,38;--b400:124,140,255;--b500:91,108,255;--b600:67,81,232;--b300:154,166,255;--aqua:34,211,238;--aqua2:8,145,178;--pink:244,114,182;--pink2:219,39,119;--d1:15,21,53;--d2:15,23,60;--d3:8,11,24;--d4:40,52,120;--line:42,50,112;--txt:229,233,255;--txt2:245,246,255;--mut1:142,155,216;--mut2:170,179,230;--mut3:74,83,128}
+html[data-theme=christmas]{--ink:7,20,13;--panel:14,33,24;--b400:255,90,95;--b500:200,16,46;--b600:155,13,36;--b300:255,179,179;--aqua:46,204,113;--aqua2:21,128,61;--pink:246,196,83;--pink2:212,160,23;--d1:18,40,28;--d2:18,40,28;--d3:6,18,11;--d4:40,90,60;--line:47,90,63;--txt:255,244,230;--txt2:255,250,242;--mut1:199,183,158;--mut2:217,201,176;--mut3:107,127,107}
+html[data-theme=halloween]{--ink:12,8,18;--panel:24,14,32;--b400:255,138,61;--b500:255,106,0;--b600:204,80,0;--b300:255,190,140;--aqua:168,85,247;--aqua2:126,34,206;--pink:163,230,53;--pink2:101,163,13;--d1:28,16,40;--d2:28,16,40;--d3:10,6,16;--d4:70,40,100;--line:70,42,96;--txt:255,240,228;--txt2:255,246,238;--mut1:190,160,200;--mut2:210,185,220;--mut3:110,85,130}
+html[data-theme=christmas]:not(.light) body{background:radial-gradient(1200px 700px at 15% -10%,rgba(200,16,46,.18),transparent 60%),radial-gradient(1000px 700px at 100% 10%,rgba(46,204,113,.14),transparent 60%),rgb(var(--ink)) !important}
+html[data-theme=halloween]:not(.light) body{background:radial-gradient(1000px 700px at 85% -10%,rgba(255,106,0,.16),transparent 60%),radial-gradient(900px 600px at 0% 30%,rgba(168,85,247,.14),transparent 60%),rgb(var(--ink)) !important}
+#fxCanvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:60}
+#fxLights{display:none;position:fixed;top:0;left:0;right:0;height:26px;z-index:70;justify-content:space-between;pointer-events:none;padding:0 6px}
+html[data-theme=christmas] #fxLights{display:flex}
+#fxLights i{display:block;width:10px;height:16px;border-radius:50% 50% 50% 50%/40% 40% 60% 60%;background:var(--c);margin-top:2px;box-shadow:0 0 12px 3px var(--c);animation:fxTw 1.4s ease-in-out infinite}
+@keyframes fxTw{0%,100%{opacity:1}50%{opacity:.35}}
+html[data-theme=christmas] #nav{top:14px !important}
+.fx-hat{display:none;position:absolute;top:-16px;left:-9px;font-size:20px;transform:rotate(-18deg);pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+html[data-theme=christmas] section:not(#home)::before{content:"";display:block;height:6px;max-width:min(1100px,90%);margin:0 auto;border-radius:6px;opacity:.55;background:repeating-linear-gradient(45deg,#c8102e 0 14px,#fff 14px 28px)}
+html[data-theme=christmas] ::-webkit-scrollbar-thumb{background:linear-gradient(#c8102e,#15803d)}
+html[data-theme=halloween] ::-webkit-scrollbar-thumb{background:linear-gradient(#ff6a00,#a855f7)}
+html[data-theme=newyear]{--ink:10,10,18;--panel:20,18,30;--b400:252,211,77;--b500:202,138,4;--b600:161,98,7;--b300:253,230,138;--aqua:167,139,250;--aqua2:109,40,217;--pink:244,114,182;--pink2:219,39,119;--d1:20,18,34;--d2:20,18,34;--d3:8,8,14;--d4:70,55,110;--line:60,52,90;--txt:255,248,230;--txt2:255,252,240;--mut1:190,180,160;--mut2:215,205,185;--mut3:110,104,90}
+html[data-theme=summer]{--ink:9,20,34;--panel:14,30,48;--b400:255,183,77;--b500:249,115,22;--b600:234,88,12;--b300:253,186,116;--aqua:34,211,238;--aqua2:8,145,178;--pink:253,224,71;--pink2:234,179,8;--d1:12,30,50;--d2:12,30,50;--d3:5,12,22;--d4:30,80,110;--line:28,70,100;--txt:255,247,235;--txt2:255,251,244;--mut1:175,190,205;--mut2:200,210,220;--mut3:95,115,135}
+html[data-theme=newyear]:not(.light) body{background:radial-gradient(1000px 700px at 80% -10%,rgba(250,204,21,.16),transparent 60%),radial-gradient(900px 600px at 0% 35%,rgba(167,139,250,.16),transparent 60%),rgb(var(--ink)) !important}
+html[data-theme=summer]:not(.light) body{background:radial-gradient(1000px 700px at 85% -10%,rgba(249,115,22,.2),transparent 60%),radial-gradient(900px 600px at 0% 40%,rgba(34,211,238,.14),transparent 60%),rgb(var(--ink)) !important}
+html[data-theme=newyear] ::-webkit-scrollbar-thumb{background:linear-gradient(#facc15,#a78bfa)}
+html[data-theme=summer] ::-webkit-scrollbar-thumb{background:linear-gradient(#f97316,#22d3ee)}
+</style>
+<style id="fxReal">
+/* ===== Realistic seasonal effects ===== */
+#fxScene{position:fixed;inset:0;pointer-events:none;z-index:55;overflow:hidden}
+/* Christmas: hanging string lights + Santa hat */
+.fx-hat{width:26px;height:22px;background:center/contain no-repeat;font-size:0;top:-15px;left:-8px}
+#fxLights{height:46px;overflow:hidden;padding:0}
+#fxLights::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(255,170,90,.12),transparent)}
+#fxLights svg{position:absolute;left:0;top:0}
+#fxLights i{position:absolute;margin:0 0 0 -4.5px;width:9px;height:15px;transform-origin:50% 0;border-radius:50% 50% 46% 46%/32% 32% 68% 68%;
+  background:radial-gradient(ellipse at 35% 30%,rgba(255,255,255,.85),transparent 32%),var(--c);box-shadow:0 0 10px 2px var(--c);animation:fxTwinkle 2.4s ease-in-out infinite}
+#fxLights i::before{content:"";position:absolute;left:1.5px;top:-4px;width:6px;height:5px;border-radius:1px;background:linear-gradient(90deg,#1b2a20,#4b6a55,#1b2a20)}
+html[data-theme=christmas] #nav{top:24px !important}
+@keyframes fxTwinkle{0%,100%{opacity:1;filter:brightness(1.15)}50%{opacity:.55;filter:brightness(.8)}}
+/* Halloween / Undas: drifting fog, candlelight flicker, cobwebs, bats */
+.fx-fog{position:absolute;left:-20%;bottom:0;width:140%;height:40%;filter:blur(20px);background:radial-gradient(ellipse at 20% 85%,rgba(200,180,225,.17),transparent 55%),radial-gradient(ellipse at 75% 95%,rgba(200,180,225,.14),transparent 60%);animation:fxFog 46s ease-in-out infinite alternate}
+.fx-fog.b{height:30%;opacity:.8;animation-duration:64s;animation-direction:alternate-reverse}
+.fx-glow{position:absolute;bottom:-150px;width:460px;height:460px;border-radius:50%;background:radial-gradient(circle,rgba(255,140,40,.22),transparent 65%);animation:fxFlick 3.4s linear infinite}
+.fx-glow.l{left:-170px}
+.fx-glow.r{right:-170px;animation-delay:-1.7s}
+.fx-web{position:absolute;top:0;left:0;width:130px;height:130px;opacity:.45}
+.fx-web.r{left:auto;right:0;transform:scaleX(-1)}
+.fx-bat{position:absolute;top:0;left:0;will-change:transform}
+.fx-bat svg{display:block;width:100%;animation:fxFlap .28s ease-in-out infinite alternate}
+@keyframes fxFog{from{transform:translateX(-7%)}to{transform:translateX(7%)}}
+@keyframes fxFlick{0%,100%{opacity:.9}7%{opacity:.6}12%{opacity:1}30%{opacity:.75}41%{opacity:.95}55%{opacity:.62}70%{opacity:1}86%{opacity:.8}}
+@keyframes fxFlap{to{transform:scaleY(.45)}}
+/* Summer: warm sun with slowly turning light rays */
+.fx-sun{position:absolute;top:-200px;right:-200px;width:560px;height:560px;border-radius:50%;background:radial-gradient(circle,rgba(255,236,170,.55),rgba(255,190,90,.22) 32%,transparent 66%)}
+.fx-sun::after{content:"";position:absolute;inset:-70%;background:repeating-conic-gradient(rgba(255,226,140,.10) 0 5deg,transparent 5deg 15deg);-webkit-mask:radial-gradient(circle,#000,transparent 58%);mask:radial-gradient(circle,#000,transparent 58%);animation:fxSpin 140s linear infinite}
+@keyframes fxSpin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){#fxLights i,.fx-fog,.fx-glow,.fx-bat svg,.fx-sun::after{animation:none}}
+</style>
+<style id="xmasPlus">
+/* Christmas polish: snow-capped cards, snow drift, warm light mode */
+html[data-theme=christmas]{--cap:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='10'%3E%3Cpath d='M0 0H140V3Q122 9 105 3Q87 9 70 3Q52 9 35 3Q17 9 0 3Z' fill='white' fill-opacity='.92'/%3E%3C/svg%3E")}
+html[data-theme=christmas].light{--cap:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='10'%3E%3Cpath d='M0 0H140V3Q122 9 105 3Q87 9 70 3Q52 9 35 3Q17 9 0 3Z' fill='%23cfe0f2'/%3E%3C/svg%3E")}
+html[data-theme=christmas] section .glass.rounded-2xl,html[data-theme=christmas] section .glass.rounded-3xl{background-image:var(--cap);background-repeat:repeat-x;background-size:140px 10px;background-position:0 0}
+.fx-drift{display:none;position:absolute;left:0;right:0;bottom:0;height:12px;background:var(--cap,none) 0 0/140px 10px repeat-x;transform:scaleY(-1)}
+html[data-theme=christmas] .fx-drift{display:block}
+html[data-theme=christmas].light body{background:radial-gradient(1100px 650px at 15% -10%,rgba(200,16,46,.10),transparent 60%),radial-gradient(900px 600px at 100% 10%,rgba(21,128,61,.09),transparent 60%),rgb(var(--txt2)) !important}
+html[data-theme=christmas].light .text-slate-200{color:#3a1c1f}
+html[data-theme=christmas].light .text-slate-300,html[data-theme=christmas].light .text-slate-300\/90{color:#5a3a38}
+html[data-theme=christmas].light .text-slate-400{color:#7a5a52}
+html[data-theme=christmas].light .text-slate-500{color:#8a6a60}
+html[data-theme=christmas].light .glass{box-shadow:0 6px 24px rgba(155,13,36,.08)}
+html[data-theme=christmas] ::selection{background:#c8102e;color:#fff}
+html[data-theme=christmas] :focus-visible{outline:2px solid #2ecc71;outline-offset:2px}
+html.vt *{transition:none !important}
+</style>
+<style id="seasonLogin">
+/* Seasonal theme on the login page */
+html[data-theme=christmas] .login-head { top: 20px; }
+html[data-theme=christmas] main .glass,
+html[data-theme=christmas] aside .glass.rounded-2xl { background-image: var(--cap); background-repeat: repeat-x; background-size: 140px 10px; background-position: 0 0; }
+html[data-theme=christmas] .logo-tile { box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 10px 30px -10px rgba(200,16,46,.55); }
+html[data-theme=christmas] .field:focus { box-shadow: 0 0 0 4px rgba(46,204,113,.22); }
+</style>
   </head>
   <body class="font-sans antialiased">
 
@@ -694,6 +780,128 @@
   </script>
 
     <!-- PWA: service worker registration + install button -->
+    <div id="fxLights" aria-hidden="true"></div>
+    <canvas id="fxCanvas" aria-hidden="true"></canvas>
+    <script>
+// Seasonal theme engine v2: realistic effects, theme follows today's date automatically
+(function(){
+  var root=document.documentElement,season=window.__season,cur=season(),
+  calm=matchMedia('(prefers-reduced-motion: reduce)').matches,
+  cv=document.getElementById('fxCanvas'),x=cv.getContext('2d'),w,h,P=[],R=[],raf,next=0,batT,
+  rnd=function(a,b){return a+Math.random()*(b-a)},
+  sc=document.createElement('div');
+  sc.id='fxScene';sc.setAttribute('aria-hidden','true');document.body.appendChild(sc);
+  var HAT="<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 34'><path d='M6 27C7 12 17 4 31 5c-5 4-5 11-2 17l6 5z' fill='rgb(214,32,45)'/><path d='M6 27C9 20 12 14 20 10' stroke='rgb(150,15,30)' stroke-width='2' fill='none' opacity='.5'/><rect x='3' y='24' width='34' height='9' rx='4.5' fill='white'/><circle cx='31' cy='6' r='4.5' fill='white'/></svg>";
+  var BAT='<svg viewBox="0 0 60 24"><path fill="#0b0712" d="M30 8L27 2L25 9C19 4 9 3 1 7C6 9 8 13 8 17C12 13 16 13 19 17C22 14 26 14 30 20C34 14 38 14 41 17C44 13 48 13 52 17C52 13 54 9 59 7C51 3 41 4 35 9L33 2Z"/></svg>';
+  var COL=['#b45309','#c2410c','#92400e','#d97706','#7c2d12','#a16207'];
+  function size(){var d=Math.min(devicePixelRatio||1,innerWidth<1024?1:2);w=innerWidth;h=innerHeight;cv.width=w*d;cv.height=h*d;x.setTransform(d,0,0,d,0,0)}
+  function light(){return root.classList.contains('light')}
+
+  // ---- particles ----
+  function mk(fresh){
+    var p={x:rnd(0,w),y:fresh?-20:rnd(0,h),a:rnd(0,6.28)};
+    if(cur==='christmas'){p.z=Math.random();p.r=.7+p.z*p.z*3;p.v=.3+p.z*1.2;p.s=rnd(.008,.025)}
+    else if(cur==='halloween'){p.r=rnd(6,11);p.v=rnd(.5,1.2);p.s=rnd(.012,.03);p.rot=rnd(0,6.28);p.vr=rnd(-.03,.03);p.f=rnd(0,6.28);p.vf=rnd(.03,.07);p.col=COL[Math.floor(rnd(0,COL.length))]}
+    else{p.r=rnd(5,26);p.v=-rnd(.08,.3);p.s=rnd(.003,.012);p.al=rnd(.05,.16);p.y=fresh?h+30:rnd(0,h)}
+    return p}
+  function launch(){var ty=rnd(h*.1,h*.45);R.push({x:rnd(w*.15,w*.85),y:h+8,vx:rnd(-.5,.5),vy:-Math.sqrt(.24*(h-ty)),hue:[45,48,335,200,280,20][Math.floor(rnd(0,6))]})}
+  function burst(r){var n=Math.round(rnd(60,95)),ring=Math.random()<.4,sp=rnd(2.2,3.6),a,v;
+    for(var i=0;i<n;i++){a=rnd(0,6.283);v=ring?sp:sp*Math.sqrt(Math.random());
+      P.push({x:r.x,y:r.y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:1,d:rnd(.009,.017),hue:r.hue+rnd(-12,12)})}}
+  function seed(){
+    P=[];R=[];x.clearRect(0,0,w,h);if(calm)return;
+    var base=Math.min(110,innerWidth/12),n=0,i;
+    if(cur==='christmas')n=Math.min(85,innerWidth/14);else if(cur==='halloween')n=base*.22;else if(cur==='summer')n=base*.35;
+    for(i=0;i<n;i++)P.push(mk(0));
+    if(cur==='newyear'){launch();setTimeout(launch,500)}}
+
+  function loop(t){
+    raf=requestAnimationFrame(loop);
+    var wind=Math.sin(t/4200)*.45+Math.sin(t/1500)*.15,lt=light();
+    if(cur==='newyear'){
+      x.globalCompositeOperation='destination-out';x.fillStyle='rgba(0,0,0,.2)';x.fillRect(0,0,w,h);
+      x.globalCompositeOperation='lighter';
+      if(t>next&&!document.hidden){launch();next=t+rnd(900,2000)}
+      R=R.filter(function(r){r.x+=r.vx;r.y+=r.vy;r.vy+=.12;
+        x.fillStyle='hsl('+r.hue+',100%,80%)';x.beginPath();x.arc(r.x,r.y,1.8,0,6.283);x.fill();
+        if(r.vy>-.6){burst(r);return false}return true});
+      P=P.filter(function(p){p.vx*=.985;p.vy=p.vy*.985+.04;p.x+=p.vx;p.y+=p.vy;p.l-=p.d;if(p.l<=0)return false;
+        x.fillStyle='hsla('+p.hue+',100%,'+(55+p.l*20)+'%,'+p.l+')';x.beginPath();x.arc(p.x,p.y,.6+1.6*p.l,0,6.283);x.fill();return true});
+      x.globalCompositeOperation='source-over';return}
+    x.clearRect(0,0,w,h);
+    if(cur==='christmas'){
+      var c=lt?'105,135,180':'255,255,255',B=[[],[],[]];
+      P.forEach(function(p){p.y+=p.v;p.a+=p.s;p.x+=Math.sin(p.a)*.35*(.4+p.z)+wind*(.3+p.z);
+        if(p.y>h+10){p.y=-10;p.x=rnd(0,w)}if(p.x>w+10)p.x=-10;else if(p.x<-10)p.x=w+10;
+        B[p.z<.34?0:p.z<.67?1:2].push(p)});
+      B.forEach(function(a,k){x.fillStyle='rgba('+c+','+((lt?.55:.4)+k*.22)+')';x.beginPath();
+        a.forEach(function(p){x.moveTo(p.x+p.r,p.y);x.arc(p.x,p.y,p.r,0,6.283)});x.fill()})}
+    else if(cur==='halloween'){
+      P.forEach(function(p){p.y+=p.v;p.a+=p.s;p.x+=Math.sin(p.a)*1.1+wind*1.4;p.rot+=p.vr;p.f+=p.vf;
+        if(p.y>h+20||p.x>w+30||p.x<-30)Object.assign(p,mk(1));
+        x.save();x.translate(p.x,p.y);x.rotate(p.rot);x.scale(1,Math.cos(p.f));x.globalAlpha=.85;x.fillStyle=p.col;
+        x.beginPath();x.moveTo(0,-p.r);x.bezierCurveTo(p.r*.9,-p.r*.4,p.r*.7,p.r*.6,0,p.r);x.bezierCurveTo(-p.r*.7,p.r*.6,-p.r*.9,-p.r*.4,0,-p.r);x.fill();
+        x.strokeStyle='rgba(0,0,0,.3)';x.beginPath();x.moveTo(0,-p.r);x.lineTo(0,p.r);x.stroke();x.restore()})}
+    else if(cur==='summer'){
+      var mc=lt?'255,160,50':'255,214,140',k=lt?1.6:1;
+      x.globalCompositeOperation='lighter';
+      P.forEach(function(p){p.y+=p.v;p.a+=p.s*10;p.x+=Math.sin(p.a)*.25+wind*.3;
+        if(p.y<-40)Object.assign(p,mk(1));
+        var g=x.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);g.addColorStop(0,'rgba('+mc+','+p.al*k+')');g.addColorStop(1,'rgba('+mc+',0)');
+        x.fillStyle=g;x.beginPath();x.arc(p.x,p.y,p.r,0,6.283);x.fill()});
+      x.globalCompositeOperation='source-over'}}
+
+  // ---- Christmas: string lights hanging in swags ----
+  function lights(){
+    var L=document.getElementById('fxLights');L.innerHTML='';if(cur!=='christmas')return;
+    var cols=['#ff3b4a','#ffd24a','#3ddc84','#4aa8ff'],seg=Math.max(120,Math.min(190,innerWidth/6)),n=Math.ceil(innerWidth/seg),sag=15,d='M0 2',b='',k=0,i,j,t,px,py,ang;
+    for(i=0;i<n;i++){
+      d+='Q'+(i*seg+seg/2)+' '+(2+sag*2)+' '+(i+1)*seg+' 2';
+      for(j=1;j<=4;j++){t=j/5;px=i*seg+t*seg;py=2+4*sag*t*(1-t);ang=Math.atan(4*sag*(1-2*t)/seg)*57.3;
+        b+='<i style="left:'+px.toFixed(1)+'px;top:'+py.toFixed(1)+'px;--c:'+cols[k%4]+';transform:rotate('+ang.toFixed(1)+'deg);animation-delay:-'+((k%5)*.5)+'s"></i>';k++}}
+    L.innerHTML='<svg width="'+n*seg+'" height="'+(sag*2+4)+'"><path d="'+d+'" fill="none" stroke="#35523f" stroke-width="1.6"/></svg>'+b}
+
+  // ---- Halloween: cobwebs + bats; Summer: sun ----
+  function web(){
+    var s='<svg viewBox="0 0 120 120" fill="none" stroke="rgba(255,255,255,.55)" stroke-width=".8">',
+    a=[0,22.5,45,67.5,90].map(function(g){return g/57.3});
+    a.forEach(function(g){s+='<path d="M0 0L'+(120*Math.cos(g)).toFixed(1)+' '+(120*Math.sin(g)).toFixed(1)+'"/>'});
+    [26,50,74,98].forEach(function(r){var d='',i,X,Y,m;
+      for(i=0;i<a.length;i++){X=r*Math.cos(a[i]);Y=r*Math.sin(a[i]);
+        if(i){m=(a[i]+a[i-1])/2;d+='Q'+(r*.82*Math.cos(m)).toFixed(1)+' '+(r*.82*Math.sin(m)).toFixed(1)+' '+X.toFixed(1)+' '+Y.toFixed(1)}
+        else d+='M'+X.toFixed(1)+' '+Y.toFixed(1)}
+      s+='<path d="'+d+'"/>'});
+    return s+'</svg>'}
+  function bat(){
+    var b=document.createElement('div'),dir=Math.random()<.5?1:-1,s=rnd(.6,1.3),ph=rnd(0,6),amp=rnd(20,60),K=[],n=6,i,px;
+    b.className='fx-bat';b.innerHTML=BAT;b.style.top=rnd(.08,.5)*h+'px';b.style.width=46*s+'px';
+    for(i=0;i<=n;i++){px=dir>0?-80+(w+160)*i/n:w+80-(w+160)*i/n;
+      K.push({transform:'translate('+px.toFixed(0)+'px,'+(Math.sin(i*1.7+ph)*amp).toFixed(0)+'px) scaleX('+dir+')'})}
+    sc.appendChild(b);b.animate(K,{duration:rnd(6500,10000),easing:'linear'}).onfinish=function(){b.remove()}}
+  function bats(){clearTimeout(batT);if(cur!=='halloween'||calm)return;
+    batT=setTimeout(function(){if(!document.hidden)bat();bats()},rnd(5000,12000))}
+  function scene(){
+    sc.innerHTML='';clearTimeout(batT);
+    if(cur==='halloween'){sc.innerHTML='<div class="fx-fog"></div><div class="fx-fog b"></div><div class="fx-glow l"></div><div class="fx-glow r"></div><div class="fx-web">'+web()+'</div><div class="fx-web r">'+web()+'</div>';bats()}
+    else if(cur==='summer')sc.innerHTML='<div class="fx-sun"></div>';
+    else if(cur==='christmas')sc.innerHTML='<div class="fx-drift"></div>'}
+
+  var logo=document.querySelector('header a[data-home] > span'),hat=document.createElement('span');hat.className='fx-hat';
+  if(logo){logo.style.position='relative';logo.appendChild(hat)}
+  function apply(){
+    cur=season();
+    if(cur==='default')root.removeAttribute('data-theme');else root.setAttribute('data-theme',cur);
+    hat.style.display=cur==='christmas'?'block':'none';
+    hat.style.backgroundImage=cur==='christmas'?'url("data:image/svg+xml,'+encodeURIComponent(HAT)+'")':'none';
+    var tc=document.querySelector('meta[name=theme-color]');if(tc)tc.setAttribute('content',({christmas:'#07140d',halloween:'#0c0812',newyear:'#0a0a12',summer:'#091422'})[cur]||'#070a16');
+    scene();lights();seed();cancelAnimationFrame(raf);next=0;
+    if(!calm&&cur!=='default')raf=requestAnimationFrame(loop)}
+  size();addEventListener('resize',function(){size();seed();lights()});
+  apply();
+  // flip automatically if the page stays open across a season change
+  setInterval(function(){if(season()!==cur)apply()},60000);
+})();
+</script>
     <script src="/pwa.js" defer></script>
   </body>
 </html>
